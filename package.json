@@ -1,0 +1,16 @@
+{
+  "name": "diamon",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "gobble"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gobble-babel": "^5.5.8",
+    "gobble-cli": "^0.6.0",
+    "gobble-rollup": "^0.11.0"
+  }
+}
