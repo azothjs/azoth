@@ -1,6 +1,7 @@
+import { getAttributeRenderer, getTextRenderer } from './getRenderers';
 
 export default class TextElementRenderer {
-	constructor ( template, index, children ) {
+	constructor ( template, index ) {
 
 		this.node = '';
 		this.name = template.name;
@@ -9,13 +10,16 @@ export default class TextElementRenderer {
 		this.children = null;
 		this.childContent = null;
 
-		if ( children ) {
+		const children = template.children;
+		if ( children && children.length ) {
 			const childContent = this.childContent = new Array( children.length );
 			const renderers = [];
-			children.forEach( ( child, index ) => {
-				childContent[ index ] = child.node;
-				if ( child.hasAttach ) renderers.push( child );
-			});
+			children
+				.map( getTextRenderer )
+				.forEach( ( child, index ) => {
+					childContent[ index ] = child.node;
+					if ( child.hasAttach ) renderers.push( child );
+				});
 
 			if ( renderers.length ) {
 				this.children = renderers;

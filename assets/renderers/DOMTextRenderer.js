@@ -1,5 +1,5 @@
 export default class DOMTextRenderer {
-	constructor ( template, index, children ) {
+	constructor ( template, index ) {
 		this.node = document.createTextNode( template.text );
 		this.ref = template.ref;
 		this.hasAttach = !!template.ref;

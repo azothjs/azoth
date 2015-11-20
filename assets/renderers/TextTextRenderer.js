@@ -1,5 +1,5 @@
 export default class TextTextRenderer {
-	constructor ( template, index, children ) {
+	constructor ( template, index ) {
 		this.node = template.text;
 		this.ref = template.ref;
 		this.hasAttach = !!template.ref;

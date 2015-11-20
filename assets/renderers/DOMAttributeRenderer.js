@@ -1,6 +1,6 @@
 export default class DOMAttributeRenderer {
 
-	constructor ( template, index, children ) {
+	constructor ( template, index ) {
 		this.node = null;
 		const isStatic = !( this.hasAttach = !!( this.ref = template.ref ) );
 		this.index = index;

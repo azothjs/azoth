@@ -1,14 +1,8 @@
-import DOMAttributeRenderer from './DOMAttributeRenderer';
-import DOMSectionRenderer from './DOMSectionRenderer';
-import getRenderers from './getRenderers';
-
-const getRenderer = getRenderers({
-	attribute: DOMAttributeRenderer,
-	section: DOMSectionRenderer
-});
+import { getAttributeRenderer, getDOMRenderer } from './getRenderers';
+import DOMAttributesRenderer from './DOMAttributesRenderer';
 
 export default class DOMElementRenderer {
-	constructor ( template, index, children ) {
+	constructor ( template, index ) {
 
 		const node = this.node = document.createElement( template.name );
 		this.index = index;
@@ -17,26 +11,22 @@ export default class DOMElementRenderer {
 		this.attributes = null;
 
 		if ( template.attributes ) {
-			const attributes = [];
-			template.attributes
-				.map( getRenderer )
-				.forEach( attr => {
-					if ( attr.node ) node.setAttributeNode( attr.node );
-					if ( attr.hasAttach ) attributes.push( attr );
-				});
-
-			if ( attributes.length ) {
+			const attributes = new DOMAttributesRenderer( template.attributes );
+			const attach = attributes.addTo( node );
+			if ( attach.length ) {
 				this.hasAttach = true;
-				this.attributes = attributes;
+				this.attributes = attach;
 			}
 		}
 
-		if ( children ) {
+		if ( template.children ) {
 			const renderers = [];
-			children.forEach( child => {
-				if ( child.node ) node.appendChild( child.node );
-				if ( child.hasAttach ) renderers.push( child );
-			});
+			template.children
+				.map( getDOMRenderer )
+				.forEach( child => {
+					if ( child.node ) node.appendChild( child.node );
+					if ( child.hasAttach ) renderers.push( child );
+				});
 
 			if ( renderers.length ) {
 				this.hasAttach = true;
