@@ -1,10 +1,10 @@
 const gobble = require( 'gobble' );
 
 const js = gobble( [ 'assets', 'test/tests' ] )
-	// .transform( 'babel', {
-	// 	sourceMaps: true,
-	// 	hlist: ['es6.modules', 'strict']
-	// })
+	.transform( 'babel', {
+		sourceMaps: true,
+		whitelist: [ 'es6.parameters', 'es6.destructuring' ]
+	})
 	.transform( 'rollup', {
   		entry: 'test.new.index.js',
   		dest:  'test.js',
