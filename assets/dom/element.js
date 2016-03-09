@@ -1,26 +1,34 @@
-import attributesRenderer from '../children/attributes';
-import childNodesRenderer from '../children/childNodes';
+// import attributesRenderer from '../children/attributes';
+import { getChildren } from '../children/childNodes';
 
-export default function elementRenderer( template, index ) {
-	const node = document.createElement( template.name );
-	const binder = getBinder( node, template, index );
-	return { node, binder };
-}
+export default class ElementRenderer {
 
-function getBinder( node, template, index ){
-	const childTemplates = template.children;
-	const attributes = template.attributes;
-	if ( !childTemplates && !attributes ) return;
+	constructor ( template, index = 0 ) {
+		this.name = template.name;
+		this.index = index;
+		this.children = template.children;
+		this.isBound = false;
+		this.renderers = null;
+	}
 
-	const children = childNodesRenderer( childTemplates, n => node.appendChild(n) );
-	const attrs = attributesRenderer( attributes, a => node.setAttributeNode(a) );
+	create () {
+		const element = document.createElement( this.name );
+		this.isBound = !!(
+			this.renderers = getChildren( element, this.children )
+		);
 
-	if ( !children && !attrs ) return;
+		return element;
+	}
 
-	return function* bind( context ) {
-		const instance  = yield index;
-		if ( attrs ) attrs( instance, context );
-		if ( children ) children( context, i => instance.childNodes[i] );
-	};
+	render ( childNodes ) {
+		const element = childNodes[ this.index ];
+		const renderers = this.renderers;
+
+		if ( !renderers ) return;
+
+		return ( context ) => {
+			renderers.render( element.childNodes, context );
+		};
+	}
 }
 

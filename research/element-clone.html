@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>prototype clone</title>
+</head>
+<body>
+	<main></main>
+	<script>
+		function assert( expression, compare ){
+			if ( arguments.length > 1 ? compare !== expression : !expression ) debugger;
+		} 
+		
+		var target = document.querySelector( 'main' );
+		
+		console.time('render');
+		
+		HTMLElement.prototype.diamond = function(value){
+			this.textContent = value;
+		};
+        
+		var li = document.createElement('li');
+		li.textContent = 'foo';
+		var clone = li.cloneNode(true);
+		
+		assert( clone.textContent, 'foo' );
+		
+		clone.diamond( 'bar' )
+		
+		assert( clone.textContent, 'bar' );
+		
+		target.appendChild(li);
+		target.appendChild(clone);
+		
+		console.timeEnd('render');
+		
+	</script>
+</body>
+</html>

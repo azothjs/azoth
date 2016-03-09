@@ -30,7 +30,7 @@ function getBinder( binders ) {
 			.map( b => b( context ) )
 			.map( g => ( { g, i: getInstance( g.next().value ) } ) )
 			.forEach( e => e.g.next( e.i ) );
-	}
+	};
 }
 
 

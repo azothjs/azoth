@@ -1,24 +1,55 @@
-import childNodesRenderer from '../children/childNodes';
+import { getChildNode } from '../children/getChild';
+import { getChildren } from '../children/childNodes';
+import Context from '../Context';
 
-export default function sectionRenderer( template, index ) {
-	const node = document.createComment( `section ${index} anchor` );
-	const frag = document.createDocumentFragment();
-	const binder = getBinder( frag, template, index );
-	return { node, binder };
-}
+export default class Section {
+	constructor ( template, index = 0 ) {
+		this.ref = template.ref;
+		this.index = index;
+		this.isBound = true;
+		this.children = template.children;
+		this.fragment = null;
+		this.renderers = null;
+	}
 
-function getBinder( fragment, template, index ) {
-	if ( !template || !template.length ) return;
+	create () {
+		const fragment = this.fragment = document.createDocumentFragment();
+		this.renderers = getChildren( fragment, this.children );
+		// return a placeholder
+		return document.createComment( `section ${this.index} anchor` );
+	}
 
- 	const children = childNodesRenderer( template, n => fragment.appendChild(n) );
-
-	return function* bind( context ) {
-		const anchor  = yield index;
+	render ( childNodes ) {
+		const anchor = childNodes[ this.index ];
 		const parentNode = anchor.parentNode;
-		const clone = fragment.cloneNode( true );
-		if ( children ) {
-			children( context, i => clone.childNodes[i] );
-		}
-		parentNode.insertBefore( clone, anchor );
-	};
+
+		return ( context ) => {
+			const ref = this.ref;
+			const value = ref ? context.get( this.ref ) : void 0;
+			const fragment = this.fragment;
+			const renderers = this.renderers;
+
+			if ( !this.ref ) {
+				add( context );
+			}
+			else if ( Array.isArray( value ) ) {
+				value.forEach( item => add( new Context( item ) ) );
+			}
+			else if ( value ) {
+				add( value );
+			}
+
+			function add( context ){
+				const clone = fragment.cloneNode( true );
+
+				if ( renderers ) {
+					renderers.render( clone.childNodes, context );
+				}
+
+				parentNode.insertBefore( clone, anchor );
+			}
+
+		};
+	}
 }
+

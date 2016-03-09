@@ -1,16 +1,21 @@
-export default function textRenderer( template, index ) {
+export default class TextRenderer {
 
-	const node = document.createTextNode( template.text );
-	const binder = getBinder( template, index );
+	constructor ( template, index = 0 ) {
+		this.ref = template.ref;
+		this.text = template.text;
+		this.index = index;
+		this.isBound = !!template.ref;
+	}
 
-	return { node, binder };
-}
+	create () {
+		return document.createTextNode( this.text );
+	}
 
-function getBinder( template, index ){
-	if ( !template.ref ) return;
+	render ( childNodes ) {
+		const instance = childNodes[ this.index ];
 
-	return function* bind( context ) {
-		const instance  = yield index;
-		instance.textContent = context.get( template.ref );
-	};
+		return ( context ) => {
+			instance.textContent = context.get( this.ref );
+		};
+	}
 }
