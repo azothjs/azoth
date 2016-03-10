@@ -98,7 +98,8 @@ test( 'render', t => {
 function renderToFixture( template, cxt = context ){
 	const queue = {};
 	const result = create( template, queue );
-	fixture.appendChild( render( result, queue, cxt ) );
+	const rendered = render( result, queue, cxt );
+	fixture.appendChild( rendered );
 }
 
 
@@ -160,7 +161,138 @@ test( 'no context, no render', t => {
 	t.equal( fixture.innerHTML, '<!--with-->');
 });
 
+// module( 'big template' );
 
+
+// test( 'renderer big template', t => {
+//     const template = {
+// 		children: [{
+// 			type: 'element',
+// 			name: 'table',
+// 			children: [{
+// 				type: 'section',
+// 				subtype: 'for',
+// 				ref: 'items',
+// 				children: [{
+// 					type: 'element',
+// 					name: 'tr',
+// 					children: [{
+// 						type: 'element',
+// 						name: 'td',
+// 						children: [{
+// 							type: 'text',
+// 							ref: 'message'
+// 						}]
+// 					}, {
+// 						type: 'element',
+// 						name: 'td',
+// 						children: [{
+// 							type: 'text',
+// 							ref: 'number'
+// 						}]
+// 					}, {
+// 						type: 'element',
+// 						name: 'td',
+// 						children: [{
+// 							type: 'text',
+// 							ref: 'first'
+// 						}]
+// 					}, {
+// 						type: 'element',
+// 						name: 'td',
+// 						children: [{
+// 							type: 'text',
+// 							ref: 'second'
+// 						}]
+// 					}, {
+// 						type: 'element',
+// 						name: 'td',
+// 						children: [{
+// 							type: 'text',
+// 							ref: 'third'
+// 						}]
+// 					}, {
+// 						type: 'element',
+// 						name: 'td',
+// 						children: [{
+// 							type: 'text',
+// 							ref: 'fourth'
+// 						}]
+// 					}, {
+// 						type: 'element',
+// 						name: 'td',
+// 						children: [{
+// 							type: 'text',
+// 							ref: 'fifth'
+// 						}]
+// 					}, {
+// 						type: 'element',
+// 						name: 'td',
+// 						children: [{
+// 							type: 'text',
+// 							ref: 'sixth'
+// 						}]
+// 					}, {
+// 						type: 'element',
+// 						name: 'td',
+// 						children: [{
+// 							type: 'text',
+// 							ref: 'seventh'
+// 						}]
+// 					}, {
+// 						type: 'element',
+// 						name: 'td',
+// 						children: [{
+// 							type: 'text',
+// 							ref: 'eighth'
+// 						}]
+// 					}, {
+// 						type: 'element',
+// 						name: 'td',
+// 						children: [{
+// 							type: 'text',
+// 							ref: 'ninth'
+// 						}]
+// 					}, {
+// 						type: 'element',
+// 						name: 'td',
+// 						children: [{
+// 							type: 'text',
+// 							ref: 'tenth'
+// 						}]
+// 					}]
+// 				}]
+// 			}]
+// 		}]
+//     };
+
+//     const items = new Array( 1000 );
+//     for( var i = 0, l = items.length; i < l; i++ ){
+//         items[i] = {
+//             message: `message ${i}`,
+//             number: i,
+//             first: `first ${i}`,
+//             second: `second ${i}`,
+//             third: `third ${i}`,
+//             fourth: `fourth ${i}`,
+//             fifth: `fifth ${i}`,
+//             sixth: `sixth ${i}`,
+//             seventh: `seventh ${i}`,
+//             eighth: `eighth ${i}`,
+//             ninth: `ninth ${i}`,
+//             tenth: `tenth ${i}`,
+//         };
+//     }
+//     const dataContext = new Context( { items } );
+
+//     console.time('render');
+//     renderToFixture( template, dataContext );
+//     console.timeEnd('render');
+
+//     // console.log( fixture.innerHTML );
+//     t.ok( true );
+
+// });
 
 
 
