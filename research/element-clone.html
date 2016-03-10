@@ -13,26 +13,53 @@
 		
 		var target = document.querySelector( 'main' );
 		
-		console.time('render');
+		console.time('diamond-li custom');
 		
-		HTMLElement.prototype.diamond = function(value){
-			this.textContent = value;
+		const proto =  Object.create( HTMLLIElement.prototype );
+
+		proto.createdCallback = function() {
+			this.textContent = 'foo';
 		};
-        
-		var li = document.createElement('li');
-		li.textContent = 'foo';
+		
+		// proto.template = { foo: 'foo' };
+		
+		var DiamondHTMLLIElement = document.registerElement( 'diamond-li', {
+			prototype: proto,
+			extends: 'li'
+		});
+		
+		console.timeEnd('diamond-li custom');
+
+		
+        console.time('diamond-li');
+
+		var li = document.createElement( 'li', 'diamond-li' );
+		
 		var clone = li.cloneNode(true);
 		
-		assert( clone.textContent, 'foo' );
+		// assert( clone.textContent, 'foo' );
 		
-		clone.diamond( 'bar' )
 		
-		assert( clone.textContent, 'bar' );
-		
-		target.appendChild(li);
+		// target.appendChild(li);
 		target.appendChild(clone);
 		
-		console.timeEnd('render');
+		console.timeEnd('diamond-li');
+		
+		console.time('li');
+		
+		
+        
+		var li = document.createElement( 'li' );
+		
+		var clone = li.cloneNode(true);
+		
+		// assert( clone.textContent, 'foo' );
+		
+		
+		// target.appendChild(li);
+		target.appendChild(clone);
+		
+		console.timeEnd('li');
 		
 	</script>
 </body>

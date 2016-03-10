@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "gobble": "^0.10.2",
     "gobble-babel": "^5.5.8",
     "gobble-cli": "^0.6.0",
     "gobble-rollup": "^0.11.0"

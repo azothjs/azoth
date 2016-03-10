@@ -6,14 +6,12 @@ const js = gobble( [ 'assets', 'test/tests' ] )
 		whitelist: [ 'es6.parameters', 'es6.destructuring' ]
 	})
 	.transform( 'rollup', {
-  		entry: 'test.new.index.js',
-  		// entry: 'test.first.js',
+  		entry: 'test.queue.js',
   		dest:  'test.js',
 		format: 'umd'
 	});
 
 const index = gobble( 'test' ).include( 'index.html' );
 const research = gobble( 'research' ).moveTo( 'research' );
-
 
 module.exports = gobble( [ js, index, research ] );

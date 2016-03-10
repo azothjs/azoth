@@ -21,7 +21,7 @@
 		li.innerHTML = `<div class="view">
 							<input class="toggle" type="checkbox">
 							<label>Taste Javscript</label>
-							<button class="destroy"></button>
+							<button class="destroy">x</button>
 						</div>`;
 						
         var target = document.getElementById( 'target' );
@@ -33,9 +33,9 @@
 			clone.children[0].children[1].textContent = 'This is task ' + i;
 			fragment.appendChild(clone);
             
-            if ( i !== 0 && i % 10 === 0 ) {
-                target.appendChild(fragment);
-            }
+            // if ( i !== 0 && i % 10 === 0 ) {
+            //     target.appendChild(fragment);
+            // }
 		}
 		
 		target.appendChild(fragment);
