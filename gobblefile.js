@@ -1,4 +1,6 @@
 const gobble = require( 'gobble' );
+// const bundleNpm = require( './bundle-npm' );
+// const package = require( './package.json' );
 
 const js = gobble( [ 'assets', 'test/tests' ] )
 	.transform( 'babel', {
@@ -14,4 +16,10 @@ const js = gobble( [ 'assets', 'test/tests' ] )
 const index = gobble( 'test' ).include( 'index.html' );
 const research = gobble( 'research' ).moveTo( 'research' );
 
-module.exports = gobble( [ js, index, research ] );
+// var modules = gobble( 'assets/npm' )
+// 	.transform( bundleNpm, {
+// 		modules: Object.keys( package.dependencies ),
+// 		dest: 'modules.js'
+// 	});
+
+module.exports = gobble( [ js, /*modules,*/ index, research ] );
