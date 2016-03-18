@@ -1,60 +1,58 @@
 import render from './render';
 import Context from './Context';
+import BindingTree from './BindingTree';
 
 function queueRenderer( queue, renderer ) {
-	const renderers = queue.renderers;
-	if ( !renderers ) queue.renderers = [ renderer ];
-	else renderers.push( renderer );
-}
-
-function appendChildren( node, children, queue ) {
-	const mapChildren = queue.children || ( queue.children = [] );
-	var childqueue, child;
-	for ( let i = 0, l = children.length; i < l; i++ ) {
-		mapChildren.push( childqueue = { index: i } );
-		child = create( children[i], childqueue );
-		node.appendChild( child );
-	}
+	queue.renderers.push( renderer );
 }
 
 export default function create( template, queue ){
 	
-	if ( template.type === 'section' ) {
-		return createSection( template, queue );
-	}
-	else {
-		
-		const { node, renderer } = getItem( template );
-		
-		if ( renderer ) {
-			queueRenderer( queue, renderer );
-		}
-		
-		const children = template.children;
-		
-		if ( children ) {
-			appendChildren( node, children, queue );
-		}
-		
-		return node;
-	}
-	
-}
-
-function createSection( template, queue ){
-	const { node, renderer, fragment, childqueue } = getSection( template );
+	const item = getItem( template );
+	const { node, renderer } = item; 
 	
 	if ( renderer ) {
 		queueRenderer( queue, renderer );
 	}
 	
+	var parent, childqueue;
+	
+	if ( template.type === 'section' ) {
+		const section = createSection( template, queue );
+		parent = section.node;
+		childqueue = section.queue;
+	}
+	else {
+		parent = node;
+		childqueue = queue;
+	}
+	
 	const children = template.children;
 	
 	if ( children ) {
-		appendChildren( fragment, children, childqueue );
-	}	
-	
+		appendChildren( parent, children, childqueue );
+	}
+
 	return node;
+}
+
+function appendChildren( node, children, queue ) {
+	var childqueue, child;
+	for ( let i = 0, l = children.length; i < l; i++ ) {
+		childqueue = queue.createChild( i );
+		child = create( children[i], childqueue );
+		node.appendChild( child );
+	}
+}
+
+function createSection( template, queue ) {
+	const { renderer, fragment, childqueue } = getSection( template );
+	
+	if ( renderer ) {
+		queueRenderer( queue, renderer );
+	}
+	
+	return { node: fragment, queue: childqueue };
 }
 
 function getItem( template ) {
@@ -68,8 +66,9 @@ function getItem( template ) {
 		case 'element':
 			node = document.createElement( name );
 			break;
-		// case 'section':
-		// 	break;
+		case 'section':
+			node = document.createComment( template.subtype || 'section' )
+			break;
 		case 'text':
 			node = document.createTextNode( template.text || '' );
 			if ( ref ) renderer = ( context, node ) => {
@@ -87,9 +86,9 @@ function getItem( template ) {
 function getSection( template ) {
 	const { subtype = '', ref } = template;
 	
-	const node = document.createComment( subtype || 'section' );
+	// const node = document.createComment( subtype || 'section' );
 	const fragment = document.createDocumentFragment();
-	const childqueue = {};
+	const childqueue = new BindingTree();
 	
 	function add( context, node ){
 		const clone = render( fragment, childqueue, context );
@@ -128,6 +127,6 @@ function getSection( template ) {
 			throw new Error( `Unexpected section subtype "${subtype}"` );
 	}
 	
-	return { node, renderer, fragment, childqueue };
+	return { renderer, fragment, childqueue };
 	
 }

@@ -10,10 +10,14 @@
   "license": "ISC",
   "devDependencies": {
     "browserify": "^13.0.0",
+    "camelcase": "^2.1.1",
     "gobble": "^0.10.2",
     "gobble-babel": "^5.5.8",
     "gobble-cli": "^0.6.0",
-    "gobble-rollup": "^0.11.0"
+    "gobble-concat": "^0.4.0",
+    "gobble-rollup": "^0.11.0",
+    "junk": "^1.0.2",
+    "sander": "^0.4.0"
   },
   "dependencies": {
     "htmlparser": "^1.7.7"
