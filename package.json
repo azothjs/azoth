@@ -9,13 +9,15 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "babel-plugin-transform-es2015-destructuring": "^6.6.5",
+    "babel-plugin-transform-es2015-parameters": "^6.7.0",
     "browserify": "^13.0.0",
     "camelcase": "^2.1.1",
     "gobble": "^0.10.2",
-    "gobble-babel": "^5.5.8",
+    "gobble-babel": "^6.0.0",
     "gobble-cli": "^0.6.0",
     "gobble-concat": "^0.4.0",
-    "gobble-rollup": "^0.11.0",
+    "gobble-rollup": "^0.25.0",
     "junk": "^1.0.2",
     "sander": "^0.4.0"
   },

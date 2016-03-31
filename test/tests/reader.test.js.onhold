@@ -1,0 +1,74 @@
+
+const test = QUnit.test;
+const module = QUnit.module;
+
+module( 'parse reader' );
+
+function read( html ) {
+	
+	const chain = {};
+	
+	function Event( name ) {
+		
+		const listeners = [];
+		
+		return {
+			name,
+			listeners,
+			on ( listener ) {
+				listeners.push( listener );
+				return chain;
+			}
+		};
+	}
+	
+	const events = [ 'element', 'text', 'ref' ].map( name => new Event( name ) );
+	events.forEach( event => chain[ `on${event.name}` ] = event.on );
+	
+	const [ element, text, ref ] = events;
+	
+	const rules = {
+		'<' ( html ) {
+			const end = html.search( />/ );
+			const attr = html.slice( 0, end );
+			
+			attr.replace( )
+		} 
+	}
+	
+	chain.run = function () {
+		
+		var i = -1, char = '', rule = null;
+		
+		while( char = html[++i] ) {
+			rule = rules[ char ];
+			if ( rule ) {
+				rule( html.slice( i ) );
+			} 
+		}
+	};
+	
+	
+	return chain;
+}
+
+
+test( 'render', t => {
+	
+	t.expect( 3 );
+	
+	const reader = read( `<div class="greeter">Hello {{place}}</div>` )
+		.onelement( 
+			element => t.equal( element.name, 'div' ) 
+		)
+		.ontext( 
+			text => t.equal( text.value, 'Hello ' ) 
+		)
+		.onref( 
+			ref => t.equal( ref.mustache, 'place' ) 
+		);
+		
+	reader.run();
+	
+	
+});

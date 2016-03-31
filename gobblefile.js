@@ -6,22 +6,29 @@ const camelCase = require( 'camelCase' );
 // const package = require( './package.json' );
 
 const tests = gobble( 'test/tests' )
-const index = tests.transform( function( code ) {
+const bad = /^test\./;
+
+const index = tests.include( '*.js' ).transform( function( code ) {
 	const filename = this.filename;
 	const basename = path.basename( filename, path.extname( filename ) );
 	
+	if ( bad.test( basename ) ) return '';
+	
 	return `import './${basename}';`;
 	
-}).transform( 'concat', { dest: 'index.js' });
+}).transform( 'concat', { 
+	dest: 'index.js', 
+	separator: '\n' 
+});
 
 
 const js = gobble( [ index, tests, 'src' ] ).transform( 'babel', {
-	sourceMaps: true,
-	whitelist: [ 'es6.parameters', 'es6.destructuring' ]
+	plugins: [ 'babel-plugin-transform-es2015-parameters', 'babel-plugin-transform-es2015-destructuring' ],
+	sourceMaps: true
 }).transform( 'rollup', {
 	entry: 'index.js',
 	dest:  'test.js',
-	format: 'umd'
+	format: 'iife'
 });
 
 const html = gobble( 'test' ).include( 'index.html' );
