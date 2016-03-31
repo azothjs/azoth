@@ -10,15 +10,16 @@ const fixture = document.getElementById( 'qunit-fixture' );
 
 const getElement = ( name, children ) => ({ type: 'element', name, children });
 
-( function(){
+( function(){	
 	
 	module( 'create' );
 
-	const t1 = Đ.text({  ref: 'place' });
+	const t1 = Đ.text({ ref: 'place' });
+	
 	const fragment = $([
-		$.el('div',[
-			$.el('span',[ 
-				$.text('Hello '),  
+		$.el( 'div',[
+			$.el( 'span',[ 
+				$.text( 'Hello ' ),  
 				t1
 			])
 		])
