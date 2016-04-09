@@ -1,4 +1,4 @@
-import { $, Đ } from './template.js';
+import dom from './template/dom';
 import getBindingTree from './getBindingTree';
 
 const test = QUnit.test;
@@ -10,7 +10,9 @@ const fixture = document.getElementById( 'qunit-fixture' );
 
 const getElement = ( name, children ) => ({ type: 'element', name, children });
 
-( function(){	
+const { $, Đ } = dom;
+
+(function(){	
 	
 	module( 'create' );
 

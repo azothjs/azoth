@@ -11,7 +11,7 @@ export default function getBindingTree( childNodes ) {
 		childNode = childNodes[i];
 		result = null;
 		 
-		children = getBindingTree( childNode.childNodes );
+		children = getBindingTree( Array.isArray( childNode ) ? childNode : childNode.childNodes );
 		
 		if ( children ) {
 			result = { children };
@@ -32,5 +32,5 @@ export default function getBindingTree( childNodes ) {
 		}	
 	}
 	
-	return results.length ? results : null;	
+	return results && results.length ? results : null;	
 }
