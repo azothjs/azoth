@@ -1,23 +1,25 @@
 import Binding from '../../Binding';
 import Context from '../../Context';
-import getBindingTree from '../../getBindingTree';
-import render from '../../render';
+import StringTemplate from './StringTemplate';
+import bind from '../../bind';
 import blocks from '../../blocks';
 import $ from './static';
-import deepSlice from './deepSlice';
 
 export default class StringSection extends Binding {
 	
 	constructor ( binding, template ) {
 		super( binding );
 		
-		this.template = {
-			clone() { return deepSlice( template.clonable ) },
-			bindingTree: template.bindingTree || getBindingTree( template.clonable )
-		}
+		this.template = new StringTemplate( 
+			template.fragment, 
+			template.bindingTree 
+		);
 		
-		// TODO: raise error on unknown section type
-		this.block = new ( blocks[ binding.type ] );
+		const Block = blocks[ binding.type ];
+		
+		if ( !Block ) throw new Error( `Unrecognized section type ${binding.type}` );
+
+		this.block = new Block();
 	}
 	
 	node () {
@@ -29,8 +31,9 @@ export default class StringSection extends Binding {
 		const template = this.template;
 		
 		function add( addContext ) {
-			const clone = render( template, addContext );
-			target.node.push( clone );
+			const { queue, node } = template.render();
+			bind( queue, addContext );
+			target.node.push( node );
 		}
 		
 		this.block.bind( context, this.binding, add );

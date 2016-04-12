@@ -1,7 +1,7 @@
 import Binding from '../../Binding';
 import Context from '../../Context';
-import getBindingTree from '../../getBindingTree';
-import render from '../../render';
+import DOMTemplate from './DOMTemplate';
+import bind from '../../bind';
 import blocks from '../../blocks';
 import $ from './static';
 
@@ -10,13 +10,16 @@ export default class Section extends Binding {
 	constructor ( binding, template ) {
 		super( binding );
 		
-		this.template = {
-			clone() { return template.clonable.cloneNode( true ) },
-			bindingTree: template.bindingTree || getBindingTree( template.clonable.childNodes )
-		}
+		this.template = new DOMTemplate( 
+			template.fragment, 
+			template.bindingTree 
+		);
 		
-		// TODO: raise error on unknown section type
-		this.block = new ( blocks[ binding.type ] );
+		const Block = blocks[ binding.type ];
+		
+		if ( !Block ) throw new Error( `Unrecognized section type ${binding.type}` );
+
+		this.block = new Block();
 	}
 	
 	node () {
@@ -28,8 +31,9 @@ export default class Section extends Binding {
 		const template = this.template;
 		
 		function add( addContext ) {
-			const clone = render( template, addContext );
-			anchor.parentNode.insertBefore( clone, anchor );
+			const { queue, node } = template.render();
+			bind( queue, addContext );
+			anchor.parentNode.insertBefore( node, anchor );
 		}
 		
 		this.block.bind( context, this.binding, add );
