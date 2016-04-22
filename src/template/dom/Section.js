@@ -26,8 +26,7 @@ export default class Section extends Binding {
 		return $.comment( this.binding.type );
 	}
 	
-	bind ( context, target ) {
-		const anchor = target.node;
+	bind ( context, anchor ) {
 		const template = this.template;
 		
 		function add( addContext ) {

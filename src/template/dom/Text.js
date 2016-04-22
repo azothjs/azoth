@@ -6,7 +6,7 @@ export default class DOMText extends Binding {
 		return $.text( '' );
 	}
 	
-	bind ( context, target ) {
-		target.node.textContent = context.get( this.binding.ref );
+	bind ( context, node ) {
+		node.textContent = context.get( this.binding.ref );
 	}
 }

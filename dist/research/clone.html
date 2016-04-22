@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>clone fragments</title>
+</head>
+<body>
+	<main class='todo-app'>
+		<ul class='todo-list' id='target'></ul>
+	</main>
+	
+	<script>
+		
+		var template = document.createElement( 'li' );
+		
+		template.innerHTML = `
+			<div class="view">
+					<input class="toggle" type="checkbox">
+					<label>Taste JavaScript</label>
+					<button class="destroy">x</button>
+			</div>
+			<input class="edit" value="Create a TodoMVC template">`;
+						
+        var fragment = document.createDocumentFragment();
+		
+		var copies = 1000;
+		//console.log( 'copies', copies );
+		
+		var clone;
+		
+		for( var i = 0; i < copies; i++ ){
+			
+			clone = template.cloneNode(true);
+			
+			// simulate binding from data...
+			clone.children[0].children[0].checked = false;
+			clone.children[1].value = 'This is task ' + i;
+			
+			// add to our fragment
+			fragment.appendChild( clone );
+		}
+		
+		document.getElementById( 'target' ).appendChild( fragment );
+		
+	</script>
+</body>
+</html>

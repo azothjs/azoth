@@ -10,18 +10,18 @@ const fixture = document.getElementById( 'qunit-fixture' );
 
 const getElement = ( name, children ) => ({ type: 'element', name, children });
 
-const { $, Đ } = dom;
+const { $tatic, bound } = dom;
 
 (function(){	
 	
 	module( 'create' );
 
-	const t1 = Đ.text({ ref: 'place' });
+	const t1 = bound.text({ ref: 'place' });
 	
-	const fragment = $([
-		$.el( 'div',[
-			$.el( 'span',[ 
-				$.text( 'Hello ' ),  
+	const fragment = $tatic([
+		$tatic.el( 'div', null,[
+			$tatic.el( 'span', null,[ 
+				$tatic.text( 'Hello ' ),  
 				t1
 			])
 		])

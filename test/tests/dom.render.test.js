@@ -1,8 +1,4 @@
-import Context from './Context';
-import dom from './template/dom';
-import text from './template/string';
-import getBindingTree from './getBindingTree';
-import bind from './bind';
+import Diamond from './Diamond';
 
 const test = QUnit.test;
 const module = QUnit.module;
@@ -11,82 +7,92 @@ const skip = { test: () => {} };
 
 module( 'dom render' );
 
-const { $, Đ } = dom;
-
-function renderTemplate( fragment, data ){
-	const template = dom.getTemplate( fragment );
-	const context = new Context( data );
-	const { queue, node } = template.render();
-	bind( queue, context );
-	return node;
-}
+const { $tatic, bound } = Diamond.dom;
 
 test( 'elements and text', t => {
 	
-	const t1 = Đ.text({ ref: 'foo' });
-	const t2 = Đ.text({ ref: 'bar' });
+	const t1 = bound.text({ ref: 'foo' });
+	const t2 = bound.text({ ref: 'bar' });
 	
-	const fragment = $([
-		$.el( 'div', [
-			$.el( 'span', [ t1 ] ),
-			$.el( 'span', [ $.text( 'label: ' ), t2 ] )
+	const fragment = $tatic([
+		$tatic.el( 'div', null, [
+			$tatic.el( 'span', null, [ t1 ] ),
+			$tatic.el( 'span', null, [ $tatic.text( 'label: ' ), t2 ] )
 		])
 	]);
 	
-	var template = renderTemplate( fragment, { foo: 'foo', bar: 'bar' } );
-	fixture.appendChild( template );
+	new Diamond( { 
+		template: { fragment }, 
+		data: { foo: 'foo', bar: 'bar' }, 
+		el: fixture 
+	});
+	
 	t.equal( fixture.innerHTML, '<div><span>foo</span><span>label: bar</span></div>' );
 });
 
 test( 'static section', t => {
 	
-	const t1 = Đ.text({ ref: 'foo' });
+	const t1 = bound.text({ ref: 'foo' });
 	
-	const fragment = $([
-		$.el( 'div', [ t1 ] )
+	const fragment = $tatic([
+		$tatic.el( 'div', null, [ t1 ] )
 	]);
 	
-	var template = renderTemplate( fragment, { foo: 'foo' } );
-	fixture.appendChild( template );
+	new Diamond( { 
+		template: { fragment }, 
+		data: { foo: 'foo' }, 
+		el: fixture 
+	});
+	
 	t.equal( fixture.innerHTML, '<div>foo</div>' );
 });
 
 test( '#for section', t => {
 	
-	const t1 = Đ.text({ ref: '.' });
+	const t1 = bound.text({ ref: '.' });
 	
-	const fragment = $([
-		Đ( { type: 'for', ref: 'items' }, {
-			fragment: $( [ $.el( 'li', [ t1 ] ) ] )
+	const fragment = $tatic([
+		bound( { type: 'for', ref: 'items' }, {
+			fragment: $tatic( [ $tatic.el( 'li', null, [ t1 ] ) ] )
 		})
 	]);
 	
-	var template = renderTemplate( fragment, { items: [ 1, 2, 3 ] } );
-	fixture.appendChild( template );
+	new Diamond( { 
+		template: { fragment }, 
+		data: { items: [ 1, 2, 3 ] }, 
+		el: fixture 
+	});	
+	
 	t.equal( fixture.innerHTML, '<li>1</li><li>2</li><li>3</li><!--for-->' );
 
 });
 
 (function () {
 	
-	const t1 = Đ.text({ ref: 'foo' });
+	const t1 = bound.text({ ref: 'foo' });
 	
-	const fragment = $([
-		Đ( { type: 'if', ref: 'condition' }, {
-			fragment: $( [ $.el( 'li', [ t1 ] ) ] )
+	const fragment = $tatic([
+		bound( { type: 'if', ref: 'condition' }, {
+			fragment: $tatic( [ $tatic.el( 'li', null, [ t1 ] ) ] )
 		})
 	]);
 		
 	test( '#if section true', t => {
-		var template = renderTemplate( fragment, { condition: true, foo: 'foo' } );
-		fixture.appendChild( template );
+		new Diamond( { 
+			template: { fragment }, 
+			data: { condition: true, foo: 'foo' }, 
+			el: fixture 
+		});	
 		t.equal( fixture.innerHTML, '<li>foo</li><!--if-->' );
 	});
 
 	
 	test( '#if section false', t => {
-		var template = renderTemplate( fragment, { condition: false, foo: 'foo' } );
-		fixture.appendChild( template );
+		new Diamond( { 
+			template: { fragment }, 
+			data: { condition: false, foo: 'foo' }, 
+			el: fixture 
+		});	
 		t.equal( fixture.innerHTML, '<!--if-->' );
 	});
 	
@@ -94,24 +100,30 @@ test( '#for section', t => {
 
 (function () {
 	
-	const t1 = Đ.text({ ref: 'a' });
-	const t2 = Đ.text({ ref: 'b' });
+	const t1 = bound.text({ ref: 'a' });
+	const t2 = bound.text({ ref: 'b' });
 	
-	const fragment = $([
-		Đ( { type: 'with', ref: 'obj' }, {
-			fragment: $( [ $.el( 'p', [ t1, t2 ] ) ] )
+	const fragment = $tatic([
+		bound( { type: 'with', ref: 'obj' }, {
+			fragment: $tatic( [ $tatic.el( 'p', null, [ t1, t2 ] ) ] )
 		})
 	]);
 		
 	test( '#with section', t => {
-		var template = renderTemplate( fragment, { obj: { a: 'A', b: 'B' } } );
-		fixture.appendChild( template );
+		new Diamond( { 
+			template: { fragment }, 
+			data: { obj: { a: 'A', b: 'B' } }, 
+			el: fixture 
+		});	
 		t.equal( fixture.innerHTML, '<p>AB</p><!--with-->' );
 	});
 
 	test( '#with section, no object', t => {
-		var template = renderTemplate( fragment, {} );
-		fixture.appendChild( template );
+		new Diamond( { 
+			template: { fragment }, 
+			data: {}, 
+			el: fixture 
+		});	
 		t.equal( fixture.innerHTML, '<!--with-->' );
 	});
 

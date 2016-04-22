@@ -2,6 +2,9 @@ const gobble = require( 'gobble' );
 const path = require( 'path' );
 const camelCase = require( 'camelCase' );
 
+const buble = require( 'rollup-plugin-buble' );
+
+
 // const bundleNpm = require( './bundle-npm' );
 // const package = require( './package.json' );
 
@@ -22,14 +25,22 @@ const index = tests.include( '*.js' ).transform( function( code ) {
 });
 
 
-const js = gobble( [ index, tests, 'src' ] ).transform( 'babel', {
-	plugins: [ 'babel-plugin-transform-es2015-parameters', 'babel-plugin-transform-es2015-destructuring' ],
-	sourceMaps: true
-}).transform( 'rollup', {
+const test = gobble( [ index, tests, 'src' ] ).transform( 'rollup', {
+	plugins: [ buble() ],
 	entry: 'index.js',
 	dest:  'test.js',
 	format: 'iife'
 });
+
+
+const build = gobble( [ index, tests, 'src' ] ).transform( 'rollup', {
+	plugins: [ buble() ],
+	entry: 'main.js',
+	dest:  'diamond.js',
+	format: 'iife'
+});
+
+const min = build.transform( 'uglifyjs', { ext: '.min.js' });
 
 const html = gobble( 'test' ).include( 'index.html' );
 const research = gobble( 'research' ).moveTo( 'research' );
@@ -40,4 +51,4 @@ const research = gobble( 'research' ).moveTo( 'research' );
 // 		dest: 'modules.js'
 // 	});
 
-module.exports = gobble( [ js, /*modules,*/ html, research ] );
+module.exports = gobble( [ test, build, min, /*modules,*/ html, research ] );

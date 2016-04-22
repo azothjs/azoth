@@ -18,9 +18,22 @@ $.comment = function( comment ) {
 	return document.createComment( comment );
 };
 	
-$.el = function( name, children ) {
+$.el = function( name, attr, children ) {
 	const element = document.createElement( name );
-	appendChildren( element, children );
+	
+	var l, a;
+	
+	if ( attr && ( l = attr.length ) ) {
+		for ( var i = 0; i < l; i++ ) {
+			a = attr[i];
+			element.setAttribute( a.name, a.value );
+		}
+	}
+		
+	if ( children && children.length ) {
+		appendChildren( element, children );
+	}
+	
 	return element;
 };
 

@@ -19,9 +19,7 @@ export default function getBindings( clone, bindingTree ) {
 				for( var j = 0, bl = bindings.length; j < bl; j++ ) {
 					queue.push({ 
 						binding: bindings[j],
-						node: childNode,
-						parent: node,
-						index,
+						node: childNode
 					});
 				}
 			}

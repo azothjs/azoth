@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>💎diamond</title>
+</head>
+<body>
+	<main class='todo-app'>
+		<ul class='todo-list' id='target'></ul>
+	</main>
+	
+	<script src='../diamond.js'></script>
+	
+	<script>
+		function getData() {
+			
+			console.time( 'data' );
+			
+			var copies = 1000;
+			var items = new Array( copies );
+			
+			for( var i = 0; i < copies; i++ ){
+				items[i] = { 
+					name: 'This is task ' + i,
+					done: ( i % 5 === 0 )
+				};
+			}
+			
+			console.timeEnd( 'data' );
+			
+			return items;
+		}
+		
+		var { $tatic, bound } = Diamond.dom;
+		
+		function getTemplate() {
+			
+			const p1 = bound.property( 'checked', { ref: 'done' } );
+			const p2 = bound.property( 'value', { ref: 'name' } );
+	
+			const s1 = bound( { type: 'for', ref: 'items' }, {
+				fragment: $tatic([
+					$tatic.el( 'li', null, [
+						$tatic.el( 'div', null, [
+							$tatic.el( 'input', [{ 
+								name: 'class',
+								value: 'toggle'
+							},{
+								name: 'type',
+								value: 'checkbox'
+							}]),
+							$tatic.el( 'label', null, [ $tatic.text( 'Taste Javscript' ) ] ),
+							$tatic.el( 'button', [{ 
+								name: 'class',
+								value: 'destroy'
+							}], [ 
+								$tatic.text( 'x' ) 
+							]) 
+						]),
+						$tatic.el( 'input', [{
+							name: 'class',
+							value: 'edit'	
+						}])  
+					]) 
+				]),
+				bindingTree: [{
+					children: [{
+						children: [{
+							bindings: [ p1 ]
+						}]
+					}, {
+						index: 1,
+						bindings: [ p2 ]
+					}]
+				}]
+			});
+			
+			return {
+				fragment: $tatic([ s1.node() ]),
+				bindingTree: [{
+					bindings: [ s1 ]
+				}]
+			};
+		}
+		
+		// console.profile( 'render' );
+		new Diamond({
+			el: document.getElementById( 'target' ),
+			template: getTemplate(),
+			data: { items: getData() }
+		});
+		// console.profileEnd( 'render' )
+		
+	</script>
+</body>
+</html>
