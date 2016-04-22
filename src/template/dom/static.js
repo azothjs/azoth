@@ -1,5 +1,3 @@
-import Binding from '../../Binding';
-
 export default function $( children ) {
 	return $.section( children );
 }
@@ -42,7 +40,7 @@ function appendChildren( parent, children ) {
 	
 	for ( var i = 0, l = children.length; i < l; i++ ) {
 		child = children[ i ];
-		if ( child instanceof Binding ){
+		if ( typeof child.node === 'function' ){
 			child = getNodeFromBinding( child );
 		};
 		parent.appendChild( child );
