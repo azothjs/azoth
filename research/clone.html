@@ -24,22 +24,24 @@
         var fragment = document.createDocumentFragment();
 		
 		var copies = 1000;
-		// console.log( 'copies', copies );
+		//console.log( 'copies', copies );
 		
-		var clone, div;
+		var clone;
 		
 		for( var i = 0; i < copies; i++ ){
 			
-			clone = li.cloneNode(true);
-			div = clone.children[0];
+			clone = template.cloneNode(true);
 			
 			// simulate binding from data...
 			clone.children[0].children[0].checked = false;
-			clone.children[1].textContent = 'This is task ' + i;
+			clone.children[1].value = 'This is task ' + i;
 			
+			// add to our fragment
 			fragment.appendChild( clone );
 		}
 		
 		document.getElementById( 'target' ).appendChild( fragment );
+		
+	</script>
 </body>
 </html>
