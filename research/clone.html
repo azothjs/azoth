@@ -3,44 +3,43 @@
 <head>
 	<meta charset="UTF-8">
 	<title>clone fragments</title>
-	
-	<!--<link rel="stylesheet" href="css/base.css">
-	<link rel="stylesheet" href="css/index.css">-->
-	
 </head>
 <body>
 	<main class='todo-app'>
-		<ul class='todo-list' id='target'>
-		</ul>
+		<ul class='todo-list' id='target'></ul>
 	</main>
 	
 	<script>
-		console.time('render');
-		var li = document.createElement('li');
-		li.className = '';
-		li.innerHTML = `<div class="view">
-							<input class="toggle" type="checkbox">
-							<label>Taste Javscript</label>
-							<button class="destroy">x</button>
-						</div>`;
-						
-        var target = document.getElementById( 'target' );
-		var fragment = document.createDocumentFragment();
 		
-		for(var i = 0; i < 1000; i++){
-			var clone = li.cloneNode(true);
+		var template = document.createElement( 'li' );
+		
+		template.innerHTML = `
+			<div class="view">
+					<input class="toggle" type="checkbox">
+					<label>Taste JavaScript</label>
+					<button class="destroy">x</button>
+			</div>
+			<input class="edit" value="Create a TodoMVC template">`;
+						
+        var fragment = document.createDocumentFragment();
+		
+		var copies = 1000;
+		// console.log( 'copies', copies );
+		
+		var clone, div;
+		
+		for( var i = 0; i < copies; i++ ){
+			
+			clone = li.cloneNode(true);
+			div = clone.children[0];
+			
+			// simulate binding from data...
 			clone.children[0].children[0].checked = false;
-			clone.children[0].children[1].textContent = 'This is task ' + i;
-			fragment.appendChild(clone);
-            
-            // if ( i !== 0 && i % 10 === 0 ) {
-            //     target.appendChild(fragment);
-            // }
+			clone.children[1].textContent = 'This is task ' + i;
+			
+			fragment.appendChild( clone );
 		}
 		
-		target.appendChild(fragment);
-		
-		console.timeEnd('render');
-	</script>
+		document.getElementById( 'target' ).appendChild( fragment );
 </body>
 </html>
