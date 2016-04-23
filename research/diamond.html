@@ -18,10 +18,11 @@
 		function getData() {			
 			var copies = 1000; // @1000 takes < 1ms to create
 			var items = new Array( copies );
+			var fizz = ['fizz', '', ''], buzz = ['buzz', '', '', '', ''];
 			
 			for( var i = 0; i < copies; i++ ){
 				items[i] = { 
-					name: 'This is task ' + i,
+					name: 'This is task ' + ( fizz[ i%3 ] + buzz[ i%5 ] || i ),
 					done: ( i % 5 === 0 )
 				};
 			}			
