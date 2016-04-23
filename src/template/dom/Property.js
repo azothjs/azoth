@@ -8,10 +8,10 @@ export default class Property extends Binding {
 	}
 	
 	node () {
-		return;
+		return name;
 	}
 	
-	bind ( context, node ) {
-		node[ this.name ] = context.get( this.binding.ref );
+	bind ( context, obj ) {
+		obj[ this.name ] = context.get( this.binding.ref );
 	}
 }

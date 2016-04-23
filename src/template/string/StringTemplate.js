@@ -2,7 +2,7 @@
 import getBindingTree from '../../getBindingTree';
 import deepSlice from './deepSlice';
 
-export default class StringTemplate /*extends Template*/ {
+export default class StringTemplate {
 	
 	constructor ( fragment, bindingTree = getBindingTree( fragment.childNodes ) ) {
 		this.fragment = fragment;
