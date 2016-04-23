@@ -25,6 +25,7 @@ const index = tests.include( '*.js' ).transform( function( code ) {
 });
 
 
+
 const test = gobble( [ index, tests, 'src' ] ).transform( 'rollup', {
 	plugins: [ buble() ],
 	entry: 'index.js',
@@ -33,16 +34,15 @@ const test = gobble( [ index, tests, 'src' ] ).transform( 'rollup', {
 });
 
 
-const build = gobble( [ index, tests, 'src' ] ).transform( 'babel', {
-	plugins: [ 'babel-plugin-transform-es2015-parameters', 'babel-plugin-transform-es2015-destructuring' ],
-	sourceMaps: true
-}).transform( 'rollup', {
+const build = gobble( [ index, tests, 'src' ] ).transform( 'rollup', {
+	plugins: [ buble() ],
 	entry: 'main.js',
 	dest:  'diamond.js',
 	format: 'iife'
 });
 
-const min = build //.transform( 'uglifyjs', { ext: '.min.js' });
+const min = build.transform( 'uglifyjs', { ext: '.min.js' });
+
 
 const html = gobble( 'test' ).include( 'index.html' );
 const research = gobble( 'research' ).moveTo( 'research' );
