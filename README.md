@@ -1,4 +1,4 @@
-# 💎diamond
+# 💎 diamond
 
 Superstatic UI Rendering Library
 
