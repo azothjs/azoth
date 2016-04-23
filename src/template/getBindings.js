@@ -24,7 +24,7 @@ export default function getBindings( clone, bindingTree ) {
 				}
 			}
 			
-			queueBindings( childNode, map.children );	
+			queueBindings( childNode, map.children );
 		}
 	}	
 	

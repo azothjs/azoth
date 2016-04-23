@@ -1,16 +1,11 @@
 import Diamond from './diamond';
 
-import Context from './Context';
-import dom from './template/dom';
-import text from './template/string';
-import bind from './bind';
-
 const test = QUnit.test;
 const module = QUnit.module;
 const fixture = document.getElementById( 'qunit-fixture' );
 const skip = { test: () => {} };
 
-module( `${dom.type} performance` );
+module( `dom performance` );
 
 const { $tatic, bound } = Diamond.dom;
 
@@ -77,7 +72,7 @@ test( `jsBlocks 12 column table with ${count} rows < ${treshhold}ms`, t => {
 	const elapsed = performance.now() - start;
 			
 	t.ok( elapsed < treshhold, `render took ${elapsed}ms` );
-	console.log( `${dom.type} render ${count} items: ${elapsed}ms` );
+	console.log( `dom render ${count} items: ${elapsed}ms` );
 });
 
 
@@ -117,7 +112,7 @@ test( `mithril 150 simple items`, t => {
 	
 	t.ok( true, `render took ${elapsed}ms` );
 	
-	console.log( `${dom.type} mithril test render: ${elapsed}ms` );
+	console.log( `dom mithril test render: ${elapsed}ms` );
 	
 });
 

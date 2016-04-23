@@ -11,6 +11,8 @@
 	
 	<script src='../diamond.js'></script>
 	
+	<template id='todo'><li><div class="view"><input class="toggle" type="checkbox"><label>Taste JavaScript</label><button class="destroy">x</button></div><input class="edit" value="Create a TodoMVC template"></template>
+	
 	<script>
 		
 		function getData() {			
@@ -30,37 +32,18 @@
 		
 		function getTemplate() {
 			
+			
 			const p1 = bound.property( 'checked', { ref: 'done' } );
 			const p2 = bound.property( 'value', { ref: 'name' } );
 	
 			const s1 = bound( { type: 'for', ref: 'items' }, {
-				fragment: $tatic([
-					$tatic.el( 'li', null, [
-						$tatic.el( 'div', null, [
-							$tatic.el( 'input', [{ 
-								name: 'class',
-								value: 'toggle'
-							},{
-								name: 'type',
-								value: 'checkbox'
-							}]),
-							$tatic.el( 'label', null, [ $tatic.text( 'Taste Javscript' ) ] ),
-							$tatic.el( 'button', [{ 
-								name: 'class',
-								value: 'destroy'
-							}], [ 
-								$tatic.text( 'x' ) 
-							]) 
-						]),
-						$tatic.el( 'input', [{
-							name: 'class',
-							value: 'edit'	
-						}])  
-					]) 
-				]),
+				fragment: document.getElementById('todo').content,
 				bindingTree: [{
+					// index: 1, // li
 					children: [{
+						// index: 1, // div
 						children: [{
+							// index: 1, // input
 							bindings: [ p1 ]
 						}]
 					}, {
@@ -69,7 +52,7 @@
 					}]
 				}]
 			});
-			
+
 			return {
 				fragment: $tatic([ s1.node() ]),
 				bindingTree: [{
