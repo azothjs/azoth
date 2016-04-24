@@ -5,7 +5,8 @@ Superstatic UI Rendering Library
 ## What's this about?
 
 `diamond` is an experimental ui rendering library that offers fully 
-recursive, templated data binding - written to be as simple and as fast as possible.
+recursive, templated data binding - written so the code is as simple
+and fast as possible.
 
 How fast? `diamond` can rival, or even be faster, than the same 
 content rendered as a static document.
@@ -19,7 +20,7 @@ There are three things that make diamond so fast:
 It utilizes the DOM's `.cloneNode(true)` to deep clone template fragments 
 and create instances at a fraction of the speed it takes to create new DOM nodes
 from scratch. Checkout out `research/vanilla-js.html` compared to 
-`research/document.html` to understand this built-in DOM boost,
+`research/document.html` to understand this built-in DOM boost.
 
 ### 2. Shift Work
 
@@ -36,7 +37,8 @@ that will be common to all instances of a template section should be determined
 in the template, not the rendered dom node instances.
 
 3. Binding functions are executed for any bound node instance along with 
-the data context. Any work that is instance specific happens here.
+the data context. Any work that is instance specific happens here. 
+Static nodes do not require any additional work.
 	 
 ### 3. Very Vanilla JS
 
@@ -44,25 +46,137 @@ In critical rendering paths, iterating trees is expensive. Functional programmin
 and closures are expensive. Calling too many functions can get expensive. So you will
 see unglamorous code like:
 
-```js
+```javascript
 for ( var i = 0, l = children.length; i < l; i++ ) {
 ```
 
-## But How does it work?
+Really, it saves 100's of ms.
 
-TODO:
-* fragment and binding tree
-* recursive sections
+## But How Does It Work?
 
-## What is the API?
+Consider the following mustachesque template:
+
+```html
+<h2>Contacts</h2>
+<ul>
+	{{#each contacts}}
+	<li><span>{{name}}</span> <tel>{{phone}}</tel></li>
+	{{/each}}
+</ul>
+```
+
+Which we could logically think of as two sections. One
+top-level section whose template looks like:
+
+```html
+<template id="main">
+	<h2>Contacts</h2>
+	<ul>
+		<!-- each -->
+	</ul>
+</template>
+```
+
+(More on the comment node below.) And an "each" section whose template is:
+
+```html
+<template id="contact">
+	<li>
+		<span>{{name}}</span>
+		<tel>{{phone}}</tel>
+	</li>
+</template>
+```
+
+Let's start by looking at applying bindings to the _second_ template,
+applying the bindings with pseudo-code like:
+
+```js
+
+// create the template bindings:
+var t1 = bound.text({ ref: { prop: 'name' } });
+var t2 = bound.text({ ref: { prop: 'phone' } });
+
+var template = {
+	// assume `template` supported:
+	fragment: document.getElementById( 'todo' ).content,
+	queueBindings( clone ) {
+		var bindings = new Array(2);
+		var li = clone.children[0];
+		bindings[0] = { binder: t1, node: li.children[0].childNode[0] });
+		bindings[1] = { binder: t2, node: li.children[1].childNode[0] });
+		return bindings;
+	}
+}
+
+// create a clone and get queued bindings:
+var clone = template.fragment.cloneNode( true );
+var bindings = template.queueBindings( clone );
+
+// run the bindings:
+var each;
+for ( var i = 0, l = bindings.length; i < l; i++ ) {
+	each = bindings[i];
+	each.binding.bind( context, each.node );
+}
+
+```
+
+You may be wondering why queue the bindings versus executing 
+them on the spot as instance nodes are found. 
+
+The main reason is that a binder may mutate the cloned fragment.
+For example an iterative section may insert nodes, or a decorator 
+may subtle alter the dom making it impossible to find other nodes
+that need to be bound. 
+
+Sections are represented as comments in their parents, and register
+a binding function against that node which servers as a callback
+so the section can do its rendering. Then comment node also acts as 
+an anchor to place instances of that section:
+
+```js
+
+// create the template bindings:
+var s1 = bound.section({ type: 'for', ref: { prop: 'contacts' } },
+	// the section template from above
+	template );
+	
+var template = {
+	// assume `template` supported:
+	fragment: document.getElementById( 'main' ).content,
+	queueBindings( clone ) {
+		var bindings = new Array(1);
+		// fyi the comment node is after a text node 
+		bindings[0] = { binder: s1, node: clone.children[1].childNodes[1] });
+		return bindings;
+	}
+}
+
+// create a clone and get queued bindings:
+var clone = template.fragment.cloneNode( true );
+var bindings = template.queueBindings( clone );
+
+// run the bindings:
+var each;
+for ( var i = 0, l = bindings.length; i < l; i++ ) {
+	each = bindings[i];
+	// binding the section will cause it to create
+	// the instances for each contact in data "context"
+	each.binding.bind( context, each.node );
+}
+
+```
+
+## So What's the API?
 
 While the API is very much in progress, more important is
 understanding the boundaries for the project:
 
 1. The DOM fragment
-2. The binder interace, which is simple a function that
+2. The binder interface, which is simple a function that
    accepts the created node
-3. The context api which includes
+3. The context API which includes
 	* methods for getting, setting and observing
 	* "reference" object options that describe which what
 	data(s) to use and optionally expression to be applied
