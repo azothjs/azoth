@@ -11,6 +11,8 @@ and fast as possible.
 How fast? `diamond` can rival, or even be faster, than the same 
 content rendered as a static document.
 
+
+
 ## How is that even possible?
 
 There are three things that make diamond so fast:
@@ -148,7 +150,6 @@ var template = {
 	fragment: document.getElementById( 'main' ).content,
 	queueBindings( clone ) {
 		var bindings = new Array(1);
-		// fyi the comment node is after a text node, thus childNodes[1] 
 		bindings[0] = { binder: s1, node: clone.children[1].childNodes[1] });
 		return bindings;
 	}
