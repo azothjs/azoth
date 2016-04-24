@@ -91,12 +91,11 @@ top-level section whose template looks like:
 </template>
 ```
 
-Let's start by looking at applying bindings to the _second_ template,
-applying the bindings with pseudo-code like:
+Let's start by looking at applying bindings to the _second_ template:
 
 ```js
 
-// create the template bindings:
+// create the bindings for the text nodes:
 var t1 = bound.text({ ref: { prop: 'name' } });
 var t2 = bound.text({ ref: { prop: 'phone' } });
 
@@ -125,32 +124,31 @@ for ( var i = 0, l = bindings.length; i < l; i++ ) {
 
 ```
 
-You may be wondering why queue the bindings versus executing 
-them on the spot as instance nodes are found. 
+You may be wondering why the bindings were queued and not executing 
+on the spot as the node instances were located. 
 
 The main reason is that a binder may mutate the cloned fragment.
 For example an iterative section may insert nodes, or a decorator 
-may subtle alter the dom making it impossible to find other nodes
+may subtly alter the dom making it impossible to find other nodes
 that need to be bound. 
 
-Sections are represented as comments in their parents, and register
-a binding function against that node which servers as a callback
-so the section can do its rendering. Then comment node also acts as 
-an anchor to place instances of that section:
+Sections are represented as comments in their parents and register
+a binding function so the section can do its rendering. Then comment
+node also acts as an anchor to place instances of that section:
 
 ```js
 
-// create the template bindings:
-var s1 = bound.section({ type: 'for', ref: { prop: 'contacts' } },
+// create the section bindings:
+var s1 = bound.section(
+	{ type: 'for', ref: { prop: 'contacts' } },
 	// the section template from above
 	template );
 	
 var template = {
-	// assume `template` supported:
 	fragment: document.getElementById( 'main' ).content,
 	queueBindings( clone ) {
 		var bindings = new Array(1);
-		// fyi the comment node is after a text node 
+		// fyi the comment node is after a text node, thus childNodes[1] 
 		bindings[0] = { binder: s1, node: clone.children[1].childNodes[1] });
 		return bindings;
 	}
@@ -164,8 +162,6 @@ var bindings = template.queueBindings( clone );
 var each;
 for ( var i = 0, l = bindings.length; i < l; i++ ) {
 	each = bindings[i];
-	// binding the section will cause it to create
-	// the instances for each contact in data "context"
 	each.binding.bind( context, each.node );
 }
 
