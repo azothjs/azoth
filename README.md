@@ -22,7 +22,7 @@ see [this explanation](./HOW-IT-WORKS.md).
 `diamond` is intended as a ui rendering engine only. Its job is to create and 
 update dom nodes as fast and efficiently as possible. 
 
-In fact there's no parser in `diamond`, it exposes very general capabilities to
+In fact there's no parser in `diamond`! It exposes very general capabilities to
 supply a template fragment and a set of binding functions, as well as a "context"
 interface that is passed into binding functions so they can report data changes
  and have `diamond` render or update ui as necessary.
@@ -46,19 +46,22 @@ engine to update specific content.
 
 ## Background
 
-I am a contributor to [RactiveJS](github.com/ractivejs/ractive). This project 
+I am a contributor to [RactiveJS](https://github.com/ractivejs/ractive). This project 
 is an attempt to synthesize many ideas, based on both the good and bad of 
-working with the Ractive code base and looking and other js ui libraries and frameworks.
+working with the Ractive code base (and the good and bad of other js ui libraries and frameworks).
 
 As mentioned above, I'm starting by reducing the scope to just the rendering engine. 
-Obviously Ractive would be good fit for first possible integration once the library is
+Obviously Ractive would be a good fit for first possible integration once the library is
 matured enough to be usuable.
 
 ## Running the Project
 
-Everything available via `npm start`. `localhost:4567` will run
-the tests. `localhost:4567/research/[name].html` has some full 
-page examples and research.
+Currently the project is geared towards research and early development, so a bit lacking on
+packaging and deployment (but not tests!)
+
+Everything is available via `npm start` which runs a gobble dev server running
+at `http://localhost:4567` (base url will give run tests). 
+`http://localhost:4567/research/[name].html` has some full page examples and research.
 
 If you want to build a stand-alone version of the library, run 
 `gobble build dist -f` where `dist` is the name of the destination directory
