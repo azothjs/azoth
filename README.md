@@ -40,14 +40,17 @@ in the template, not the rendered dom node instances.
 the data context. Any work that is instance specific happens here. 
 Static nodes do not require any additional work.
 	 
-### 3. Very Vanilla JS
+### 3. Real Vanilla JS
 
 In critical rendering paths, iterating trees is expensive. Functional programming 
 and closures are expensive. Calling too many functions can get expensive. So you will
 see unglamorous code like:
 
-```javascript
-for ( var i = 0, l = children.length; i < l; i++ ) {
+```js
+for ( var i = 0, l = children.length, child; i < l; i++ ) {
+	child = children[i];
+	// ...
+}
 ```
 
 Really, it saves 100's of ms.
