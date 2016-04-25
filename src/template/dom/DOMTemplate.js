@@ -17,9 +17,10 @@ export default class DOMTemplate {
 	
 	render() {
 		const node = this.fragment.cloneNode( true );
-		// const queue = [];
-		// queueBindings( queue, node, this.bindingTree );
+		
+		// array of { node, binder }
 		const queue = getBindings( node, this.bindingTree )
+		
 		return { node, queue };
 	}
 }

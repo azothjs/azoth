@@ -1,14 +1,12 @@
-import Binding from '../../Binding';
-import Context from '../../Context';
 import DOMTemplate from './DOMTemplate';
 import bind from '../../bind';
 import blocks from '../../blocks';
 import $ from './static';
 
-export default class Section extends Binding {
+export default class Section {
 	
 	constructor ( binding, template ) {
-		super( binding );
+		this.binding = binding;
 		
 		this.template = new DOMTemplate( 
 			template.fragment, 
