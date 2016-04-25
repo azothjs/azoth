@@ -1,8 +1,7 @@
 # 💎 diamond
 
-Superstatic UI Rendering Library
+superstatic ui rendering library:
 
-Experimental ui rendering library:
 * fast or faster than same content rendered as a static document
 * supports nested sections
 * some simple data-bindng (think todo list)
