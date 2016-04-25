@@ -15,10 +15,11 @@ see [this explanation](./HOW-IT-WORKS.md).
 Currently the project is in research and early development, so a bit lacking on
 packaging and deployment (but not tests!).
 
-Everything is available via `npm start` which runs a gobble dev server running
-at `http://localhost:4567` which runs the tests.
- 
-`http://localhost:4567/research/[name].html` has the full page examples and research.
+Start the gobble dev server via `npm start` and go to `http://localhost:4567` 
+to runs the tests.
+
+The research directory is also served, checkout   
+`localhost:4567/research/diamond.html` for todo example.
 
 If you want to build a stand-alone version of the library, run 
 `gobble build dist -f` where `dist` is the name of the destination directory
