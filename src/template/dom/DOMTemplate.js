@@ -4,11 +4,9 @@ import getBindingTree from '../../getBindingTree';
 
 export default class DOMTemplate {
 	
-	constructor ( fragment, bindingTree = getBindingTree( fragment.childNodes ) ) {
+	constructor ( { fragment, bindings } ) {
 		this.fragment = fragment;
-		this.bindingTree = bindingTree;
-		
-		// console.log( JSON.stringify(bindingTree, true, 2) );
+		this.bindings = bindings;
 	}
 	
 	node () {
@@ -17,10 +15,7 @@ export default class DOMTemplate {
 	
 	render() {
 		const node = this.fragment.cloneNode( true );
-		
-		// array of { node, binder }
-		const queue = getBindings( node, this.bindingTree )
-		
+		const queue = this.bindings( node );
 		return { node, queue };
 	}
 }

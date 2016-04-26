@@ -9,6 +9,7 @@
 		<ul class='todo-list' id='target'></ul>
 	</main>
 	
+	<!--
 	<template>
 		<li>
 		<div class="view">
@@ -18,14 +19,44 @@
 		</div>
 		<input class="edit" value="Create a TodoMVC template">
 	</template>
+	--> 
 	
 	<script>
 		
 	(function cloneRender(){
 		
-		var template = document.getElementsByTagName('template')[0].content.cloneNode( true );
+		// var template = document.getElementsByTagName('template')[0].content;
+		
+        var template = document.createDocumentFragment();
+		
+		var li = document.createElement('li');
+		
+		var div = document.createElement('div');
+		div.setAttribute( 'class', 'view' );
+		
+		var checkbox = document.createElement('input');
+		checkbox.setAttribute( 'type', 'checkbox' );
+		checkbox.setAttribute( 'class', 'toggle' );
+		div.appendChild( checkbox );
+		
+		var label = document.createElement('label');
+		label.textContent = 'Taste JavaScript';
+		div.appendChild( label );
+		
+		var button = document.createElement('button');
+		button.setAttribute( 'class', 'toggle' );
+		button.textContent = 'x';
+		div.appendChild( button );
+		
+		var input = document.createElement('input');
+		input.setAttribute( 'class', 'edit' );
+		input.setAttribute( 'value', 'Create a TodoMVC template' );
 					
-        // var fragment = document.createDocumentFragment();
+		li.appendChild( div );
+		li.appendChild( input );
+		
+		template.appendChild( li );
+					
 		
 		var copies = 1000;
 		// console.log( 'copies', copies );

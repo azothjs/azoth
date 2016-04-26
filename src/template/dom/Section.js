@@ -8,10 +8,7 @@ export default class Section {
 	constructor ( binding, template ) {
 		this.binding = binding;
 		
-		this.template = new DOMTemplate( 
-			template.fragment, 
-			template.bindingTree 
-		);
+		this.template = new DOMTemplate( template );
 		
 		const Block = blocks[ binding.type ];
 		

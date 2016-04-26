@@ -38,35 +38,34 @@
 			const p2 = bound.property( 'value', { ref: 'name' } );
 	
 			const s1 = bound( { type: 'for', ref: 'items' }, {
-				fragment: document.getElementById('todo').content,
-				bindingTree: [{
-					// index: 1, // li
-					children: [{
-						// index: 1, // div
-						children: [{
-							// index: 1, // input
-							bindings: [ p1 ]
-						}]
-					}, {
-						index: 1,
-						bindings: [ p2 ]
-					}]
-				}]
+				fragment: document.getElementById('todo').content.cloneNode( true ),
+				bindings ( node ) {
+					var li = node.children[0];
+					return [
+						{ node: li.children[0].children[0], binding: p1 },
+						{ node: li.children[1], binding: p2 }
+					];	
+				}
 			});
 
 			return {
 				fragment: $tatic([ s1.node() ]),
-				bindingTree: [{
-					bindings: [ s1 ]
-				}]
+				bindings ( node ) {
+					return [
+						{ node: node.childNodes[0], binding: s1 }
+					];
+				}
 			};
 		}
 		
+		console.time( 'render' );
 		new Diamond({
 			el: document.getElementById( 'target' ),
 			template: getTemplate(),
 			data: { items: getData() }
 		});
+		
+		console.timeEnd( 'render' );
 		
 	</script>
 </body>

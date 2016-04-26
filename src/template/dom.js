@@ -7,7 +7,7 @@ export default {
 	type: 'dom',
 	$tatic: $tatic, 
 	bound: bound,
-	getTemplate( fragment, bindingTree ) { 
-		return new DOMTemplate( fragment, bindingTree ); 
+	getTemplate( template ) { 
+		return new DOMTemplate( template ); 
 	}  
 };

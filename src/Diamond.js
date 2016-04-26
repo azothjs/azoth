@@ -6,10 +6,9 @@ export default class Diamond {
 	
 	constructor( { template, data, el } ) {
 		
-		const { fragment, bindingTree } = template;
-		const rendered = dom.getTemplate( fragment, bindingTree );
+		const domTemplate = dom.getTemplate( template );
 		
-		const { queue, node } = rendered.render();
+		const { queue, node } = domTemplate.render();
 		
 		const context = new Context( data );
 		bind( queue, context );

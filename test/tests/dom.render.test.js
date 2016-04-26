@@ -14,15 +14,24 @@ test( 'elements and text', t => {
 	const t1 = bound.text({ ref: 'foo' });
 	const t2 = bound.text({ ref: 'bar' });
 	
-	const fragment = $tatic([
-		$tatic.el( 'div', null, [
-			$tatic.el( 'span', null, [ t1 ] ),
-			$tatic.el( 'span', null, [ $tatic.text( 'label: ' ), t2 ] )
-		])
-	]);
+	const template = {
+		fragment: $tatic([
+			$tatic.el( 'div', null, [
+				$tatic.el( 'span', null, [ t1.node() ] ),
+				$tatic.el( 'span', null, [ $tatic.text( 'label: ' ), t2 ] )
+			])
+		]),
+		bindings ( node ) {
+			const div = node.children[0];
+			return [
+				{ node: div.children[0].childNodes[0], binding: t1 },
+				{ node: div.children[1].childNodes[1], binding: t2 }
+			];
+		}
+	};
 	
 	new Diamond( { 
-		template: { fragment }, 
+		template, 
 		data: { foo: 'foo', bar: 'bar' }, 
 		el: fixture 
 	});
@@ -34,12 +43,19 @@ test( 'static section', t => {
 	
 	const t1 = bound.text({ ref: 'foo' });
 	
-	const fragment = $tatic([
-		$tatic.el( 'div', null, [ t1 ] )
-	]);
+	const template = {
+		fragment: $tatic([
+			$tatic.el( 'div', null, [ t1.node() ] )
+		]),
+		bindings ( node ) {
+			return [
+				{ node: node.children[0].childNodes[0], binding: t1 }
+			];
+		}
+	};
 	
 	new Diamond( { 
-		template: { fragment }, 
+		template, 
 		data: { foo: 'foo' }, 
 		el: fixture 
 	});
@@ -49,16 +65,27 @@ test( 'static section', t => {
 
 test( '#for section', t => {
 	
-	const t1 = bound.text({ ref: '.' });
+	const t1 = bound.text( { ref: '.' } );
+	const s1 = bound.section( { type: 'for', ref: 'items' }, {
+		fragment: $tatic( [ $tatic.el( 'li', null, [ t1 ] ) ] ),
+		bindings ( node ) {
+			return [
+				{ node: node.children[0].childNodes[0], binding: t1 }
+			];
+		}
+	});
 	
-	const fragment = $tatic([
-		bound( { type: 'for', ref: 'items' }, {
-			fragment: $tatic( [ $tatic.el( 'li', null, [ t1 ] ) ] )
-		})
-	]);
+	const template = {
+		fragment: $tatic([ s1.node() ]),
+		bindings ( node ) {
+			return [
+				{ node: node.childNodes[0], binding: s1 }
+			];
+		}
+	};
 	
 	new Diamond( { 
-		template: { fragment }, 
+		template, 
 		data: { items: [ 1, 2, 3 ] }, 
 		el: fixture 
 	});	
@@ -70,16 +97,27 @@ test( '#for section', t => {
 (function () {
 	
 	const t1 = bound.text({ ref: 'foo' });
+	const s1 = bound.section( { type: 'if', ref: 'condition' }, {
+		fragment: $tatic( [ $tatic.el( 'li', null, [ t1.node() ] ) ] ),
+		bindings ( node ) {
+			return [
+				{ node: node.children[0].childNodes[0], binding: t1 }
+			];
+		}
+	})
 	
-	const fragment = $tatic([
-		bound( { type: 'if', ref: 'condition' }, {
-			fragment: $tatic( [ $tatic.el( 'li', null, [ t1 ] ) ] )
-		})
-	]);
+	const template = {
+		fragment: $tatic([ s1.node() ]),
+		bindings ( node ) {
+			return [
+				{ node: node.childNodes[0], binding: s1 }
+			];
+		}
+	};
 		
 	test( '#if section true', t => {
 		new Diamond( { 
-			template: { fragment }, 
+			template, 
 			data: { condition: true, foo: 'foo' }, 
 			el: fixture 
 		});	
@@ -89,7 +127,7 @@ test( '#for section', t => {
 	
 	test( '#if section false', t => {
 		new Diamond( { 
-			template: { fragment }, 
+			template, 
 			data: { condition: false, foo: 'foo' }, 
 			el: fixture 
 		});	
@@ -103,15 +141,29 @@ test( '#for section', t => {
 	const t1 = bound.text({ ref: 'a' });
 	const t2 = bound.text({ ref: 'b' });
 	
-	const fragment = $tatic([
-		bound( { type: 'with', ref: 'obj' }, {
-			fragment: $tatic( [ $tatic.el( 'p', null, [ t1, t2 ] ) ] )
-		})
-	]);
+	const s1 = bound.section( { type: 'with', ref: 'obj' }, {
+		fragment: $tatic( [ $tatic.el( 'p', null, [ t1, t2 ] ) ] ),
+		bindings ( node ) {
+			var p = node.children[0];
+			return [
+				{ node: p.childNodes[0], binding: t1 },
+				{ node: p.childNodes[1], binding: t2 }
+			];
+		}
+	})
+	
+	const template = {
+		fragment: $tatic([ s1.node() ]),
+		bindings ( node ) {
+			return [
+				{ node: node.childNodes[0], binding: s1 }
+			];
+		}
+	};
 		
 	test( '#with section', t => {
 		new Diamond( { 
-			template: { fragment }, 
+			template, 
 			data: { obj: { a: 'A', b: 'B' } }, 
 			el: fixture 
 		});	
@@ -120,7 +172,7 @@ test( '#for section', t => {
 
 	test( '#with section, no object', t => {
 		new Diamond( { 
-			template: { fragment }, 
+			template, 
 			data: {}, 
 			el: fixture 
 		});	

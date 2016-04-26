@@ -42,25 +42,34 @@ test( `jsBlocks 12 column table with ${count} rows < ${treshhold}ms`, t => {
 		fragment: $tatic([
 			$tatic.el( 'tr', null, tds ) 
 		]),
-		bindingTree: [{
-			children: bindings.map( ( b, index ) => {
-				return {
-					index,
-					children: [ { bindings: [ b ] } ]
-				}; 
-			})
-		}]
+		bindings ( node ) {
+			var tr = node.children[0];
+			return [
+				{ node: tr.children[0].childNodes[0], binding: bindings[0] },
+				{ node: tr.children[1].childNodes[0], binding: bindings[1] },
+				{ node: tr.children[2].childNodes[0], binding: bindings[2] },
+				{ node: tr.children[3].childNodes[0], binding: bindings[3] },
+				{ node: tr.children[4].childNodes[0], binding: bindings[4] },
+				{ node: tr.children[5].childNodes[0], binding: bindings[5] },
+				{ node: tr.children[6].childNodes[0], binding: bindings[6] },
+				{ node: tr.children[7].childNodes[0], binding: bindings[7] },
+				{ node: tr.children[8].childNodes[0], binding: bindings[8] },
+				{ node: tr.children[9].childNodes[0], binding: bindings[9] },
+				{ node: tr.children[10].childNodes[0], binding: bindings[10] },
+				{ node: tr.children[11].childNodes[0], binding: bindings[11] }
+			];
+		}
 	});
 	
 	const template = {
 		fragment: $tatic([
 			$tatic.el( 'table', null, [ s1.node() ])
 		]),
-		bindingTree: [{
-			children: [{
-				bindings: [ s1 ]
-			}]
-		}]
+		bindings ( node ) {
+			return [
+				{ node: node.children[0].childNodes[0], binding: s1 }
+			];
+		}
 	};
 	
 	new Diamond( { 
@@ -82,24 +91,27 @@ test( `mithril 150 simple items`, t => {
 	
 	const start = performance.now();
 	
-	const t2 = bound.text({ ref: 'name' });
-	
+	const t1 = bound.text({ ref: 'name' });
 	const s1 = bound( { type: 'for', ref: 'items' }, {
 		fragment: $tatic([
-			$tatic.el( 'span', null, [ t2.node() ]) 
+			$tatic.el( 'span', null, [ t1.node() ]) 
 		]),
-		bindingTree: [{
-			children: [{
-				bindings: [ t2 ]
-			}]
-		}]
+		bindings ( node ) {
+			return [
+				{ node: node.children[0].childNodes[0], binding: t1 }
+			];
+		}
 	});
 	
 	const template = {
-		fragment: $tatic([ s1.node() ]),
-		bindingTree: [{
-			bindings: [ s1 ]
-		}]
+		fragment: $tatic([
+			$tatic([ s1.node() ])
+		]),
+		bindings ( node ) {
+			return [
+				{ node: node.childNodes[0], binding: s1 }
+			];
+		}
 	};
 	
 	new Diamond( { 
