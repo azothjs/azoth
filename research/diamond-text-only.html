@@ -10,9 +10,12 @@
 	</main>
 	
 	<script src='../diamond.js'></script>
+	<!--
 	
-	<template id='todo'><li><div class="view"><input class="toggle" type="checkbox"><label>Taste JavaScript</label><button class="destroy">x</button></div><input class="edit" value="Create a TodoMVC template"></li></template>
+	<template id='todo'><li><div class="view"><span>done</span><label>Taste JavaScript</label><button class="destroy">x</button></div><span class="edit">Create a TodoMVC template</span></li></template>
+			-->
 	
+			<template id='todo'><li><div class="view"><span>done</span><span>Taste JavaScript</span><span class="destroy">x</span></div><span class="edit">Create a TodoMVC template</span></li></template>
 	<script>
 		
 		function getData() {			
@@ -35,16 +38,16 @@
 		function getTemplate() {
 			
 			
-			const p1 = bound.property( 'checked', { ref: 'done' } );
-			const p2 = bound.property( 'value', { ref: 'name' } );
+			const t1 = bound.text( { ref: 'done' } );
+			const t2 = bound.text( { ref: 'name' } );
 	
 			const s1 = bound( { type: 'for', ref: 'items' }, {
 				fragment: document.getElementById('todo').content.cloneNode( true ),
 				bindings ( node ) {
 					var li = node.children[0];
 					return [
-						{ node: li.children[0].children[0], binding: p1 },
-						{ node: li.children[1], binding: p2 }
+						{ node: li.children[0].children[0].childNodes[0], binding: t1 },
+						{ node: li.children[1].childNodes[0], binding: t2 }
 					];	
 				}
 			});

@@ -11,6 +11,7 @@ export default class Diamond {
 		const { queue, node } = domTemplate.render();
 		
 		const context = new Context( data );
+		
 		bind( queue, context );
 		
 		el.appendChild( node );
