@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>vanilla js</title>
+</head>
+<body>
+	<main class='todo-app'>
+		<h2>running some js perf stuff</h2>
+		<div id='same'></div>
+		<div id='mixed'></div>
+	</main>
+	
+	<script>
+		
+	(function same(){
+		
+		
+		var times = 10000;
+		
+		var b1 = function(){};
+		var b2 = function(){};
+		var b3 = function(){};
+		var b4 = function(){};
+		
+		var same = [
+			[ b1 ],
+			[ b2, b3 ],
+			[ b4 ]
+		];
+		
+		console.time( `same ${times} times` );
+		var each;
+		for( var i = 0; i < times; i++ ){
+
+			for( var j = 0, sLength = same.length; j < sLength; j++ ) {
+				each = same[j];
+				for( var k = 0, bLength = each.length; k < bLength; k++ ){
+					each[k]();	
+				}
+			}
+
+		}
+		console.timeEnd( `same ${times} times` );
+		
+		var mixed = [
+			b1,
+			[ b2, b3 ],
+			b4
+		];
+		
+		console.time( `mixed ${times} times` );
+		var each;
+		for( var i = 0; i < times; i++ ){
+
+			for( var j = 0, sLength = mixed.length; j < sLength; j++ ) {
+				each = mixed[j];
+				if ( Array.isArray( each ) ) {
+					for( var k = 0, bLength = each.length; k < bLength; k++ ){
+						each[k]();	
+					}
+				}
+				else {
+					each();
+				}
+			}
+
+		}
+		console.timeEnd( `mixed ${times} times` );
+		
+		
+		
+	})();
+	</script>
+</body>
+</html>
