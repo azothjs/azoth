@@ -2,7 +2,6 @@ const gobble = require( 'gobble' );
 const buble = require( 'rollup-plugin-buble' );
 const path = require( 'path' );
 
-
 const tests = gobble( 'test/tests' );
 
 const index = tests.include( '*.js' )
@@ -24,7 +23,6 @@ const test = gobble( [ index, tests, 'src' ] )
 		format: 'iife'
 	});
 
-
 const build = gobble( [ index, tests, 'src' ] )
 	.transform( 'rollup', {
 		plugins: [ buble() ],
@@ -34,7 +32,6 @@ const build = gobble( [ index, tests, 'src' ] )
 	});
 
 const min = build.transform( 'uglifyjs', { ext: '.min.js' });
-
 
 const html = gobble( 'test' ).include( 'index.html' );
 const research = gobble( 'research' ).moveTo( 'research' );
