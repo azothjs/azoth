@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js vs dom selector</title>
+</head>
+<body>
+	<main class='todo-app'>
+		<h2>running some js perf stuff</h2>
+		<div id='same'></div>
+		<div id='mixed'></div>
+	</main>
+	
+	<template id='todo'>
+		<li>
+			<div class="view">
+				<input class="toggle" type="checkbox">
+				<label>Taste Javascript</label>
+				<button class="destroy">x</button>
+			</div>
+			<input class="edit" value="Create a TodoMVC template">
+		</li>
+	</template>	
+	
+	<template id='todo-annotated'>
+		<li>
+			<div class="view">
+				<input data-slot class="toggle" type="checkbox">
+				<label>Taste <data-slot></data-slot></label>
+				<button class="destroy">x</button>
+			</div>
+			<input data-slot class="edit" value="Create a TodoMVC template">
+		</li>
+	</template>
+
+	
+	<script>
+		
+	(function same(){
+		
+		
+		var times = 1000;
+		
+		var b1 = function(){};
+		var b2 = function(){};
+		var b3 = function(){};
+		var b4 = function(){};
+		
+		var same = [
+			[ b1 ],
+			[ b2, b3 ],
+			[ b4 ]
+		];
+		
+		var template = document.getElementById( 'todo' ).content;
+		var expectedLength = 3;
+				
+		function findNodes( fragment ) {
+			var li = fragment.children[0];
+			return [
+				li.children[0].children[0],
+				li.children[0].children[0].childNodes[0],
+				li.children[1],
+			];		
+		}
+		
+		console.time( `js by index ${times} times` );
+		var nodes = null;
+		for( var i = 0; i < times; i++ ){
+			nodes = findNodes( template.cloneNode( true ) );
+			if ( nodes.length !== expectedLength ) {
+				throw new Error( `wrong length: ${node.length}` )
+			}
+		}
+		console.timeEnd( `js by index ${times} times` );
+		
+		template = document.getElementById( 'todo-annotated' ).content;
+		
+		console.time( `dom selector ${times} times` );
+		var nodes = null;
+		for( var i = 0; i < times; i++ ){
+			nodes = template.cloneNode( true ).querySelectorAll( '[data-slot],data-slot' );
+			nodes[1].parentNode.replaceChild(document.createTextNode( '' ), nodes[1])
+			if ( nodes.length !== expectedLength ) {
+				throw new Error( `wrong length: ${nodes.length}` )
+			}
+		}
+		console.timeEnd( `dom selector ${times} times` );
+		console.log(nodes)
+	})();
+	</script>
+</body>
+</html>
