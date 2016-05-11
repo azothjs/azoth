@@ -1,6 +1,7 @@
 import Context from './Context';
 import dom from './template/dom';
 import bind from './bind'; 
+import makeFragment from './makeFragment'; 
 
 export default class Diamond {
 	
@@ -20,3 +21,4 @@ export default class Diamond {
 }
 
 Diamond.dom = dom;
+Diamond.makeFragment = makeFragment;

@@ -1,12 +1,12 @@
-import getBindings from '../getBindings';
-// import queueBindings from '../queueBindings';
-import getBindingTree from '../../getBindingTree';
-
 export default class DOMTemplate {
 	
-	constructor ( { fragment, bindings } ) {
+	constructor ( { fragment, oninit, onbind } ) {
 		this.fragment = fragment;
-		this.bindings = bindings;
+		if ( oninit ) {
+			const nodes = getBoundNodes( fragment );
+			initNodes( nodes, oninit );
+		}
+		this.onbind = onbind;
 	}
 	
 	node () {
@@ -15,7 +15,58 @@ export default class DOMTemplate {
 	
 	render() {
 		const node = this.fragment.cloneNode( true );
-		const queue = this.bindings( node );
+		const nodes = getBoundNodes( node );
+		const queue = queueNodesAndBindings( nodes, this.onbind );
 		return { node, queue };
 	}
 }
+
+function getBoundNodes( fragment, bindings, method ) {
+	return fragment.querySelectorAll( '[data-bind]' );
+}
+
+function initNodes( nodes, bindings ) {
+	for( var i = 0, l = nodes.length, node, binding; i < l; i++ ) {
+		node = nodes[i];
+		// list = node.dataset.bind.split( ',' );
+		
+		binding = bindings[ node.dataset.bind ];
+		if ( binding ) {
+			binding.init( node );
+		}
+			
+		// for ( var b = 0, bl = list.length, binding; b < bl; b++ ) {
+		// 	binding = bindings[ list[b] ];
+		// 	if ( binding ) {
+		// 		binding.init( node );
+		// 	}
+		// }
+	}	
+}
+
+function queueNodesAndBindings( nodes, bindings ) {
+	const l = nodes.length;
+	const queue = [];
+	
+	for( var i = 0, node, binding; i < l; i++ ) {
+		node = nodes[i];
+		// list = node.dataset.bind.split( ',' );
+		
+		binding = bindings[ node.dataset.bind ];
+			if ( binding ) {
+			queue.push( { node, binding } );
+		}
+		// for ( var b = 0, bl = list.length, binding; b < bl; b++ ) {
+		// 	binding = bindings[ list[b] ];
+		// 	if ( binding ) {
+		// 		queue.push( { node, binding } );
+		// 	}
+		// }
+		
+		//TODO: test perf w/ and w/o this:
+		node.removeAttribute( 'data-bind' );
+	}	
+	
+	return queue;
+}
+

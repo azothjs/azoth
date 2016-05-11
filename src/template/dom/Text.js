@@ -1,25 +1,22 @@
-// import Binding from '../../Binding';
 import $ from './static';
 
-// export default class DOMText extends Binding {
-// 	node () {
-// 		return $.text( '' );
-// 	}
+export default class DOMText {
 	
-// 	bind ( context, node ) {
-// 		node.textContent = context.get( this.binding.ref );
-// 	}
-// }
-
-export default function domText( binding ) {
+	constructor ( binding ) {
+		this.binding = binding;
+		this.index = 0;
+	}
 	
-	return {
-		node () {
-			return $.text( '' );
-		},
-		
-		bind ( context, node ) {
-			node.textContent = context.get( binding.ref );
-		}
-	};
+	node () {
+		return $.text( '' );
+	}
+	
+	init ( node ) {
+		this.index = node.childNodes.length;
+		node.appendChild( $.text( '' ) );	
+	}
+	
+	bind ( context, node ) {
+		node.childNodes[ this.index ].textContent = context.get( this.binding.ref );
+	}
 }

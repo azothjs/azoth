@@ -21,8 +21,11 @@ export default class Section {
 		return $.comment( this.binding.type );
 	}
 	
-	bind ( context, anchor ) {
+	bind ( context, node ) {
 		const template = this.template;
+		const anchor = this.node();
+		
+		node.parentNode.replaceChild( anchor, node );
 		
 		function add( addContext ) {
 			const { queue, node } = template.render();

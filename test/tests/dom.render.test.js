@@ -9,49 +9,16 @@ module( 'dom render' );
 
 const { $tatic, bound } = Diamond.dom;
 
-test( 'elements and text', t => {
-	
-	const t1 = bound.text({ ref: 'foo' });
-	const t2 = bound.text({ ref: 'bar' });
-	
-	const template = {
-		fragment: $tatic([
-			$tatic.el( 'div', null, [
-				$tatic.el( 'span', null, [ t1.node() ] ),
-				$tatic.el( 'span', null, [ $tatic.text( 'label: ' ), t2 ] )
-			])
-		]),
-		bindings ( node ) {
-			const div = node.children[0];
-			return [
-				{ node: div.children[0].childNodes[0], binding: t1 },
-				{ node: div.children[1].childNodes[1], binding: t2 }
-			];
-		}
-	};
-	
-	new Diamond( { 
-		template, 
-		data: { foo: 'foo', bar: 'bar' }, 
-		el: fixture 
-	});
-	
-	t.equal( fixture.innerHTML, '<div><span>foo</span><span>label: bar</span></div>' );
-});
-
-test( 'static section', t => {
+test( 'simple node with text', t => {
 	
 	const t1 = bound.text({ ref: 'foo' });
 	
 	const template = {
-		fragment: $tatic([
-			$tatic.el( 'div', null, [ t1.node() ] )
-		]),
-		bindings ( node ) {
-			return [
-				{ node: node.children[0].childNodes[0], binding: t1 }
-			];
-		}
+		fragment: Diamond.makeFragment(`
+			<div data-bind="t1"></div>
+		`),
+		oninit: { t1 },
+		onbind: { t1 }
 	};
 	
 	new Diamond( { 
@@ -63,25 +30,46 @@ test( 'static section', t => {
 	t.equal( fixture.innerHTML, '<div>foo</div>' );
 });
 
+test( 'nested elements and text', t => {
+	
+	const t1 = bound.text({ ref: 'foo' });
+	const t2 = bound.text({ ref: 'bar' });
+	
+	const template = {
+		fragment: Diamond.makeFragment(`
+			<div>
+				<span data-bind="t1"></span>
+				<span data-bind="t2">label: </span>
+			</div>
+		`),
+		oninit: { t1, t2 },
+		onbind: { t1, t2 }
+	};
+	
+	new Diamond( { 
+		template, 
+		data: { foo: 'foo', bar: 'bar' }, 
+		el: fixture 
+	});
+	
+	t.equal( fixture.innerHTML, '<div><span>foo</span><span>label: bar</span></div>' );
+});
+
+
 test( '#for section', t => {
 	
 	const t1 = bound.text( { ref: '.' } );
 	const s1 = bound.section( { type: 'for', ref: 'items' }, {
-		fragment: $tatic( [ $tatic.el( 'li', null, [ t1 ] ) ] ),
-		bindings ( node ) {
-			return [
-				{ node: node.children[0].childNodes[0], binding: t1 }
-			];
-		}
+		fragment: Diamond.makeFragment(`
+			<li data-bind="t1"></li>
+		`),
+		oninit: { t1 },
+		onbind: { t1 }
 	});
 	
 	const template = {
-		fragment: $tatic([ s1.node() ]),
-		bindings ( node ) {
-			return [
-				{ node: node.childNodes[0], binding: s1 }
-			];
-		}
+		fragment: Diamond.makeFragment( `<for-section data-bind="s1"></for-section>` ),
+		onbind: { s1 }
 	};
 	
 	new Diamond( { 
@@ -98,21 +86,16 @@ test( '#for section', t => {
 	
 	const t1 = bound.text({ ref: 'foo' });
 	const s1 = bound.section( { type: 'if', ref: 'condition' }, {
-		fragment: $tatic( [ $tatic.el( 'li', null, [ t1.node() ] ) ] ),
-		bindings ( node ) {
-			return [
-				{ node: node.children[0].childNodes[0], binding: t1 }
-			];
-		}
+		fragment: Diamond.makeFragment(`
+			<li data-bind="t1"></li>
+		`),
+		oninit: { t1 },
+		onbind: { t1 }
 	})
-	
+		
 	const template = {
-		fragment: $tatic([ s1.node() ]),
-		bindings ( node ) {
-			return [
-				{ node: node.childNodes[0], binding: s1 }
-			];
-		}
+		fragment: Diamond.makeFragment( `<if-section data-bind="s1"></if-section>` ),
+		onbind: { s1 }
 	};
 		
 	test( '#if section true', t => {
@@ -142,23 +125,16 @@ test( '#for section', t => {
 	const t2 = bound.text({ ref: 'b' });
 	
 	const s1 = bound.section( { type: 'with', ref: 'obj' }, {
-		fragment: $tatic( [ $tatic.el( 'p', null, [ t1, t2 ] ) ] ),
-		bindings ( node ) {
-			var p = node.children[0];
-			return [
-				{ node: p.childNodes[0], binding: t1 },
-				{ node: p.childNodes[1], binding: t2 }
-			];
-		}
+				fragment: Diamond.makeFragment(`
+			<p data-bind="t1,t2"></p>
+		`),
+		oninit: { t1, t2 },
+		onbind: { t1, t2 }
 	})
 	
 	const template = {
-		fragment: $tatic([ s1.node() ]),
-		bindings ( node ) {
-			return [
-				{ node: node.childNodes[0], binding: s1 }
-			];
-		}
+		fragment: Diamond.makeFragment( `<with-section data-bind="s1"></with-section>` ),
+		onbind: { s1 }
 	};
 		
 	test( '#with section', t => {
