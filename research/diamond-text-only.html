@@ -3,6 +3,9 @@
 <head>
 	<meta charset="UTF-8">
 	<title>💎diamond</title>
+	
+	<link rel="stylesheet" href="css/base.css">
+	<link rel="stylesheet" href="css/index.css">
 </head>
 <body>
 	<main class='todo-app'>
@@ -10,13 +13,33 @@
 	</main>
 	
 	<script src='../diamond.js'></script>
-	<!--
 	
-	<template id='todo'><li><div class="view"><span>done</span><label>Taste JavaScript</label><button class="destroy">x</button></div><span class="edit">Create a TodoMVC template</span></li></template>
-			-->
+	<template id='todo'><li><div class="view"><span data-bind="t1"></span><span data-bind="t2"></span><span class="destroy">x</span></div><span data-bind="t2" class="edit">Create a TodoMVC template</span></li></template>
 	
-			<template id='todo'><li><div class="view"><span>done</span><span>Taste JavaScript</span><span class="destroy">x</span></div><span class="edit">Create a TodoMVC template</span></li></template>
+	<template id='section'><for-section data-bind="s1"></for-section></template>
+	
 	<script>
+		
+		var { $tatic, bound, clean } = Diamond.dom;
+		
+		function getTemplate() {
+			
+			
+			const t1 = bound.text( { ref: 'done' } );
+			const t2 = bound.text( { ref: 'name' } );
+	
+			const s1 = bound( { type: 'for', ref: 'items' }, {
+				fragment: document.getElementById('todo').content.cloneNode( true ),
+				oninit: { t1, t2 },
+				onbind: { t1, t2 }
+			});
+
+			return {
+				fragment: document.getElementById('section').content.cloneNode( true ),
+				onbind: { s1 }
+			};
+		}
+		
 		
 		function getData() {			
 			var copies = 100; // @1000 takes < 1ms to create
@@ -33,34 +56,6 @@
 			return items;
 		}
 		
-		var { $tatic, bound } = Diamond.dom;
-		
-		function getTemplate() {
-			
-			
-			const t1 = bound.text( { ref: 'done' } );
-			const t2 = bound.text( { ref: 'name' } );
-	
-			const s1 = bound( { type: 'for', ref: 'items' }, {
-				fragment: document.getElementById('todo').content.cloneNode( true ),
-				bindings ( node ) {
-					var li = node.children[0];
-					return [
-						{ node: li.children[0].children[0].childNodes[0], binding: t1 },
-						{ node: li.children[1].childNodes[0], binding: t2 }
-					];	
-				}
-			});
-
-			return {
-				fragment: $tatic([ s1.node() ]),
-				bindings ( node ) {
-					return [
-						{ node: node.childNodes[0], binding: s1 }
-					];
-				}
-			};
-		}
 		
 		console.time( 'render' );
 		new Diamond({

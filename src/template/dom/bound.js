@@ -1,6 +1,6 @@
 import Binding from '../../Binding';
 import Section from './Section';
-import text from './Text';
+import Text from './Text';
 import Property from './Property';
 
 
@@ -9,7 +9,7 @@ export default function bound( binding, children ) {
 }
 
 bound.text = function( binding ) {
-	return text( binding );
+	return new Text( binding );
 };
 
 bound.property = function( name, binding ) {

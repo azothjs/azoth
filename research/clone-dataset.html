@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>mixed object-array vs same array-array</title>
+</head>
+<body>
+	<main class='todo-app'>
+		<h2>running some js perf stuff</h2>
+	</main>
+	
+	<script>
+		
+		var div = document.createElement( 'div' );
+		var foo = {}
+		div.dataset.foo = {};
+		
+		var clone = div.cloneNode( true );
+		
+		console.log( div.dataset.foo === clone.dataset.foo ); 
+		
+		
+	</script>
+</body>
+</html>
