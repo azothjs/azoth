@@ -12,11 +12,10 @@ export default class DOMText {
 	}
 	
 	init ( node ) {
-		this.index = node.childNodes.length;
 		node.appendChild( $.text( '' ) );	
 	}
 	
 	bind ( context, node ) {
-		node.childNodes[ this.index ].textContent = context.get( this.binding.ref );
+		node.lastChild.textContent = context.get( this.binding.ref );
 	}
 }
