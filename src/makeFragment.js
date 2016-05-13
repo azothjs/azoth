@@ -1,6 +1,6 @@
 const div = document.createElement( 'div' );
 
-export default function makeFragment( html ) {
+export function makeFragment( html ) {
 	div.innerHTML = html;
 	clean( div );
 	const { childNodes } = div;
@@ -16,7 +16,7 @@ export default function makeFragment( html ) {
 
 // http://www.sitepoint.com/removing-useless-nodes-from-the-dom/
 // TODO: get node type code
-function clean(node)
+export function clean(node)
 {
   for(var n = 0; n < node.childNodes.length; n ++)
   {
@@ -34,4 +34,5 @@ function clean(node)
       clean(child);
     }
   }
+  return node;
 }
