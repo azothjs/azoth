@@ -3,6 +3,9 @@
 <head>
 	<meta charset="UTF-8">
 	<title>💎diamond</title>
+	
+	<link rel="stylesheet" href="css/base.css">
+	<link rel="stylesheet" href="css/index.css">
 </head>
 <body>
 	<main class='todo-app'>
@@ -11,26 +14,13 @@
 	
 	<script src='../diamond.js'></script>
 	
-	<template id='todo'><li><div class="view"><span data-bind="t1">done</span><span>Taste JavaScript</span><span class="destroy">x</span></div><span data-bind="t2" class="edit">Create a TodoMVC template</span></li></template>
+	<template id='todo'><li><div class="view"><span data-bind="t1"></span><span data-bind="t2"></span><span class="destroy">x</span></div><span data-bind="t2" class="edit">Create a TodoMVC template</span></li></template>
+	
 	<template id='section'><for-section data-bind="s1"></for-section></template>
+	
 	<script>
 		
-		function getData() {			
-			var copies = 100; // @1000 takes < 1ms to create
-			console.log( `${copies} todo's` );
-			var items = new Array( copies );
-			var fizz = ['fizz', '', ''], buzz = ['buzz', '', '', '', ''];
-			
-			for( var i = 0; i < copies; i++ ){
-				items[i] = { 
-					name: 'This is task ' + ( fizz[ i%3 ] + buzz[ i%5 ] || i ),
-					done: ( i % 4 === 0 )
-				};
-			}			
-			return items;
-		}
-		
-		var { $tatic, bound } = Diamond.dom;
+		var { $tatic, bound, clean } = Diamond.dom;
 		
 		function getTemplate() {
 			
@@ -49,6 +39,23 @@
 				onbind: { s1 }
 			};
 		}
+		
+		
+		function getData() {			
+			var copies = 100; // @1000 takes < 1ms to create
+			console.log( `${copies} todo's` );
+			var items = new Array( copies );
+			var fizz = ['fizz', '', ''], buzz = ['buzz', '', '', '', ''];
+			
+			for( var i = 0; i < copies; i++ ){
+				items[i] = { 
+					name: 'This is task ' + ( fizz[ i%3 ] + buzz[ i%5 ] || i ),
+					done: ( i % 4 === 0 )
+				};
+			}			
+			return items;
+		}
+		
 		
 		console.time( 'render' );
 		new Diamond({

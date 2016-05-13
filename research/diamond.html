@@ -3,6 +3,9 @@
 <head>
 	<meta charset="UTF-8">
 	<title>💎diamond</title>
+	
+	<link rel="stylesheet" href="css/base.css">
+	<link rel="stylesheet" href="css/index.css">
 </head>
 <body>
 	<main class='todo-app'>
@@ -11,13 +14,37 @@
 	
 	<script src='../diamond.js'></script>
 	
-	<template id='todo'><li><div class="view"><input data-bind="p1" class="toggle" type="checkbox"><label>Taste JavaScript</label><button class="destroy">x</button></div><input data-bind="p2" class="edit" value="Create a TodoMVC template"></li></template>
+	<template id='todo'><li><div class="view"><input data-bind="p1" class="toggle" type="checkbox"><label data-bind="t1"></label><button class="destroy"></button></div><input data-bind="p2" class="edit" value=""></li></template>
 	<template id='section'><for-section data-bind="s1"></for-section></template>
+	
 	<script>
 		
+		var { $tatic, bound } = Diamond.dom;
+		
+		function getTemplate() {
+			
+			var p1 = bound.property( 'checked', { ref: 'done' } );
+			var p2 = bound.property( 'value', { ref: 'name' } );
+			var t1 = bound.text( { ref: 'name' } );
+			
+			var fragment = document.getElementById('todo').content.cloneNode( true );
+	
+			var s1 = bound( { type: 'for', ref: 'items' }, {
+				fragment: fragment,
+				oninit: { t1 },
+				onbind: { p1, p2, t1 }
+			});
+			
+			return {
+				fragment: document.getElementById('section').content.cloneNode( true ),
+				onbind: { s1 }
+			};
+		}
+		
 		function getData() {			
-			var copies = 100; // @1000 takes < 1ms to create
-			console.log( `${copies} todo's` );
+			var copies = 1000; // @1000 takes < 1ms to create
+			
+			console.log( `${ new Number(copies).toLocaleString() } todo's` );
 			var items = new Array( copies );
 			var fizz = ['fizz', '', ''], buzz = ['buzz', '', '', '', ''];
 			
@@ -30,33 +57,15 @@
 			return items;
 		}
 		
-		var { $tatic, bound } = Diamond.dom;
-		
-		function getTemplate() {
-			
-			
-			var p1 = bound.property( 'checked', { ref: 'done' } );
-			var p2 = bound.property( 'value', { ref: 'name' } );
-	
-			var s1 = bound( { type: 'for', ref: 'items' }, {
-				fragment: document.getElementById('todo').content.cloneNode( true ),
-				onbind: { p1, p2 }
-			});
-			
-			return {
-				fragment: document.getElementById('section').content.cloneNode( true ),
-				onbind: { s1 }
-			};
-		}
 		
 		var items = getData();
+
 		console.time( 'render' );
-		new Diamond({
+		const d = new Diamond({
 			el: document.getElementById( 'target' ),
 			template: getTemplate(),
 			data: { items: items }
 		});
-		
 		console.timeEnd( 'render' );
 		
 	</script>
