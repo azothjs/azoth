@@ -1,14 +1,13 @@
-import DOMTemplate from './DOMTemplate';
-import bind from '../../bind';
-import blocks from '../../blocks';
-import $ from './static';
+import Template from './Template';
+import bind from '../bind';
+import blocks from '../blocks';
 
 export default class Section {
 	
 	constructor ( binding, template ) {
 		this.binding = binding;
 		
-		this.template = new DOMTemplate( template );
+		this.template = new Template( template );
 		
 		const Block = blocks[ binding.type ];
 		
@@ -17,13 +16,9 @@ export default class Section {
 		this.block = new Block();
 	}
 	
-	node () {
-		return $.comment( this.binding.type );
-	}
-	
 	bind ( context, node ) {
-		const template = this.template;
-		const anchor = this.node();
+		const { template, binding } = this;
+		const anchor = document.createComment( binding.type );
 		
 		node.parentNode.replaceChild( anchor, node );
 		
@@ -33,7 +28,7 @@ export default class Section {
 			anchor.parentNode.insertBefore( node, anchor );
 		}
 		
-		this.block.bind( context, this.binding, add );
+		this.block.bind( context, binding, add );
 		
 	}
 }

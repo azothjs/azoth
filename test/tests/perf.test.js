@@ -7,12 +7,12 @@ const skip = { test: () => {} };
 
 module( `dom performance` );
 
-const { $tatic, bound } = Diamond.dom;
+const { bound } = Diamond;
 
 const count = 1500;
 const treshhold = 150;
 
-test( `jsBlocks 12 column table with ${count} rows < ${treshhold}ms`, t => {
+skip.test( `jsBlocks 12 column table with ${count} rows < ${treshhold}ms`, t => {
 	
 	const items = [];
 	const columns = [ 'message', 'number', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth' ];

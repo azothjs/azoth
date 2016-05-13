@@ -1,5 +1,6 @@
 import Context from './Context';
-import dom from './template/dom';
+import Template from './template/Template';
+import bound from './template/bound';
 import bind from './bind'; 
 import { makeFragment, clean } from './makeFragment'; 
  
@@ -8,7 +9,7 @@ export default class Diamond {
 	
 	constructor( { template, data, el } ) {
 		
-		const domTemplate = dom.getTemplate( template );
+		const domTemplate = new Template( template );
 		
 		const { queue, node } = domTemplate.render();
 		
@@ -21,6 +22,6 @@ export default class Diamond {
 		
 }
 
-Diamond.dom = dom;
+Diamond.bound = bound;
 Diamond.makeFragment = makeFragment;
 Diamond.clean = clean;

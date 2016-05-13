@@ -1,18 +1,12 @@
-import $ from './static';
-
-export default class DOMText {
+export default class Text {
 	
 	constructor ( binding ) {
 		this.binding = binding;
 		this.index = 0;
 	}
 	
-	node () {
-		return $.text( '' );
-	}
-	
 	init ( node ) {
-		node.appendChild( $.text( '' ) );	
+		node.appendChild( document.createTextNode( '' ) );	
 	}
 	
 	bind ( context, node ) {

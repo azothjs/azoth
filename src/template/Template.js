@@ -1,4 +1,4 @@
-export default class DOMTemplate {
+export default class Template {
 	
 	constructor ( { fragment, oninit, onbind } ) {
 		this.fragment = fragment;

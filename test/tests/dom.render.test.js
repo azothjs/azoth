@@ -7,7 +7,7 @@ const skip = { test: () => {} };
 
 module( 'dom render' );
 
-const { $tatic, bound } = Diamond.dom;
+const { bound } = Diamond;
 
 test( 'simple node with text', t => {
 	

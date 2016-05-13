@@ -1,14 +1,7 @@
-import Binding from '../../Binding';
-
-export default class Property extends Binding {
+export default class Property {
 	
 	constructor( name, binding ) {
-		super( binding );
 		this.name = name;
-	}
-	
-	node () {
-		return name;
 	}
 	
 	bind ( context, obj ) {
