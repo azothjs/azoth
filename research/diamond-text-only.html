@@ -14,35 +14,47 @@
 	
 	<script src='../diamond.js'></script>
 	
-	<template id='todo'><li><div class="view"><span data-bind="t1"></span><span data-bind="t2"></span><span class="destroy">x</span></div><span data-bind="t2" class="edit">Create a TodoMVC template</span></li></template>
+	<template id='todo'>
+		<li>
+			<div class="view">
+				<span data-bind="a1" class="toggle"></span>
+				<label data-bind="t2"></label>
+				<button class="destroy"></button>
+			</div>
+			<span data-bind="t2" class="edit"></span>
+		</li>
+	</template>
 	
-	<template id='section'><for-section data-bind="s1"></for-section></template>
+	<template id='section'>
+		<for-section data-bind="s1"></for-section>
+	</template>
 	
 	<script>
 		
 		var bound = Diamond.bound;
 		
-		
 		function getTemplate() {
 				
-			const t1 = bound.text( { ref: 'done' } );
+			const a1 = bound.attr( 'data-done', { ref: 'done' } );
 			const t2 = bound.text( { ref: 'name' } );
 	
-			const s1 = bound( { type: 'for', ref: 'items' }, {
-				fragment: document.getElementById('todo').content.cloneNode( true ),
-				oninit: { t1, t2 },
-				onbind: { t1, t2 }
+			const s1 = bound.section( { type: 'for', ref: 'items' }, {
+				fragment: Diamond.clean( document.getElementById('todo').content.cloneNode( true ) ),
+				oninit: { t2 },
+				onbind: { a1, t2 }
 			});
 
 			return {
-				fragment: document.getElementById('section').content.cloneNode( true ),
+				fragment: Diamond.clean( document.getElementById('section').content.cloneNode( true ) ),
 				onbind: { s1 }
 			};
 		}
 		
 		
-		function getData() {			
-			var copies = 100; // @1000 takes < 1ms to create
+		function getData() {
+
+			var copies = location.hash.slice(1); // @1000 takes < 1ms to create
+
 			console.log( `${copies} todo's` );
 			var items = new Array( copies );
 			var fizz = ['fizz', '', ''], buzz = ['buzz', '', '', '', ''];
@@ -58,6 +70,7 @@
 		
 		
 		console.time( 'render' );
+		
 		new Diamond({
 			el: document.getElementById( 'target' ),
 			template: getTemplate(),
