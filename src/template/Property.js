@@ -1,6 +1,7 @@
 export default class Property {
 	
 	constructor( name, binding ) {
+		this.binding = binding;
 		this.name = name;
 	}
 	
