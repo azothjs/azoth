@@ -64,7 +64,7 @@ function queueNodesAndBindings( nodes, bindings ) {
 		// }
 		
 		//TODO: test perf w/ and w/o this:
-		node.removeAttribute( 'data-bind' );
+		// node.removeAttribute( 'data-bind' );
 	}	
 	
 	return queue;
