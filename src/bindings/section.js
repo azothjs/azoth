@@ -1,10 +1,10 @@
-import Template from '../Template';
+import makeRender from '../Template';
 import bind from '../bind';
 import blocks from '../blocks';
 
 export default function sectionBinding ( binding, rawTemplate ) {
 	
-	const template = new Template( rawTemplate );
+	const render = makeRender( rawTemplate );
 	const block = blocks[ binding.type ];
 	
 	if ( !block ) throw new Error( `Unrecognized section type ${binding.type}` );
@@ -14,7 +14,7 @@ export default function sectionBinding ( binding, rawTemplate ) {
 		node.parentNode.replaceChild( anchor, node );
 		
 		function add( addContext ) {
-			const { queue, node } = template.render();
+			const { queue, node } = render();
 			bind( queue, addContext );
 			anchor.parentNode.insertBefore( node, anchor );
 		}

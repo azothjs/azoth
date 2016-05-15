@@ -1,14 +1,12 @@
-export default class Template {
+export default function getTemplate( { fragment, bindings } ) {
 	
-	constructor ( template ) {
-		const nodes = getBoundNodes( this.fragment = template.fragment );
-		initNodes( nodes, this.bindings = template.bindings );
-	}
-	
-	render() {
-		const node = this.fragment.cloneNode( true );
+	const nodes = getBoundNodes( fragment );
+	initNodes( nodes, bindings );
+
+	return function templateRender() {
+		const node = fragment.cloneNode( true );
 		const nodes = getBoundNodes( node );
-		const queue = queueNodesAndBindings( nodes, this.bindings );
+		const queue = queueNodesAndBindings( nodes, bindings );
 		return { node, queue };
 	}
 }
