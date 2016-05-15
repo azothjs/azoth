@@ -1,7 +1,7 @@
 import Context from './Context';
 
 const blocks = {
-	'for'( context, binding, add ) {
+	'for': function forBlock( context, binding, add ) {
 		const value = context.get( binding.ref );
 		if ( Array.isArray( value ) ) {
 			for ( var i = 0, l = value.length; i < l; i++ ) {
@@ -10,12 +10,12 @@ const blocks = {
 		}
 	},
 	
-	'if'( context, binding, add ) {
+	'if': function ifBlock( context, binding, add ) {
 		const value = context.get( binding.ref );
 		if ( value ) add( context );
 	},
 	
-	'with'( context, binding, add ) {
+	'with': function withBlock( context, binding, add ) {
 		const value = context.get( binding.ref );
 		if ( value != null ) add( new Context( value ) );
 	}	

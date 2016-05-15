@@ -1,11 +1,8 @@
 export default class Template {
 	
-	constructor ( { fragment, bindings } ) {
-		this.fragment = fragment;
-		this.bindings = bindings;
-		
-		const nodes = getBoundNodes( fragment );
-		initNodes( nodes, bindings );
+	constructor ( template ) {
+		const nodes = getBoundNodes( this.fragment = template.fragment );
+		initNodes( nodes, this.bindings = template.bindings );
 	}
 	
 	render() {
