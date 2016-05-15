@@ -17,8 +17,7 @@ test( 'simple node with text', t => {
 		fragment: Diamond.makeFragment(`
 			<div data-bind="t1"></div>
 		`),
-		oninit: { t1 },
-		onbind: { t1 }
+		bindings: { t1 }
 	};
 	
 	new Diamond( { 
@@ -42,8 +41,7 @@ test( 'nested elements and text', t => {
 				<span data-bind="t2">label: </span>
 			</div>
 		`),
-		oninit: { t1, t2 },
-		onbind: { t1, t2 }
+		bindings: { t1, t2 }
 	};
 	
 	new Diamond( { 
@@ -63,13 +61,12 @@ test( '#for section', t => {
 		fragment: Diamond.makeFragment(`
 			<li data-bind="t1"></li>
 		`),
-		oninit: { t1 },
-		onbind: { t1 }
+		bindings: { t1 }
 	});
 	
 	const template = {
 		fragment: Diamond.makeFragment( `<for-section data-bind="s1"></for-section>` ),
-		onbind: { s1 }
+		bindings: { s1 }
 	};
 	
 	new Diamond( { 
@@ -89,13 +86,12 @@ test( '#for section', t => {
 		fragment: Diamond.makeFragment(`
 			<li data-bind="t1"></li>
 		`),
-		oninit: { t1 },
-		onbind: { t1 }
+		bindings: { t1 }
 	})
 		
 	const template = {
 		fragment: Diamond.makeFragment( `<if-section data-bind="s1"></if-section>` ),
-		onbind: { s1 }
+		bindings: { s1 }
 	};
 		
 	test( '#if section true', t => {
@@ -128,13 +124,12 @@ test( '#for section', t => {
 				fragment: Diamond.makeFragment(`
 			<p data-bind="t1,t2"></p>
 		`),
-		oninit: { t1, t2 },
-		onbind: { t1, t2 }
+		bindings: { t1, t2 }
 	})
 	
 	const template = {
 		fragment: Diamond.makeFragment( `<with-section data-bind="s1"></with-section>` ),
-		onbind: { s1 }
+		bindings: { s1 }
 	};
 		
 	test( '#with section', t => {

@@ -43,13 +43,12 @@
 	
 			var s1 = bound.section( { type: 'for', ref: 'items' }, {
 				fragment: fragment,
-				oninit: { t1 },
-				onbind: { p1, p2, t1 }
+				bindings: { p1, p2, t1 }
 			});
 			
 			return {
 				fragment: Diamond.clean( document.getElementById('section').content.cloneNode( true ) ),
-				onbind: { s1 }
+				bindings: { s1 }
 			};
 		}
 		

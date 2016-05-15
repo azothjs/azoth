@@ -1,22 +1,17 @@
 export default class Template {
 	
-	constructor ( { fragment, oninit, onbind } ) {
+	constructor ( { fragment, bindings } ) {
 		this.fragment = fragment;
-		if ( oninit ) {
-			const nodes = getBoundNodes( fragment );
-			initNodes( nodes, oninit );
-		}
-		this.onbind = onbind;
-	}
-	
-	node () {
-		return document.createDocumentFragment();
+		this.bindings = bindings;
+		
+		const nodes = getBoundNodes( fragment );
+		initNodes( nodes, bindings );
 	}
 	
 	render() {
 		const node = this.fragment.cloneNode( true );
 		const nodes = getBoundNodes( node );
-		const queue = queueNodesAndBindings( nodes, this.onbind );
+		const queue = queueNodesAndBindings( nodes, this.bindings );
 		return { node, queue };
 	}
 }
@@ -31,7 +26,7 @@ function initNodes( nodes, bindings ) {
 		// list = node.dataset.bind.split( ',' );
 		
 		binding = bindings[ node.dataset.bind ];
-		if ( binding ) {
+		if ( binding && binding.init ) {
 			binding.init( node );
 		}
 			
@@ -53,9 +48,11 @@ function queueNodesAndBindings( nodes, bindings ) {
 		// list = node.dataset.bind.split( ',' );
 		
 		binding = bindings[ node.dataset.bind ];
-			if ( binding ) {
-			queue.push( { node, binding } );
-		}
+		
+		if ( !binding ) throw new Error( `unrecognized binding ${node.dataset.bind}` );
+		
+		queue.push( { node, binding } );
+		
 		// for ( var b = 0, bl = list.length, binding; b < bl; b++ ) {
 		// 	binding = bindings[ list[b] ];
 		// 	if ( binding ) {

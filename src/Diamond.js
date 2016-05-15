@@ -1,6 +1,6 @@
 import Context from './Context';
-import Template from './template/Template';
-import bound from './template/bound';
+import Template from './Template';
+import bound from './bindings/index';
 import bind from './bind'; 
 import { makeFragment, clean } from './makeFragment'; 
  
