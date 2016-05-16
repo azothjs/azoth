@@ -6,11 +6,9 @@ module( 'parser' );
 const { bound } = Diamond;
 
 test( 'cleans', t => {
-	
 	const { html } = parser(`
 		<div></div>
 	`);
-	
 	t.equal( html, '<div></div>' );
 });
 
