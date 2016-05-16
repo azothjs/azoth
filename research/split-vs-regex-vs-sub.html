@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>split regex sub</title>
+</head>
+<body>
+	<main class='todo-app'>
+		<h2>running some perf stuff</h2>
+	</main>
+
+	<script>
+		
+	(function run(){
+		
+		
+		var times = 1000;
+		
+		var hash = { 
+			p1: function(){},
+			p2: function(){},
+			t1: function(){},
+		}
+		var bindings = 'p1,p2,t1';
+		
+		
+		console.time( `split ${times} times` );
+		
+		function split(){
+			var arr = bindings.split(',');
+			for( var i = 0, l = arr.length; i < l; i++ ){
+				hash[ arr[i] ]();
+			}
+		}
+		
+		for( var t = 0; t < times; t++ ) split();
+		
+		console.timeEnd( `split ${times} times` );
+		
+		
+		// console.time( `regex ${times} times` );
+		// var regex = /([^,]?)/g
+		// bindings.replace( regex, match => {
+		// })
+		// console.timeEnd( `regex ${times} times` );
+		
+		
+		console.time( `search-substring ${times} times` );
+		
+		function search() {
+			var start = 0, end = -1;
+			
+			while( ( end = bindings.indexOf( ',', start ) ) !== -1 ) {
+				hash[ bindings.substring( start, end ) ]();
+				start = end + 1;
+			}
+			
+			hash[ bindings.substring( start ) ]();
+		}
+		
+		for( var t = 0; t < times; t++ ) search();
+		
+		console.timeEnd( `search-substring ${times} times` );
+		
+		console.time( `wrapper fn ${times} times` );
+		
+		var wrapped = {
+			w1() {
+				hash.p1();
+				hash.p2();
+				hash.t1();
+			}
+		}
+		
+		function wrap() {
+			wrapped[ 'w1' ]();
+		}
+		
+		for( var t = 0; t < times; t++ ) wrap();
+		
+		console.timeEnd( `wrapper fn ${times} times` );
+	})();
+	</script>
+</body>
+</html>
