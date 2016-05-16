@@ -14,8 +14,10 @@ const index = tests.include( '*.js' )
 		dest: 'index.js', 
 		separator: '\n' 
 	});
+	
+const qunit = gobble( 'test' ).include( 'qunit.js' );
 
-const test = gobble( [ index, tests, 'src' ] )
+const test = gobble( [ index, tests, qunit, 'src' ] )
 	.transform( 'rollup', {
 		plugins: [ buble() ],
 		entry: 'index.js',
@@ -23,7 +25,7 @@ const test = gobble( [ index, tests, 'src' ] )
 		format: 'iife'
 	});
 
-const build = gobble( [ index, tests, 'src' ] )
+const build = gobble( [ index, 'src' ] )
 	.transform( 'rollup', {
 		plugins: [ buble() ],
 		entry: 'main.js',

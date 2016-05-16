@@ -1,9 +1,5 @@
 import Diamond from './Diamond';
-
-const test = QUnit.test;
-const module = QUnit.module;
-const fixture = document.getElementById( 'qunit-fixture' );
-const skip = { test: () => {} };
+import { test, module, fixture, skip } from './qunit';
 
 module( 'dom render' );
 
