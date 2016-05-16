@@ -12,16 +12,17 @@
 		<ul class='todo-list' id='target'></ul>
 	</main>
 	
+	<script src='getData.js'></script>
 	<script src='../diamond.js'></script>
 	
 	<template id='todo'>
 		<li>
 			<div class="view">
 				<span data-bind="a1" class="toggle"></span>
-				<label data-bind="t2"></label>
+				<label data-bind="t1"></label>
 				<button class="destroy"></button>
 			</div>
-			<span data-bind="t2" class="edit"></span>
+			<span data-bind="t1" class="edit"></span>
 		</li>
 	</template>
 	
@@ -35,39 +36,19 @@
 		
 		function getTemplate() {
 				
-			const a1 = bound.attr( 'data-done', { ref: 'done' } );
-			const t2 = bound.text( { ref: 'name' } );
+			const a1 = bound.attribute( 'data-done', { ref: 'done' } );
+			const t1 = bound.text( { ref: 'name' } );
 	
 			const s1 = bound.section( { type: 'for', ref: 'items' }, {
 				fragment: Diamond.clean( document.getElementById('todo').content.cloneNode( true ) ),
-				oninit: { t2 },
-				onbind: { a1, t2 }
+				bindings: { a1, t1 }
 			});
 
 			return {
 				fragment: Diamond.clean( document.getElementById('section').content.cloneNode( true ) ),
-				onbind: { s1 }
+				bindings: { s1 }
 			};
 		}
-		
-		
-		function getData() {
-
-			var copies = location.hash.slice(1); // @1000 takes < 1ms to create
-
-			console.log( `${copies} todo's` );
-			var items = new Array( copies );
-			var fizz = ['fizz', '', ''], buzz = ['buzz', '', '', '', ''];
-			
-			for( var i = 0; i < copies; i++ ){
-				items[i] = { 
-					name: 'This is task ' + ( fizz[ i%3 ] + buzz[ i%5 ] || i ),
-					done: ( i % 4 === 0 )
-				};
-			}			
-			return items;
-		}
-		
 		
 		console.time( 'render' );
 		

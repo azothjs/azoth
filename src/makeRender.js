@@ -1,22 +1,12 @@
-export default class Template {
+export default function getTemplateRender( { fragment, bindings, clean } ) {
 	
-	constructor ( { fragment, oninit, onbind } ) {
-		this.fragment = fragment;
-		if ( oninit ) {
-			const nodes = getBoundNodes( fragment );
-			initNodes( nodes, oninit );
-		}
-		this.onbind = onbind;
-	}
-	
-	node () {
-		return document.createDocumentFragment();
-	}
-	
-	render() {
-		const node = this.fragment.cloneNode( true );
+	const nodes = getBoundNodes( fragment );
+	initNodes( nodes, bindings );
+
+	return function templateRender() {
+		const node = fragment.cloneNode( true );
 		const nodes = getBoundNodes( node );
-		const queue = queueNodesAndBindings( nodes, this.onbind );
+		const queue = queueNodesAndBindings( nodes, bindings, clean );
 		return { node, queue };
 	}
 }
@@ -31,7 +21,7 @@ function initNodes( nodes, bindings ) {
 		// list = node.dataset.bind.split( ',' );
 		
 		binding = bindings[ node.dataset.bind ];
-		if ( binding ) {
+		if ( binding && binding.init ) {
 			binding.init( node );
 		}
 			
@@ -44,7 +34,7 @@ function initNodes( nodes, bindings ) {
 	}	
 }
 
-function queueNodesAndBindings( nodes, bindings ) {
+function queueNodesAndBindings( nodes, bindings, clean ) {
 	const l = nodes.length;
 	const queue = [];
 	
@@ -53,9 +43,11 @@ function queueNodesAndBindings( nodes, bindings ) {
 		// list = node.dataset.bind.split( ',' );
 		
 		binding = bindings[ node.dataset.bind ];
-			if ( binding ) {
-			queue.push( { node, binding } );
-		}
+		
+		if ( !binding ) throw new Error( `unrecognized binding ${node.dataset.bind}` );
+		
+		queue.push( { node, binding } );
+		
 		// for ( var b = 0, bl = list.length, binding; b < bl; b++ ) {
 		// 	binding = bindings[ list[b] ];
 		// 	if ( binding ) {
@@ -63,8 +55,8 @@ function queueNodesAndBindings( nodes, bindings ) {
 		// 	}
 		// }
 		
-		//TODO: test perf w/ and w/o this:
-		// node.removeAttribute( 'data-bind' );
+		// TODO: make optional, adds a ms or so
+		node.removeAttribute( 'data-bind' );
 	}	
 	
 	return queue;

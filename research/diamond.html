@@ -12,6 +12,7 @@
 		<ul class='todo-list' id='target'></ul>
 	</main>
 	
+	<script src='getData.js'></script>
 	<script src='../diamond.js'></script>
 	
 	<template id='todo'>
@@ -30,7 +31,7 @@
 	</template>
 	
 	<script>
-		
+		// console.profile('render')
 		var bound = Diamond.bound;
 		
 		function getTemplate() {
@@ -43,34 +44,15 @@
 	
 			var s1 = bound.section( { type: 'for', ref: 'items' }, {
 				fragment: fragment,
-				oninit: { t1 },
-				onbind: { p1, p2, t1 }
+				bindings: { p1, p2, t1 }
 			});
 			
 			return {
 				fragment: Diamond.clean( document.getElementById('section').content.cloneNode( true ) ),
-				onbind: { s1 }
+				bindings: { s1 },
+				noinit: true
 			};
 		}
-		
-		function getData() {			
-
-			var copies = 200; // @1000 takes < 1ms to create
-			
-			console.log( `${ new Number(copies).toLocaleString() } todo's` );
-
-			var items = new Array( copies );
-			var fizz = ['fizz', '', ''], buzz = ['buzz', '', '', '', ''];
-			
-			for( var i = 0; i < copies; i++ ){
-				items[i] = { 
-					name: 'This is task ' + ( fizz[ i%3 ] + buzz[ i%5 ] || i ),
-					done: ( i % 4 === 0 )
-				};
-			}			
-			return items;
-		}
-		
 		
 		var items = getData();
 
@@ -81,6 +63,7 @@
 			data: { items: items }
 		});
 		console.timeEnd( 'render' );
+		// console.profileEnd( 'render' );
 		
 	</script>
 </body>

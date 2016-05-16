@@ -97,13 +97,12 @@ test( `mithril 150 simple items`, t => {
 	
 	const s1 = bound.section( { type: 'for', ref: 'items' }, {
 		fragment: f1,
-		oninit: { t1 },
-		onbind: { t1 }
+		bindings: { t1 }
 	});
 	
 	const template = {
 		fragment: f2,
-		onbind: { s1 }
+		bindings: { s1 }
 	};
 	
 	new Diamond( { 
