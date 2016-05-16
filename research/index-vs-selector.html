@@ -22,17 +22,17 @@
 		</li>
 	</template>	
 	
-	<template id='todo-annotated'>
+	<template id="todo-annotated">
 		<li>
 			<div class="view">
-				<input data-slot class="toggle" type="checkbox">
-				<label>Taste <data-slot></data-slot></label>
-				<button class="destroy">x</button>
+				<input data-bind='p1,c1' class="toggle" type="checkbox">
+				<label data-bind='t1'></label>
+				<button class="destroy"></button>
 			</div>
-			<input data-slot class="edit" value="Create a TodoMVC template">
+			<input data-bind='p2' class="edit" value="Create a TodoMVC template">
 		</li>
 	</template>
-
+	
 	
 	<script>
 		
@@ -79,14 +79,31 @@
 		console.time( `dom selector ${times} times` );
 		var nodes = null;
 		for( var i = 0; i < times; i++ ){
-			nodes = template.cloneNode( true ).querySelectorAll( '[data-slot],data-slot' );
-			nodes[1].parentNode.replaceChild(document.createTextNode( '' ), nodes[1])
+			nodes = template.cloneNode( true ).querySelectorAll( '[data-bind]' );
+			for( var n = 0, nl = nodes.length, binding; n < nl; n++ ) {
+				binding = nodes[n].dataset.bind;
+				// binding happens	
+			}
 			if ( nodes.length !== expectedLength ) {
 				throw new Error( `wrong length: ${nodes.length}` )
 			}
 		}
 		console.timeEnd( `dom selector ${times} times` );
-		console.log(nodes)
+		
+		console.time( `varied attr ${times} times` );
+		var nodes = null;
+		for( var i = 0; i < times; i++ ){
+			nodes = template.cloneNode( true ).querySelectorAll( '[data-bind]' );
+			for( var n = 0, nl = nodes.length; n < nl; n++ ) {
+				nodes[n].dataset.bind.split('')
+			}
+			if ( nodes.length !== expectedLength ) {
+				throw new Error( `wrong length: ${nodes.length}` )
+			}
+		}
+		console.timeEnd( `varied attr ${times} times` );
+		console.log( nodes );
+		
 	})();
 	</script>
 </body>
