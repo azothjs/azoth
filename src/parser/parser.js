@@ -1,55 +1,66 @@
 import { makeFragment, makeDiv } from './fragmentUtil'; 
 
+const textMustache = /({{[^#\/].+?}})/g;
+const anyMustache = /({{.+?}})/g;
+const mustacheBrackets = /[{{|}}]/g;
+
+const textElName = 'text-slot';
+const bindingName = 'binding';
+
 export default function parser( template ){
-	const div = makeDiv( template );
 	
-	const bindings = getTextBindings( div );
+	const bindings = {};
+	var i = 1;
+	
+	template = template.replace( textMustache, match =>  {
+		const name = `t${i++}`;
+		const ref = match.replace( mustacheBrackets, '' ).trim();
+		bindings[ name ] = { ref };
+		return `<${textElName} ${bindingName}="${name}"></${textElName}>`;
+	});
+	
+	// sections
+	
+	const div = makeDiv( template );
+
+	indexTextBindings( div, bindings );
 	
 	return { html: div.innerHTML, bindings };
 }
 
-var regex = /({{.+?}})/g;
+function getPosition( el ) {
+	var i = 0, prev = el;
+	while( prev = prev.previousSibling ) i++;
+	return i;
+}
 
-function getTextBindings( element, bindings = {} ) {
+const bindingAttr = 'data-bind';
+
+function indexTextBindings( element, bindings ) {
 	
-	var i = 1;
-	textBindings( element );
-	return bindings;
 	
-	function textBindings( element ) {
-		const { childNodes } = element;
+	const textElements = element.querySelectorAll( textElName );
+	
+	for( var i = 0, l = textElements.length, el, parent, attr, name, pos; i < l; i++ ) {
+		el = textElements[i];
+		name = el.getAttribute( bindingName );
 		
-		for( var n = 0, child, matches, value, binding; n < childNodes.length; n++ ) {
-			child = childNodes[n];
-			if( child.nodeType === 3 ) {
-				value = child.nodeValue;
-				matches = value.match( regex );
-				
-				if ( matches ) {
-					matches.forEach( m => {
-						const index = value.indexOf( m );
-						value = value.replace( m, '' );
-						const prop = `t${i++}`;
-						const ref = m.replace(/[{{|}}]/g, '').trim();
-						
-						binding = { ref };
-						if ( index ) binding.index = index;
-						bindings[ prop ] = binding;
-						
-						element._bindings = element._bindings || [];
-						element._bindings.push( prop )
-					});
-					child.nodeValue = value;
-				}
-			}
-			else if( child.nodeType === 1 ) {
-				textBindings( child, bindings );
-			}
-		}
+		parent = el.parentNode;
 		
-		if ( element._bindings ) {
-			element.setAttribute( 'data-bind', element._bindings );
-		}
+		// add the binding name to the parent element
+		attr = parent.getAttribute( bindingAttr ) || '';
+		if ( attr ) attr += ',';
+		attr += name;
+		parent.setAttribute( bindingAttr, attr );
+		
+		// add the childNode position to the binding
+		pos = getPosition( el );
+		if ( pos ) bindings[ name ].index = pos;
 	}
 	
+	// remove the elements from the dom
+	for( var i = 0, l = textElements.length, el; i < l; i++ ) {
+		el = textElements[i];
+		el.parentNode.removeChild( el );
+	}
 }
