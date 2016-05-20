@@ -28,7 +28,7 @@ function initBindings( fragment, bindings ) {
 function initNodes( nodes, bindings ) {
 		
 	for( var i = 0, l = nodes.length, node, binding; i < l; i++ ) {
-		// list = node.dataset.bind.split( ',' );
+		
 		node = nodes[i];
 		binding = bindings[ node.dataset.bind ];
 		if ( binding && binding.init ) {

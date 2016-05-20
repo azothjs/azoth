@@ -8,62 +8,59 @@
 	<link rel="stylesheet" href="css/index.css">
 </head>
 <body>
-	<main class='todo-app'>
-		<ul class='todo-list' id='target'></ul>
-	</main>
+	<main class='todo-app'></main>
 	
 	<script src='getData.js'></script>
 	<script src='../diamond.js'></script>
 	
 	<template id='todo'>
-		<li>
-			<div class="view">
-				<input data-bind="p1" class="toggle" type="checkbox">
-				<label data-bind="t1"></label>
-				<button class="destroy"></button>
-			</div>
-			<input data-bind="p2" class="edit" value="">
-		</li>
-	</template>
-	
-	<template id='section'>
-		<for-section data-bind="s1"></for-section>
+		<ul class='todo-list'>
+			<section-slot data-bind="s1">
+			<li>
+				<div class="view">
+					<input data-bind="p1" class="toggle" type="checkbox">
+					<label><text-slot data-bind="t1"></text-slot></label>
+					<button class="destroy"></button>
+				</div>
+				<input data-bind="p2" class="edit" value="">
+			</li>
+			</section-slot>
+		</ul>
 	</template>
 	
 	<script>
 		// console.profile('render')
-		var bound = Diamond.bound;
+		var Binder = Diamond.Binder;
 		
 		function getTemplate() {
 			
-			var p1 = bound.property( 'checked', { ref: 'done' } );
-			var p2 = bound.property( 'value', { ref: 'name' } );
-			var t1 = bound.text( { ref: 'name' } );
+			var binder = new Binder();
+			binder.section( 's1', { type: 'for', ref: 'items' } );
+			binder.property( 'p1', 'checked', { ref: 'done' } );
+			binder.property( 'p2', 'value', { ref: 'name' } );
+			binder.text( 't1', { ref: 'name' } );
 			
 			var fragment = Diamond.clean( document.getElementById('todo').content.cloneNode( true ) );
-	
-			var s1 = bound.section( { type: 'for', ref: 'items' }, {
-				fragment: fragment,
-				bindings: { p1, p2, t1 }
-			});
-			
+				
 			return {
-				fragment: Diamond.clean( document.getElementById('section').content.cloneNode( true ) ),
-				bindings: { s1 },
-				noinit: true
+				fragment,
+				bindings: binder.bindings
 			};
 		}
 		
-		var items = getData();
-
+		console.time( 'total' );
+		
+		console.time( 'init' );
+		const el = document.querySelector( 'main' );
+		const data = { items: getData() };
+		const template = getTemplate();
+		console.timeEnd( 'init' );
+		
 		console.time( 'render' );
-		const d = new Diamond({
-			el: document.getElementById( 'target' ),
-			template: getTemplate(),
-			data: { items: items }
-		});
+		new Diamond({ el, template, data });
 		console.timeEnd( 'render' );
-		// console.profileEnd( 'render' );
+		
+		console.timeEnd( 'total' );
 		
 	</script>
 </body>

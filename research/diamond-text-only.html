@@ -8,57 +8,58 @@
 	<link rel="stylesheet" href="css/index.css">
 </head>
 <body>
-	<main class='todo-app'>
-		<ul class='todo-list' id='target'></ul>
-	</main>
+	<main class='todo-app'></main>
 	
 	<script src='getData.js'></script>
 	<script src='../diamond.js'></script>
 	
 	<template id='todo'>
-		<li>
-			<div class="view">
-				<span data-bind="a1" class="toggle"></span>
-				<label data-bind="t1"></label>
-				<button class="destroy"></button>
-			</div>
-			<span data-bind="t1" class="edit"></span>
-		</li>
-	</template>
-	
-	<template id='section'>
-		<for-section data-bind="s1"></for-section>
+		<ul class='todo-list'>
+			<section-slot data-bind="s1">
+			<li>
+				<div class="view">
+					<span data-bind="a1" class="toggle"></span>
+					<label><text-slot data-bind="t1"></text-slot></label>
+					<button class="destroy"></button>
+				</div>
+				<span class="edit"><text-slot data-bind="t1"></text-slot></span>
+			</li>
+			</section-slot>
+		</ul>
 	</template>
 	
 	<script>
 		
-		var bound = Diamond.bound;
+		var Binder = Diamond.Binder;
 		
 		function getTemplate() {
+			
+			var binder = new Binder();
+			binder.section( 's1', { type: 'for', ref: 'items' } );
+			binder.attribute( 'a1', 'data-done', { ref: 'done' } );
+			binder.text( 't1', { ref: 'name' } );
+			
+			var fragment = Diamond.clean( document.getElementById('todo').content.cloneNode( true ) );
 				
-			const a1 = bound.attribute( 'data-done', { ref: 'done' } );
-			const t1 = bound.text( { ref: 'name' } );
-	
-			const s1 = bound.section( { type: 'for', ref: 'items' }, {
-				fragment: Diamond.clean( document.getElementById('todo').content.cloneNode( true ) ),
-				bindings: { a1, t1 }
-			});
-
 			return {
-				fragment: Diamond.clean( document.getElementById('section').content.cloneNode( true ) ),
-				bindings: { s1 }
+				fragment,
+				bindings: binder.bindings
 			};
 		}
+			
+		console.time( 'total' );
+		
+		console.time( 'init' );
+		const el = document.querySelector( 'main' );
+		const data = { items: getData() };
+		const template = getTemplate();
+		console.timeEnd( 'init' );
 		
 		console.time( 'render' );
-		
-		new Diamond({
-			el: document.getElementById( 'target' ),
-			template: getTemplate(),
-			data: { items: getData() }
-		});
-		
+		new Diamond({ el, template, data });
 		console.timeEnd( 'render' );
+		
+		console.timeEnd( 'total' );
 		
 	</script>
 </body>

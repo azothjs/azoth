@@ -48,6 +48,33 @@ test( 'text node only', t => {
 	t.equal( fixture.innerHTML, 'foo' );
 });
 
+
+test( 'node with two bindings', t => {
+	
+	const binder = new Binder();
+	binder.text( 'a1', { name: 'class', ref: 'klass' } );
+	binder.text( 'p1', { name: 'value', ref: 'foo' } );
+	
+	const template = {
+		fragment: Diamond.makeFragment(`
+			<div>
+				<input data-bind="a1,p1">
+			</div>
+		`),
+		bindings: binder.bindings
+	};
+	
+	new Diamond( { 
+		template, 
+		data: { foo: 'foo', klass: 'bar' }, 
+		el: fixture 
+	});
+	
+	t.equal( fixture.innerHTML, '<div><input class="klass"></div>' );
+	t.equal( fixture.children[0].children[0].value, 'foo' );
+});
+
+
 test( 'nested elements and text', t => {
 	
 	const binder = new Binder();
@@ -163,38 +190,41 @@ test( '#for section - no top level element', t => {
 	
 }());
 
-(function testWith() {
+// (function testWith() {
 	
-	const binder = new Binder();
-	binder.section( 's1', { type: 'with', ref: 'obj' } );
-	binder.text( 't1', { ref: 'a' } );
-	binder.text( 't2', { ref: 'b' } );
+// 	const binder = new Binder();
+// 	binder.section( 's1', { type: 'with', ref: 'obj' } );
+// 	binder.text( 't1', { ref: 'a' } );
+// 	binder.text( 't2', { ref: 'b' } );
 	
-	const template = {
-		fragment: Diamond.makeFragment( `
-			<section-slot data-bind="s1">
-				<p data-bind="t1,t2"></p>
-			</section-slot>
-		` ),
-		bindings: binder.bindings
-	};
+// 	const template = {
+// 		fragment: Diamond.makeFragment( `
+// 			<section-slot data-bind="s1">
+// 				<p>
+// 					<text-slot data-bind="t1"></text-slot>
+// 					<text-slot data-bind="t1"></text-slot>
+// 				</p>
+// 			</section-slot>
+// 		` ),
+// 		bindings: binder.bindings
+// 	};
 		
-	test( '#with section', t => {
-		new Diamond( { 
-			template, 
-			data: { obj: { a: 'A', b: 'B' } }, 
-			el: fixture 
-		});	
-		t.equal( fixture.innerHTML, '<p>AB</p><!--with-->' );
-	});
+// 	test( '#with section', t => {
+// 		new Diamond( { 
+// 			template, 
+// 			data: { obj: { a: 'A', b: 'B' } }, 
+// 			el: fixture 
+// 		});	
+// 		t.equal( fixture.innerHTML, '<p>AB</p><!--with-->' );
+// 	});
 
-	test( '#with section, no object', t => {
-		new Diamond( { 
-			template, 
-			data: {}, 
-			el: fixture 
-		});	
-		t.equal( fixture.innerHTML, '<!--with-->' );
-	});
+// 	test( '#with section, no object', t => {
+// 		new Diamond( { 
+// 			template, 
+// 			data: {}, 
+// 			el: fixture 
+// 		});	
+// 		t.equal( fixture.innerHTML, '<!--with-->' );
+// 	});
 
-}());
+// }());

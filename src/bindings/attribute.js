@@ -4,5 +4,5 @@ export default function attributeBinding ( name, binding ) {
 	
 	return function bindAttribute ( context, element ) {
 		element.setAttribute( name, context.get( ref ) );
-	}
+	};
 }

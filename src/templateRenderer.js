@@ -12,6 +12,7 @@ export default function getTemplateRender( fragment, bindings ) {
 	};
 
 	function bindNode( node, key ) {
+		
 		const binding = bindings[ key ];
 		if ( !binding ) throw new Error( `unrecognized binding ${key}` );
 		return { node, binding };
@@ -24,7 +25,7 @@ export default function getTemplateRender( fragment, bindings ) {
 			node = nodes[i];
 			queue.push( bindNode( node, node.dataset.bind ) );
 			// TODO: make optional, adds a ms or so
-			node.removeAttribute( 'data-bind' );
+			// node.removeAttribute( 'data-bind' );
 		}	
 		
 		return queue;

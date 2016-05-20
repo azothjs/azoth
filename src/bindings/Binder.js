@@ -16,4 +16,13 @@ export default class Binder {
 	section( key, binding ) {
 		this.bindings[ key ] = section( binding, this.bindings );
 	}
+	
+	property( key, name, binding ) {
+		this.bindings[ key ] = property( name, binding );
+		
+	}
+	
+	attribute( key, name, binding ) {
+		this.bindings[ key ] = attribute( name, binding );		
+	}
 }

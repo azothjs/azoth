@@ -4,5 +4,5 @@ export default function propertyBinding ( name, binding ) {
 	
 	return function bindProperty ( context, obj ) {
 		obj[ name ] = context.get( ref );
-	}
+	};
 }
