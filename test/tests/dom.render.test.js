@@ -1,19 +1,23 @@
 import Diamond from './Diamond';
-import { test, module, fixture, skip } from './qunit';
+import { test, module, fixture } from './qunit';
 
 module( 'dom render' );
 
-const { bound } = Diamond;
+const { Binder } = Diamond;
+
 
 test( 'simple node with text', t => {
 	
-	const t1 = bound.text({ ref: 'foo' });
+	const binder = new Binder();
+	binder.text( 't1', { ref: 'foo' } );
 	
 	const template = {
 		fragment: Diamond.makeFragment(`
-			<div data-bind="t1"></div>
+			<div>
+				<text-slot data-bind="t1"></text-slot>
+			</div>
 		`),
-		bindings: { t1 }
+		bindings: binder.bindings
 	};
 	
 	new Diamond( { 
@@ -25,19 +29,41 @@ test( 'simple node with text', t => {
 	t.equal( fixture.innerHTML, '<div>foo</div>' );
 });
 
+test( 'text node only', t => {
+	
+	const binder = new Binder();
+	binder.text( 't1', { ref: 'foo' } );
+	
+	const template = {
+		fragment: Diamond.makeFragment( `<text-slot data-bind="t1"></text-slot>` ),
+		bindings: binder.bindings
+	};
+	
+	new Diamond( { 
+		template, 
+		data: { foo: 'foo' }, 
+		el: fixture 
+	});
+	
+	t.equal( fixture.innerHTML, 'foo' );
+});
+
 test( 'nested elements and text', t => {
 	
-	const t1 = bound.text({ ref: 'foo' });
-	const t2 = bound.text({ ref: 'bar' });
+	const binder = new Binder();
+	binder.text( 't1', { ref: 'foo' } );
+	binder.text( 't2', { ref: 'bar' } );
 	
 	const template = {
 		fragment: Diamond.makeFragment(`
 			<div>
-				<span data-bind="t1"></span>
-				<span data-bind="t2">label: </span>
+				<span>
+					<text-slot data-bind="t1"></text-slot>
+				</span>
+				<span>label: <text-slot data-bind="t2"></text-slot></span>
 			</div>
 		`),
-		bindings: { t1, t2 }
+		bindings: binder.bindings
 	};
 	
 	new Diamond( { 
@@ -51,18 +77,45 @@ test( 'nested elements and text', t => {
 
 
 test( '#for section', t => {
-	
-	const t1 = bound.text( { ref: '.' } );
-	const s1 = bound.section( { type: 'for', ref: 'items' }, {
-		fragment: Diamond.makeFragment(`
-			<li data-bind="t1"></li>
-		`),
-		bindings: { t1 }
-	});
+		
+	const binder = new Binder();
+	binder.section( 's1', { type: 'for', ref: 'items' } );
+	binder.text( 't1', { ref: '.' } );
 	
 	const template = {
-		fragment: Diamond.makeFragment( `<for-section data-bind="s1"></for-section>` ),
-		bindings: { s1 }
+		fragment: Diamond.makeFragment( `
+			<ul>
+				<section-slot data-bind="s1">
+					<li><text-slot data-bind="t1"></text-slot></li>
+				</section-slot>
+			</ul>
+		` ),
+		bindings: binder.bindings
+	};
+	
+	new Diamond( { 
+		template, 
+		data: { items: [ 1, 2, 3 ] }, 
+		el: fixture 
+	});	
+	
+	t.equal( fixture.innerHTML, '<ul><li>1</li><li>2</li><li>3</li><!--for--></ul>' );
+
+});
+
+test( '#for section - no top level element', t => {
+		
+	const binder = new Binder();
+	binder.section( 's1', { type: 'for', ref: 'items' } );
+	binder.text( 't1', { ref: '.' } );
+	
+	const template = {
+		fragment: Diamond.makeFragment( `
+			<section-slot data-bind="s1">
+				<li><text-slot data-bind="t1"></text-slot></li>
+			</section-slot>
+		` ),
+		bindings: binder.bindings
 	};
 	
 	new Diamond( { 
@@ -75,21 +128,21 @@ test( '#for section', t => {
 
 });
 
-(function () {
+(function testIf() {
 	
-	const t1 = bound.text({ ref: 'foo' });
-	const s1 = bound.section( { type: 'if', ref: 'condition' }, {
-		fragment: Diamond.makeFragment(`
-			<li data-bind="t1"></li>
-		`),
-		bindings: { t1 }
-	})
-		
+	const binder = new Binder();
+	binder.section( 's1', { type: 'if', ref: 'condition' } );
+	binder.text( 't1', { ref: 'foo' } );
+	
 	const template = {
-		fragment: Diamond.makeFragment( `<if-section data-bind="s1"></if-section>` ),
-		bindings: { s1 }
+		fragment: Diamond.makeFragment( `
+			<section-slot data-bind="s1">
+				<li><text-slot data-bind="t1"></text-slot></li>
+			</section-slot>
+		` ),
+		bindings: binder.bindings
 	};
-		
+	
 	test( '#if section true', t => {
 		new Diamond( { 
 			template, 
@@ -98,7 +151,6 @@ test( '#for section', t => {
 		});	
 		t.equal( fixture.innerHTML, '<li>foo</li><!--if-->' );
 	});
-
 	
 	test( '#if section false', t => {
 		new Diamond( { 
@@ -109,23 +161,22 @@ test( '#for section', t => {
 		t.equal( fixture.innerHTML, '<!--if-->' );
 	});
 	
-})();
+}());
 
-(function () {
+(function testWith() {
 	
-	const t1 = bound.text({ ref: 'a' });
-	const t2 = bound.text({ ref: 'b' });
-	
-	const s1 = bound.section( { type: 'with', ref: 'obj' }, {
-		fragment: Diamond.makeFragment(`
-			<p data-bind="t1,t2"></p>
-		`),
-		bindings: { t1, t2 }
-	})
+	const binder = new Binder();
+	binder.section( 's1', { type: 'with', ref: 'obj' } );
+	binder.text( 't1', { ref: 'a' } );
+	binder.text( 't2', { ref: 'b' } );
 	
 	const template = {
-		fragment: Diamond.makeFragment( `<with-section data-bind="s1"></with-section>` ),
-		bindings: { s1 }
+		fragment: Diamond.makeFragment( `
+			<section-slot data-bind="s1">
+				<p data-bind="t1,t2"></p>
+			</section-slot>
+		` ),
+		bindings: binder.bindings
 	};
 		
 	test( '#with section', t => {
@@ -146,4 +197,4 @@ test( '#for section', t => {
 		t.equal( fixture.innerHTML, '<!--with-->' );
 	});
 
-})();
+}());
