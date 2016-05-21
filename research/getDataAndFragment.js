@@ -5,9 +5,8 @@ function getData() {
 	
 	window.onhashchange = function(){
 		location.reload();
-	}
+	};
 	
-	console.log( `${copies} todo's` );
 	var items = new Array( copies );
 	var fizz = ['fizz', '', ''], buzz = ['buzz', '', '', '', ''];
 	
@@ -18,4 +17,8 @@ function getData() {
 		};
 	}			
 	return items;
+}
+
+function getFragment( id ) {
+	return Diamond.clean( document.getElementById( id ).content.cloneNode( true ) );
 }

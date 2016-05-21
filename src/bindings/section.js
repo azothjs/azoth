@@ -1,44 +1,27 @@
 import templateRenderer from '../templateRenderer';
-import bind from '../bind';
 import blocks from '../blocks';
-import { getPosition, adopt } from './childNodeBindings';
 
-export default function sectionBinding ( binding, bindings ) {
+export default function sectionBinding ( binding, template ) {
+	
+	const { fragment, bindings } = template;
+	const render = templateRenderer( fragment, bindings );
+	
+	const index = binding.index || 0;
 	
 	const block = blocks[ binding.type ];
-	
-	var index = 0, render = null;
-	
 	if ( !block ) throw new Error( `Unrecognized section type ${binding.type}` );
 	
 	function bindSection ( context, node ) {
 		const anchor = node.childNodes[ index ];
+		anchor.textContent = binding.type;
 		
 		function add( addContext ) {
-			const { queue, node } = render();
-			bind( queue, addContext );
+			const node = render( addContext );
 			anchor.parentNode.insertBefore( node, anchor );
 		}
 		
 		block( context, binding, add );
 	}
-	
-	bindSection.init = function initSection( node ){
-		index = getPosition( node );
-		adopt( node, document.createComment( binding.type ) );
 		
-		const fragment = copyToFragment( node.childNodes );
-		
-		render = templateRenderer( fragment, bindings );
-	};
-	
 	return bindSection;
-}
-
-function copyToFragment( nodes ) {
-	const fragment = document.createDocumentFragment();
-	for( var i = 0, l = nodes.length; i < l; i++ ) {
-		fragment.appendChild( nodes[i] );
-	}
-	return fragment;
 }

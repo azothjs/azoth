@@ -56,7 +56,11 @@ module.exports = {
         "id-blacklist": "error",
         "id-length": "off",
         "id-match": "error",
-        "indent": "off",
+        "indent": [
+            "error",
+            "tab",
+            { "SwitchCase": 1 }   
+        ],
         "init-declarations": "off",
         "jsx-quotes": "error",
         "key-spacing": "error",
@@ -96,7 +100,7 @@ module.exports = {
         "no-extra-label": "error",
         "no-extra-parens": "off",
         "no-floating-decimal": "error",
-        "no-implicit-coercion": "error",
+        "no-implicit-coercion": "off",
         "no-implicit-globals": "error",
         "no-implied-eval": "error",
         "no-inline-comments": "error",

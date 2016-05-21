@@ -10,6 +10,7 @@
 <body>
 	<main class='todo-app'></main>
 	
+	
 	<template id='app'>
 		<ul class='todo-list' data-bind>
 			<node-slot data-type="8"></node-slot>
@@ -19,17 +20,16 @@
 	<template id='todo'>
 		<li>
 			<div class="view">
-				<input data-bind class="toggle" type="checkbox">
+				<span data-bind class="toggle"></span>
 				<label data-bind><node-slot></node-slot></label>
 				<button class="destroy"></button>
 			</div>
-			<input data-bind class="edit" value="">
 		</li>
 	</template>
 	
 	<script src='../diamond.js'></script>
 	<script src='getDataAndFragment.js'></script>
-	
+
 	<script>
 		var bound = Diamond.bound;
 		
@@ -40,16 +40,15 @@
 					bound.section( { type: 'for', ref: 'items' }, {
 						fragment: getFragment( 'todo' ),
 						bindings: [
-							bound.property( { name: 'checked', ref: 'done' } ),
+							bound.attribute( { name: 'data-done', ref: 'done' } ),
 							bound.text( { ref: 'name' } ),
-							bound.property( { name: 'value', ref: 'name' } ),
 						]
 					})
 				]
 			};
-		}
+		}	
+
 	</script>
-	
 	<script src='renderWithTimings.js'></script>
 
 </body>

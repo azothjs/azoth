@@ -3,26 +3,44 @@ import text from './text';
 import property from './property';
 import attribute from './attribute';
 
-export default class Binder {
+export class Binder {
 	
 	constructor() {
-		this.bindings = Object.create( null );
+		this.bindings = [];
 	}
 	
-	text( key, binding ) {
-		this.bindings[ key ] = text( binding );
+	text( binding ) {
+		this.bindings.push( text( binding ) );
 	}
 	
-	section( key, binding ) {
-		this.bindings[ key ] = section( binding, this.bindings );
+	section( binding ) {
+		this.bindings.push( section( binding, this.bindings ) );
 	}
 	
-	property( key, name, binding ) {
-		this.bindings[ key ] = property( name, binding );
-		
+	property( binding ) {
+		this.bindings.push( property( binding ) );
 	}
 	
-	attribute( key, name, binding ) {
-		this.bindings[ key ] = attribute( name, binding );		
+	attribute( binding ) {
+		this.bindings.push( attribute( binding ) );		
+	}
+	
+	wrap( indexes ) {
+		const bindings = this.bindings;
+		const l = indexes.length;
+		bindings.push( ( context, node ) => {
+			for( var i = 0; i < l; i++ ) bindings[ indexes[i] ]( context, node );
+		});
 	}
 }
+
+function wrap( bindings ) {
+	const l = bindings.length;
+	return ( context, node ) => {
+		for( var i = 0; i < l; i++ ) bindings[i]( context, node );
+	}; 
+}
+
+export const bound = {
+	text, section, property, attribute, wrap
+};
