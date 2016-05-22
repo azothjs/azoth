@@ -1,8 +1,6 @@
-export default function attributeBinding ( binding ) {
+export default function attributeBinding ( { name, ref } ) {
 	
-	const { ref, name } = binding;
-	
-	return function bindAttribute ( context, element ) {
+	return ( context, element ) => {
 		element.setAttribute( name, context.value( ref ) );
 	};
 }

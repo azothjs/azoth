@@ -10,7 +10,6 @@ module.exports = {
     "rules": {
         "accessor-pairs": "error",
         "array-callback-return": "error",
-        "arrow-body-style": "error",
         "arrow-parens": [
             "error",
             "as-needed"
@@ -40,7 +39,6 @@ module.exports = {
         ],
         "complexity": "error",
         "computed-property-spacing": "off",
-        "consistent-return": "error",
         "consistent-this": "error",
         "curly": "off",
         "default-case": "error",

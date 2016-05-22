@@ -2,7 +2,7 @@ const gobble = require( 'gobble' );
 const buble = require( 'rollup-plugin-buble' );
 const path = require( 'path' );
 
-const tests = gobble( 'test/tests' );
+const tests = gobble( 'test/tests' ).exclude( 'perf.test.js' );
 
 const index = tests.include( '*.js' )
 	.transform( function importFiles( code ) {

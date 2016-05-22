@@ -1,8 +1,6 @@
-export default function propertyBinding ( binding ) {
+export default function propertyBinding ( { name, ref } ) {
 	
-	const { ref, name } = binding;
-	
-	return function bindProperty ( context, obj ) {
+	return ( context, obj ) => {
 		obj[ name ] = context.value( ref );
 	};
 }

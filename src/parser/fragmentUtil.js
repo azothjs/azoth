@@ -1,7 +1,10 @@
 const div = document.createElement( 'div' );
 
 export function makeFragment( html ) {
-	const { childNodes } = makeDiv( html );
+	return toFragment( makeDiv( html ).childNodes );
+}
+
+export function toFragment( childNodes ) {
 	const fragment = document.createDocumentFragment();
 	
 	var node;
@@ -12,9 +15,9 @@ export function makeFragment( html ) {
 	return fragment;
 }
 
-export function makeDiv( html ) {
+export function makeDiv( html, options = { clean: true } ) {
 	div.innerHTML = html;
-	clean( div );
+	if ( options.clean ) clean( div );
 	return div;
 }
 
@@ -33,7 +36,7 @@ export function clean(node)
 			n --;
 		}
 		else if( child.nodeType === 1 ) {
-			// clean(child);
+			clean(child);
 		}
 	}
 	return node;
