@@ -14,9 +14,9 @@ test( 'cleans', t => {
 
 test( 'text binding', t => {
 	const { html, bindings } = parser( '<div>{{ hello }}</div>' );
-	t.equal( html, '<div data-bind="t1"></div>' );
-	t.ok( bindings && bindings.t1 );
-	t.equal( bindings.t1.ref, 'hello' );
+	t.equal( html, '<div data-bind></div>' );
+	t.ok( bindings && bindings[0] );
+	t.equal( bindings[0].ref, 'hello' );
 });
 
 test( 'positioned text binding', t => {

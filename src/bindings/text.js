@@ -1,10 +1,7 @@
-export default function textBinding ( binding ) {
-	
-	const ref = binding.ref;
-	const index = binding.index || 0;
+export default function textBinding ( { ref } ) {
 	
 	return ( context, node ) => {
-		node.childNodes[ index ].textContent = context.get( ref );
+		node.textContent = context.value( ref );
 	};
 	
 }

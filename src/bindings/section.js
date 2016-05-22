@@ -3,17 +3,17 @@ import blocks from '../blocks';
 
 export default function sectionBinding ( binding, template ) {
 	
-	const { fragment, bindings } = template;
-	const render = templateRenderer( fragment, bindings );
-	
+	const render = templateRenderer( template );
+	const type = binding.type;
 	const index = binding.index || 0;
+	const block = blocks[ type ];
 	
-	const block = blocks[ binding.type ];
-	if ( !block ) throw new Error( `Unrecognized section type ${binding.type}` );
+	if ( !block ) throw new Error( `Unrecognized section type ${type}` );
 	
 	function bindSection ( context, node ) {
 		const anchor = node.childNodes[ index ];
-		anchor.textContent = binding.type;
+		// TODO: move this to init (matters for sections of sections)
+		anchor.textContent = type;
 		
 		function add( addContext ) {
 			const node = render( addContext );

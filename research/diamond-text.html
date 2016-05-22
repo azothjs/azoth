@@ -13,7 +13,7 @@
 	
 	<template id='app'>
 		<ul class='todo-list' data-bind>
-			<node-slot data-type="8"></node-slot>
+			<section-node></section-node>
 		</ul>
 	</template>
 	
@@ -21,7 +21,7 @@
 		<li>
 			<div class="view">
 				<span data-bind class="toggle"></span>
-				<label data-bind><node-slot></node-slot></label>
+				<label data-bind><text-node></text-node></label>
 				<button class="destroy"></button>
 			</div>
 		</li>

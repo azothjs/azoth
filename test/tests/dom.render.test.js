@@ -9,14 +9,10 @@ const { bound } = Diamond;
 test( 'simple node with text', t => {
 	
 	const template = {
-		fragment: Diamond.makeFragment(`
-			<div data-bind>
-				<node-slot data-type="3"></node-slot>
-			</div>
-		`),
-		bindings: [
-			bound.text( { ref: 'foo' } )
-		]
+		fragment: Diamond.makeFragment( 
+			`<div data-bind><text-node></text-node></div>`
+		),
+		bindings: [ bound.text( { ref: 'foo' } ) ]
 	};
 	
 	new Diamond( { 
@@ -32,9 +28,9 @@ test( 'text node only', t => {
 	
 	const template = {
 		fragment: Diamond.makeFragment( 
-			`<node-slot data-type="3" data-bind></node-slot>` ),
+			`<text-node data-bind></text-node>` ),
 		bindings: [
-			bound.text( { ref: 'foo' } )
+			bound.childText( { ref: 'foo' } )
 		]
 	};
 	
@@ -79,15 +75,13 @@ test( 'nested elements and text', t => {
 	const template = {
 		fragment: Diamond.makeFragment(`
 			<div>
-				<span data-bind>
-					<node-slot></node-slot>
-				</span>
-				<span data-bind>label: <node-slot></node-slot></span>
+				<span data-bind></span>
+				<span data-bind>label: <text-node></text-node></span>
 			</div>
 		`),
 		bindings: [
 			bound.text( { ref: 'foo' } ),
-			bound.text( { ref: 'bar', index: 1 } )
+			bound.childText( { ref: 'bar', index: 1 } )
 		]
 	};
 	
@@ -105,7 +99,7 @@ test( 'nested elements and text', t => {
 	const bindings = [
 		bound.section( { type: 'for', ref: 'items' }, {
 			fragment: Diamond.makeFragment( 
-				`<li data-bind><node-slot></node-slot></li>`
+				`<li data-bind></li>`
 			),
 			bindings: [
 				bound.text( { ref: '.' } )
@@ -118,7 +112,7 @@ test( 'nested elements and text', t => {
 		const template = {
 			fragment: Diamond.makeFragment( `
 				<ul data-bind>
-					<node-slot data-type='8'></node-slot>
+					<section-node></section-node>
 				</ul>
 			` ),
 			bindings
@@ -139,7 +133,7 @@ test( 'nested elements and text', t => {
 
 		const template = {
 			fragment: Diamond.makeFragment( `
-				<node-slot data-type='8'></node-slot>
+				<section-node></section-node>
 			` ),
 			bindings
 		};
@@ -159,12 +153,12 @@ test( 'nested elements and text', t => {
 	
 	const template = {
 		fragment: Diamond.makeFragment( `
-			<node-slot data-type='8'></node-slot>
+			<section-node></section-node>
 		` ),
 		bindings: [
 			bound.section( { type: 'if', ref: 'condition' }, {
 				fragment: Diamond.makeFragment( 
-					`<li data-bind><node-slot></node-slot></li>`
+					`<li data-bind><text-node></text-node></li>`
 				),
 				bindings: [
 					bound.text( { ref: 'foo' } )
@@ -197,20 +191,20 @@ test( 'nested elements and text', t => {
 	
 	const template = {
 		fragment: Diamond.makeFragment( `
-			<node-slot data-type='8'></node-slot>
+			<section-node></section-node>
 		` ),
 		bindings: [
 			bound.section( { type: 'with', ref: 'obj' }, {
 				fragment: Diamond.makeFragment( 
 					`<p data-bind>
-						<node-slot></node-slot>
-						<node-slot></node-slot>
+						<text-node></text-node>
+						<text-node></text-node>
 					</p>`
 				),
 				bindings: [
 					bound.wrap([
-						bound.text( { ref: 'a' } ),
-						bound.text( { ref: 'b', index: 1 } )
+						bound.childText( { ref: 'a' } ),
+						bound.childText( { ref: 'b', index: 1 } )
 					])
 				]
 			})

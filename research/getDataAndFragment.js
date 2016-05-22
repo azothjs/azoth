@@ -1,6 +1,6 @@
 function getData() {
 
-	var copies = location.hash.slice(1); // @1000 takes ~ 1ms to create
+	var copies = location.hash.slice(1); // @1000 takes ~< 1ms to create
 	if ( copies !== 0 && ( !copies || isNaN( copies ) ) ) copies = 100;
 	
 	window.onhashchange = function(){
@@ -20,5 +20,6 @@ function getData() {
 }
 
 function getFragment( id ) {
-	return Diamond.clean( document.getElementById( id ).content.cloneNode( true ) );
+	// TODO: research: it appears cloning a template element directly is slightly slower
+	return Diamond.clean( document.getElementById( id ).content/*.cloneNode( true )*/ );
 }

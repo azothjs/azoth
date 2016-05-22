@@ -1,28 +1,32 @@
 
-console.group( 'total' );
+const group = 'js execution time including dom creation';
+console.group( group );
 console.time( 'total' );
 
-console.group( 'init' );
+	console.group( 'init' );
 
-console.time( 'el' );
-const el = document.querySelector( 'main' );
-console.timeEnd( 'el' );
+		console.time( 'el' );
+			const el = document.querySelector( 'main' );
+		console.timeEnd( 'el' );
 
-console.time( 'data' );
-const data = { items: getData() };
-console.timeEnd( 'data' );
+		console.time( 'data' );
+			const data = { items: getData() };
+		console.timeEnd( 'data' );
 
-console.time( 'template' );
-const template = getTemplate();
-console.timeEnd( 'template' );
+		console.time( 'template' );
+			const template = getTemplate();
+		console.timeEnd( 'template' );
 
-console.groupEnd( 'init' );
+	console.groupEnd( 'init' );
 
-console.log( `${data.items.length} todo's` );
 
-console.time( 'render' );
-new Diamond({ el, template, data });
-console.timeEnd( 'render' );
+	console.group( 'render' );
 
-console.timeEnd( 'total' );
-console.groupEnd( 'total' );
+		console.time( `${data.items.length} todo's` );
+		new Diamond({ el, template, data });
+		console.timeEnd( `${data.items.length} todo's` );
+
+	console.groupEnd( 'render' );
+
+console.timeEnd( 'total' );	
+console.groupEnd( group );

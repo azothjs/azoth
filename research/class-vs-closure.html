@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>mixed object-array vs same array-array</title>
+</head>
+<body>
+	<main class='todo-app'>
+		<h2>running some js perf stuff</h2>
+	</main>
+	
+	<script>
+		
+	(function run(){
+		
+		
+		var times = 100000;
+		
+		function Template( foo, bar ) {
+			this.foo = foo;
+			this.bar = bar;
+		}
+		
+		Template.prototype.render = function(){
+			return this.foo + this.bar;
+		}
+		
+		console.time( `class ${times} times` );
+		var each, result;
+		for( var i = 0; i < times; i++ ){
+			each = new Template( `foo${i}`, `bar${i}` );
+			result = each.render();
+		}
+		console.timeEnd( `class ${times} times` );
+		
+		function getRender( foo, bar ) {
+			return function(){
+				return foo + bar;
+			}
+		}
+		
+		console.time( `closure ${times} times` );
+		var each, result;
+		for( var i = 0; i < times; i++ ){
+			each = getRender( `foo${i}`, `bar${i}` );
+			result = each();
+		}
+		console.timeEnd( `closure ${times} times` );
+		
+		
+		function getFatRender( foo, bar ) {
+			return () => {
+				return foo + bar;
+			}
+		}
+		
+		console.time( `=> ${times} times` );
+		var each, result;
+		for( var i = 0; i < times; i++ ){
+			each = getFatRender( `foo${i}`, `bar${i}` );
+			result = each();
+		}
+		console.timeEnd( `=> ${times} times` );
+		
+		
+		
+	})();
+	</script>
+</body>
+</html>

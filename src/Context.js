@@ -3,7 +3,11 @@ export default class Context {
 		this.data = data;
 	}
 
-	get ( ref ) {
+	value ( ref ) {
 		return ref === '.' ? this.data : this.data[ ref ];
+	}
+	
+	child( ref ) {
+		return new Context( this.get( ref ) );
 	}
 }
