@@ -59,17 +59,18 @@ function rollupBindings( host, hash ) {
 	};
 	
 	const getBinding = bindings => {
-		return bindings.length === 1 ? bindings[0] : { type: 'wrap', bindings };
+		return bindings.length === 1 ? bindings[0] : { binder: 'wrap', bindings };
 	};
 	
 	const nodeList = host.querySelectorAll( `[${BINDING_ATTR}]` );
 	var ordered = [].slice.call( nodeList )
 		.map( node => {
 			const bindings = getBindings( node );
-			if ( !bindings.length ) throw new Error( 'zero length bindings' );
 			node.setAttribute( BINDING_ATTR,  '' );
-			return getBinding( bindings );
-		} );
+			return bindings ? getBinding( bindings ) : null;
+		})
+		// filter out orphans, foster parent will manage below
+		.filter( bindings => bindings );
 	
 	const orphans = getBindings( host );
 	if ( orphans ) {
@@ -104,7 +105,7 @@ function makeSectionBindings( host, bindings ) {
 			if ( attr ) attr += ',';
 			parent.setAttribute( BINDING_ATTR, attr += name );
 			// orphans need to be tagged with binding attr
-			if ( isOrphan ) node.setAttribute( BINDING_ATTR, name );
+			if ( isOrphan ) node.setAttribute( BINDING_ATTR, '' );
 			
 			const pos = getPosition( node );
 			// record non-zero index
@@ -134,7 +135,7 @@ function makeTextBindings( host, bindings ) {
 			if ( attr ) attr += ',';
 			parent.setAttribute( BINDING_ATTR, attr += name );
 			// orphans need to be tagged with binding attr
-			if ( isOrphan ) node.setAttribute( BINDING_ATTR, name );
+			if ( isOrphan ) node.setAttribute( BINDING_ATTR, '' );
 			
 			const pos = getPosition( node );
 			// record non-zero index

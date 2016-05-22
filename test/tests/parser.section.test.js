@@ -20,16 +20,17 @@ module( 'parser', () => {
 	});
 	
 	test( 'orphan section', t => {
-		const { html, bindings } = parser( '{{#for items}}<span>{{.}}</span>{{/for}}' );
-		t.equal( html, '<section-node data-bind></section-node>' );
-		t.deepEqual( bindings[0], { 
-			binder: 'section', type: 'for', ref: 'items',
-			children: {
-				html: '<span data-bind></span>',
-				bindings: [
-					{ binder: 'text', ref: '.' }
-				]	
-			} 
+		t.deepEqual( parser( '{{#for items}}<span>{{.}}</span>{{/for}}' ), {
+			html: '<section-node data-bind></section-node>',
+			bindings: [{ 
+				binder: 'section', type: 'for', ref: 'items',
+				children: {
+					html: '<span data-bind></span>',
+					bindings: [
+						{ binder: 'text', ref: '.' }
+					]	
+				} 
+			}]
 		});
 	});
 
