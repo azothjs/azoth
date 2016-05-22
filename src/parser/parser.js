@@ -2,9 +2,10 @@ import { makeDiv, toFragment } from './domUtil';
 import toBindings from './mapDefsToBindings';
 import getTextParser from './text-parser';
 import getSectionParser from './section-parser';
+import getAttrParser from './attr-parser';
 
 const staticBundle = ( host, defs ) => ({
-	html: host.innerHTML.replace( /data-bind=""/g, 'data-bind' ),
+	html: host.innerHTML.replace( /=""/g, '' ),
 	defs
 });
 
@@ -18,7 +19,8 @@ const liveBundle = ( host, defs ) => {
 const BINDING_ATTR = 'data-bind';
 const parsers = [
 	getSectionParser,
-	getTextParser
+	getAttrParser,
+	getTextParser,
 ].map( get => get( BINDING_ATTR ) );
 
 export default function parser( raw, options = { live: false } ){
