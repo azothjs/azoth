@@ -10,7 +10,7 @@ module( 'parser', () => {
 			html: '<ul data-bind><section-node></section-node></ul>',
 			defs: [{
 				binder: 'section', type: 'for', ref: 'items',
-				children: {
+				template: {
 					html: '<li data-bind></li>',
 					defs: [
 						{ binder: 'text', ref: '.' }
@@ -25,7 +25,7 @@ module( 'parser', () => {
 			html: '<section-node data-bind></section-node>',
 			defs: [{ 
 				binder: 'section', type: 'for', ref: 'items',
-				children: {
+				template: {
 					html: '<span data-bind></span>',
 					defs: [
 						{ binder: 'text', ref: '.' }

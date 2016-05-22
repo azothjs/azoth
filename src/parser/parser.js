@@ -1,4 +1,5 @@
 import { makeDiv, toFragment } from './fragmentUtil'; 
+import toBindings from './mapDefsToBindings';
 
 const textMustache = /({{[^#\/]+?}})/g;
 const mustacheBrackets = /[{{|}}]/g;
@@ -8,15 +9,17 @@ const textElName = 'text-node';
 const sectionElName = 'section-node';
 const tempName = 'temp-name';
 
-const staticBundle = ( host, bindings ) => ({
+const staticBundle = ( host, defs ) => ({
 	html: host.innerHTML.replace( /data-bind=""/g, 'data-bind' ),
-	defs: bindings
+	defs
 });
 
-const liveBundle = ( host, bindings ) => ({
-	fragment: toFragment( host ),
-	bindings
-});
+const liveBundle = ( host, defs ) => {
+	return {
+		fragment: toFragment( host.childNodes ),
+		bindings: toBindings( defs )
+	};
+};
 
 export default function parser( raw, options = { live: false } ){
 	
@@ -131,7 +134,7 @@ function makeSectionBindings( host, template ) {
 			// remove the data-bind from the node as "host" for child bindings
 			node.removeAttribute( BINDING_ATTR );
 			// recurse!
-			binding.children = makeBindings( node, template );
+			binding.template = makeBindings( node, template );
 		});
 }
 

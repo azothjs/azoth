@@ -1,9 +1,9 @@
 import templateRenderer from '../templateRenderer';
 import blocks from '../blocks';
 
-export default function sectionBinding ( binding, template ) {
+export default function sectionBinding ( binding ) {
 	
-	const render = templateRenderer( template );
+	const render = templateRenderer( binding.template );
 	const { type, index = 0 } = binding;
 	const block = blocks[ type ];
 	

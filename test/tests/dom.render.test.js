@@ -97,13 +97,17 @@ test( 'nested elements and text', t => {
 (function testFor(){
 	
 	const bindings = [
-		bound.section( { type: 'for', ref: 'items' }, {
-			fragment: Diamond.makeFragment( 
-				`<li data-bind></li>`
-			),
-			bindings: [
-				bound.text( { ref: '.' } )
-			]
+		bound.section( { 
+			type: 'for', 
+			ref: 'items', 
+			template: {
+				fragment: Diamond.makeFragment( 
+					`<li data-bind></li>`
+				),
+				bindings: [
+					bound.text( { ref: '.' } )
+				]
+			}
 		})
 	];
 	
@@ -156,13 +160,17 @@ test( 'nested elements and text', t => {
 			<section-node></section-node>
 		` ),
 		bindings: [
-			bound.section( { type: 'if', ref: 'condition' }, {
-				fragment: Diamond.makeFragment( 
-					`<li data-bind><text-node></text-node></li>`
-				),
-				bindings: [
-					bound.text( { ref: 'foo' } )
-				]
+			bound.section({ 
+				type: 'if', 
+				ref: 'condition', 
+				template: {
+					fragment: Diamond.makeFragment( 
+						`<li data-bind><text-node></text-node></li>`
+					),
+					bindings: [
+						bound.text( { ref: 'foo' } )
+					]
+				}
 			})
 		]
 	};
@@ -194,19 +202,23 @@ test( 'nested elements and text', t => {
 			<section-node></section-node>
 		` ),
 		bindings: [
-			bound.section( { type: 'with', ref: 'obj' }, {
-				fragment: Diamond.makeFragment( 
-					`<p data-bind>
-						<text-node></text-node>
-						<text-node></text-node>
-					</p>`
-				),
-				bindings: [
-					bound.wrap([
-						bound.childText( { ref: 'a' } ),
-						bound.childText( { ref: 'b', index: 1 } )
-					])
-				]
+			bound.section({ 
+				type: 'with', 
+				ref: 'obj', 
+				template: {
+					fragment: Diamond.makeFragment( 
+						`<p data-bind>
+							<text-node></text-node>
+							<text-node></text-node>
+						</p>`
+					),
+					bindings: [
+						bound.wrap([
+							bound.childText( { ref: 'a' } ),
+							bound.childText( { ref: 'b', index: 1 } )
+						])
+					]
+				}
 			})
 		]
 	};
