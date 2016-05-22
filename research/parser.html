@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>💎 diamond</title>
+	
+	<link rel="stylesheet" href="css/base.css">
+	<link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+	<main>
+		<section>
+			<h3>Parser Performance</h3>
+			<div>Times: <span id='times'></span></div>
+			<div>Total: <span id='time'></span>ms</div>
+			<div>Avg: <span id='avg'></span>ms</div>
+		</section>
+	</main>
+	
+	<script src='../diamond.js'></script>
+	
+	<script>
+		var parser = Diamond.parser;
+		
+		var times = 100;
+		
+		document.getElementById( 'times' ).textContent = times;
+		
+		var template = `
+			<ul class='todo-list' data-bind>
+				{{#for items}}
+				<li>
+					<div class="view">
+						<span class="toggle">{{done}}</span>
+						<label>{{name}}</label>
+						<button class="destroy"></button>
+					</div>
+				</li>
+				{{/for}}
+			</ul>
+		`;
+		
+		const start = performance.now();
+		
+		for( var i = 0, parsed; i < times; i++ ){
+			parsed = parser( template );
+			// if ( !i ) console.log( parsed );
+		}
+		
+		const total = performance.now() - start;
+		
+		document.getElementById( 'time' ).textContent = Math.round( total, 2 );
+		document.getElementById( 'avg' ).textContent = times/total;
+		
+		
+	</script>
+	
+</body>
+</html>
