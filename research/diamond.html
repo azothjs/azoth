@@ -37,13 +37,17 @@
 			return {
 				fragment: getFragment( 'app' ),
 				bindings: [
-					bound.section( { type: 'for', ref: 'items' }, {
-						fragment: getFragment( 'todo' ),
-						bindings: [
-							bound.property( { name: 'checked', ref: 'done' } ),
-							bound.text( { ref: 'name' } ),
-							bound.property( { name: 'value', ref: 'name' } ),
-						]
+					bound.section( { 
+						type: 'for', 
+						ref: 'items',
+						template: {
+							fragment: getFragment( 'todo' ),
+							bindings: [
+								bound.property( { name: 'checked', ref: 'done' } ),
+								bound.text( { ref: 'name' } ),
+								bound.property( { name: 'value', ref: 'name' } ),
+							]
+						}
 					})
 				]
 			};

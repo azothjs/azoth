@@ -42,3 +42,8 @@ export function clean(node)
 	return node;
 }
 
+export function getPosition( node ) {
+	var i = 0, prev = node;
+	while( prev = prev.previousSibling ) i++;
+	return i;
+}

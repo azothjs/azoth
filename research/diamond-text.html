@@ -37,12 +37,16 @@
 			return {
 				fragment: getFragment( 'app' ),
 				bindings: [
-					bound.section( { type: 'for', ref: 'items' }, {
-						fragment: getFragment( 'todo' ),
-						bindings: [
-							bound.attribute( { name: 'data-done', ref: 'done' } ),
-							bound.text( { ref: 'name' } ),
-						]
+					bound.section( { 
+						type: 'for', 
+						ref: 'items', 
+						template: {
+							fragment: getFragment( 'todo' ),
+							bindings: [
+								bound.attribute( { name: 'data-done', ref: 'done' } ),
+								bound.text( { ref: 'name' } ),
+							]
+						}
 					})
 				]
 			};

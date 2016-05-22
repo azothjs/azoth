@@ -1,7 +1,7 @@
 import Context from './Context';
 import templateRenderer from './templateRenderer';
 import bound from './bindings/bound';
-import { makeFragment, clean } from './parser/fragmentUtil'; 
+import { makeFragment, clean } from './parser/domUtil'; 
 import parser from './parser/parser';
 
 export default class Diamond {
