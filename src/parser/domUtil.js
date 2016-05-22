@@ -47,3 +47,9 @@ export function getPosition( node ) {
 	while( prev = prev.previousSibling ) i++;
 	return i;
 }
+
+export function addBinding( node, BINDING_ATTR, name ) {
+	var attr = node.getAttribute( BINDING_ATTR ) || '';
+	if ( attr ) attr += ',';
+	node.setAttribute( BINDING_ATTR, attr += name );
+}

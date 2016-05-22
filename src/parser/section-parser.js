@@ -1,4 +1,4 @@
-import { getPosition } from './domUtil';
+import { getPosition, addBinding } from './domUtil';
 
 const mustacheBrackets = /[{{|}}]/g;
 const sectionMustache = /({{[#\/].+?}})/g;
@@ -44,9 +44,7 @@ export default function getSectionParser( BINDING_ATTR ) {
 					node.removeAttribute( tempName );
 
 					// add the binding name to the parent element
-					var attr = parent.getAttribute( BINDING_ATTR ) || '';
-					if ( attr ) attr += ',';
-					parent.setAttribute( BINDING_ATTR, attr += name );
+					addBinding( parent, BINDING_ATTR, name );
 					// orphans need to be tagged with binding attr
 					if ( isOrphan ) node.setAttribute( BINDING_ATTR, '' );
 					

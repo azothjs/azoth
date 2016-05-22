@@ -1,4 +1,4 @@
-import { getPosition } from './domUtil';
+import { getPosition, addBinding } from './domUtil';
 
 const textMustache = /({{[^#\/]+?}})/g;
 const mustacheBrackets = /[{{|}}]/g;
@@ -29,9 +29,7 @@ export default function getTextParser( BINDING_ATTR ) {
 					node.removeAttribute( tempName );
 
 					// add the binding name to the parent element
-					var attr = parent.getAttribute( BINDING_ATTR ) || '';
-					if ( attr ) attr += ',';
-					parent.setAttribute( BINDING_ATTR, attr += name );
+					addBinding( parent, BINDING_ATTR, name );
 					// orphans need to be tagged with binding attr
 					if ( isOrphan ) node.setAttribute( BINDING_ATTR, '' );
 					
