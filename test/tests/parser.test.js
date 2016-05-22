@@ -15,31 +15,31 @@ test( 'cleans', t => {
 test( 'text binding', t => {
 	const { html, bindings } = parser( '<div>{{ hello }}</div>' );
 	t.equal( html, '<div data-bind></div>' );
-	t.ok( bindings && bindings[0] );
-	t.equal( bindings[0].ref, 'hello' );
+	t.deepEqual( bindings[0], { ref: 'hello', type: 'text' } );
 });
 
 test( 'positioned text binding', t => {
 	const { html, bindings } = parser( '<div>hello {{world}}</div>' );
-	t.equal( html, '<div data-bind="t1:1">hello </div>' );
-	t.ok( bindings && bindings.t1 );
-	t.equal( bindings.t1.ref, 'world' );
-	t.equal( bindings.t1.index, 1 );
+	t.equal( html, '<div data-bind>hello <text-node></text-node></div>' );
+	t.deepEqual( bindings[0], { ref: 'world', type: 'childText', index: 1 } );
 });
 
 test( 'same ref twice', t => {
 	const { html, bindings } = parser( '<div>{{foo}} {{foo}}</div>' );
-	t.equal( html, '<div data-bind="t1,t2"></div>' );
-	t.equal( bindings.t1.ref, 'foo' );
-	t.equal( bindings.t2.ref, 'foo' );
-	t.notOk( bindings.t1.index );
-	t.equal( bindings.t2.index, 1 );
+	t.equal( html, '<div data-bind><text-node></text-node> <text-node></text-node></div>' );
+	t.equal( bindings[0].type, 'wrap' );
+	const wrapped = bindings[0].bindings;
+	t.deepEqual( wrapped[0], { ref: 'foo', type: 'childText' } );
+	t.deepEqual( wrapped[1], { ref: 'foo', type: 'childText', index: 2 } );
 });
 
 test( 'text in nested elements', t => {
 	const { html, bindings } = parser( '<div>{{greeting}}<span>{{place}}</span>{{person}}</div>' );
-	t.equal( html, '<div data-bind="t1,t3"><span data-bind="t2"></span></div>' );
-	t.equal( bindings.t1.ref, 'greeting' );
-	t.equal( bindings.t2.ref, 'place' );
-	t.equal( bindings.t3.index, 2 );
+	t.equal( html, '<div data-bind><text-node></text-node><span data-bind></span><text-node></text-node></div>' );
+	t.equal( bindings[0].type, 'wrap' );
+	const wrapped = bindings[0].bindings;
+	t.deepEqual( wrapped[0], { ref: 'greeting', type: 'childText' } );
+	t.deepEqual( wrapped[1], { ref: 'person', type: 'childText', index: 2 } );
+	
+	t.deepEqual( bindings[1], { ref: 'place', type: 'text' } );
 });

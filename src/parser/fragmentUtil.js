@@ -33,7 +33,7 @@ export function clean(node)
 			n --;
 		}
 		else if( child.nodeType === 1 ) {
-			clean(child);
+			// clean(child);
 		}
 	}
 	return node;
