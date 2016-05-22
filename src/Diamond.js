@@ -2,7 +2,7 @@ import Context from './Context';
 import templateRenderer from './templateRenderer';
 import bound from './bindings/bound';
 import { makeFragment, clean } from './parser/fragmentUtil'; 
-// import parser from './parser/parser';
+import parser from './parser/parser';
 
 export default class Diamond {
 	
@@ -14,7 +14,7 @@ export default class Diamond {
 }
 
 
-// Diamond.parser = parser;
+Diamond.parser = parser;
 Diamond.bound = bound;
 Diamond.makeFragment = makeFragment;
 Diamond.clean = clean;

@@ -1,4 +1,4 @@
-import { makeDiv } from './fragmentUtil'; 
+import { makeDiv, toFragment } from './fragmentUtil'; 
 
 const textMustache = /({{[^#\/]+?}})/g;
 const mustacheBrackets = /[{{|}}]/g;
@@ -8,11 +8,30 @@ const textElName = 'text-node';
 const sectionElName = 'section-node';
 const tempName = 'temp-name';
 
-export default function parser( html ){
+const staticBundle = ( host, bindings ) => ({
+	html: host.innerHTML.replace( /data-bind=""/g, 'data-bind' ),
+	defs: bindings
+});
+
+const liveBundle = ( host, bindings ) => ({
+	fragment: toFragment( host ),
+	bindings
+});
+
+export default function parser( raw, options = { live: false } ){
 	
+	var { html, hash } = processMustaches( raw );
+	const div = makeDiv( html, { clean: false } );
+	
+	const bundle = options.live ? liveBundle : staticBundle;
+
+	return makeBindings( div, { hash, bundle } );
+}
+
+function processMustaches( html ) {
 	const hash = Object.create( null );
-	var i = 0;
 	
+	var i = 0;
 	html = html.trim().replace( textMustache, match =>  {
 		const name = `t${i++}`;
 		const ref = match.replace( mustacheBrackets, '' ).trim();
@@ -43,13 +62,16 @@ export default function parser( html ){
 		return replace;
 	});
 	
-	const div = makeDiv( html, { clean: false } );
-
-	return makeBindings( div, hash );
-	
+	return { html, hash };
 }
 
 const BINDING_ATTR = 'data-bind';
+
+function makeBindings( host, template ) {
+	makeSectionBindings( host, template );
+	makeTextBindings( host, template );
+	return template.bundle( host, rollupBindings( host, template.hash ) );
+}
 
 function rollupBindings( host, hash ) {
 	
@@ -59,7 +81,7 @@ function rollupBindings( host, hash ) {
 	};
 	
 	const getBinding = bindings => {
-		return bindings.length === 1 ? bindings[0] : { binder: 'wrap', bindings };
+		return bindings.length === 1 ? bindings[0] : { binder: 'wrap', wrapped: bindings };
 	};
 	
 	const nodeList = host.querySelectorAll( `[${BINDING_ATTR}]` );
@@ -81,16 +103,9 @@ function rollupBindings( host, hash ) {
 	return ordered;
 }
 
-function makeBindings( host, hash ) {
-	makeSectionBindings( host, hash );
-	makeTextBindings( host, hash );
-	const bindings = rollupBindings( host, hash );
-	const html = host.innerHTML.replace( /data-bind=""/g, 'data-bind' );
+function makeSectionBindings( host, template ) {
 	
-	return { html, bindings };
-}
-
-function makeSectionBindings( host, bindings ) {
+	const bindings = template.hash;
 	
 	[].slice.call( host.querySelectorAll( sectionElName ) )
 		.forEach( node => {
@@ -116,12 +131,14 @@ function makeSectionBindings( host, bindings ) {
 			// remove the data-bind from the node as "host" for child bindings
 			node.removeAttribute( BINDING_ATTR );
 			// recurse!
-			binding.children = makeBindings( node, bindings );
+			binding.children = makeBindings( node, template );
 		});
 }
 
-function makeTextBindings( host, bindings ) {
+function makeTextBindings( host, template ) {
 	
+	const bindings = template.hash;
+
 	[].slice.call( host.querySelectorAll( textElName ) )
 		.filter( node => {
 			const name = node.getAttribute( tempName );
