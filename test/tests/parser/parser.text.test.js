@@ -3,19 +3,12 @@ import parser from './parser/parser';
 
 module( 'parser', () => {
 	
-	test( 'trims', t => {
-		const { html } = parser(`
-			<div></div>
-		`);
-		t.equal( html, '<div></div>' );
-	});
-	
 	module( 'text' );
 
 	test( 'text binding', t => {
 		t.deepEqual( parser( '<div>{{ hello }}</div>' ), {
 			html: '<div data-bind></div>',
-			bindings: [
+			defs: [
 				{ ref: 'hello', binder: 'text' }
 			]
 		});
@@ -24,7 +17,7 @@ module( 'parser', () => {
 	test( 'orphan binding', t => {
 		t.deepEqual( parser( '{{ foo }}' ), {
 			html: '<text-node data-bind></text-node>',
-			bindings: [
+			defs: [
 				{ ref: 'foo', binder: 'childText' } 
 			]
 		});
@@ -33,7 +26,7 @@ module( 'parser', () => {
 	test( 'positioned text binding', t => {
 		t.deepEqual( parser( '<div>hello {{world}}</div>' ), {
 			html: '<div data-bind>hello <text-node></text-node></div>',
-			bindings: [
+			defs: [
 				{ ref: 'world', binder: 'childText', index: 1 } 	
 			]
 		});
@@ -42,9 +35,9 @@ module( 'parser', () => {
 	test( 'same ref twice', t => {
 		t.deepEqual( parser( '<div>{{foo}} {{foo}}</div>' ), {
 			html: '<div data-bind><text-node></text-node> <text-node></text-node></div>',
-			bindings: [{ 
+			defs: [{ 
 				binder: 'wrap',
-				bindings: [
+				wrapped: [
 					{ ref: 'foo', binder: 'childText' },
 					{ ref: 'foo', binder: 'childText', index: 2 }
 				]
@@ -55,9 +48,9 @@ module( 'parser', () => {
 	test( 'text in nested elements', t => {
 		t.deepEqual( parser( '<div>{{greeting}}<span>{{place}}</span>{{person}}</div>' ), {
 			html: '<div data-bind><text-node></text-node><span data-bind></span><text-node></text-node></div>',
-			bindings: [{ 
+			defs: [{ 
 				binder: 'wrap',
-				bindings: [
+				wrapped: [
 					{ ref: 'greeting', binder: 'childText' },
 					{ ref: 'person', binder: 'childText', index: 2 }
 				] 
