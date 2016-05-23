@@ -1,3 +1,4 @@
+
 export default function render( { fragment, bindings } ) {
 	
 	init( fragment );
@@ -26,7 +27,7 @@ export default function render( { fragment, bindings } ) {
 function init( fragment ) {
 	const nodes = fragment.querySelectorAll( 'text-node,section-node' );
 	
-	for( var i = 0, l = nodes.length, node, type, replacement, parent; i < l; i++ ) {
+	for( var i = 0, l = nodes.length, node, replacement, parent; i < l; i++ ) {
 		
 		node = nodes[i];
 		if ( node.localName === 'section-node' ) {

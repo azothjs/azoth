@@ -6,10 +6,5 @@ export default function mapDefsToBindings( defs ) {
 }
 
 function convert( defs ) {
-	return defs.map( def => {
-		// if ( def.template ) {
-		// 	def.template = convert( def.defs );
-		// }
-		return bound[ def.binder ]( def );
-	});	
+	return defs.map( def => bound[ def.binder ]( def ) );	
 }
