@@ -5,7 +5,11 @@
 	<title>💎 diamond</title>
 </head>
 <body>
-	<main id="app"></main>
+	<main id="app">
+		<h1>hello 💎 diamond</h1>
+		<section id='planets'></section>
+		<section id='asteroids'></section>
+	</main>
 	
 	<template id='template'>
 		<ul data-bind>
@@ -27,9 +31,9 @@
 		var parser = Diamond.parser;
 		
 		new Diamond({
-			el: document.getElementById( 'app' ),
+			el: document.getElementById( 'planets' ),
 			template: parser( `
-					<h1>hello 💎 diamond</h1>
+					<h1>planets...</h1>
 					<ul>
 						{{#for planets}}
 						<li>{{planet}}</li>
@@ -39,6 +43,25 @@
 				planets
 			}
 		});
+		
+		self.fetch( 'http://www.asterank.com/api/mpc' )
+			.then( r => r.json() )
+			.then( asteroids => {
+				new Diamond({
+					el: document.getElementById( 'asteroids' ),
+					template: parser( `
+							<h2>minor planets...</h2>
+							<ul>
+								{{#for asteroids}}
+								<li>{{readable_des}} </li>
+								{{/for}}
+							</ul>`, { live: true } ),
+					data: {
+						asteroids
+					}
+				});
+			})
+			.catch( err => console.error );
 	
 
 	</script>
