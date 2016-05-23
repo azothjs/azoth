@@ -26,29 +26,13 @@
 	<script>
 		var parser = Diamond.parser;
 		
-		function getTemplate() {	
-			return parser( `
-					<ul class='todo-list' data-bind>
-						{{#for items}}
-						<li>
-							<div class="view">
-								<span class="toggle" data-done="{{done}}"></span>
-								<label>{{planet}}</label>
-								<button class="destroy"></button>
-							</div>
-						</li>
-						{{/for}}
-					</ul>`, { live: true } );
-		}	
-				
-		
 		new Diamond({
 			el: document.getElementById( 'app' ),
 			template: parser( `
 					<h1>hello 💎 diamond</h1>
 					<ul>
 						{{#for planets}}
-						<li>{{name}}</li>
+						<li>{{planet}}</li>
 						{{/for}}
 					</ul>`, { live: true } ),
 			data: {
