@@ -1,5 +1,5 @@
 import Context from './Context';
-import templateRenderer from './templateRenderer';
+import renderer from './renderer';
 import bound from './bindings/bound';
 import { makeFragment, clean } from './parser/domUtil'; 
 import parser from './parser/parser';
@@ -8,7 +8,7 @@ export default class Diamond {
 	
 	constructor( { template, el, data = {} } ) {
 		const context = this.context = new Context( data );
-		const node = templateRenderer( template )( context );
+		const node = renderer( template )( context );
 		el.appendChild( node );
 	}	
 }

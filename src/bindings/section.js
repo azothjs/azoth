@@ -1,9 +1,9 @@
-import templateRenderer from '../templateRenderer';
+import renderer from '../renderer';
 import blocks from '../blocks';
 
 export default function sectionBinding ( binding ) {
 	
-	const render = templateRenderer( binding.template );
+	const render = renderer( binding.template );
 	const { type, index = 0 } = binding;
 	const block = blocks[ type ];
 	
@@ -16,7 +16,8 @@ export default function sectionBinding ( binding ) {
 		anchor.textContent = type;
 		
 		block( context, binding, context => {
-			host.insertBefore( render( context ), anchor );
+			const node = render( context );
+			host.insertBefore( node, anchor );
 		});
 	};
 }
