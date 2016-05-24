@@ -69,6 +69,28 @@ test( 'node with two bindings', t => {
 	t.equal( fixture.children[0].children[0].value, 'foo' );
 });
 
+test( 'node with two text bindings', t => {
+	const template = {
+		fragment: Diamond.makeFragment(`
+			<div data-bind><text-node></text-node>: <text-node></text-node></div>
+		`),
+		bindings: [
+			bound.wrap([
+				bound.childText( { ref: 'foo' } ),
+				bound.childText( { ref: 'bar', index: 2 } )	
+			])
+		]
+	};
+	
+	new Diamond( { 
+		template, 
+		data: { foo: 'foo', bar: 'bar' }, 
+		el: fixture 
+	});
+	
+	t.equal( fixture.innerHTML, '<div>foo: bar</div>' );
+});
+
 
 test( 'nested elements and text', t => {
 
@@ -93,6 +115,47 @@ test( 'nested elements and text', t => {
 	
 	t.equal( fixture.innerHTML, '<div><span>foo</span><span>label: bar</span></div>' );
 });
+
+test( 'section with node with two ', t => {
+
+	const template = {
+		fragment: Diamond.makeFragment( `
+			<ul data-bind><section-node></section-node></ul>
+		` ),
+		bindings: [
+			bound.section( { 
+				type: 'for', 
+				ref: 'items', 
+				template: {
+					fragment: Diamond.makeFragment( 
+						`<li data-bind><text-node></text-node>: <text-node></text-node></li>`
+					),
+					bindings: [
+						bound.wrap([
+							bound.childText( { ref: 'foo' } ),
+							bound.childText( { ref: 'bar', index: 2 } )
+						])
+					]
+				}
+			})
+		]
+	};
+	
+	new Diamond( { 
+		template, 
+		data: { 
+			items: [
+				{ foo: 'foo1', bar: 'bar1' },
+				{ foo: 'foo2', bar: 'bar2' },
+				{ foo: 'foo3', bar: 'bar3' }
+			]
+		},
+		el: fixture 
+	});
+	
+	t.equal( fixture.innerHTML, '<ul><li>foo1: bar1</li><li>foo2: bar2</li><li>foo3: bar3</li><!--for--></ul>' );
+});
+
 
 (function testFor(){
 	

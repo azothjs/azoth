@@ -32,14 +32,14 @@ module( 'parser', () => {
 		});
 	});
 
-	test( 'same ref twice', t => {
-		t.deepEqual( parser( '<div>{{foo}} {{foo}}</div>' ), {
+	test( 'two text ref in element', t => {
+		t.deepEqual( parser( '<div>{{foo}} {{bar}}</div>' ), {
 			html: '<div data-bind><text-node></text-node> <text-node></text-node></div>',
 			defs: [{ 
 				binder: 'wrap',
 				wrapped: [
 					{ ref: 'foo', binder: 'childText' },
-					{ ref: 'foo', binder: 'childText', index: 2 }
+					{ ref: 'bar', binder: 'childText', index: 2 }
 				]
 			}]
 		});

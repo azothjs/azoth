@@ -4,10 +4,10 @@ import childText from './childText';
 import property from './property';
 import attribute from './attribute';
 
-function wrap( bindings ) {
-	const l = bindings.length;
+function wrap( wrapped ) {
+	const l = wrapped.length;
 	return ( context, node ) => {
-		for( var i = 0; i < l; i++ ) bindings[i]( context, node );
+		for( var i = 0; i < l; i++ ) wrapped[i]( context, node );
 	}; 
 }
 

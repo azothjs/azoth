@@ -6,8 +6,8 @@ import parser from './parser/parser';
 
 export default class Diamond {
 	
-	constructor( { template, data, el } ) {
-		const context = new Context( data );
+	constructor( { template, el, data = {} } ) {
+		const context = this.context = new Context( data );
 		const node = templateRenderer( template )( context );
 		el.appendChild( node );
 	}	

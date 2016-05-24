@@ -6,5 +6,8 @@ export default function mapDefsToBindings( defs ) {
 }
 
 function convert( defs ) {
-	return defs.map( def => bound[ def.binder ]( def ) );	
+	return defs.map( def => {
+		const definition = def.binder === 'wrap' ? convert( def.wrapped ) : def;
+		return bound[ def.binder ]( definition ); 
+	});	
 }

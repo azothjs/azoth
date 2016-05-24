@@ -34,6 +34,25 @@ module( 'parser', () => {
 			}]
 		});
 	});
+	
+	test( 'section with element that has two text bindings', t => {
+		t.deepEqual( parser( '<ul>{{#for items}}<li>{{foo}}: {{bar}}</li>{{/for}}</ul>' ), {
+			html: '<ul data-bind><section-node></section-node></ul>',
+			defs: [{
+				binder: 'section', type: 'for', ref: 'items',
+				template: {
+					html: '<li data-bind><text-node></text-node>: <text-node></text-node></li>',
+					defs: [{ 
+						binder: 'wrap', 
+						wrapped: [
+							{ ref: 'foo', binder: 'childText' },
+							{ ref: 'bar', binder: 'childText', index: 2 }
+						] 
+					}]	
+				} 	
+			}]
+		});
+	});
 
 
 });
