@@ -30,7 +30,7 @@
 	<script>
 		var parser = Diamond.parser;
 		
-		new Diamond({
+		const diamond = new Diamond({
 			el: document.getElementById( 'planets' ),
 			template: parser( `
 					<h1>planets...</h1>
@@ -38,30 +38,33 @@
 						{{#for planets}}
 						<li>{{planet}}</li>
 						{{/for}}
+					</ul>
+					
+					<h2>minor planets...</h2>
+					<ul>
+						{{#for asteroids}}
+						<li>{{{{readable_des}} ({{epoch}})</li>
+						{{/for}}
 					</ul>`, { live: true } ),
 			data: {
 				planets
 			}
 		});
 		
-		self.fetch( 'http://www.asterank.com/api/mpc' )
+		var url =  'http://www.asterank.com/api/mpc'
+		var request = new Request( 'http://www.colourlovers.com/api/colors?format=json', {
+			method: 'GET', 
+			mode: 'no-cors'
+		});
+		
+		self.fetch( url )
 			.then( r => r.json() )
 			.then( asteroids => {
-				new Diamond({
-					el: document.getElementById( 'asteroids' ),
-					template: parser( `
-							<h2>minor planets...</h2>
-							<ul>
-								{{#for asteroids}}
-								<li>{{readable_des}} </li>
-								{{/for}}
-							</ul>`, { live: true } ),
-					data: {
-						asteroids
-					}
-				});
+				console.time( `${asteroids.length} asteroids set` );
+				diamond.context.set( 'asteroids', asteroids );
+				console.timeEnd( `${asteroids.length} asteroids set` );
 			})
-			.catch( err => console.error );
+			.catch( err => console.error( err ) );
 	
 
 	</script>

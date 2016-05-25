@@ -10,7 +10,7 @@ test( 'simple node with text', t => {
 	
 	const template = {
 		fragment: Diamond.makeFragment( 
-			`<div data-bind><text-node></text-node></div>`
+			`<div data-bind></div>`
 		),
 		bindings: [ bound.text( { ref: 'foo' } ) ]
 	};

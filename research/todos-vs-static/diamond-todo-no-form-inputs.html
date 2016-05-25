@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>💎 diamond</title>
+	<title>💎diamond</title>
 	
 	<link rel="stylesheet" href="css/base.css">
 	<link rel="stylesheet" href="css/index.css">
 </head>
 <body>
 	<main class='todo-app'></main>
+	
 	
 	<template id='app'>
 		<ul class='todo-list' data-bind>
@@ -19,17 +20,16 @@
 	<template id='todo'>
 		<li>
 			<div class="view">
-				<input data-bind class="toggle" type="checkbox">
+				<span data-bind class="toggle"></span>
 				<label data-bind><text-node></text-node></label>
 				<button class="destroy"></button>
 			</div>
-			<input data-bind class="edit" value="">
 		</li>
 	</template>
 	
-	<script src='../diamond.js'></script>
+	<script src='../../diamond.js'></script>
 	<script src='getDataAndFragment.js'></script>
-	
+
 	<script>
 		var bound = Diamond.bound;
 		
@@ -39,21 +39,20 @@
 				bindings: [
 					bound.section( { 
 						type: 'for', 
-						ref: 'items',
+						ref: 'items', 
 						template: {
 							fragment: getFragment( 'todo' ),
 							bindings: [
-								bound.property( { name: 'checked', ref: 'done' } ),
+								bound.attribute( { name: 'data-done', ref: 'done' } ),
 								bound.text( { ref: 'name' } ),
-								bound.property( { name: 'value', ref: 'name' } ),
 							]
 						}
 					})
 				]
 			};
-		}
+		}	
+
 	</script>
-	
 	<script src='renderWithTimings.js'></script>
 
 </body>
