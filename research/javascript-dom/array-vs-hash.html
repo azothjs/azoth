@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>array vs hash</title>
+</head>
+<body>
+	<main class='todo-app'>
+		<h2>perf - see console</h2>
+	</main>
+	
+	<script>
+		
+	(function run(){
+		
+		
+		var times = 1000;
+		
+		var nodes = [];
+		var bindingsArray = [];
+		var bindingsHash = Object.create( null );
+		var length = 20;
+		
+		for( var n = 0, name = '', node = null, fn = null; n < length; n++ ) {
+			name = `f${n}`;
+		
+			node = document.createElement( 'div' );
+			node.setAttribute( 'data-bind', name );
+			nodes.push( node );
+		
+			fn = function( node ) { node };
+			bindingsArray.push( fn );
+			bindingsHash[ name ] = fn;
+		}
+		
+		
+		console.time( `array ${times} times` );
+		for( var i = 0; i < times; i++ ){
+			for( var e = 0; e < length; e++ ) {
+				bindingsArray[e]( nodes[e] );
+			}
+		}
+		console.timeEnd( `array ${times} times` );
+		
+		
+		
+		console.time( `hash ${times} times` );
+		for( var i = 0; i < times; i++ ){
+			for( var e = 0, node = null; e < length; e++ ) {
+				node = nodes[e];
+				bindingsHash[ node.dataset.bind ]( node );
+			}
+		}
+		console.timeEnd( `hash ${times} times` );
+		
+		
+		
+		
+		
+	})();
+	</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>vanilla js</title>
+</head>
+<body>
+	<main class='todo-app'>
+		<ul class='todo-list' id='target'></ul>
+	</main>
+	
+	<template id='template'>
+		<li>
+			<div class="view">
+				<input class="toggle" type="checkbox">
+				<label>Taste JavaScript</label>
+				<button class="destroy"></button>
+			</div>
+			<input class="edit" value="Create a TodoMVC template">
+		</li>
+	</template>
+	
+	
+	<div id='vanilla'>
+		<li>
+			<div class="view">
+				<input class="toggle" type="checkbox">
+				<label>Taste JavaScript</label>
+				<button class="destroy"></button>
+			</div>
+			<input class="edit" value="Create a TodoMVC template">
+		</li>
+	</div>
+	
+	<script>
+		
+				
+		var template = document.getElementById('template').content;
+        var fragment = document.createDocumentFragment();
+		var childNodes = document.getElementById('vanilla').childNodes;
+		var childNode = null;
+		while( childNode = childNodes[0] ) fragment.appendChild( childNode );
+		
+		var times = 1000;
+		
+		
+		console.time( `vanilla ${times} times` );
+		for( var i = 0; i < times; i++ ){
+			fragment.cloneNode( true );
+		}
+		console.timeEnd( `vanilla ${times} times` );
+		
+		
+		console.time( `template ${times} times` );
+		for( var i = 0; i < times; i++ ){
+			template.cloneNode( true );
+		}
+		console.timeEnd( `template ${times} times` );
+	</script>
+</body>
+</html>

@@ -35,6 +35,22 @@ module( 'parser', () => {
 		});
 	});
 	
+	
+	test( 'nested sections', t => {
+		t.deepEqual( parser( '<ul>{{#for items}}<li>{{.}}</li>{{/for}}</ul>' ), {
+			html: '<ul data-bind><section-node></section-node></ul>',
+			defs: [{
+				binder: 'section', type: 'for', ref: 'items',
+				template: {
+					html: '<li data-bind></li>',
+					defs: [
+						{ binder: 'text', ref: '.' }
+					]	
+				} 	
+			}]
+		});
+	});
+	
 	test( 'section with element that has two text bindings', t => {
 		t.deepEqual( parser( '<ul>{{#for items}}<li>{{foo}}: {{bar}}</li>{{/for}}</ul>' ), {
 			html: '<ul data-bind><section-node></section-node></ul>',

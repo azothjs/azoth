@@ -7,43 +7,31 @@
 <body>
 	<main id="app">
 		<h1>hello 💎 diamond</h1>
-		<section id='planets'></section>
-		<section id='asteroids'></section>
+		<section id='sol'></section>
 	</main>
-	
-	<template id='template'>
-		<ul data-bind>
-			{{#for items}}
-			<li>
-				<div class="view">
-					<span class="toggle">{{done}}</span>
-					<label>{{name}}</label>
-					<button class="destroy"></button>
-				</div>
-			</li>
-			{{/for}}
-		</ul>
-	</template>
 	
 	<script src='../diamond.js'></script>
 	<script src='./planets.js'></script>
 	<script>
 		var parser = Diamond.parser;
 		
-		const diamond = new Diamond({
-			el: document.getElementById( 'planets' ),
-			template: parser( `
-					<h1>planets...</h1>
-					<ul>
-						{{#for planets}}
-						<li>{{planet}}</li>
-						{{/for}}
-					</ul>
-					
+		/*
+		
 					<h2>minor planets...</h2>
 					<ul>
 						{{#for asteroids}}
 						<li>{{{{readable_des}} ({{epoch}})</li>
+						{{/for}}
+					</ul>
+		*/
+		
+		const diamond = new Diamond({
+			el: document.getElementById( 'sol' ),
+			template: parser( `
+					<h1>planets...</h1>
+					<ul>
+						{{#for planets}}
+						<li>{{planet}}: {{#for children}}{{.}} {{/for}}</li>
 						{{/for}}
 					</ul>`, { live: true } ),
 			data: {
@@ -57,14 +45,14 @@
 			mode: 'no-cors'
 		});
 		
-		self.fetch( url )
-			.then( r => r.json() )
-			.then( asteroids => {
-				console.time( `${asteroids.length} asteroids set` );
-				diamond.context.set( 'asteroids', asteroids );
-				console.timeEnd( `${asteroids.length} asteroids set` );
-			})
-			.catch( err => console.error( err ) );
+		// self.fetch( url )
+		// 	.then( r => r.json() )
+		// 	.then( asteroids => {
+		// 		console.time( `${asteroids.length} asteroids set` );
+		// 		diamond.context.child( 'asteroids' ).set( asteroids );
+		// 		console.timeEnd( `${asteroids.length} asteroids set` );
+		// 	})
+		// 	.catch( err => console.error( err ) );
 	
 
 	</script>

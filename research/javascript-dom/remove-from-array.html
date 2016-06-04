@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>remove from array</title>
+</head>
+<body>
+	<main class='todo-app'>
+		<h2>perf - see console</h2>
+	</main>
+	
+	<script>
+		
+	(function run(){
+		
+		
+		var times = 1000;
+		
+		var dense = [];
+		var sparse = [];
+		var sparseFilled = [];
+		var length = 200;
+		
+		for( var n = 0, fn = null; n < length; n++ ) {
+			fn = function(value){};
+			dense.push(fn);
+			sparse.push(fn);
+			sparseFilled.push(fn);
+		}
+		
+		var NO_OP = function(){};
+		
+		console.time( `splice ${times} times` );
+		for( var i = 0, copy = null; i < times; i++ ){
+			copy = dense.slice();
+			copy.splice( copy.indexOf( dense[ length/2 ] ), 1 );
+		}
+		console.timeEnd( `splice ${times} times` );
+		
+		
+		console.time( `sparse ${times} times` );
+		for( var i = 0, copy = null; i < times; i++ ){
+			copy = sparse.slice();
+			sparse[2] = void 0;
+		}
+		console.timeEnd( `sparse ${times} times` );
+		
+		// console.time( `sparse forEached ${times} times` );
+		// for( var i = 0; i < times; i++ ){
+		// 	sparse.forEach( fn => {
+		// 		fn( 'foo' );
+		// 	});
+		// }
+		// console.timeEnd( `sparse forEached ${times} times` );
+		
+		console.time( `sparse filled ${times} times` );
+		for( var i = 0, copy = null; i < times; i++ ){
+			copy = sparseFilled.slice();
+			copy[2] = NO_OP	
+		}
+		console.timeEnd( `sparse filled ${times} times` );
+		
+		
+		
+		
+		
+	})();
+	</script>
+</body>
+</html>

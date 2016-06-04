@@ -25,6 +25,8 @@
 		
 	(function cloneRender(){
 		
+		
+		console.time( 'render' );
 		// var template = document.getElementsByTagName('template')[0].content;
 		
         var template = document.createDocumentFragment();
@@ -84,6 +86,8 @@
 		
 		document.getElementById( 'target' ).appendChild( fragment );
 		
+		
+		console.timeEnd( 'render' );
 	})();
 	</script>
 </body>

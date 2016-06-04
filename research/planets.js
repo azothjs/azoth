@@ -11,7 +11,8 @@ var planets = [ {
   "temperature_low_f" : "-153",
   "size_miles" : "2159",
   "distance_from_sun_miles" : "238000",
-  "rotation_earth_days" : "27.3"
+  "rotation_earth_days" : "27.3",
+  children: [ 'a', 'b', 'c' ]
 }
 , {
   "temperature_low_f_2" : "-300",
@@ -26,7 +27,8 @@ var planets = [ {
   "temperature_low_f" : "-184",
   "size_miles" : "3032",
   "distance_from_sun_miles" : "36000000",
-  "rotation_earth_days" : "59"
+  "rotation_earth_days" : "59",
+  children: [ 'd', 'e', 'f' ]
 }
 , {
   "temperature_high_f" : "900",

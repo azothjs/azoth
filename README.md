@@ -1,14 +1,149 @@
 # 💎 diamond
 
-superstatic ui rendering library:
+## Templates
 
-* fast or faster than same content rendered as a static document
-* supports nested sections
-* some simple data-bindng (think todo list)
+Modelling the flow of data through the template
 
-`diamond` is an attempt to adapt the fastest vanilla js solution to 
-data-binding and turn that into a rendering engine. For more technical details, 
-see [this explanation](./HOW-IT-WORKS.md).
+```
+
+class Todos extends Component {	
+
+	static template( Todo, AddNew ) {
+		return <# (todos) => {
+			<ul>
+				<# todos.map( (todo, i) => {
+					<li>
+						<Todo(todo) on-remove="()=>todos.splice(i, 1)"/>
+					</li>
+				}) #>
+				<li><AddNew on-add="task=>todos.push({ task, done: false })"/></li>
+			<ul>	
+		} #>;
+	};
+	
+	constructor(){
+		fetch('api/todos').then(todos => this.data.todos = todos);
+	}
+	
+	render() {
+		
+	}
+	
+};
+
+
+class Todos extends Component {	
+
+	static template( Todo, AddNew ) {
+		return <# (todos) => {
+			<ul>
+				<# todos.map( (todo, i) => {
+					<li>
+						<Todo(todo) on-remove="()=>todos.splice(i, 1)"/>
+					</li>
+				}) #>
+				<li><AddNew on-add="task=>todos.push({ task, done: false })"/></li>
+			<ul>	
+		} #>;
+	};
+	
+	constructor( data ){
+		
+	}
+	
+};
+
+	
+const Todos = ( Todo, AddNew ) => {
+	return <# (todos) => {
+		<ul>
+			<# todos.map( (todo, i) => {
+				<li>
+					<Todo(todo) on-remove="()=>todos.splice(i, 1)"/>
+				</li>
+			}) #>
+			<li><AddNew on-add="task=>todos.push({ task, done: false })"/></li>
+		<ul>
+	} #>;
+};
+	
+
+const Todo = () => {
+	return <# ({ task, done = false }) => {
+		
+		<div class="todo" class-done={done}>
+		
+			<# let editing = false #>
+			
+			<input type="checkbox" checked=done>
+			
+			<# when ( editing ) {
+				<input value="${task}" 
+						on-render="({ node }) => node.focus()"
+						on-blur-enterKey="({ node }) => {
+							task = node.value;
+							editing = false;
+						}">
+			}# else {
+				<span on-click="()=>editing = true">${task}</span>
+			}#>
+			
+			<button on-click="()=>this.fire('remove')">X</button>
+			
+		</div>
+	}#>;
+}
+
+
+const AddNew = () => {
+	return <# () => {
+		<# let newItem = ''; #>
+
+		<form on-submit="()=>{
+				this.fire('add', newItem);
+				newItem = '';
+			}" onsubmit="return false;">
+			
+			<input value=newItem>
+			<button type="submit">add</button>
+			
+		</form>
+	} #>;
+};
+
+```
+
+Emphasis on explicit binding required
+
+ string interpolation ###
+
+### `${ ref }` string interpolation ###
+
+On render text nodes and attribute values (one-time binding):
+
+```
+<span class="${importance}">TODO: ${task}</span>
+```
+
+### `<\# ref \#>` bound interpolation ###
+
+Extended binding text nodes and attribute values 
+(like `{{` and `}}` in mustache or handlebars):
+
+```
+<span class="<#importance#>"TODO: <#task#></span>
+```
+
+## `<\# ref \#>` 
+
+```
+hello ${world}
+```
+# Assignment
+
+```
+<
+
 
 ## Running the Project
 

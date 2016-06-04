@@ -4,7 +4,7 @@ import blocks from '../blocks';
 export default function sectionBinding ( binding ) {
 	
 	const render = renderer( binding.template );
-	const { type, index = 0 } = binding;
+	const { type, ref, index = 0 } = binding;
 	const block = blocks[ type ];
 	
 	if ( !block ) throw new Error( `Unrecognized section type ${type}` );
@@ -15,9 +15,24 @@ export default function sectionBinding ( binding ) {
 		// TODO: move this to init (matters for sections of sections)
 		anchor.textContent = type;
 		
-		block( context, binding, context => {
-			const node = render( context );
+		const instances = [];
+		
+		const add = ( node, start = instances.length ) => {
+			// const node = render( context );
+			const childNodes = node.childNodes;
+			
+			const insert = childNodes.length === 1 
+				? childNodes[0] 
+				: [].slice.call( node.childNodes );
+				
+			instances.splice( start, 0, insert );
 			host.insertBefore( node, anchor );
-		});
+		};
+		
+		const remove = ( start = 0, length = 1 ) => {
+			instances.splice( start, length );
+		};
+		
+		block( context, ref, render, add, remove );
 	};
 }

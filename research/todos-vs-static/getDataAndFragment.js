@@ -20,6 +20,5 @@ function getData() {
 }
 
 function getFragment( id ) {
-	// TODO: research: it appears cloning a template element directly is slightly slower
-	return Diamond.clean( document.getElementById( id ).content/*.cloneNode( true )*/ );
+	return Diamond.clean( document.getElementById( id ).content );
 }

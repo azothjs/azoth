@@ -216,6 +216,69 @@ test( 'section with node with two ', t => {
 	});
 }());
 
+
+(function testNestedFor(){
+	
+	const childBindings = [
+		bound.childText({ ref: 'value' }),
+		bound.section( { 
+			type: 'for', 
+			ref: 'children', 
+			template: {
+				fragment: Diamond.makeFragment( 
+					`<li data-bind></li>`
+				),
+				bindings: [
+					bound.text( { ref: '.' } )
+				]
+			}
+		})
+	];
+	
+	const bindings = [
+		bound.section( { 
+			type: 'for', 
+			ref: 'items', 
+			template: {
+				fragment: Diamond.makeFragment( `
+					<li data-bind><text-node></text-node>
+						<ul data-bind>
+							<section-node></section-node>
+						</ul>
+					</li>
+				` ),
+				bindings: childBindings
+			}
+		})
+	];
+	
+	test( 'nested #for sections', t => {
+
+		const template = {
+			fragment: Diamond.makeFragment( `
+				<ul data-bind>
+					<section-node></section-node>
+				</ul>
+			` ),
+			bindings
+		};
+		
+		new Diamond( { 
+			template, 
+			data: { items: [
+				{ value: 'A', children: [ 1, 2, 3 ] },
+				{ value: 'B', children: [ 4, 5, 6 ] },
+				{ value: 'C', children: [ 7, 8, 9 ] } 
+			]}, 
+			el: fixture 
+		});	
+		
+		t.equal( fixture.innerHTML, '<ul><li>A<ul><li>1</li><li>2</li><li>3</li><!--for--></ul></li><li>B<ul><li>4</li><li>5</li><li>6</li><!--for--></ul></li><li>C<ul><li>7</li><li>8</li><li>9</li><!--for--></ul></li><!--for--></ul>' );
+
+	});
+	
+}());
+
 (function testIf() {
 	
 	const template = {

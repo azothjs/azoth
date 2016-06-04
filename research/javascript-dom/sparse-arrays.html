@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>sparse arrays</title>
+</head>
+<body>
+	<main class='todo-app'>
+		<h2>perf - see console</h2>
+	</main>
+	
+	<script>
+		
+	(function run(){
+		
+		
+		var times = 1000;
+		
+		var dense = [];
+		var sparse = [];
+		var sparseFilled = [];
+		var length = 20;
+		
+		for( var n = 0, fn = null; n < length; n++ ) {
+			fn = function(value){};
+			dense.push(fn);
+			sparse.push(fn);
+			sparseFilled.push(fn);
+		}
+		
+		var NO_OP = function(){};
+		
+		// [ 0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 
+		//   17, 18, 19, 20, 30, 31, 32, 33, 34, 35, 36, 
+		//   40, 41, 42, 43, 44, 45, 46, 
+		//   120, 121, 122, 123, 124, 125, 129 ]
+		  
+		[ 0, 4, 5 ]
+		.forEach( i => {
+			dense.splice( i, 1 );
+			sparse[i] = null;
+			sparseFilled[i] = NO_OP
+		});
+		
+		console.time( `dense ${times} times` );
+		for( var i = 0; i < times; i++ ){
+			for( var e = 0, l = dense.length, fn = null; e < l; e++ ) {
+				fn = dense[e];
+				fn( 'foo' );
+			}
+		}
+		console.timeEnd( `dense ${times} times` );
+		
+		
+		
+		console.time( `sparse ${times} times` );
+		for( var i = 0; i < times; i++ ){
+			for( var e = 0, l = sparse.length, fn = null; e < l; e++ ) {
+				fn = sparse[e];
+				if ( fn ) fn( 'foo' );
+			}
+		}
+		console.timeEnd( `sparse ${times} times` );
+		
+		// console.time( `sparse forEached ${times} times` );
+		// for( var i = 0; i < times; i++ ){
+		// 	sparse.forEach( fn => {
+		// 		fn( 'foo' );
+		// 	});
+		// }
+		// console.timeEnd( `sparse forEached ${times} times` );
+		
+		console.time( `sparse filled ${times} times` );
+		for( var i = 0; i < times; i++ ){
+			for( var e = 0, l = sparseFilled.length, fn = null; e < l; e++ ) {
+				fn = sparseFilled[e];
+				if ( fn !== NO_OP ) fn( 'foo' );
+			}
+		}
+		console.timeEnd( `sparse filled ${times} times` );
+		
+		
+		
+		
+		
+	})();
+	</script>
+</body>
+</html>

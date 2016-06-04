@@ -2,27 +2,38 @@ export default class Context {
 	constructor ( data ) {
 		this.data = data;
 		this.refs = Object.create( null );
+		this.children = Object.create( null );
+		this.adds = [];
+		this.removes = [];
 	}
 
-	value ( ref ) {
-		return ref === '.' ? this.data : this.data[ ref ];
+	value ( ref = '.' ) {
+		return ( ref == null || ref === '.' ) ? this.data : this.data[ ref ];
 	}
 	
 	child( ref ) {
-		return new Context( this.get( ref ) );
+		const context = this.children[ ref ];
+		if ( context ) return context;
+		
+		return this.children[ ref ] = new Context( this.value( ref ) );
 	}
 	
-	set ( ref, value ) {
-		this.data[ ref ] = value;
-		const handlers = this.refs[ ref ];
+	set ( value ) {
+		this.data = value;
+		const handlers = this.adds;
 		if ( handlers ) {
-			for( var i = 0, l = handlers.length; i < l; i++ ) {
-				handlers[i]( value );
+			for( var h = 0, l = handlers.length, handler = null; h < l; h++ ) {
+				handler = handlers[h];
+				if ( Array.isArray( value ) ) {
+					for( var i = 0, vl = value.length; i < vl; i++ ) {
+						handler( this.child(i) );
+					}
+				}
 			}
 		}
 	}
 	
-	observe( ref, handler ) {
+	onproperty( ref, handler ) {
 		const refs = this.refs;
 		const handlers = refs[ ref ] || ( refs[ ref ] = [] );
 		// TODO: how to unsubscribe
@@ -30,5 +41,28 @@ export default class Context {
 		
 		const value = this.value( ref );
 		if ( value != null ) handler( value );
+	}
+	
+	onval( handler ) {
+		
+	}
+	
+	// these go tp iterable context only i think
+	onadd( handler ) {
+		// TODO: how to unsubscribe
+		this.adds.push( handler );
+		
+		const val = this.data;
+		// TODO: [Symbol.iterator]
+		if ( Array.isArray( val ) ) {
+			for( var i = 0, l = val.length; i < l; i++ ) {
+				handler( this.child(i) );
+			}
+		}
+	}
+	
+	onremove( handler ) {
+		// TODO: how to unsubscribe
+		this.removes.push( handler );
 	}
 }
