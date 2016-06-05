@@ -1,0 +1,43 @@
+<data-source on-context="(todos) => {}">
+	<ul>
+		<for-section data-source="todos.map( (todo, i) => {} )">
+			<li>
+				<component name="Todo" invoke="todo" remove="()=>this.splice(i, 1)"/>
+			</li>
+		</for-section>
+		
+		<li><component name="TextInput" add="task=>todos.push({ task, done: false })"/></li>
+	</ul>
+</data-source>
+	
+	
+<data-source on-context="({ task, done = false }) => {}">
+		
+		<div class="todo" class-done="done">
+		
+			<input type="checkbox" checked=done>
+			
+			<if-else-section add-state="{editing:false}">
+		
+				<if-section when="editing">
+					<input bind-value="task" 
+							on-render="({ node }) => node.focus()"
+							on-blur-enterKey="({ node }) => {
+								task = node.value;
+								editing = false;
+							}">
+				</if-section>
+		
+				<else-section>
+					<span on-click="()=>editing = true">
+						<text-node data-source="task"></text-node>
+					</span>
+				</else-section>
+		
+			</if-else-section>
+			
+			<button on-click="()=>this.remove()">X</button>
+			
+		</div>
+</data-source>
+	
