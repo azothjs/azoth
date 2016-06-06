@@ -1,6 +1,6 @@
 export default function attributeBinding ( { name, ref } ) {
 	
-	return ( context, element ) => {
+	return ( element, context ) => {
 		element.setAttribute( name, context.value( ref ) );
 	};
 }

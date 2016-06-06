@@ -73,7 +73,7 @@ module.exports = {
         "max-params": "off",
         "max-statements": "off",
         "max-statements-per-line": "error",
-        "new-cap": "error",
+        "new-cap": "off",
         "new-parens": "error",
         "newline-after-var": "off",
         "newline-before-return": "off",

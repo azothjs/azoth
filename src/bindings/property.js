@@ -1,6 +1,6 @@
 export default function propertyBinding ( { name, ref } ) {
 	
-	return ( context, obj ) => {
+	return ( obj, context ) => {
 		obj[ name ] = context.value( ref );
 	};
 }

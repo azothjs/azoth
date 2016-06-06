@@ -2,19 +2,19 @@ export default function renderer( { fragment, bindings } ) {
 	
 	init( fragment );
 	
-	return function render( context ) {
+	return function render( context, owner ) {
 		const clone = fragment.cloneNode( true );
 		const nodes = clone.querySelectorAll( '[data-bind]' );
 		
 		// orphan bindings are stored at the end,
 		// and executed first as top of node tree
 		if ( fragment._orphans ) {
-			bindings[ nodes.length ]( context, clone );
+			bindings[ nodes.length ]( clone, context, owner );
 		}
 		
 		for ( var i = 0, l = nodes.length, node = null; i < l; i++ ) {
 			node = nodes[i];
-			bindings[i]( context, node );
+			bindings[i]( node, context, owner );
 			
 			// TODO: make optional, adds a ms or so
 			node.removeAttribute( 'data-bind' );
@@ -26,8 +26,8 @@ export default function renderer( { fragment, bindings } ) {
 }
 
 const replace = {
-	'text-node': node => document.createTextNode( node.nodeValue ),
-	'section-node': node => document.createComment( node.nodeValue )
+	'text-node': node => document.createTextNode( '' ),
+	'section-node': node => document.createComment( 'section' )
 };
 
 const query = Object.keys( replace ).join();
@@ -35,7 +35,9 @@ const query = Object.keys( replace ).join();
 function init( fragment ) {
 	const nodes = fragment.querySelectorAll( query );
 	
-	for( var i = 0, l = nodes.length, node = null, parent = null, newNode = null; i < l; i++ ) {
+	let  node = null, parent = null, newNode = null;
+	
+	for( var i = 0, l = nodes.length; i < l; i++ ) {
 		node = nodes[i];
 		parent = node.parentNode;
 		newNode = replace[ node.localName ]( node );

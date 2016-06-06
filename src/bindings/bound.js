@@ -6,8 +6,8 @@ import attribute from './attribute';
 
 function wrap( wrapped ) {
 	const l = wrapped.length;
-	return ( context, node ) => {
-		for( var i = 0; i < l; i++ ) wrapped[i]( context, node );
+	return ( node, context, owner ) => {
+		for( var i = 0; i < l; i++ ) wrapped[i]( node, context, owner );
 	}; 
 }
 

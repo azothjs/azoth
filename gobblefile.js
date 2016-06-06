@@ -21,7 +21,7 @@ const qunit = gobble( 'test' ).include( 'qunit.js' );
 
 const test = gobble( [ index, tests, qunit, 'src' ] )
 	.transform( 'rollup', {
-		plugins: [ buble() ],
+		// plugins: [ buble() ],
 		entry: 'index.js',
 		dest:  'test.js',
 		format: 'iife'
@@ -29,15 +29,15 @@ const test = gobble( [ index, tests, qunit, 'src' ] )
 
 const build = gobble( [ index, 'src' ] )
 	.transform( 'rollup', {
-		plugins: [ buble() ],
+		// plugins: [ buble() ],
 		entry: 'main.js',
 		dest:  'diamond.js',
 		format: 'iife'
 	});
 
-const min = build.transform( 'uglifyjs', { ext: '.min.js' });
+// const min = build.transform( 'uglifyjs', { ext: '.min.js' });
 
 const html = gobble( 'test' ).include( 'index.html' );
 const research = gobble( 'research' ).moveTo( 'research' );
 
-module.exports = gobble( [ test, build, min, html, research ] );
+module.exports = gobble( [ test, build, /*min,*/ html, research ] );

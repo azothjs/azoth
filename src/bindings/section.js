@@ -9,16 +9,17 @@ export default function sectionBinding ( binding ) {
 	
 	if ( !block ) throw new Error( `Unrecognized section type ${type}` );
 	
-	return ( context, { childNodes } ) => {
+	return ( { childNodes }, context, owner ) => {
 		const anchor = childNodes[ index ];
 		const host = anchor.parentNode;
-		// TODO: move this to init (matters for sections of sections)
+		
+		// TODO: make this dev only
 		anchor.textContent = type;
 		
 		const instances = [];
 		
-		const add = ( node, start = instances.length ) => {
-			// const node = render( context );
+		const add = ( context, start = instances.length ) => {
+			const node = render( context );
 			const childNodes = node.childNodes;
 			
 			const insert = childNodes.length === 1 
@@ -33,6 +34,6 @@ export default function sectionBinding ( binding ) {
 			instances.splice( start, length );
 		};
 		
-		block( context, ref, render, add, remove );
+		block( context, ref, add, remove );
 	};
 }

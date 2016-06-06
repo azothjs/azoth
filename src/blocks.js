@@ -1,34 +1,22 @@
 const blocks = {
-	'for': function forBlock( context, ref, render, add, remove ) {
+	'for': function forBlock( context, ref, add, remove ) {
 		
 		const iterable = context.child( ref );
-		iterable.onadd( ( child, index = 0 ) => {
-			add( render( child ), index );
-		});
-		
+		iterable.onadd( add );
 		iterable.onremove( remove );
 		
-		
-		// // TODO: unsubsribe
-		// context.observe( ref, value => {
-		// 	if ( Array.isArray( value ) ) {
-		// 		for ( var i = 0, l = value.length; i < l; i++ ) {
-		// 			add( new Context( value[i] ) );
-		// 		}
-		// 	}
-		// });
 	},
 	
-	'if': function ifBlock( context, ref, render, add, remove ) {
+	'if': function ifBlock( context, ref, add, remove ) {
 		context.onproperty( ref, value => {
-			if ( value ) add( render( context ) );
+			if ( value ) add( context );
 			else remove();
 		});
 	},
 	
-	'with': function withBlock( context, ref, render, add, remove ) {
+	'with': function withBlock( context, ref, add, remove ) {
 		const withContext = context.child( ref );
-		if ( withContext.value() != null ) add( render( withContext ) );
+		if ( withContext.value() != null ) add( withContext );
 		else remove();
 	}	
 };
