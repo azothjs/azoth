@@ -28,11 +28,12 @@ export function $(strings, ...values) {
 	const newStrings = strings.slice();
 	newStrings.raw = strings.raw.slice();
 	
-	function addTextBinding( binding, isAttr, omitAttr = false ) {
-		if ( !binding.type ) binding.type = isAttr ? 'attr' : 'text';
+	function addTextBinding( binding, key, omitQuotes = false ) {
+		if ( key ) binding.name = key;
+		if ( !binding.type ) binding.type = key ? 'attr' : 'text';
 		const name = bindings.add( binding );
-		const prefix = omitAttr ? '' : '"" ';
-		return isAttr
+		const prefix = omitQuotes ? '' : '"" ';
+		return key
 			? `${prefix}${TEMP_ATTR}-${name}`
 			: `<text-node data-bind="${name}"></text-node>`;
 	}
@@ -44,22 +45,23 @@ export function $(strings, ...values) {
 			const name = bindings.add( value.binding );	
 			return `<section-node data-bind="${name}"></section-node>`;
 		}
-		const attr = strings[i].match( attrPattern );
-		const isAttr = !!attr;
+		const match = strings[i].match( attrPattern );
+		const attr = match ? match[1] : '';
 
-		if ( isAttr && attr[1] && attr[1].startsWith( 'on-' ) ) {
-			const events = attr[1].slice(3).split( '-' );
+		if ( attr.startsWith( 'on-' ) ) {
+			const events = attr.slice(3).split( '-' );
 			newStrings[i] = newStrings[i].replace( attrPattern, ' ' );
 			newStrings.raw[i] = newStrings.raw[i].replace( attrPattern, ' ' );
-			return addTextBinding({ 
+			const name = bindings.add({ 
 				expr: value.toString(),
 				type: 'event',
 				events 
-			}, true, true );
+			});
+			return `${TEMP_ATTR}-${name}`;	 
 		}
 		
 		if ( value instanceof Context ) {
-			return addTextBinding( { ref: value.getPath() }, isAttr );
+			return addTextBinding( { ref: value.getPath() }, attr );
 		}
 		
 		if ( value instanceof ComponentInvocation ) {
@@ -71,11 +73,11 @@ export function $(strings, ...values) {
 		}
 		
 		if ( value.prototype instanceof Component ) {
-			return 'component'; //value.name;
+			return 'component';
 		}
 
 		if( typeof value === 'function' ) {
-			return addTextBinding( { expr: value.toString() }, isAttr );
+			return addTextBinding( { expr: value.toString() }, attr );
 		}
 
 		else {

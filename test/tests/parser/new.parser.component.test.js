@@ -62,6 +62,7 @@ module( 'new parser', () => {
 					type: 'component',
 					constructor: ComponentB 
 				}, {
+					name: 'foo',
 					ref: '.',
 					type: 'attr'
 				}, {

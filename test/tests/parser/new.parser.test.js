@@ -78,7 +78,11 @@ module( 'new parser', () => {
 		
 		t.deepEqual( result, {
 			html: '<span class data-bind></span>',
-			bindings: [{ ref: '.', type: 'attr' }]
+			bindings: [{ 
+				ref: '.', 
+				name: 'class',
+				type: 'attr' 
+			}]
 		});
 	});
 	
