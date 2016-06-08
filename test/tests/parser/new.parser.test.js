@@ -1,126 +1,139 @@
 import { test, module } from './qunit';
-import parser from './parser/parser';
+import { $, getContext } from './new-parser/parser';
 
 module( 'new parser', () => {
 	
-	class Bindings {
-		constructor() {
-			this.hash = Object.create( null );
-			this.b = 0;
-		}
-		
-		add( binding ) {
-			const name = `b${this.b++}`;
-			this.hash[ name ] = binding;
-			return name;
-		}
-	}
-	
-	class Context{
-		
-		constructor( { prop = '.', bindings = new Bindings() } = {} ){
-			this.prop = prop;
-			this._bindings = bindings;
-			this.children = Object.create( null );
-		}
-		
-		[Symbol.toPrimitive]() {
-			return this.toString();
-		}
-		
-		toString() {
-			const name = this._bindings.add({ 
-				ref: this.prop,
-				type: 'text'
-			});
-			return `<text-node data-bind="${name}"></text-node>`;
-		}
-		
-		map( map ) {
-			const context = getContext();
-			const fragment = map( context ).trim();
-			const name = this._bindings.add({ 
-				ref: this.prop,
-				type: 'map',
-				template: { fragment, bindings: context.bindings }
-			});			
-			return `<section-node data-bind="${name}"></section-node>`;
-		}
-		
-		get bindings() {
-			return this._bindings.hash;
-		}
-		
-		getChildContext( name ) {
-			let child = this.children[ name ];
-			if ( !child ) {
-				child = getContext({ prop: name, bindings: this._bindings });
-				this.children[ name ] = child; 
-			}
-			return child;
-		}
-	}
-	
-	function getContext( options ){
-		const context = new Context( options );
-
-		const handler = {
-			get( target, name ){
-				if ( name in target ) return target[name];
-				
-				return target.getChildContext( name );
-			}
-		};
-
-		return new Proxy( context, handler );
-
-	}
-	
 	test( 'root text node', t => {
 		
-		const template = ( place => `
-			<span>hello ${place}</span>
-		`);
+		const template = place => $`<span>hello ${place}</span>`;
 		
-		const context = getContext();
-		const result = template( context ).trim();
-		t.equal( result, '<span>hello <text-node data-bind="b0"></text-node></span>' );
-		t.deepEqual( context.bindings, {
-			b0: { ref: '.', type: 'text' }
+		const result = template( getContext() );
+		
+		t.deepEqual( result, {
+			html: '<span>hello <text-node data-bind></text-node></span>',
+			bindings: [{ ref: '.', type: 'text' }]
 		});
+		
 	});
 	
 	test( 'two children of root in text nodes', t => {
 		
-		const template = ( ({ first, last }) => `
+		const template = ({ first, last }) => $`
 			<span>${first} ${last}</span>
-		`);
+		`;
 		
-		const context = getContext();
-		const result = template( context ).trim();
-		t.equal( result, '<span><text-node data-bind="b0"></text-node> <text-node data-bind="b1"></text-node></span>' );
+		const result = template( getContext() );
+
+		t.deepEqual( result, {
+			html: '<span><text-node data-bind></text-node> ' +
+				'<text-node data-bind></text-node></span>',
+			bindings: [
+				{ ref: 'first', type: 'text' },
+				{ ref: 'last', type: 'text' }
+			]
+		});
+	});
+
+	test( 'grandchild prop', t => {
+		
+		const template = parent => $`${parent.child.grandchild}`;
+		
+		const result = template( getContext() );
+		
+		t.deepEqual( result, {
+			html: '<text-node data-bind></text-node>',
+			bindings: [{ 
+				ref: [ 'grandchild', 'child' ], 
+				type: 'text' 
+			}]
+		});
 	});
 	
 	test( 'map root context', t => {
 		
-		const template = ( colors => `
-			<ul>${colors.map( color => `<li>${color}</li>` )}</ul>
-		`);
+		const template = colors => $`
+			<ul>${colors.map( color => $`<li>${color}</li>` )}</ul>
+		`;
 		
-		const context = getContext();
-		const result = template( context ).trim();
-		t.equal( result, '<ul><section-node data-bind="b0"></section-node></ul>' );
-		t.deepEqual( context.bindings, {
-			b0: { 
+		const result = template( getContext() );
+
+		t.deepEqual( result, {
+			html: '<ul><section-node data-bind></section-node></ul>',
+			bindings: [{ 
 				ref: '.', 
 				type: 'map', 
 				template: {
-					fragment: `<li><text-node data-bind="b0"></text-node></li>`,
-					bindings: {
-						b0: { ref: '.', type: 'text' }
-					}
+					html: '<li><text-node data-bind></text-node></li>',
+					bindings: [{ ref: '.', type: 'text' }]
 				}
-			}
+			}]
+		});
+	});
+		
+	test( 'attribute value', t => {
+		
+		const template = className => $`<span class=${className}></span>`;
+		
+		const result = template( getContext() );
+		
+		t.deepEqual( result, {
+			html: '<span class data-bind></span>',
+			bindings: [{ ref: '.', type: 'attr' }]
+		});
+	});
+	
+	test( 'expression text node', t => {
+		
+		const template = ({ x, y }) => $`
+			${x} + ${y} = ${() => x + y}
+		`;
+		
+		const result = template( getContext() );
+		
+		t.deepEqual( result, {
+			html: '<text-node data-bind></text-node> + ' +
+				'<text-node data-bind></text-node> = ' +
+				'<text-node data-bind></text-node>',
+			bindings: [
+				{ ref: 'x', type: 'text' },
+				{ ref: 'y', type: 'text' },
+				{ expr: '() => x + y', type: 'text' }
+			]
+		});
+	});
+
+	// TODO: for now need to use expressions () => place()
+
+	// test( 'expression root function call', t => {
+		
+	// 	const template = place => $`
+	// 		<span>hello ${place()}</span>
+	// 	`;
+		
+	// 	const result = template( context ).trim();
+
+
+	// 	t.equal( result, '<binding-set name="bset0"></binding-set><span>hello <text-node data-bind="b0"></text-node></span>' );
+		
+	// 	t.deepEqual( $.getSet( 'bset0' ), {
+	// 		b0: { ref: '.', type: 'text' }
+	// 	});
+	// });
+
+	test( 'event handler', t => {
+		
+		const template = () => $`
+			<span on-click-touchstart=${({ node }) => node.textContent = 'yo!'}></span>
+		`;
+		
+		const result = template();
+		t.deepEqual( result, {
+			html: '<span data-bind></span>',
+			bindings: [{ 
+				expr: `({ node }) => node.textContent = 'yo!'`, 
+				type: 'event',
+				events: [ 'click', 'touchstart' ] 
+			}]
 		});
 	});
 	

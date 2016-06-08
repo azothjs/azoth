@@ -1,20 +1,20 @@
 import { Component } from 'diamond-alpha';
 import request from 'superagent';
 
+const bind = () => {};
+
 class Todos extends Component {	
 
 	static template({ Todo, TextInput }) {
-		return `<# (todos) => {
+		return bind`${todos => bind`
 			<ul>
-				<# todos.map( (todo, i) => {
-					<li>
-						<Todo(todo) remove="()=>this.splice(i, 1)"/>
-					</li>
-				}) #>
-				<li><TextInput add="task=>todos.push({ task, done: false })"/></li>
-			<ul>
-			
-		} #>`;	
+				${todos.map( (todo, i) => bind`<li>
+						<${Todo(todo)} on-remove=${() => this.splice(i, 1)}/>
+					</li>`
+				)}
+				<li><${TextInput()} on-add=${task => todos.push({ task, done: false })}/></li>
+			<ul>`
+		}`;	
 
 	}
 	
@@ -27,8 +27,6 @@ class Todos extends Component {
 			.remove(todo => request.del(`api/todos/${todo.id}`))
 			.finally(err => this.error = err);
 	}
-	
-	
 	
 };
 

@@ -20,7 +20,7 @@ const BINDING_ATTR = 'data-bind';
 const parsers = [
 	getSectionParser,
 	getAttrParser,
-	getTextParser,
+	getTextParser
 ].map( get => get( BINDING_ATTR ) );
 
 export default function parser( raw, options = { live: false } ){

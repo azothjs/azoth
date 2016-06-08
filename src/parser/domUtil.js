@@ -25,8 +25,6 @@ export function makeHtml( html ) {
 	return makeDiv( html ).innerHTML;
 }
 
-// http://www.sitepoint.com/removing-useless-nodes-from-the-dom/
-// TODO: get node type code
 export function clean(node)
 {
 	for( var n = 0, child; n < node.childNodes.length; n++ ) {
@@ -34,9 +32,6 @@ export function clean(node)
 		if( (child.nodeType === 3 && !/\S/.test(child.nodeValue)) ) {
 			node.removeChild(child);
 			n --;
-		}
-		else if( child.nodeType === 1 ) {
-			clean(child);
 		}
 	}
 	return node;
