@@ -19,6 +19,21 @@ class Bindings {
 	}
 }
 
+class When {
+	constructor( condition, truthy, falsey ) {
+		this.binding = {
+			type: 'when',
+			condition: condition.toString(),
+			truthy: truthy.toString(),
+			falsey: falsey ? falsey.toString() : null
+		};
+	}
+}
+
+export function when( condition, truthy, falsey ) {
+	return new When( condition, truthy, falsey );
+}
+
 export const getContext = Context.get;
 
 export function $(strings, ...values) {
@@ -41,7 +56,7 @@ export function $(strings, ...values) {
 	const attrPattern = /\s*?([a-zA-Z0-9\-]+?)=$/;
 
 	const mapped = values.map( ( value, i ) => {
-		if ( value instanceof Mapping ) {	
+		if ( value instanceof Mapping || value instanceof When ) {	
 			const name = bindings.add( value.binding );	
 			return `<section-node data-bind="${name}"></section-node>`;
 		}
@@ -91,7 +106,7 @@ export function $(strings, ...values) {
 		});
 
 	const { hash } = bindings;
-	const host = makeDiv( raw );
+	const host = makeDiv( raw.trim() /*, { clean: false }*/ );
 	rollupAttributes( host, hash );
 	const ordered = rollupBindings( host, hash );
 

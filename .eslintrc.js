@@ -84,7 +84,7 @@ module.exports = {
         "no-caller": "error",
         "no-catch-shadow": "error",
         "no-cond-assign": "off",
-        "no-confusing-arrow": "error",
+        "no-confusing-arrow": "off",
         "no-continue": "error",
         "no-div-regex": "off",
         "no-duplicate-imports": "error",
@@ -100,7 +100,7 @@ module.exports = {
         "no-implicit-coercion": "off",
         "no-implicit-globals": "error",
         "no-implied-eval": "error",
-        "no-inline-comments": "error",
+        "no-inline-comments": "off",
         "no-inner-declarations": [
             "error",
             "functions"

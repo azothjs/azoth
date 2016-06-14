@@ -27,9 +27,9 @@ module( 'new parser', () => {
 		const result = render( context );
 		
 		t.deepEqual( result, {
-			html: '<component data-bind></component>' +
-				  '<component data-bind></component>' +
-				  '<component data-bind></component>',
+			html:  `<component data-bind></component>
+					<component data-bind></component>
+					<component data-bind></component>`,
 			bindings: [
 				{ type: 'component', constructor: ComponentA },
 				{ type: 'component', constructor: ComponentB },
@@ -44,10 +44,11 @@ module( 'new parser', () => {
 			
 			static template( ComponentB ) {
 				return foo => $`
-					<${ComponentB()} foo=${foo} on-add=${() => console.log( foo )}/>
+					<${ComponentB()} foo=${foo} on-add=${() =>  console.log( foo )}/>
 				`;
 			}
 		}
+
 		class ComponentB extends Component {}
 		
 		const render = ComponentA.compile( ComponentB );
@@ -73,6 +74,36 @@ module( 'new parser', () => {
 			}]
 		});
 	});
+
+	// test( 'todos component', () => {
+	// 	class Todos extends Component {	
+
+	// 		static template({ Todo, TextInput }) {
+	// 			return todos => $`
+	// 				<ul>
+	// 					${todos.map( (todo, i) => $`
+	// 						<li>
+	// 							<${Todo(todo)} on-remove=${() => todos.splice(i, 1)}/>
+	// 						</li>
+	// 					`)}
+						
+	// 					<li>
+	// 						<${TextInput()} on-add=${task => todos.push({ task, done: false })}/>
+	// 					</li>
+	// 				<ul>
+	// 			`;
+	// 		}
+	// 	}
+
+	// 	class Todo extends Component {}
+	// 	class TextInput extends Component {}
+		
+	// 	const render = Todos.compile({ Todo, TextInput });
+	// 	const context = getContext();
+	// 	const result = render( context );
+
+	// 	console.log( result );
+	// });
 	
 	
 });

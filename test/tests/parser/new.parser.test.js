@@ -1,5 +1,5 @@
 import { test, module } from './qunit';
-import { $, getContext } from './new-parser/parser';
+import { $, when, getContext } from './new-parser/parser';
 
 module( 'new parser', () => {
 	
@@ -86,6 +86,25 @@ module( 'new parser', () => {
 		});
 	});
 	
+	class W {
+		
+		render () {
+			return {
+				y: 2,
+				get z() {
+					return this.y * 2;
+				},
+				render: ( x ) => $`
+					<div>
+						<input value=${x}> + <input value=${y}>
+						<input value=*${this.y}*> = 
+						<span>${x + this.z}</span>
+					</div>
+					<button on-click="${() => x = y = 0}">reset</button>`
+			};
+		}
+	}
+
 	test( 'expression text node', t => {
 		
 		const template = ({ x, y }) => $`
@@ -140,5 +159,35 @@ module( 'new parser', () => {
 			}]
 		});
 	});
+
+	test( 'when', t => {
+
+		const template = fooish => $`
+			${when( 
+				() => fooish === 'foo', 
+				() => `<span>FOO</span>` 
+			)}
+		`;
+		
+		const result = template( getContext() );
+		
+		t.deepEqual( result, {
+			html: '<section-node data-bind></section-node>',
+			bindings: [{ 
+				condition: '() => fooish === \'foo\'',
+				falsey: null,
+				truthy: '() => `<span>FOO</span>`',
+				type: 'when'
+			}]
+		});
+	});
 	
+	test( 'when', t => {
+
+		const fooish = foo => $`<span>${foo}</span>`;
+
+		const template = foo => `${foo.bar ? fooish(foo) : ''}`;
+		
+		t.equal( template, 'not!');
+	});
 });

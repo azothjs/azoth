@@ -15,9 +15,9 @@ export function toFragment( childNodes ) {
 	return fragment;
 }
 
-export function makeDiv( html, options = { clean: true } ) {
+export function makeDiv( html /*, options = { clean: true }*/ ) {
 	div.innerHTML = html;
-	if ( options.clean ) clean( div );
+	//if ( options.clean ) clean( div );
 	return div;
 }
 
@@ -32,6 +32,9 @@ export function clean(node)
 		if( (child.nodeType === 3 && !/\S/.test(child.nodeValue)) ) {
 			node.removeChild(child);
 			n --;
+		}
+		else if( child.nodeType === 1 ) {
+			clean(child);
 		}
 	}
 	return node;

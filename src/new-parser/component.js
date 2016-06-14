@@ -12,12 +12,13 @@ export class Component {
 		const Specs = Components.map( c => {
 			if ( c.prototype instanceof Component ) return c.spec;
 			Object.keys(c)
-				.filter( key => c[ key ] instanceof Component )
+				.filter( key => c[ key ].prototype instanceof Component )
 				.forEach( key => c[ key ] = c[ key ].spec );
 			return c;
 		});
 		return this.template( ...Specs );
 	}
+	
 	static get spec() {
 		return new Proxy( this, { 
 			apply: ( ...args ) => new ComponentInvocation( this, args )

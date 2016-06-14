@@ -4,21 +4,20 @@
 
 Modelling the flow of data through the template
 
-```
+```js
 
 class Todos extends Component {	
 
 	static template( Todo, AddNew ) {
-		return <# (todos) => {
-			<ul>
-				<# todos.map( (todo, i) => {
-					<li>
-						<Todo(todo) on-remove="()=>todos.splice(i, 1)"/>
-					</li>
-				}) #>
-				<li><AddNew on-add="task=>todos.push({ task, done: false })"/></li>
-			<ul>	
-		} #>;
+		return (todos) => $`<ul>
+			<# todos.map( (todo, i) => {
+				<li>
+					<${Todo(todo)} on-remove=${() => todos.splice(i, 1)"/>
+				</li>
+			}) #>
+			<li><AddNew on-add="task=>todos.push({ task, done: false })"/></li>
+		<ul>`;	
+		};
 	};
 	
 	constructor(){

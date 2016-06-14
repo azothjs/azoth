@@ -46,11 +46,7 @@ test( 'text node only', t => {
 test( 'node with two bindings', t => {
 	
 	const template = {
-		fragment: Diamond.makeFragment(`
-			<div>
-				<input data-bind>
-			</div>
-		`),
+		fragment: Diamond.makeFragment(`<div><input data-bind></div>`),
 		bindings: [
 			bound.wrap([
 				bound.attribute( { name: 'class', ref: 'klass' } ),
@@ -71,9 +67,9 @@ test( 'node with two bindings', t => {
 
 test( 'node with two text bindings', t => {
 	const template = {
-		fragment: Diamond.makeFragment(`
-			<div data-bind><text-node></text-node>: <text-node></text-node></div>
-		`),
+		fragment: Diamond.makeFragment(
+			`<div data-bind><text-node></text-node>: <text-node></text-node></div>`
+		),
 		bindings: [
 			bound.wrap([
 				bound.childText( { ref: 'foo' } ),
@@ -95,12 +91,12 @@ test( 'node with two text bindings', t => {
 test( 'nested elements and text', t => {
 
 	const template = {
-		fragment: Diamond.makeFragment(`
-			<div>
+		fragment: Diamond.makeFragment(
+			`<div>
 				<span data-bind></span>
 				<span data-bind>label: <text-node></text-node></span>
-			</div>
-		`),
+			</div>`
+		),
 		bindings: [
 			bound.text( { ref: 'foo' } ),
 			bound.childText( { ref: 'bar', index: 1 } )
@@ -113,15 +109,20 @@ test( 'nested elements and text', t => {
 		el: fixture 
 	});
 	
-	t.equal( fixture.innerHTML, '<div><span>foo</span><span>label: bar</span></div>' );
+	t.equal( fixture.innerHTML, 
+			`<div>
+				<span>foo</span>
+				<span>label: bar</span>
+			</div>`
+	);
 });
 
 test( 'section with node with two ', t => {
 
 	const template = {
-		fragment: Diamond.makeFragment( `
-			<ul data-bind><section-node></section-node></ul>
-		` ),
+		fragment: Diamond.makeFragment(
+			`<ul data-bind><section-node></section-node></ul>`
+		),
 		bindings: [
 			bound.section( { 
 				type: 'for', 
@@ -177,11 +178,9 @@ test( 'section with node with two ', t => {
 	test( '#for section', t => {
 
 		const template = {
-			fragment: Diamond.makeFragment( `
-				<ul data-bind>
-					<section-node></section-node>
-				</ul>
-			` ),
+			fragment: Diamond.makeFragment(
+				`<ul data-bind><section-node></section-node></ul>`
+			),
 			bindings
 		};
 		
@@ -199,9 +198,7 @@ test( 'section with node with two ', t => {
 			
 
 		const template = {
-			fragment: Diamond.makeFragment( `
-				<section-node></section-node>
-			` ),
+			fragment: Diamond.makeFragment( `<section-node></section-node>` ),
 			bindings
 		};
 		
@@ -240,13 +237,11 @@ test( 'section with node with two ', t => {
 			type: 'for', 
 			ref: 'items', 
 			template: {
-				fragment: Diamond.makeFragment( `
-					<li data-bind><text-node></text-node>
-						<ul data-bind>
-							<section-node></section-node>
-						</ul>
-					</li>
-				` ),
+				fragment: Diamond.makeFragment(
+					'<li data-bind><text-node></text-node>' +
+						'<ul data-bind><section-node></section-node></ul>' +
+					'</li>'
+				),
 				bindings: childBindings
 			}
 		})
@@ -255,11 +250,9 @@ test( 'section with node with two ', t => {
 	test( 'nested #for sections', t => {
 
 		const template = {
-			fragment: Diamond.makeFragment( `
-				<ul data-bind>
-					<section-node></section-node>
-				</ul>
-			` ),
+			fragment: Diamond.makeFragment( 
+				`<ul data-bind><section-node></section-node></ul>`
+			),
 			bindings
 		};
 		
@@ -282,9 +275,7 @@ test( 'section with node with two ', t => {
 (function testIf() {
 	
 	const template = {
-		fragment: Diamond.makeFragment( `
-			<section-node></section-node>
-		` ),
+		fragment: Diamond.makeFragment( `<section-node></section-node>` ),
 		bindings: [
 			bound.section({ 
 				type: 'if', 
@@ -324,9 +315,7 @@ test( 'section with node with two ', t => {
 (function testWith() {
 	
 	const template = {
-		fragment: Diamond.makeFragment( `
-			<section-node></section-node>
-		` ),
+		fragment: Diamond.makeFragment( `<section-node></section-node>` ),
 		bindings: [
 			bound.section({ 
 				type: 'with', 
@@ -340,8 +329,8 @@ test( 'section with node with two ', t => {
 					),
 					bindings: [
 						bound.wrap([
-							bound.childText( { ref: 'a' } ),
-							bound.childText( { ref: 'b', index: 1 } )
+							bound.childText( { ref: 'a', index: 1 } ),
+							bound.childText( { ref: 'b', index: 3 } )
 						])
 					]
 				}
@@ -355,7 +344,10 @@ test( 'section with node with two ', t => {
 			data: { obj: { a: 'A', b: 'B' } }, 
 			el: fixture 
 		});	
-		t.equal( fixture.innerHTML, '<p>AB</p><!--with-->' );
+		t.equal( fixture.innerHTML, `<p>
+							A
+							B
+						</p><!--with-->` );
 	});
 
 	test( '#with section, no object', t => {
