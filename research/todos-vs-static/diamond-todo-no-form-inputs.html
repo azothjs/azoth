@@ -36,21 +36,28 @@
 		function getTemplate() {	
 			return {
 				fragment: getFragment( 'app' ),
-				bindings: [
-					bound.section( { 
+				bindings() {
+					const b1 = bound.section( { 
 						type: 'for', 
-						ref: 'items', 
+						ref: 'items',
 						template: {
 							fragment: getFragment( 'todo' ),
-							bindings: [
-								bound.attribute( { name: 'data-done', ref: 'done' } ),
-								bound.text( { ref: 'name' } ),
-							]
+							bindings() {
+								const b1 = bound.attribute( { name: 'data-done', ref: 'done' } );
+								const b2 = bound.text( { ref: 'name' } );
+								return ( nodes, context ) => {
+									b1( nodes[0], context );
+									b2( nodes[1], context );
+								};
+							}
 						}
-					})
-				]
+					});
+					return ( nodes, context ) => {
+						b1( nodes[0], context );
+					};
+				}
 			};
-		}	
+		}
 
 	</script>
 	<script src='renderWithTimings.js'></script>
