@@ -44,7 +44,7 @@ module( 'new parser', () => {
 			
 			static template( ComponentB ) {
 				return foo => $`
-					<${ComponentB()} foo=${foo} on-add=${() =>  console.log( foo )}/>
+					<${ComponentB()} foo=${foo} on-add=${() => console.log( foo )}/>
 				`;
 			}
 		}

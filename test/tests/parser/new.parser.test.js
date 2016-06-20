@@ -160,34 +160,34 @@ module( 'new parser', () => {
 		});
 	});
 
-	test( 'when', t => {
+// 	test( 'when', t => {
 
-		const template = fooish => $`
-			${when( 
-				() => fooish === 'foo', 
-				() => `<span>FOO</span>` 
-			)}
-		`;
+// 		const template = fooish => $`
+// 			${when( 
+// 				() => fooish === 'foo', 
+// 				() => `<span>FOO</span>` 
+// 			)}
+// 		`;
 		
-		const result = template( getContext() );
+// 		const result = template( getContext() );
 		
-		t.deepEqual( result, {
-			html: '<section-node data-bind></section-node>',
-			bindings: [{ 
-				condition: '() => fooish === \'foo\'',
-				falsey: null,
-				truthy: '() => `<span>FOO</span>`',
-				type: 'when'
-			}]
-		});
-	});
+// 		t.deepEqual( result, {
+// 			html: '<section-node data-bind></section-node>',
+// 			bindings: [{ 
+// 				condition: '() => fooish === \'foo\'',
+// 				falsey: null,
+// 				truthy: '() => `<span>FOO</span>`',
+// 				type: 'when'
+// 			}]
+// 		});
+// 	});
 	
-	test( 'when', t => {
+// 	test( 'when', t => {
 
-		const fooish = foo => $`<span>${foo}</span>`;
+// 		const fooish = foo => $`<span>${foo}</span>`;
 
-		const template = foo => `${foo.bar ? fooish(foo) : ''}`;
+// 		const template = foo => `${foo.bar ? fooish(foo) : ''}`;
 		
-		t.equal( template, 'not!');
-	});
+// 		t.equal( template, 'not!');
+// 	});
 });
