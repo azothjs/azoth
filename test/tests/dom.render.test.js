@@ -5,14 +5,18 @@ module( 'dom render' );
 
 const { bound } = Diamond;
 
-
 test( 'simple node with text', t => {
 	
 	const template = {
 		fragment: Diamond.makeFragment( 
 			`<div data-bind></div>`
 		),
-		bindings: [ bound.text( { ref: 'foo' } ) ]
+		bindings() {
+			const b1 = bound.text( { ref: 'foo' } );
+			return ( nodes, context ) => {
+				b1( nodes[0], context );
+			};
+		}	
 	};
 	
 	new Diamond( { 
@@ -29,9 +33,12 @@ test( 'text node only', t => {
 	const template = {
 		fragment: Diamond.makeFragment( 
 			`<text-node data-bind></text-node>` ),
-		bindings: [
-			bound.childText( { ref: 'foo' } )
-		]
+		bindings() {
+			const b1 = bound.childText( { ref: 'foo' } );
+			return ( nodes, context, fragment ) => {
+				b1( fragment, context );
+			};
+		}
 	};
 	
 	new Diamond( { 
@@ -47,12 +54,14 @@ test( 'node with two bindings', t => {
 	
 	const template = {
 		fragment: Diamond.makeFragment(`<div><input data-bind></div>`),
-		bindings: [
-			bound.wrap([
-				bound.attribute( { name: 'class', ref: 'klass' } ),
-				bound.property( { name: 'value', ref: 'foo' } )	
-			])
-		]
+		bindings() {
+			const b1 = bound.attribute( { name: 'class', ref: 'klass' } );
+			const b2 = bound.property( { name: 'value', ref: 'foo' } );
+			return ( nodes, context ) => {
+				b1( nodes[0], context );
+				b2( nodes[0], context );
+			};
+		}
 	};
 	
 	new Diamond( { 
@@ -70,12 +79,14 @@ test( 'node with two text bindings', t => {
 		fragment: Diamond.makeFragment(
 			`<div data-bind><text-node></text-node>: <text-node></text-node></div>`
 		),
-		bindings: [
-			bound.wrap([
-				bound.childText( { ref: 'foo' } ),
-				bound.childText( { ref: 'bar', index: 2 } )	
-			])
-		]
+		bindings() {
+			const b1 = bound.childText( { ref: 'foo' } );
+			const b2 = bound.childText( { ref: 'bar', index: 2 } );	
+			return ( nodes, context ) => {
+				b1( nodes[0], context );
+				b2( nodes[0], context );
+			};
+		}
 	};
 	
 	new Diamond( { 
@@ -97,10 +108,14 @@ test( 'nested elements and text', t => {
 				<span data-bind>label: <text-node></text-node></span>
 			</div>`
 		),
-		bindings: [
-			bound.text( { ref: 'foo' } ),
-			bound.childText( { ref: 'bar', index: 1 } )
-		]
+		bindings() {
+			const b1 = bound.text( { ref: 'foo' } );
+			const b2 = bound.childText( { ref: 'bar', index: 1 } );	
+			return ( nodes, context ) => {
+				b1( nodes[0], context );
+				b2( nodes[1], context );
+			};
+		}
 	};
 	
 	new Diamond( { 
@@ -123,23 +138,28 @@ test( 'section with node with two ', t => {
 		fragment: Diamond.makeFragment(
 			`<ul data-bind><section-node></section-node></ul>`
 		),
-		bindings: [
-			bound.section( { 
+		bindings() {
+			const b1 = bound.section( { 
 				type: 'for', 
 				ref: 'items', 
 				template: {
 					fragment: Diamond.makeFragment( 
 						`<li data-bind><text-node></text-node>: <text-node></text-node></li>`
 					),
-					bindings: [
-						bound.wrap([
-							bound.childText( { ref: 'foo' } ),
-							bound.childText( { ref: 'bar', index: 2 } )
-						])
-					]
+					bindings() {
+						const b1 = bound.childText( { ref: 'foo' } );
+						const b2 = bound.childText( { ref: 'bar', index: 2 } );	
+						return ( nodes, context ) => {
+							b1( nodes[0], context );
+							b2( nodes[0], context );
+						};
+					}
 				}
-			})
-		]
+			});
+			return ( nodes, context ) => {
+				b1( nodes[0], context );
+			};
+		}
 	};
 	
 	new Diamond( { 
@@ -160,28 +180,32 @@ test( 'section with node with two ', t => {
 
 (function testFor(){
 	
-	const bindings = [
-		bound.section( { 
-			type: 'for', 
-			ref: 'items', 
-			template: {
-				fragment: Diamond.makeFragment( 
-					`<li data-bind></li>`
-				),
-				bindings: [
-					bound.text( { ref: '.' } )
-				]
-			}
-		})
-	];
-	
 	test( '#for section', t => {
 
 		const template = {
 			fragment: Diamond.makeFragment(
 				`<ul data-bind><section-node></section-node></ul>`
 			),
-			bindings
+			bindings() {
+				const b1 = bound.section( { 
+					type: 'for', 
+					ref: 'items', 
+					template: {
+						fragment: Diamond.makeFragment( 
+							`<li data-bind></li>`
+						),
+						bindings() {
+							const b1 = bound.text( { ref: '.' } );
+							return  ( nodes, context ) => {
+								b1( nodes[0], context );
+							};
+						}
+					}
+				});
+				return ( nodes, context ) => {
+					b1( nodes[0], context );
+				};
+			}
 		};
 		
 		new Diamond( { 
@@ -196,10 +220,28 @@ test( 'section with node with two ', t => {
 
 	test( '#for section - no top level element', t => {
 			
-
 		const template = {
 			fragment: Diamond.makeFragment( `<section-node></section-node>` ),
-			bindings
+			bindings() {
+				const b1 = bound.section( { 
+					type: 'for', 
+					ref: 'items', 
+					template: {
+						fragment: Diamond.makeFragment( 
+							`<li data-bind></li>`
+						),
+						bindings() {
+							const b1 = bound.text( { ref: '.' } );
+							return  ( nodes, context ) => {
+								b1( nodes[0], context );
+							};
+						}
+					}
+				});
+				return ( nodes, context, fragment ) => {
+					b1( fragment, context );
+				};
+			}
 		};
 		
 		new Diamond( { 
@@ -216,24 +258,31 @@ test( 'section with node with two ', t => {
 
 (function testNestedFor(){
 	
-	const childBindings = [
-		bound.childText({ ref: 'value' }),
-		bound.section( { 
+	const childBindings = () => {
+		const b1 = bound.childText({ ref: 'value' });
+		const b2 = bound.section( { 
 			type: 'for', 
 			ref: 'children', 
 			template: {
 				fragment: Diamond.makeFragment( 
 					`<li data-bind></li>`
 				),
-				bindings: [
-					bound.text( { ref: '.' } )
-				]
+				bindings() {
+					const b1 = bound.text( { ref: '.' } );
+					return( nodes, context ) => {
+						b1( nodes[0], context );
+					};
+				}
 			}
-		})
-	];
+		});
+		return ( nodes, context ) => {
+			b1( nodes[0], context );
+			b2( nodes[1], context );
+		};
+	};
 	
-	const bindings = [
-		bound.section( { 
+	const bindings = () => {
+		const b1 = bound.section( { 
 			type: 'for', 
 			ref: 'items', 
 			template: {
@@ -244,8 +293,12 @@ test( 'section with node with two ', t => {
 				),
 				bindings: childBindings
 			}
-		})
-	];
+		});
+
+		return ( nodes, context ) => {
+			b1( nodes[0], context );
+		};
+	};
 	
 	test( 'nested #for sections', t => {
 
@@ -276,20 +329,26 @@ test( 'section with node with two ', t => {
 	
 	const template = {
 		fragment: Diamond.makeFragment( `<section-node></section-node>` ),
-		bindings: [
-			bound.section({ 
+		bindings() {
+			const b1 = bound.section({ 
 				type: 'if', 
 				ref: 'condition', 
 				template: {
 					fragment: Diamond.makeFragment( 
 						`<li data-bind><text-node></text-node></li>`
 					),
-					bindings: [
-						bound.text( { ref: 'foo' } )
-					]
+					bindings() {
+						const b1 = bound.text( { ref: 'foo' } );
+						return ( nodes, context ) => {
+							b1( nodes[0], context );
+						};
+					}
 				}
-			})
-		]
+			});
+			return ( nodes, context, fragment ) => {
+				b1( fragment, context );
+			};
+		}
 	};
 	
 	test( '#if section true', t => {
@@ -312,6 +371,7 @@ test( 'section with node with two ', t => {
 	
 }());
 
+/*
 (function testWith() {
 	
 	const template = {
@@ -360,3 +420,4 @@ test( 'section with node with two ', t => {
 	});
 
 }());
+*/

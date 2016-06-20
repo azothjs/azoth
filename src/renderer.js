@@ -1,6 +1,7 @@
 export default function renderer( { fragment, bindings } ) {
 	
 	init( fragment );
+	const bind = typeof bindings === 'function' ? bindings() : null;
 	
 	return function render( context, owner ) {
 		const clone = fragment.cloneNode( true );
@@ -8,16 +9,15 @@ export default function renderer( { fragment, bindings } ) {
 		
 		// orphan bindings are stored at the end,
 		// and executed first as top of node tree
-		if ( fragment._orphans ) {
-			bindings[ nodes.length ]( clone, context, owner );
-		}
+		// if ( fragment._orphans ) {
+		// 	bindings[ nodes.length ]( clone, context, owner );
+		// }
+
+		bind( nodes, context, clone );
 		
-		for ( var i = 0, l = nodes.length, node = null; i < l; i++ ) {
-			node = nodes[i];
-			bindings[i]( node, context, owner );
-			
-			// TODO: make optional, adds a ms or so
-			node.removeAttribute( 'data-bind' );
+		// TODO: make optional, adds a ms or so
+		for ( var i = 0, l = nodes.length; i < l; i++ ) {
+			nodes[i].removeAttribute( 'data-bind' );
 		}
 		
 		return clone;

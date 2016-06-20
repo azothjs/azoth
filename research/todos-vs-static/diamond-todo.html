@@ -36,20 +36,28 @@
 		function getTemplate() {	
 			return {
 				fragment: getFragment( 'app' ),
-				bindings: [
-					bound.section( { 
+				bindings() {
+					const b1 = bound.section( { 
 						type: 'for', 
 						ref: 'items',
 						template: {
 							fragment: getFragment( 'todo' ),
-							bindings: [
-								bound.property( { name: 'checked', ref: 'done' } ),
-								bound.text( { ref: 'name' } ),
-								bound.property( { name: 'value', ref: 'name' } ),
-							]
+							bindings() {
+								const b1 = bound.property( { name: 'checked', ref: 'done' } );
+								const b2 = bound.text( { ref: 'name' } );
+								const b3 = bound.property( { name: 'value', ref: 'name' } );
+								return ( nodes, context ) => {
+									b1( nodes[0], context );
+									b2( nodes[1], context );
+									b3( nodes[2], context );
+								};
+							}
 						}
-					})
-				]
+					});
+					return ( nodes, context ) => {
+						b1( nodes[0], context );
+					};
+				}
 			};
 		}
 	</script>
