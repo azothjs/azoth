@@ -3,7 +3,7 @@ import request from 'superagent';
 
 export class Todos extends Component {	
 
-	static template({ Todo, TextInput }) {
+	$render({ Todo, TextInput }) {
 		return todos => $`
 			<ul>
 				${todos.map( (todo, i) => $`

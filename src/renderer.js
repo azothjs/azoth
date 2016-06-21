@@ -16,9 +16,9 @@ export default function renderer( { fragment, bindings } ) {
 		bind( nodes, context, clone );
 		
 		// TODO: make optional, adds a ms or so
-		// for ( var i = 0, l = nodes.length; i < l; i++ ) {
-		// 	nodes[i].removeAttribute( 'data-bind' );
-		// }
+		for ( var i = 0, l = nodes.length; i < l; i++ ) {
+			nodes[i].removeAttribute( 'data-bind' );
+		}
 		
 		return clone;
 	};

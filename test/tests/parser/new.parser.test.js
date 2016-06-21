@@ -1,5 +1,5 @@
 import { test, module } from './qunit';
-import { $, when, getContext } from './new-parser/parser';
+import { $, getContext } from './new-parser/parser';
 
 module( 'new parser', () => {
 	
