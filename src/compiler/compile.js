@@ -46,26 +46,22 @@ function parse( { expressions, quasis } ){
 		bindAttr( expr ){
 			const name = currentAttr;
 			const el = currentEl;
-			const attrs = el.attributes;
-
 			el.bound = true;
 
-			const binding = { 
+			// specialized binding type
+			const parts = name.split( '-' );
+			let type = '';
+			if( parts.length > 1 && ( type = specials[ parts[0] ] ) ) {
+				delete el.attributes[ name ];
+			}
+			type = type || 'attr';
+
+			el.bindings.push({ 
 				el, 
-				type: 'attr',
+				type,
 				name,
 				expr: expr.name 
-			};
-
-			el.bindings.push( binding );
-
-			const parts = name.split( '-' );
-			let special = ''; 
-			if( parts.length > 1 && ( special = specials[ parts[0] ] ) ) {
-				delete attrs[ name ];
-				binding.type = special;
-			}
-
+			});
 		},
 		onopentag( name ) {
 			const el = currentEl;
@@ -96,6 +92,22 @@ function parse( { expressions, quasis } ){
 				el, 
 				type: 'child-text',
 				expr: expr.name,
+				index: el.childCount
+			});
+		},
+		unwrite( count = 1 ) {
+			const current = html[ html.length - 1 ];
+			html[ html.length - 1] = current.slice( 0, -count );
+			console.log( html );
+		},
+		bindSection( expr ){
+			const el = currentEl;
+			el.bound = true;
+
+			el.bindings.push({  
+				el, 
+				type: 'section',
+				expr: expr,
 				index: el.childCount
 			});
 		},
@@ -130,8 +142,15 @@ function parse( { expressions, quasis } ){
 			handler.bindAttr( expressions[i] );
 		}
 		else if ( i < expressions.length && !inElTag ) {
-			parser.write( '<text-node></text-node>' );
-			handler.bindText( expressions[i] );
+			if( raw[ raw.length - 1 ] === '#' ) {
+				handler.unwrite();
+				parser.write( '<section-node></section-node>' );
+				handler.bindSection( expressions[i] );
+			}
+			else {
+				parser.write( '<text-node></text-node>' );
+				handler.bindText( expressions[i] );
+			}
 		}
 	});
 

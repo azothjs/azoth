@@ -1,38 +1,9 @@
 /* global describe, it, require */
 
-const acorn = require('acorn');
-// const fs = require( 'fs' );
-import getTagged from '../../src/compiler/getTagged';
 import compile from '../../src/compiler/compile';
 import chai from 'chai';
 const assert = chai.assert;
 
-describe( 'get tagged templates', () => {
-	let tagged, template;
-
-	const source = `
-		import { $ } from './new-parser/parser';
-
-		const template = ( place, foo ) => $\`<span class="hello" class-foo=\${foo} data-custom="custom">hello \${place}</span>\`;
-
-		export default template;
-	`;
-
-	it( 'finds $ tagged templates', () => {
-		
-		const tagged = getTagged( source );
-		assert.equal( tagged.length, 1 );
-		const quasi = tagged[0].quasi;
-
-		const expressions = quasi.expressions;
-		assert.equal( expressions.length, 2, 'expression length' );
-
-		const quasis = quasi.quasis;
-		assert.equal( quasis.length, 3, 'quaisis length' );
-
-	});
-});
-	
 describe( 'compiles', () => {
 
 	it( 'element attributes', () => {
@@ -56,6 +27,7 @@ describe( 'compiles', () => {
 			}]
 		);
 	});
+
 
 	it( 'element text nodes', () => {
 		const { html, bindings } = compile(`
@@ -93,6 +65,26 @@ describe( 'compiles', () => {
 				expr: 'place' 
 			}]
 		);
+
+		// const greeting = place => $`<span>hello *${place}</span>`;
+		// const render = $$(
+		// 	'<span data-bind>hello <text-node></text-node></span>',
+		// 	(() => { 
+		// 		const b0 = bound.text( { ref: 'place', index: 1 } );
+		// 		return nodes => {
+		// 			b0( nodes[0] );
+		// 		};
+		// 	})()
+		// );
+
+		// const render2 = function $$( fragment, bind ) {
+		// 	return () => {
+
+		// 	}
+		// }
+
+		// fb.on( 'value', render );
+
 		
 	});
 
@@ -151,5 +143,32 @@ describe( 'compiles', () => {
 				expr: 'greeting' 
 			}]
 		);	
+	});
+});
+
+describe( 'block compiles', () => {
+
+
+	it.skip( 'basic section', () => {
+		const compiled = compile(`
+			items => $\`<ul>
+				#\${ items.map( item => $\`
+					<li>\${ item }</li>
+				\`)}
+			</ul>\`
+		`);
+
+		assert.deepEqual( compiled, {
+			html: `<ul data-bind>
+				<section-node></section-node>
+			</ul>`,
+			bindings: [{ 
+				elIndex: 0,
+				type: 'section',
+				index: 1,
+				expr: '?' 
+			}]
+		});	
+		
 	});
 });

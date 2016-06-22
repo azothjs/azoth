@@ -6,9 +6,9 @@
   "scripts": {
     "start": "gobble",
     "build": "gobble build -f dist",
-    "test": "mocha --compilers js:babel-core/register --reporter mocha-better-spec-reporter test/compile/compile.test.js",
-    "dev-test": "mocha --compilers js:babel-core/register --reporter mocha-better-spec-reporter -w test/compile/compile.test.js",
-    "debug-test": "mocha --debug-brk test/compile/compile.test.js"
+    "test": "mocha --compilers js:babel-core/register --reporter mocha-better-spec-reporter test/compile",
+    "dev-test": "mocha --compilers js:babel-core/register --reporter mocha-better-spec-reporter -w test/compile",
+    "debug-test": "mocha --debug-brk test/compile"
   },
   "repository": "",
   "author": "",
