@@ -148,7 +148,6 @@ describe( 'compiles', () => {
 
 describe( 'block compiles', () => {
 
-
 	it.skip( 'basic section', () => {
 		const compiled = compile(`
 			items => $\`<ul>
