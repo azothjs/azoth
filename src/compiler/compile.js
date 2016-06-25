@@ -1,5 +1,7 @@
 import getTagged from './getTagged';
 import htmlparser from 'htmlparser2';
+import undeclared from 'undeclared';
+import astring from 'astring';
 
 const attrPattern = /\s*?([a-zA-Z0-9\-]+?)=$/;
 const specials = {
@@ -43,25 +45,17 @@ function parse( { expressions, quasis } ){
 		onattribute( name, value ) {
 			currentEl.attributes[ currentAttr = name ] = value;
 		},
-		bindAttr( expr ){
-			const name = currentAttr;
-			const el = currentEl;
-			el.bound = true;
-
+		bindAttr( expr, binding ){
+			const name = binding.name = currentAttr;
 			// specialized binding type
 			const parts = name.split( '-' );
 			let type = '';
 			if( parts.length > 1 && ( type = specials[ parts[0] ] ) ) {
-				delete el.attributes[ name ];
+				delete currentEl.attributes[ name ];
 			}
-			type = type || 'attr';
+			binding.type = type || 'attr';
 
-			el.bindings.push({ 
-				el, 
-				type,
-				name,
-				expr: expr.name 
-			});
+			this.bind( expr, binding )
 		},
 		onopentag( name ) {
 			const el = currentEl;
@@ -84,21 +78,24 @@ function parse( { expressions, quasis } ){
 			html.push( text );
 			if( currentEl ) currentEl.childCount++;
 		},
-		bindText( expr ){
-			const el = currentEl;
-			el.bound = true
+		bind( expr, binding ){
+			const el = binding.el = currentEl;
+			el.bound = true;
+			
+			if ( binding.index === -1 ) binding.index = el.childCount;
+			
+			if ( expr.type === 'Identifier' ) binding.ref = expr.name
+			else {
+				binding.expr = astring( expr );
+				const params = Array.from( undeclared( expr ).values() ).join();
+				binding.params = params;
+			}
 
-			el.bindings.push({  
-				el, 
-				type: 'child-text',
-				expr: expr.name,
-				index: el.childCount
-			});
+			el.bindings.push( binding );
 		},
 		unwrite( count = 1 ) {
 			const current = html[ html.length - 1 ];
 			html[ html.length - 1] = current.slice( 0, -count );
-			console.log( html );
 		},
 		bindSection( expr ){
 			const el = currentEl;
@@ -135,22 +132,33 @@ function parse( { expressions, quasis } ){
 	quasis.forEach( ( quasi, i ) => {
 		const raw =  quasi.value.raw;
 		parser.write( raw );
+		// TDOO extract to strategy for attr, text, etc. mov behavior in handler into those
+		const binding = {};
+		const observable = raw[ raw.length - 1 ] === '*';
+		if ( observable ) {
+			handler.unwrite(1);
+			binding.observable = observable;
+		}
+
 		if( currentAttr ) {
 			if ( !attrPattern.test( raw ) ) throw 'unexpected ${...} in attributes';
 			// finish the attr
 			parser.write( '""' );
-			handler.bindAttr( expressions[i] );
+			binding.type = 'attr';
+			handler.bindAttr( expressions[i], binding );
 		}
 		else if ( i < expressions.length && !inElTag ) {
-			if( raw[ raw.length - 1 ] === '#' ) {
-				handler.unwrite();
-				parser.write( '<section-node></section-node>' );
-				handler.bindSection( expressions[i] );
-			}
-			else {
+			// if( raw[ raw.length - 1 ] === '#' ) {
+			// 	handler.unwrite();
+			// 	parser.write( '<section-node></section-node>' );
+			// 	handler.bindSection( expressions[i] );
+			// }
+			// else {
 				parser.write( '<text-node></text-node>' );
-				handler.bindText( expressions[i] );
-			}
+				binding.type = 'text';
+				binding.index = -1 // auto-fill
+				handler.bind( expressions[i], binding );
+			//}
 		}
 	});
 
@@ -158,6 +166,7 @@ function parse( { expressions, quasis } ){
 
 	let count = 0;
 	const map = new Map();
+	
 	fragment.bindings.forEach( b => {
 		let index;
 		if ( map.has( b.el ) ) {
@@ -168,6 +177,7 @@ function parse( { expressions, quasis } ){
 			map.set( b.el, index );
 		}
 		delete b.el;
+
 		b.elIndex = index;
 	})
 	

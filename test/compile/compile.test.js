@@ -23,7 +23,7 @@ describe( 'compiles', () => {
 				elIndex: 0,
 				type: 'class',
 				name: 'class-done',
-				expr: 'done' 
+				ref: 'done' 
 			}]
 		);
 	});
@@ -48,21 +48,21 @@ describe( 'compiles', () => {
 		assert.deepEqual( bindings, 
 			[{ 
 				elIndex: 0,
-				type: 'child-text',
+				type: 'text',
 				index: 0,
-				expr: 'place' 
+				ref: 'place' 
 			},
 			{ 
 				elIndex: 1,
-				type: 'child-text',
+				type: 'text',
 				index: 1,
-				expr: 'place' 
+				ref: 'place' 
 			},
 			{ 
 				elIndex: 2,
-				type: 'child-text',
+				type: 'text',
 				index: 1,
-				expr: 'place' 
+				ref: 'place' 
 			}]
 		);
 
@@ -98,9 +98,9 @@ describe( 'compiles', () => {
 		assert.deepEqual( bindings, 
 			[{ 
 				elIndex: 0,
-				type: 'child-text',
+				type: 'text',
 				index: 0,
-				expr: 'foo' 
+				ref: 'foo' 
 			}]
 		);
 		
@@ -116,9 +116,9 @@ describe( 'compiles', () => {
 		assert.deepEqual( bindings, 
 			[{ 
 				elIndex: 0,
-				type: 'child-text',
+				type: 'text',
 				index: 2,
-				expr: 'foo' 
+				ref: 'foo' 
 			}]
 		);	
 	});
@@ -133,17 +133,52 @@ describe( 'compiles', () => {
 		assert.deepEqual( bindings, 
 			[{ 
 				elIndex: 0,
-				type: 'child-text',
+				type: 'text',
 				index: 2,
-				expr: 'place' 
+				ref: 'place' 
 			}, { 
 				elIndex: 1,
-				type: 'child-text',
+				type: 'text',
 				index: 0,
-				expr: 'greeting' 
+				ref: 'greeting' 
 			}]
 		);	
 	});
+
+	it( 'expression', () => {
+
+		// ( x, y ) => $`*${x} + *${y} = *${x + y}`;
+		const compiled = compile(`
+			( x, y ) => $\`*\${x} + *\${y} = *\${x + y}\`
+		`);
+
+		assert.deepEqual( compiled, {
+			html: '<text-node></text-node> + <text-node></text-node> = <text-node></text-node>',
+			bindings: [{ 
+				type: 'text',
+				index: 1,
+				observable: true,
+				ref: 'x',
+				elIndex: 0 
+			}, { 
+				type: 'text',
+				index: 3,
+				observable: true,
+				ref: 'y',
+				elIndex: 0 
+			}, { 
+				type: 'text',
+				index: 5,
+				observable: true,
+				expr: 'x + y',
+				params: 'x,y',
+				elIndex: 0
+			}]
+		});
+		
+	});
+
+
 });
 
 describe( 'block compiles', () => {

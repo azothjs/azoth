@@ -15,6 +15,7 @@
   "license": "ISC",
   "devDependencies": {
     "acorn": "^3.2.0",
+    "astring": "^0.6.1",
     "babel-core": "^6.9.1",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.10.3",
     "camelcase": "^2.1.1",
@@ -30,7 +31,8 @@
     "mocha": "^2.5.3",
     "mocha-better-spec-reporter": "^3.0.2",
     "rollup-plugin-buble": "^0.9.0",
-    "rollup-plugin-node-resolve": "^1.7.1"
+    "rollup-plugin-node-resolve": "^1.7.1",
+    "undeclared": "^1.0.6"
   },
   "dependencies": {
     "rxjs-es": "^5.0.0-beta.9"

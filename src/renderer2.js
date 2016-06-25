@@ -18,16 +18,14 @@ const replace = {
 const query = Object.keys( replace ).join();
 
 function init( fragment ) {
+
 	const nodes = fragment.querySelectorAll( query );
 	
-	let  node = null, parent = null, newNode = null;
+	let  node = null, newNode = null;
 	
 	for( var i = 0, l = nodes.length; i < l; i++ ) {
 		node = nodes[i];
-		parent = node.parentNode;
 		newNode = replace[ node.localName ]( node );
-		parent.replaceChild( newNode, node );
-		// track if orphans nodes with no clonable parent
-		if ( parent === fragment ) fragment._orphans = true;
+		node.parentNode.replaceChild( newNode, node );
 	}
 }
