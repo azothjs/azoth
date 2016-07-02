@@ -152,6 +152,7 @@ label[for='toggle-all'] {
 	position: relative;
 	font-size: 24px;
 	border-bottom: 1px solid #ededed;
+	display: inline-block;
 }
 
 .todo-list li:last-child {
@@ -164,7 +165,7 @@ label[for='toggle-all'] {
 }
 
 .todo-list li.editing .edit {
-	display: block;
+	display: inline-block;
 	width: 506px;
 	padding: 13px 17px 12px 17px;
 	margin: 0 0 0 43px;

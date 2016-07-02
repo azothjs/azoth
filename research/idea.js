@@ -6,9 +6,9 @@ class FormInput extends Component {
 	
 	static template() {
 		
-		return () => `<form
-			on-submit="${({ form }) => this.emit( 'add', form.elements )}"
-			onsubmit="return false;">
+		return () => `
+			<form onsubmit="return false;"
+				  on-submit=${  ({ form }) => this.emit( 'add', form.elements ) }>
 			
 			<!-- children -->
 			
@@ -28,14 +28,14 @@ class Todos extends Component {
 	static template({ Todo, TextInput }) {
 		return todos => `
 			<ul>
-				${todos.map( (todo, i) => `<li>
-						<${ Todo(todo) } on-remove="${() => todos.splice(i, 1)}"/>
+				${ todos.map( (todo, i) => `<li>
+						<${ Todo(todo) } on-remove="${ () => todos.splice(i, 1)}"/>
 					</li>`
 				)}
 				<li>
-					<${FormInput()} on-add="${todo => todos.push(todo)}">
-						<input name="task>
-					</${FormInput}>
+					<FormInput()} on-add="${ todo => todos.push(todo) }">
+						<input name="task">
+					</FormInput>
 					
 				</li>
 			<ul>
@@ -48,8 +48,8 @@ class Todos extends Component {
 		
 		this.getListObserver()
 			.insert(newTodo => request.post(`api/todos`).send(newTodo))
-			.update(todo => request.put(`api/todos/${todo.id}`))
-			.remove(todo => request.del(`api/todos/${todo.id}`))
+			.update(todo => request.put(`api/todos/${ todo.id}`))
+			.remove(todo => request.del(`api/todos/${ todo.id}`))
 			.finally(err => this.error = err);
 	}
 	
@@ -93,14 +93,14 @@ class Todo extends Component {
 				<input type="checkbox" checked=done>
 				
 				<# when ( editing ) {
-					<input value="${task}" 
+					<input value="${ task}" 
 							on-render="({ node }) => node.focus()"
 							on-blur-enterKey="({ node }) => {
 								task = node.value;
 								editing = false;
 							}">
 				}# else {
-					<span on-click="()=>editing = true">${task}</span>
+					<span on-click="()=>editing = true">${ task}</span>
 				}#>
 				
 				<button on-click="()=>this.fire('remove')">X</button>

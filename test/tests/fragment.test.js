@@ -2,15 +2,14 @@ import { test, module, fixture } from './qunit';
 import renderer from './renderer2';
 import Diamond from './Diamond';
 // import compile from './compiler/compile';
-// import Observable from 'rxjs/Observable';
 import BehaviorSubject from 'rxjs/BehaviorSubject';
 
-const { bound, makeFragment } = Diamond;
+const { makeFragment } = Diamond;
 
 function orphanTextBinding ( index = 0 ) {
-	return nodes => {
-		const node = nodes[0].childNodes[ index ];
-		return val => node.nodeValue = val;
+	return node => {
+		const text = node.childNodes[ index ];
+		return val => text.nodeValue = val;
 	};
 }
 
@@ -27,7 +26,7 @@ module( 'fragment', () => {
 			const otb0 = otb[0];
 			return foo => {
 				const nodes = render();
-				foo.subscribe( otb0( nodes ) );
+				foo.subscribe( otb0( nodes[ nodes.length ] ) );
 				return nodes[ nodes.length ];
 			};
 		})();
@@ -49,6 +48,8 @@ module( 'fragment', () => {
 
 	test( 'Rx observable nodes with expression', t => {
 
+		const template = ( x, y ) => html`*${x} + *${y} = *${x + y}`;
+		
 		const fragment = (() => {
 			const render = renderer( makeFragment( 
 				'<text-node></text-node> + <text-node></text-node> = <text-node></text-node>' 
@@ -59,10 +60,56 @@ module( 'fragment', () => {
 			
 			return ( x, y ) => {
 				const nodes = render();
-				x.subscribe( otb0( nodes ) );
-				y.subscribe( otb2( nodes ) );
+				const __n1 = nodes[0];
+				x.subscribe( otb0( __n1 ) );
+				y.subscribe( otb2( __n1 ) );
 				x.combineLatest(y, (x, y) => x + y )
-					.subscribe( otb4( nodes ) );
+					.subscribe( otb4( __n1 ) );
+
+				return nodes[ nodes.length ];
+			};
+		})();
+		
+		// const template = ( x, y ) => html`*${x} + *${y} = *${x + y}`;
+		
+		const x = new BehaviorSubject( 5 );
+		const y = new BehaviorSubject( 2 );
+		fixture.appendChild( fragment( x, y ) );
+		
+		t.equal( fixture.innerHTML, '5 + 2 = 7' );
+
+		x.next( 3 );
+
+		t.equal( fixture.innerHTML, '3 + 2 = 5' );
+
+		y.next( 1 );
+
+		t.equal( fixture.innerHTML, '3 + 1 = 4' );
+
+		fixture.appendChild( fragment( x, y ) );
+
+		t.equal( fixture.innerHTML, '3 + 1 = 43 + 1 = 4' );
+
+	});
+
+	test( 'Mixed observer/value expression', t => {
+
+		// const template = ( x, y ) => html`*${x} + ${y} = *${x + y}`;
+
+		const fragment = (() => {
+			const render = renderer( makeFragment( 
+				'<text-node></text-node> + <text-node></text-node> = <text-node></text-node>' 
+			));
+			const otb0 = otb[0];
+			const otb2 = otb[2];
+			const otb4 = otb[4];
+			
+			return ( x, y ) => {
+				const nodes = render();
+				x.subscribe( otb0( nodes[0] ) );
+				y.subscribe( otb2( nodes[0] ) );
+				x.combineLatest(y, (x, y) => x + y )
+					.subscribe( otb4( nodes[0] ) );
 
 				return nodes[ nodes.length ];
 			};

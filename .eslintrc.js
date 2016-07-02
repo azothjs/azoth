@@ -89,7 +89,7 @@ module.exports = {
         "no-div-regex": "off",
         "no-duplicate-imports": "error",
         "no-else-return": "error",
-        "no-empty-function": "error",
+        "no-empty-function": "off",
         "no-eq-null": "off",
         "no-eval": "error",
         "no-extend-native": "error",
@@ -105,7 +105,7 @@ module.exports = {
             "error",
             "functions"
         ],
-        "no-invalid-this": "error",
+        "no-invalid-this": "off",
         "no-iterator": "error",
         "no-label-var": "error",
         "no-labels": "error",
@@ -209,7 +209,7 @@ module.exports = {
         "spaced-comment": "off",
         "strict": "error",
         "template-curly-spacing": [
-            "error",
+            "off",
             "never"
         ],
         "valid-jsdoc": "error",
