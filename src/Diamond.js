@@ -1,15 +1,17 @@
-import render from './render';
-import Context from './Context';
-import bound from './bindings/bound';
-import { makeFragment, clean } from './parser/domUtil'; 
-import parser from './parser/parser';
 
-export default function Diamond( options ) {
-	options.context = new Context( options.data );
-	render( options );
+export { default as renderer } from './renderer2';
+
+export { makeFragment } from './domUtil';
+
+export function html(){}
+
+export function __tb( index ) {
+	return node => {
+		const text = node.childNodes[ index ];
+		return val => text.nodeValue = val;
+	};
 }
 
-Diamond.parser = parser;
-Diamond.bound = bound;
-Diamond.makeFragment = makeFragment;
-Diamond.clean = clean;
+export { __tb as __otb };
+export { __tb as __ctb };
+

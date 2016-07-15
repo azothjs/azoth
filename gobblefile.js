@@ -1,12 +1,23 @@
 /* globals require, module */
 const gobble = require( 'gobble' );
 const path = require( 'path' );
+const compile = require( 'diamond-compiler' ).default;
+
+function jsd(source){
+	return compile(source);
+}
+
+jsd.defaults = {
+	accept: [ '.jsd' ],
+	ext: '.js'
+};
 
 const tests = gobble( 'test/tests' )
-	.exclude( 'perf.test.js' )
+	.exclude( ['perf.test.js', 'dom.render.test.js'] )
+	.transform( jsd )
 	.transform( 'flatten' );
 
-const index = tests.include( '**/*.js' )
+const index = tests.include( ['**/*.js'] )
 	.transform( function importFiles( /*code*/ ) {
 		const filename = this.filename;
 		const basename = path.basename( filename, path.extname( filename ) );	
@@ -27,21 +38,22 @@ const test = gobble( [ index, tests, qunit, 'src' ] )
 		format: 'iife',
 		globals: {
 			'rxjs/Observable': 'Rx.Observable',
-			'rxjs/BehaviorSubject': 'Rx.BehaviorSubject'
+			'rxjs/BehaviorSubject': 'Rx.BehaviorSubject',
+			'rxjs/operator/combineLatest': 'Rx.Observable.combineLatest'
 		}
 	});
 
-const build = gobble( [ index, 'src' ] )
-	.transform( 'rollup', {
-		// plugins: [ buble() ],
-		entry: 'main.js',
-		dest: 'diamond.js',
-		format: 'iife'
-	});
+// const build = gobble( [ index, 'src' ] )
+// 	.transform( 'rollup', {
+// 		// plugins: [ buble() ],
+// 		entry: 'main.js',
+// 		dest: 'diamond.js',
+// 		format: 'iife'
+// 	});
 
 // const min = build.transform( 'uglifyjs', { ext: '.min.js' });
 
 const html = gobble( 'test' ).include( 'index.html' );
 const research = gobble( 'research' ).moveTo( 'research' );
 
-module.exports = gobble( [ test, build, /*min,*/ html, research ] );
+module.exports = gobble( [ test, /*build, min,*/ html, research ] );

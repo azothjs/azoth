@@ -1,0 +1,204 @@
+import { module, test, fixture } from './qunit';
+import BehaviorSubject from 'rxjs/BehaviorSubject';
+import combineLatest from 'rxjs/operator/combineLatest';
+import { html as $ } from './diamond';
+
+module( 'fragment', () => {
+	
+	test( 'Rx combineLatest works with multiple observers', t => {
+		const foo = new BehaviorSubject( 'foo' );
+		const bar = new BehaviorSubject( 'bar' );
+		const qux = new BehaviorSubject( 'qux' );
+
+		const expr = combineLatest( foo, bar, qux, ( foo, bar, qux ) => `${foo}-${bar}-${qux}` );
+		let val = '';
+		expr.subscribe( v => val = v );
+		t.equal( val, 'foo-bar-qux' );
+		foo.next( 'faux' );
+		bar.next( 'barre' );
+		t.equal( val, 'faux-barre-qux' );
+		foo.next( 'foo' );
+		t.equal( val, 'foo-barre-qux' );
+	});
+
+	test( 'pluck destructured property', t => {
+		const obj = { foo: 'foo' };
+		const observer = new BehaviorSubject( obj );
+		const pluck = observer.pluck( 'foo' ).distinctUntilChanged();
+
+		let plucked = '';
+		pluck.subscribe( val => plucked = val );
+
+		t.equal( plucked, 'foo' );
+
+		plucked = 'nochange';
+		observer.next( obj );
+		t.equal( plucked, 'nochange' );
+
+		pluck.next( { foo: 'qux' } );
+		t.equal( plucked, 'qux' );
+
+		observer.next( { foo: 'bar' } );
+		t.equal( plucked, 'bar' );
+
+	});
+
+	function db( strings, ...values ) {
+		return strings[0].replace( /<span/g, '<span data-bind=""' );
+	}
+	test( 'hello diamond', t => {
+		
+		const template = name => $`<span>Hello *${name}!</span>`;
+
+		const name = new BehaviorSubject( 'diamond' );
+		const fragment = template( name );
+		fixture.appendChild( fragment );
+		t.equal( fixture.innerHTML, db`<span>Hello diamond!</span>` );
+		name.next( 'pdx' );
+		t.equal( fixture.innerHTML, db`<span>Hello pdx!</span>` );
+		fragment.unsubscribe();
+		name.next( 'rxjs' );
+		t.equal( fixture.innerHTML, db`<span>Hello pdx!</span>` );
+	});
+
+	test( 'single observable node', t => {
+		
+		const template = foo => $`*${foo}`;
+
+		const foo = new BehaviorSubject( 'foo' );
+		const fragment1 = template( foo );
+		fixture.appendChild( fragment1 );
+		
+		t.equal( fixture.innerHTML, 'foo' );
+		foo.next( 'bar' );
+		t.equal( fixture.innerHTML, 'bar' );
+
+		const fragment2 = template( foo );
+		fixture.appendChild( document.createTextNode('|') );
+		fixture.appendChild( fragment2 );
+		t.equal( fixture.innerHTML, 'bar|bar' );
+
+		foo.next( 'foo' );
+		t.equal( fixture.innerHTML, 'foo|foo' );
+		
+		fragment1.unsubscribe();
+		foo.next( 'qux' );
+		t.equal( fixture.innerHTML, 'foo|qux' );
+		fragment2.unsubscribe();
+	});
+
+	test( 'observable nodes with an expression', t => {
+
+		const template = ( x, y ) => $`*${x} + *${y} = *${x + y}`;
+				
+		const x = new BehaviorSubject( 5 );
+		const y = new BehaviorSubject( 2 );
+
+		const fragment1 = template( x, y );
+		fixture.appendChild( fragment1 );
+		
+		t.equal( fixture.innerHTML, '5 + 2 = 7' );
+
+		x.next( 3 );
+
+		t.equal( fixture.innerHTML, '3 + 2 = 5' );
+
+		y.next( 1 );
+
+		t.equal( fixture.innerHTML, '3 + 1 = 4' );
+		
+		const fragment2 = template( x, y );
+		fixture.appendChild( document.createTextNode('|') );
+		fixture.appendChild( fragment2 );
+
+		t.equal( fixture.innerHTML, '3 + 1 = 4|3 + 1 = 4' );
+
+		fragment1.unsubscribe();
+
+		x.next( 0 );
+
+		t.equal( fixture.innerHTML, '3 + 1 = 4|0 + 1 = 1' );
+
+		fragment2.unsubscribe();
+
+	});
+
+	test( 'external variables not parameterized', t => {
+
+		const upper = s => s.toUpperCase();
+
+		const template = x => $`*${upper(x)}`;
+				
+		const x = new BehaviorSubject( 'foo' );
+
+		const fragment = template(x);
+		fixture.appendChild( fragment );
+		
+		t.equal( fixture.innerHTML, 'FOO' );
+
+		x.next( 'bar' );
+
+		t.equal( fixture.innerHTML, 'BAR' );
+
+		fragment.unsubscribe();
+
+	});
+
+	test( 'destructed property', t => {
+		
+		const template = ({ foo }) => $`*${foo}`;
+
+		const obj = new BehaviorSubject({ foo: 'foo' });
+		const fragment = template( obj );
+		fixture.appendChild( fragment );
+		
+		t.equal( fixture.innerHTML, 'foo' );
+		obj.next({ foo: 'bar' });
+		t.equal( fixture.innerHTML, 'bar' );
+
+		fragment.unsubscribe();
+	});
+
+	// test( 'Mixed observer/value expression', t => {
+
+	// 	// const template = ( x, y ) => html`*${x} + ${y} = *${x + y}`;
+
+	// 	const fragment = (() => {
+	// 		const render = renderer( makeFragment( 
+	// 			'<text-node></text-node> + <text-node></text-node> = <text-node></text-node>' 
+	// 		));
+	// 		const otb0 = otb[0];
+	// 		const otb2 = otb[2];
+	// 		const otb4 = otb[4];
+			
+	// 		return ( x, y ) => {
+	// 			const nodes = render();
+	// 			x.subscribe( otb0( nodes[0] ) );
+	// 			y.subscribe( otb2( nodes[0] ) );
+	// 			x.combineLatest(y, (x, y) => x + y )
+	// 				.subscribe( otb4( nodes[0] ) );
+
+	// 			return nodes[ nodes.length ];
+	// 		};
+	// 	})();
+		
+	// 	// const template = ( x, y ) => html`*${x} + *${y} = *${x + y}`;
+	// 	const x = new BehaviorSubject( 5 );
+	// 	const y = new BehaviorSubject( 2 );
+	// 	fixture.appendChild( fragment( x, y ) );
+		
+	// 	t.equal( fixture.innerHTML, '5 + 2 = 7' );
+
+	// 	x.next( 3 );
+
+	// 	t.equal( fixture.innerHTML, '3 + 2 = 5' );
+
+	// 	y.next( 1 );
+
+	// 	t.equal( fixture.innerHTML, '3 + 1 = 4' );
+
+	// 	// fixture.appendChild( fragment( x, y ) );
+
+	// });
+
+});
