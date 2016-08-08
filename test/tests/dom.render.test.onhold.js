@@ -1,14 +1,14 @@
-import Diamond from './Diamond';
+import { makeFragment } from './diamond';
 import { test, module, fixture } from './qunit';
 
 module( 'dom render' );
 
-const { bound } = Diamond;
+const { bound } = diamond;
 
 test( 'simple node with text', t => {
 	
 	const template = {
-		fragment: Diamond.makeFragment( 
+		fragment: makeFragment( 
 			`<div data-bind></div>`
 		),
 		bindings() {
@@ -19,7 +19,7 @@ test( 'simple node with text', t => {
 		}	
 	};
 	
-	new Diamond( { 
+	new diamond( { 
 		template, 
 		data: { foo: 'foo' }, 
 		el: fixture 
@@ -31,7 +31,7 @@ test( 'simple node with text', t => {
 test( 'text node only', t => {
 	
 	const template = {
-		fragment: Diamond.makeFragment( 
+		fragment: makeFragment( 
 			`<text-node data-bind></text-node>` ),
 		bindings() {
 			const b1 = bound.childText( { ref: 'foo' } );
@@ -41,7 +41,7 @@ test( 'text node only', t => {
 		}
 	};
 	
-	new Diamond( { 
+	new diamond( { 
 		template, 
 		data: { foo: 'foo' }, 
 		el: fixture 
@@ -53,7 +53,7 @@ test( 'text node only', t => {
 test( 'node with two bindings', t => {
 	
 	const template = {
-		fragment: Diamond.makeFragment(`<div><input data-bind></div>`),
+		fragment: makeFragment(`<div><input data-bind></div>`),
 		bindings() {
 			const b1 = bound.attribute( { name: 'class', ref: 'klass' } );
 			const b2 = bound.property( { name: 'value', ref: 'foo' } );
@@ -64,7 +64,7 @@ test( 'node with two bindings', t => {
 		}
 	};
 	
-	new Diamond( { 
+	new diamond( { 
 		template, 
 		data: { foo: 'foo', klass: 'editable' }, 
 		el: fixture 
@@ -76,7 +76,7 @@ test( 'node with two bindings', t => {
 
 test( 'node with two text bindings', t => {
 	const template = {
-		fragment: Diamond.makeFragment(
+		fragment: makeFragment(
 			`<div data-bind><text-node></text-node>: <text-node></text-node></div>`
 		),
 		bindings() {
@@ -89,7 +89,7 @@ test( 'node with two text bindings', t => {
 		}
 	};
 	
-	new Diamond( { 
+	new diamond( { 
 		template, 
 		data: { foo: 'foo', bar: 'bar' }, 
 		el: fixture 
@@ -102,7 +102,7 @@ test( 'node with two text bindings', t => {
 test( 'nested elements and text', t => {
 
 	const template = {
-		fragment: Diamond.makeFragment(
+		fragment: makeFragment(
 			`<div>
 				<span data-bind></span>
 				<span data-bind>label: <text-node></text-node></span>
@@ -118,7 +118,7 @@ test( 'nested elements and text', t => {
 		}
 	};
 	
-	new Diamond( { 
+	new diamond( { 
 		template, 
 		data: { foo: 'foo', bar: 'bar' }, 
 		el: fixture 
@@ -135,7 +135,7 @@ test( 'nested elements and text', t => {
 test( 'section with node with two ', t => {
 
 	const template = {
-		fragment: Diamond.makeFragment(
+		fragment: makeFragment(
 			`<ul data-bind><section-node></section-node></ul>`
 		),
 		bindings() {
@@ -143,7 +143,7 @@ test( 'section with node with two ', t => {
 				type: 'for', 
 				ref: 'items', 
 				template: {
-					fragment: Diamond.makeFragment( 
+					fragment: makeFragment( 
 						`<li data-bind><text-node></text-node>: <text-node></text-node></li>`
 					),
 					bindings() {
@@ -162,7 +162,7 @@ test( 'section with node with two ', t => {
 		}
 	};
 	
-	new Diamond( { 
+	new diamond( { 
 		template, 
 		data: { 
 			items: [
@@ -183,7 +183,7 @@ test( 'section with node with two ', t => {
 	test( '#for section', t => {
 
 		const template = {
-			fragment: Diamond.makeFragment(
+			fragment: makeFragment(
 				`<ul data-bind><section-node></section-node></ul>`
 			),
 			bindings() {
@@ -191,7 +191,7 @@ test( 'section with node with two ', t => {
 					type: 'for', 
 					ref: 'items', 
 					template: {
-						fragment: Diamond.makeFragment( 
+						fragment: makeFragment( 
 							`<li data-bind></li>`
 						),
 						bindings() {
@@ -208,7 +208,7 @@ test( 'section with node with two ', t => {
 			}
 		};
 		
-		new Diamond( { 
+		new diamond( { 
 			template, 
 			data: { items: [ 1, 2, 3 ] }, 
 			el: fixture 
@@ -221,13 +221,13 @@ test( 'section with node with two ', t => {
 	test( '#for section - no top level element', t => {
 			
 		const template = {
-			fragment: Diamond.makeFragment( `<section-node></section-node>` ),
+			fragment: makeFragment( `<section-node></section-node>` ),
 			bindings() {
 				const b1 = bound.section( { 
 					type: 'for', 
 					ref: 'items', 
 					template: {
-						fragment: Diamond.makeFragment( 
+						fragment: makeFragment( 
 							`<li data-bind></li>`
 						),
 						bindings() {
@@ -244,7 +244,7 @@ test( 'section with node with two ', t => {
 			}
 		};
 		
-		new Diamond( { 
+		new diamond( { 
 			template, 
 			data: { items: [ 1, 2, 3 ] }, 
 			el: fixture 
@@ -264,7 +264,7 @@ test( 'section with node with two ', t => {
 			type: 'for', 
 			ref: 'children', 
 			template: {
-				fragment: Diamond.makeFragment( 
+				fragment: makeFragment( 
 					`<li data-bind></li>`
 				),
 				bindings() {
@@ -286,7 +286,7 @@ test( 'section with node with two ', t => {
 			type: 'for', 
 			ref: 'items', 
 			template: {
-				fragment: Diamond.makeFragment(
+				fragment: makeFragment(
 					'<li data-bind><text-node></text-node>' +
 						'<ul data-bind><section-node></section-node></ul>' +
 					'</li>'
@@ -303,13 +303,13 @@ test( 'section with node with two ', t => {
 	test( 'nested #for sections', t => {
 
 		const template = {
-			fragment: Diamond.makeFragment( 
+			fragment: makeFragment( 
 				`<ul data-bind><section-node></section-node></ul>`
 			),
 			bindings
 		};
 		
-		new Diamond( { 
+		new diamond( { 
 			template, 
 			data: { items: [
 				{ value: 'A', children: [ 1, 2, 3 ] },
@@ -328,13 +328,13 @@ test( 'section with node with two ', t => {
 (function testIf() {
 	
 	const template = {
-		fragment: Diamond.makeFragment( `<section-node></section-node>` ),
+		fragment: makeFragment( `<section-node></section-node>` ),
 		bindings() {
 			const b1 = bound.section({ 
 				type: 'if', 
 				ref: 'condition', 
 				template: {
-					fragment: Diamond.makeFragment( 
+					fragment: makeFragment( 
 						`<li data-bind><text-node></text-node></li>`
 					),
 					bindings() {
@@ -352,7 +352,7 @@ test( 'section with node with two ', t => {
 	};
 	
 	test( '#if section true', t => {
-		new Diamond( { 
+		new diamond( { 
 			template, 
 			data: { condition: true, foo: 'foo' }, 
 			el: fixture 
@@ -361,7 +361,7 @@ test( 'section with node with two ', t => {
 	});
 	
 	test( '#if section false', t => {
-		new Diamond( { 
+		new diamond( { 
 			template, 
 			data: { condition: false, foo: 'foo' }, 
 			el: fixture 
@@ -375,13 +375,13 @@ test( 'section with node with two ', t => {
 (function testWith() {
 	
 	const template = {
-		fragment: Diamond.makeFragment( `<section-node></section-node>` ),
+		fragment: makeFragment( `<section-node></section-node>` ),
 		bindings: [
 			bound.section({ 
 				type: 'with', 
 				ref: 'obj', 
 				template: {
-					fragment: Diamond.makeFragment( 
+					fragment: makeFragment( 
 						`<p data-bind>
 							<text-node></text-node>
 							<text-node></text-node>
@@ -399,7 +399,7 @@ test( 'section with node with two ', t => {
 	};
 		
 	test( '#with section', t => {
-		new Diamond( { 
+		new diamond( { 
 			template, 
 			data: { obj: { a: 'A', b: 'B' } }, 
 			el: fixture 
@@ -411,7 +411,7 @@ test( 'section with node with two ', t => {
 	});
 
 	test( '#with section, no object', t => {
-		new Diamond( { 
+		new diamond( { 
 			template, 
 			data: {}, 
 			el: fixture 

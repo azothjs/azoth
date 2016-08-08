@@ -4,48 +4,53 @@ import combineLatest from 'rxjs/operator/combineLatest';
 import { html as $ } from './diamond';
 
 module( 'fragment', () => {
+
+	module( 'RxJS assumptions', () => {
+
+		test( 'Rx combineLatest works with multiple observers', t => {
+			const foo = new BehaviorSubject( 'foo' );
+			const bar = new BehaviorSubject( 'bar' );
+			const qux = new BehaviorSubject( 'qux' );
+
+			const expr = combineLatest( foo, bar, qux, ( foo, bar, qux ) => `${foo}-${bar}-${qux}` );
+			let val = '';
+			expr.subscribe( v => val = v );
+			t.equal( val, 'foo-bar-qux' );
+			foo.next( 'faux' );
+			bar.next( 'barre' );
+			t.equal( val, 'faux-barre-qux' );
+			foo.next( 'foo' );
+			t.equal( val, 'foo-barre-qux' );
+		});
+
+		test( 'pluck destructured property', t => {
+			const obj = { foo: 'foo' };
+			const observer = new BehaviorSubject( obj );
+			const pluck = observer.pluck( 'foo' ).distinctUntilChanged();
+
+			let plucked = '';
+			pluck.subscribe( val => plucked = val );
+
+			t.equal( plucked, 'foo' );
+
+			plucked = 'nochange';
+			observer.next( obj );
+			t.equal( plucked, 'nochange' );
+
+			pluck.next( { foo: 'qux' } );
+			t.equal( plucked, 'qux' );
+
+			observer.next( { foo: 'bar' } );
+			t.equal( plucked, 'bar' );
+
+		});
+	});
 	
-	test( 'Rx combineLatest works with multiple observers', t => {
-		const foo = new BehaviorSubject( 'foo' );
-		const bar = new BehaviorSubject( 'bar' );
-		const qux = new BehaviorSubject( 'qux' );
 
-		const expr = combineLatest( foo, bar, qux, ( foo, bar, qux ) => `${foo}-${bar}-${qux}` );
-		let val = '';
-		expr.subscribe( v => val = v );
-		t.equal( val, 'foo-bar-qux' );
-		foo.next( 'faux' );
-		bar.next( 'barre' );
-		t.equal( val, 'faux-barre-qux' );
-		foo.next( 'foo' );
-		t.equal( val, 'foo-barre-qux' );
-	});
-
-	test( 'pluck destructured property', t => {
-		const obj = { foo: 'foo' };
-		const observer = new BehaviorSubject( obj );
-		const pluck = observer.pluck( 'foo' ).distinctUntilChanged();
-
-		let plucked = '';
-		pluck.subscribe( val => plucked = val );
-
-		t.equal( plucked, 'foo' );
-
-		plucked = 'nochange';
-		observer.next( obj );
-		t.equal( plucked, 'nochange' );
-
-		pluck.next( { foo: 'qux' } );
-		t.equal( plucked, 'qux' );
-
-		observer.next( { foo: 'bar' } );
-		t.equal( plucked, 'bar' );
-
-	});
-
-	function db( strings, ...values ) {
-		return strings[0].replace( /<span/g, '<span data-bind=""' );
+	function db( [ html ] ) {
+		return html.replace( /<span/g, '<span data-bind=""' );
 	}
+
 	test( 'hello diamond', t => {
 		
 		const template = name => $`<span>Hello *${name}!</span>`;
@@ -53,9 +58,12 @@ module( 'fragment', () => {
 		const name = new BehaviorSubject( 'diamond' );
 		const fragment = template( name );
 		fixture.appendChild( fragment );
+
 		t.equal( fixture.innerHTML, db`<span>Hello diamond!</span>` );
+
 		name.next( 'pdx' );
 		t.equal( fixture.innerHTML, db`<span>Hello pdx!</span>` );
+
 		fragment.unsubscribe();
 		name.next( 'rxjs' );
 		t.equal( fixture.innerHTML, db`<span>Hello pdx!</span>` );

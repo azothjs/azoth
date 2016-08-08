@@ -1,2 +1,2 @@
-import Diamond from './Diamond';
-self.Diamond = Diamond;
+import diamond from './diamond';
+self.diamond = diamond;

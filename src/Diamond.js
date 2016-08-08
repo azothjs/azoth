@@ -1,5 +1,5 @@
 
-export { default as renderer } from './renderer2';
+export { default as renderer } from './renderer';
 
 export { makeFragment } from './domUtil';
 

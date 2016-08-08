@@ -13,7 +13,7 @@ jsd.defaults = {
 };
 
 const tests = gobble( 'test/tests' )
-	.exclude( ['perf.test.js', 'dom.render.test.js'] )
+	.exclude( '*.onhold.js' )
 	.transform( jsd )
 	.transform( 'flatten' );
 
