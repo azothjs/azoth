@@ -8,7 +8,7 @@ function jsd(source){
 }
 
 jsd.defaults = {
-	accept: [ '.jsd' ],
+	accept: [ '.js' ],
 	ext: '.js'
 };
 
