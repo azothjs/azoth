@@ -11,8 +11,8 @@ export default function renderer( fragment ) {
 }
 
 const replace = {
-	'text-node': node => document.createTextNode( '' ),
-	'section-node': node => document.createComment( 'section' )
+	'text-node': () => document.createTextNode( '' ),
+	'block-node': () => document.createComment( 'block' )
 };
 
 const query = Object.keys( replace ).join();
