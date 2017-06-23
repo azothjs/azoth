@@ -5,29 +5,29 @@ export { makeFragment } from './domUtil';
 
 export function html(){}
 
-export function __tb( index ) {
+export function __textBinder( index ) {
 	return node => {
 		const text = node.childNodes[ index ];
 		return val => text.nodeValue = val;
 	};
 }
 
-export function __bb( index ) {
+export function __blockBinder( index ) {
 	return node => {
 		const anchor = node.childNodes[ index ];
 		const insertBefore = node => anchor.parentNode.insertBefore(node, anchor);
 
 		// TODO: pass in block observe status so we know not to do this work if possible 
 		// insert a top and iterate till anchor to remove
-		const top = document.createComment('block start');
-		insertBefore(top, anchor);
+		// const top = document.createComment('block start');
+		// insertBefore(top, anchor);
 
 		//let contents = null;
 		
 		return val => {
-			removePrior(top, anchor);
+			// removePrior(top, anchor);
 			const fragment = typeof val === 'function' ? val() : val;
-			insertBefore(fragment, anchor);
+			Array.isArray(fragment) ? fragment.forEach(f => insertBefore(f, anchor)) : insertBefore(fragment, anchor);
 		};
 	};
 }
@@ -40,14 +40,3 @@ const removePrior = (top, anchor) => {
 		current.remove();
 	}
 };
-
-// const getContents = fragment => {
-// 	const childNodes = fragment.childNodes;
-// 	return childNodes.length === 1 ? childNodes[0] : childNodes;
-// };
-
-// const removeContents = nodes => Array.isArray(nodes) ? removeNodes(nodes) : removeNode(nodes);
-// const removeNodes = nodes => nodes.forEach(removeNode);
-// const removeNode = node => node.remove();
-
-

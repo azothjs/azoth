@@ -23,18 +23,3 @@ export function makeDiv( html ) {
 export function makeHtml( html ) {
 	return makeDiv( html ).innerHTML;
 }
-
-// export function clean(node)
-// {
-// 	for( var n = 0, child; n < node.childNodes.length; n++ ) {
-// 		child = node.childNodes[n];
-// 		if( (child.nodeType === 3 && !/\S/.test(child.nodeValue)) ) {
-// 			node.removeChild(child);
-// 			n --;
-// 		}
-// 		else if( child.nodeType === 1 ) {
-// 			clean(child);
-// 		}
-// 	}
-// 	return node;
-// }

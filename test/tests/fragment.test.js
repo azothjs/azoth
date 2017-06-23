@@ -2,6 +2,7 @@ import { module, test, fixture } from './qunit';
 import BehaviorSubject from 'rxjs/BehaviorSubject';
 import combineLatest from 'rxjs/operator/combineLatest';
 import { html as _ } from './diamond';
+import Observable from 'rxjs/Observable';
 
 const clean = html => html
 	.replace(/ data-bind=""/g, '')
@@ -14,51 +15,9 @@ fixture.cleanHTML = function cleanHtml() {
 
 module('fragment', () => {
 
-	module('RxJS assumptions', () => {
-
-		test('Rx combineLatest works with multiple observers', t => {
-			const foo = new BehaviorSubject('foo');
-			const bar = new BehaviorSubject('bar');
-			const qux = new BehaviorSubject('qux');
-
-			const expr = combineLatest(foo, bar, qux, (foo, bar, qux) => `${foo}-${bar}-${qux}`);
-			let val = '';
-			expr.subscribe(v => val = v);
-			t.equal(val, 'foo-bar-qux');
-			foo.next('faux');
-			bar.next('barre');
-			t.equal(val, 'faux-barre-qux');
-			foo.next('foo');
-			t.equal(val, 'foo-barre-qux');
-		});
-
-		test('pluck destructured property', t => {
-			const obj = { foo: 'foo' };
-			const observer = new BehaviorSubject(obj);
-			const pluck = observer.pluck('foo').distinctUntilChanged();
-
-			let plucked = '';
-			pluck.subscribe(val => plucked = val);
-
-			t.equal(plucked, 'foo');
-
-			plucked = 'nochange';
-			observer.next(obj);
-			t.equal(plucked, 'nochange');
-
-			pluck.next({ foo: 'qux' });
-			t.equal(plucked, 'qux');
-
-			observer.next({ foo: 'bar' });
-			t.equal(plucked, 'bar');
-
-		});
-	});
-	
-
-	test('hello diamond', t => {
+	test('hello diamond observable', t => {
 		
-		const template = name => _`<span>Hello *${name}!</span>`;
+		const template = name => _`<span>Hello @${name}!</span>`;
 
 		const name = new BehaviorSubject('diamond');
 		const fragment = template(name);
@@ -74,9 +33,19 @@ module('fragment', () => {
 		t.equal(fixture.cleanHTML(), '<span>Hello pdx!</span>');
 	});
 
-	test('single observable node', t => {
+	test('hello diamond static', t => {
+		const template = name => _`<span>Hello ${name}!</span>`;
+		const name = 'diamond';
+		const fragment = template(name);
+		t.notOk(fragment.unsubscribe);
+		fixture.appendChild(fragment);
+		t.equal(fixture.cleanHTML(), '<span>Hello diamond!</span>');
+
+	});
+
+	test('observable node used twice', t => {
 		
-		const template = foo => _`*${foo}`;
+		const template = foo => _`@${foo}`;
 
 		const foo = new BehaviorSubject('foo');
 		const fragment1 = template(foo);
@@ -102,7 +71,7 @@ module('fragment', () => {
 
 	test('observable nodes with an expression', t => {
 
-		const template = (x, y) => _`*${x} + *${y} = *${x + y}`;
+		const template = (x, y) => _`@${x} + @${y} = @${combineLatest(x, y, (x, y) => x + y)}`;
 				
 		const x = new BehaviorSubject(5);
 		const y = new BehaviorSubject(2);
@@ -136,11 +105,21 @@ module('fragment', () => {
 
 	});
 
-	test('external variables not parameterized', t => {
+	test('static nodes with an expression', t => {
+
+		const template = (x, y) => _`${x} + ${y} = ${x + y}`;
+				
+		const fragment1 = template(5, 2);
+		fixture.appendChild(fragment1);		
+		t.equal(fixture.cleanHTML(), '5 + 2 = 7');
+
+	});
+
+	test('external variables', t => {
 
 		const upper = s => s.toUpperCase();
 
-		const template = x => _`*${upper(x)}`;
+		const template = x => _`@${x.map(x => upper(x))}`;
 				
 		const x = new BehaviorSubject('foo');
 
@@ -157,45 +136,27 @@ module('fragment', () => {
 
 	});
 
-	test('destructed property', t => {
-		
-		const template = ({ foo }) => _`*${foo}`;
-
-		const obj = new BehaviorSubject({ foo: 'foo' });
-		const fragment = template(obj);
-		fixture.appendChild(fragment);
-		
-		t.equal(fixture.cleanHTML(), 'foo');
-		obj.next({ foo: 'bar' });
-		t.equal(fixture.cleanHTML(), 'bar');
-
-		fragment.unsubscribe();
-	});
-
 	test('simple nested block', t => {
 		
-		const template = ({ foo }) => _`#${ _`<span>hello *${foo}</span>` }`;
+		const template = foo => _`${ _`<span>hello @${foo}</span>` }#`;
 
-		const obj = new BehaviorSubject({ foo: 'foo' });
-		const fragment = template(obj);
+		const subject = new BehaviorSubject('foo');
+		const fragment = template(subject);
 		fixture.appendChild(fragment);
 		
 		t.equal(fixture.cleanHTML(), '<span>hello foo</span>');
-		obj.next({ foo: 'bar' });
+		subject.next('bar');
 		t.equal(fixture.cleanHTML(), '<span>hello bar</span>');
-		// TODO: this doesn't work in RxJS
-		// obj.pluck('foo').next('qux');
-		obj.next({ foo: 'qux' });
-
+		subject.next('qux');
 		t.equal(fixture.cleanHTML(), '<span>hello qux</span>');
+		
+		// !!!TODO: block binders need to unsubscribe child templates
 		fragment.unsubscribe();
 	});
 
 	test('conditional block', t => {
-		
-		// const simple = choice => _`<div>${ choice ? _`<span>Yes</span>` : _`<span>No</span>` }`;
-		
-		const template = choice => _`*#${ choice ? _`<span>Yes</span>` : _`<span>No</span>` }`;
+				
+		const template = choice => _`@${choice.map(c => c ? _`<span>Yes</span>` : _`<span>No</span>`)}#`;
 
 		const obj = new BehaviorSubject(true);
 		const fragment = template(obj);
@@ -208,28 +169,31 @@ module('fragment', () => {
 		fragment.unsubscribe();
 	});
 
-	// test('block with array', t => {
+	test('block with array', t => {
 		
-	// 	const template = items => _`
-	// 		<ul>
-	// 			#${ items.map(item => _`
-	// 				<li>${item.name}</li>	
-	// 			`)}
-	// 		</ul>
-	// 	`;
+		const template = items => _`
+			<ul>
+				@${items
+					.map(Observable.from)
+					.map(item => _`
+					<li>@${item.map(i => i.name)}</li>	
+				`)}#
+			</ul>
+		`;
 
-	// 	const items = new BehaviorSubject([
-	// 		{ name: 'baloon' },
-	// 		{ name: 'hammer' },
-	// 		{ name: 'lipstick' },
-	// 	]);
-	// 	const fragment = template(items);
-	// 	fixture.appendChild(fragment);
+		const items = new BehaviorSubject([
+			{ name: 'baloon' },
+			{ name: 'hammer' },
+			{ name: 'lipstick' },
+		]);
+
+		const fragment = template(items);
+		fixture.appendChild(fragment);
 		
-	// 	t.equal(fixture.cleanHTML(), '<ul><li>baloon</li><li>hammer</li><li>baloon</li></ul>');
+		t.equal(fixture.cleanHTML(), '<ul><li>baloon</li><li>hammer</li><li>baloon</li></ul>');
 
-	// 	fragment.unsubscribe();
-	// });
+		fragment.unsubscribe();
+	});
 
 	// test('Mixed observer/value expression', t => {
 
