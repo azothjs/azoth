@@ -19,13 +19,11 @@ export function __blockBinder( index ) {
 
 		// TODO: pass in block observe status so we know not to do this work if possible 
 		// insert a top and iterate till anchor to remove
-		// const top = document.createComment('block start');
-		// insertBefore(top, anchor);
-
-		//let contents = null;
+		const top = document.createComment('block start');
+		insertBefore(top, anchor);
 		
 		return val => {
-			// removePrior(top, anchor);
+			removePrior(top, anchor);
 			const fragment = typeof val === 'function' ? val() : val;
 			Array.isArray(fragment) ? fragment.forEach(f => insertBefore(f, anchor)) : insertBefore(fragment, anchor);
 		};

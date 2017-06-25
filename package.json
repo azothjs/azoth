@@ -4,34 +4,28 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "gobble",
-    "build": "gobble build -f dist",
-    "test": "mocha --compilers js:babel-core/register --reporter mocha-better-spec-reporter ./compiler/test",
-    "dev-test": "mocha --compilers js:babel-core/register --reporter mocha-better-spec-reporter -w test/compile",
-    "debug-test": "mocha --debug-brk test/compile"
+    "pretest:build": "node tests/make-index.js",
+    "test:build": "rollup -c rollup.config.tests.js",
+    "test:watch": "npm run test:build -- -w",
+    "test": "run-p test:build test:serve",
+    "test:serve": "cd tests/build && live-server",
+    "start": "run-p test:watch test:serve"
   },
   "repository": "",
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "astring": "^0.6.1",
     "chai": "^3.5.0",
-    "gobble": "^0.12.0",
-    "gobble-cli": "^0.8.0",
-    "gobble-concat": "^0.4.1",
-    "gobble-flatten": "^1.0.1",
-    "gobble-rollup": "^0.40.0",
-    "htmlparser2": "^3.9.1",
-    "mocha": "^2.5.3",
-    "mocha-better-spec-reporter": "^3.0.2",
+    "diamond-compiler": "0.0.6",
+    "npm-run-all": "^4.0.2",
+    "qunit": "^1.0.0",
     "rollup": "^0.43.0",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-watch": "^4.0.0",
-    "rxjs": "^5.4.1",
-    "undeclared": "^1.0.6"
+    "rxjs-es": "^5.0.0-beta.12"
   },
   "dependencies": {
-    "rxjs-es": "^5.0.0-beta.12"
+    "source-map": "^0.5.6"
   }
 }
