@@ -4109,7 +4109,7 @@ const zip = zipStatic;
 Observable.zip = zip;
 //# sourceMappingURL=zip.js.map
 
-function map$1(project, thisArg) {
+function map(project, thisArg) {
     if (typeof project !== 'function') {
         throw new TypeError('argument is not a function. Are you looking for `mapTo()`?');
     }
@@ -7402,7 +7402,7 @@ class EverySubscriber extends Subscriber {
 Observable.prototype.every = every;
 //# sourceMappingURL=every.js.map
 
-Observable.prototype.map = map$1;
+Observable.prototype.map = map;
 //# sourceMappingURL=map.js.map
 
 function mapTo(value) {
@@ -7882,7 +7882,7 @@ function pluck(...properties) {
     if (length === 0) {
         throw new Error('list of properties cannot be empty.');
     }
-    return map$1.call(this, plucker(properties, length));
+    return map.call(this, plucker(properties, length));
 }
 function plucker(props, length) {
     const mapper = (x) => {
@@ -10544,7 +10544,7 @@ const animationFrame = new AnimationFrameScheduler(AnimationFrameAction);
 
 //# sourceMappingURL=Rx.js.map
 
-function map(observable, map, subscriber) {
+function map$1(observable, map, subscriber) {
 	let last;
 	let lastMapped;
 	observable.subscribe(value => {
@@ -10580,6 +10580,7 @@ function combine(observables, combine, subscriber) {
 	subscribed = true;
 	if (any) call();
 }
+
 module$1('custom observable functions', () => {
 	test('map', t => {
 		const x = new BehaviorSubject(5);
@@ -10589,7 +10590,7 @@ module$1('custom observable functions', () => {
 			current = val;
 			count++;
 		};
-		map(x, x => x * x, binding);
+		map$1(x, x => x * x, binding);
 		t.equal(current, 25);
 		t.equal(count, 1);
 		x.next(2);
@@ -10607,7 +10608,7 @@ module$1('custom observable functions', () => {
 			current = val;
 			count++;
 		};
-		map(x, x => x > 5 ? 'high' : 'low', binding);
+		map$1(x, x => x > 5 ? 'high' : 'low', binding);
 		t.equal(current, 'high');
 		t.equal(count, 1);
 		x.next(6);
