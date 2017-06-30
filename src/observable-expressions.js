@@ -2,7 +2,7 @@
 export function map(observable, map, subscriber) {
     let last;
     let lastMapped;
-    observable.subscribe(value => {
+    return observable.subscribe(value => {
         if(value === last) return;
         last = value;
         const mapped = map(value);
@@ -14,7 +14,8 @@ export function map(observable, map, subscriber) {
 }
 
 export function combine(observables, combine, subscriber) {
-    let values = new Array(observables.length);
+    const length = observables.length;
+    let values = new Array(length);
     let lastCombined;
     let subscribed = false;
     let any = false;
@@ -27,15 +28,27 @@ export function combine(observables, combine, subscriber) {
         }
     }
 
-    for(let i = 0; i < observables.length; i++) {
-        observables[i].subscribe(value => {
-            if(value === values[i]) return;
-            values[i] = value;
-            any = true;
-            if(subscribed) call();
-        });
+    const subscriptions = new Array(length);
+
+    for(let i = 0; i < length; i++) {
+        subscriptions.push(
+            observables[i].subscribe(value => {
+                if(value === values[i]) return;
+                values[i] = value;
+                any = true;
+                if(subscribed) call();
+            })
+        );
     }
     subscribed = true;
     
     if(any) call();
+
+    return {
+        unsubscribe() {
+            for(let i = 0; i < length; i++) {
+                subscriptions[i].unsubscribe();
+            }
+        }
+    }
 }
