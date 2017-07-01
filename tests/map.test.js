@@ -5,6 +5,8 @@ import { map, combine } from '../src/observable-expressions';
 
 module('custom observable functions', () => {
 
+    // TODO: add unsubscribe tests
+    
     test('map', t => {
         const x = new BehaviorSubject(5);
         let current = -1;

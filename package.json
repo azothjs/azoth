@@ -11,17 +11,19 @@
     "test:serve": "cd tests/build && live-server",
     "start": "run-p test:watch test:serve"
   },
-  "repository": "",
-  "author": "",
-  "license": "ISC",
+  "repository": "https://github.com/martypdx/diamond",
+  "author": "Marty Nelson <marty@martypdx.com> (@martypdx)",
+  "license": "MIT",
   "devDependencies": {
     "chai": "^3.5.0",
-    "diamond-compiler": "0.0.6",
+    "diamond-compiler": "file:../diamond-compiler",
+    "magic-string": "^0.21.3",
     "npm-run-all": "^4.0.2",
     "qunit": "^1.0.0",
     "rollup": "^0.43.0",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-pluginutils": "^2.0.1",
     "rollup-watch": "^4.0.0",
     "rxjs-es": "^5.0.0-beta.12"
   },

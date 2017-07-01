@@ -31,14 +31,12 @@ export function combine(observables, combine, subscriber) {
     const subscriptions = new Array(length);
 
     for(let i = 0; i < length; i++) {
-        subscriptions.push(
-            observables[i].subscribe(value => {
-                if(value === values[i]) return;
-                values[i] = value;
-                any = true;
-                if(subscribed) call();
-            })
-        );
+        subscriptions[i] = observables[i].subscribe(value => {
+            if(value === values[i]) return;
+            values[i] = value;
+            any = true;
+            if(subscribed) call();
+        });
     }
     subscribed = true;
     

@@ -3,6 +3,8 @@ export { default as renderer } from './renderer';
 
 export { makeFragment } from './domUtil';
 
+export { map as __map, combine as __combine } from './observable-expressions';
+
 export function html(){}
 
 export function __textBinder( index ) {
