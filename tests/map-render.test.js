@@ -1,8 +1,6 @@
 import { module, test, fixture } from './qunit';
-import { html as _ } from '../src/diamond';
+import { _, $ } from '../src/diamond';
 import { BehaviorSubject } from 'rxjs-es/BehaviorSubject';
-import { combineLatest } from 'rxjs-es/observable/combineLatest';
-import { Observable } from 'rxjs-es';
 
 module('mapped expression rendering', () => {
 
@@ -18,7 +16,7 @@ module('mapped expression rendering', () => {
         name.next('Portland');
         t.equal(fixture.cleanHTML(), '<span>Hello Portland!</span>');
         fragment.unsubscribe();
-        name.next('Not Listening')
+        name.next('Not Listening');
         t.equal(fixture.cleanHTML(), '<span>Hello Portland!</span>');
     });
 
@@ -32,21 +30,21 @@ module('mapped expression rendering', () => {
         fixture.appendChild(fragment);		
         t.equal(fixture.cleanHTML(), '5 + 2 = 7');
 
-		x.next(3);
-		t.equal(fixture.cleanHTML(), '3 + 2 = 5');
-		y.next(1);
-		t.equal(fixture.cleanHTML(), '3 + 1 = 4');
+        x.next(3);
+        t.equal(fixture.cleanHTML(), '3 + 2 = 5');
+        y.next(1);
+        t.equal(fixture.cleanHTML(), '3 + 1 = 4');
 
         fragment.unsubscribe();
 
-		y.next(10);
-		t.equal(fixture.cleanHTML(), '3 + 1 = 4');
+        y.next(10);
+        t.equal(fixture.cleanHTML(), '3 + 1 = 4');
 
     });
 
     test('conditional block with variables', t => {
         const yes = _`<span>Yes</span>`;
-        const no = _`<span>No</span>`
+        const no = _`<span>No</span>`;
         const template = (choice=$) => _`*${choice ? yes : no}#`;
 
         const choice = new BehaviorSubject(true);

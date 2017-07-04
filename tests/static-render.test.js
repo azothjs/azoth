@@ -39,7 +39,7 @@ module('static rendering', () => {
 
     test('conditional block with variables', t => {
         const yes = _`<span>Yes</span>`;
-        const no = _`<span>No</span>`
+        const no = _`<span>No</span>`;
         const template = choice => _`${choice ? yes : no}#`;
 
         const fragment = template(true);

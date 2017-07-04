@@ -5,7 +5,9 @@ export { makeFragment } from './domUtil';
 
 export { map as __map, combine as __combine } from './observable-expressions';
 
-export function html(){}
+export function _(){}
+export { _ as html }
+export function $(){}
 
 export function __textBinder( index ) {
 	return node => {

@@ -8,6 +8,6 @@ export default {
         resolve({ jsnext: true, module: true }),
         diamond()
     ],
-    sourceMap: true,
+    // sourceMap: true,
     dest: 'tests/build/test.js'
 };
