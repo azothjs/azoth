@@ -29,6 +29,7 @@ module('observable functions - first', () => {
             setTimeout(() => observer.next(5), 6);
 
         });
+        
         const b = getBinding();
 
         first(x, b, true);

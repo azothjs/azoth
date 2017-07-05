@@ -3,6 +3,7 @@ export { default as renderer } from './renderer';
 
 export { makeFragment } from './domUtil';
 
+export { default as __first } from './operators/first';
 export { default as __map } from './operators/map';
 export { default as __combine } from './operators/combine';
 
