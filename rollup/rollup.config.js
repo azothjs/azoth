@@ -1,11 +1,9 @@
 import resolve from 'rollup-plugin-node-resolve';
 
 export default {
-    entry: 'src/index.js',
-    format: 'umd',
+    entry: 'src/diamond.js',
     plugins: [
         resolve({ jsnext: true, module: true })
     ],
-    sourceMap: true,
-    dest: 'build/bundle.js'
+    // sourceMap: true
 };

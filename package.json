@@ -2,33 +2,35 @@
   "name": "diamond",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/diamond.js",
+  "module": "dist/diamond.es.js",
   "scripts": {
     "pretest:build": "node tests/make-index.js",
-    "test:build": "rollup -c rollup.config.tests.js",
+    "test:build": "rollup -c rollup/rollup.config.tests.js",
     "test:watch": "npm run test:build -- -w",
     "test": "run-p test:build test:serve",
     "test:serve": "cd tests/build && live-server",
-    "start": "run-p test:watch test:serve"
+    "start": "run-p test:watch test:serve",
+    "prebuild": "eslint src",
+    "build": "rollup -c rollup/rollup.config.cjs.js && rollup -c rollup/rollup.config.es.js",
+    "prepublish": "npm test && npm run build"
   },
   "repository": "https://github.com/martypdx/diamond",
   "author": "Marty Nelson <marty@martypdx.com> (@martypdx)",
   "license": "MIT",
   "devDependencies": {
     "chai": "^3.5.0",
-    "diamond-compiler": "file:../diamond-compiler",
     "eslint": "^4.1.1",
     "magic-string": "^0.21.3",
     "npm-run-all": "^4.0.2",
     "qunit": "^1.0.0",
     "rollup": "^0.43.0",
     "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-diamond": "0.0.2",
     "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-pluginutils": "^2.0.1",
     "rollup-watch": "^4.0.0",
-    "rxjs-es": "^5.0.0-beta.12"
-  },
-  "dependencies": {
+    "rxjs-es": "^5.0.0-beta.12",
     "source-map": "^0.5.6"
-  }
+  },
+  "dependencies": {}
 }

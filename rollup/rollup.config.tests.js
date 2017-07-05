@@ -1,5 +1,5 @@
-import diamond from './rollup-plugin-diamond';
 import resolve from 'rollup-plugin-node-resolve';
+import diamond from 'rollup-plugin-diamond';
 
 export default {
     entry: 'tests/index.js',

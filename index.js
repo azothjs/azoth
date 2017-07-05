@@ -1,4 +1,16 @@
-import { html as _ } from './diamond';
+'use strict';
+
+const replace = {
+    'text-node': () => document.createTextNode( '' ),
+    'block-node': () => document.createComment( 'block' )
+};
+
+const query = Object.keys( replace ).join();
+
+const div = document.createElement('div');
+
+function _(){}
+
 // import { BehaviorSubject } from 'rxjs-es/BehaviorSubject';
 // import { Observable } from 'rxjs-es/Observable';
 // import 'rxjs-es/add/observable/of';
@@ -55,4 +67,3 @@ console.timeEnd('render');
 // document.body.appendChild(observed(name));
 
 // document.getElementById('change').addEventListener('click', () => name.next('Freddy'));
-
