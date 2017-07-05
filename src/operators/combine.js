@@ -1,19 +1,4 @@
-
-export function map(observable, map, subscriber) {
-    let last;
-    let lastMapped;
-    return observable.subscribe(value => {
-        if(value === last) return;
-        last = value;
-        const mapped = map(value);
-        if(mapped !== lastMapped) {
-            lastMapped = mapped;
-            subscriber(mapped);
-        }
-    });
-}
-
-export function combine(observables, combine, subscriber) {
+export default function combine(observables, combine, subscriber, once = false) {
     const length = observables.length;
     let values = new Array(length);
     let lastCombined;
@@ -26,27 +11,38 @@ export function combine(observables, combine, subscriber) {
             lastCombined = combined;
             subscriber(combined);
         }
-    }
+    };
 
     const subscriptions = new Array(length);
+    const unsubscribes = once ? [] : null;
 
     for(let i = 0; i < length; i++) {
         subscriptions[i] = observables[i].subscribe(value => {
-            if(value === values[i]) return;
-            values[i] = value;
+            if(value !== values[i]) {
+                values[i] = value;
+                if(subscribed) call();
+            }
+
+            if(once) {
+                if(subscribed) subscriptions[i].unsubscribe();
+                else unsubscribes.push(i);
+            }
+
             any = true;
-            if(subscribed) call();
         });
     }
-    subscribed = true;
-    
-    if(any) call();
 
+    subscribed = true;
+    if(any) call();
+    if(once) {
+        unsubscribes.forEach(i => subscriptions[i].unsubscribe());
+    }
+    
     return {
         unsubscribe() {
             for(let i = 0; i < length; i++) {
                 subscriptions[i].unsubscribe();
             }
         }
-    }
+    };
 }
