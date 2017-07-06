@@ -1,5 +1,5 @@
 import { module, test, fixture } from './qunit';
-import { _, $ } from '../src/diamond';
+import { _, $ } from '../src/diamond-ui';
 import { BehaviorSubject } from 'rxjs-es/BehaviorSubject';
 
 module('mapped expression rendering', () => {

@@ -1,9 +1,9 @@
 {
   "name": "diamond-ui",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Compiled JavaScript UI rendering library",
-  "main": "dist/diamond.js",
-  "module": "dist/diamond.es.js",
+  "main": "dist/diamond-ui.js",
+  "module": "dist/diamond-ui.es.js",
   "scripts": {
     "pretest:build": "node tests/make-index.js",
     "test:build": "rollup -c rollup/rollup.config.tests.js",

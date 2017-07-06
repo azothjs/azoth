@@ -1,5 +1,5 @@
 import { module, test, fixture } from './qunit';
-import { html as _ } from '../src/diamond';
+import { html as _ } from '../src/diamond-ui';
 import { BehaviorSubject } from 'rxjs-es/BehaviorSubject';
 import { combineLatest } from 'rxjs-es/observable/combineLatest';
 
