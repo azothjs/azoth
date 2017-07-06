@@ -1,6 +1,6 @@
 {
   "name": "diamond-ui",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Compiled JavaScript UI rendering library",
   "main": "dist/diamond.js",
   "module": "dist/diamond.es.js",

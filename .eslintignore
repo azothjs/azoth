@@ -1,3 +1,4 @@
 .eslintrc
 node_modules
-.gobble
+dist
+tests/build
