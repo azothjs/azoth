@@ -168,12 +168,13 @@ function __blockBinder( index ) {
         
         return val => {
             removePrior(top, anchor);
-            const fragment = typeof val === 'function' ? val() : val;
+            const fragment = toFragment$1(val);
             Array.isArray(fragment) ? fragment.forEach(f => insertBefore(f, anchor)) : insertBefore(fragment, anchor);
         };
     };
 }
 
+const toFragment$1 = val => typeof val === 'function' ? val() : val;
 const removePrior = (top, anchor) => {
     let sibling = top.nextSibling;
     while(sibling && sibling !== anchor) {
@@ -183,6 +184,7 @@ const removePrior = (top, anchor) => {
     }
 };
 
+// runtime use:
 function _(){}
 function $(){}
 
