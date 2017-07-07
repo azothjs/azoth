@@ -1,4 +1,7 @@
+import { toFragment } from '../render';
+
 export default function __blockBinder( index ) {
+
     return node => {
         const anchor = node.childNodes[ index ];
         const insertBefore = node => anchor.parentNode.insertBefore(node, anchor);
@@ -10,7 +13,7 @@ export default function __blockBinder( index ) {
         
         return val => {
             removePrior(top, anchor);
-            const fragment = typeof val === 'function' ? val() : val;
+            const fragment = toFragment(val);
             Array.isArray(fragment) ? fragment.forEach(f => insertBefore(f, anchor)) : insertBefore(fragment, anchor);
         };
     };

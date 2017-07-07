@@ -145,7 +145,7 @@ function combine(observables, combine, subscriber, once = false) {
 
 const isProp = (name, node) => name in node;
 
-function textBinder(name) {
+function attrBinder(name) {
     return node => {
         return isProp(name, node)
             ? val => node[name] = val
@@ -153,7 +153,7 @@ function textBinder(name) {
     };
 }
 
-function textBinder$1(index) {
+function textBinder(index) {
     return node => {
         const text = node.childNodes[index];
         return val => text.nodeValue = val;
@@ -198,6 +198,6 @@ exports.makeFragment = makeFragment;
 exports.__first = first;
 exports.__map = map;
 exports.__combine = combine;
-exports.__attrBinder = textBinder;
-exports.__textBinder = textBinder$1;
+exports.__attrBinder = attrBinder;
+exports.__textBinder = textBinder;
 exports.__blockBinder = __blockBinder;

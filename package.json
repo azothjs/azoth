@@ -13,7 +13,8 @@
     "start": "run-p test:watch test:serve",
     "prebuild": "eslint src",
     "build": "rollup -c rollup/rollup.config.cjs.js && rollup -c rollup/rollup.config.es.js",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "update-compiler": "npm un rollup-plugin-diamond -D && npm i rollup-plugin-diamond -D"
   },
   "repository": "https://github.com/martypdx/diamond",
   "author": "Marty Nelson <marty@martypdx.com> (@martypdx)",
@@ -23,7 +24,7 @@
     "npm-run-all": "^4.0.2",
     "qunit": "^1.0.0",
     "rollup": "^0.43.0",
-    "rollup-plugin-diamond": "0.0.3",
+    "rollup-plugin-diamond": "0.0.7",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-watch": "^4.0.0",
     "rxjs-es": "^5.0.0-beta.12",

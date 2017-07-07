@@ -141,7 +141,7 @@ function combine(observables, combine, subscriber, once = false) {
 
 const isProp = (name, node) => name in node;
 
-function textBinder(name) {
+function attrBinder(name) {
     return node => {
         return isProp(name, node)
             ? val => node[name] = val
@@ -149,7 +149,7 @@ function textBinder(name) {
     };
 }
 
-function textBinder$1(index) {
+function textBinder(index) {
     return node => {
         const text = node.childNodes[index];
         return val => text.nodeValue = val;
@@ -186,4 +186,4 @@ const removePrior = (top, anchor) => {
 function _(){}
 function $(){}
 
-export { _, _ as html, $, renderer, makeFragment, first as __first, map as __map, combine as __combine, textBinder as __attrBinder, textBinder$1 as __textBinder, __blockBinder };
+export { _, _ as html, $, renderer, makeFragment, first as __first, map as __map, combine as __combine, attrBinder as __attrBinder, textBinder as __textBinder, __blockBinder };
