@@ -1,5 +1,4 @@
 // runtime use:
-export { default as render } from './render';
 export function _(){}
 export { _ as html };
 export function $(){}
