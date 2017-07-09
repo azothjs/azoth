@@ -16,7 +16,7 @@ run diamond.
 
 ### Build Install and Config
 
-Using rollup:
+#### Rollup
 
 ```
 > npm install rollup-plugin-diamond -D
@@ -37,13 +37,15 @@ export default {
 };
 ```
 
+#### Compiler
+
 The diamond compiler [here](https://github.com/martypdx/diamond-compiler) is the transformation function to adapt to other build systems.
 
 ## Developer Guide
 
 ### Compiled Syntax
 
-The current developer syntax is valid ESNext JavaScript, making it easy to use existing IDE features.  Before it is run, parts of the source code are compiled (into valid ES JavaScript) and the html is extracted out into static template fragments. 
+The current developer syntax is 100% valid ESNext JavaScript, making it easy to use existing IDE features.  Before being run, parts of the source code are compiled (into valid ES JavaScript) and the html is extracted out into static template fragments. 
 
 ### Basic Templates
 
@@ -70,18 +72,24 @@ Interpolated expressions (`${ ... }`) are marked with a trailing `#` to indicate
 that a template or an array of templates will be returned:
 
 ```js
-const list = items => _`
-    <ul>
-        ${items.map(item => _`
-            <li>${item}</li>
-        `)}#
-    </ul>
-`;
+function(items) {
+    const noItems = _`There are <em>no</em> items :(`;
+    const itemCount = _`There are <strong>${items.length}</strong> items`;
+
+    return _`
+        <h1>${ items.length ? itemCount : noItems }#</h1>
+        <ul>
+            ${items.map(item => _`
+                <li>${item}</li>
+            `)}#
+        </ul>
+    `;
+}
 ```
 
 ### Observables
 
-Suffix function parameters with a default value of `$`, imported from the `diamond-ui` library, to mark those inputs as observables. Inside the function those arguments are unchanged, however when used within `${ ... }`, the first emitted value of the observable will be used:
+Suffix function parameters with a default value of `$`, imported from the `diamond-ui` library, to mark those inputs as observables. Inside the function those arguments are unchanged. However when used within `${ ... }`, the first emitted value of the observable will be used:
 
 ```js
 import { _, $ } from 'diamond-ui';
