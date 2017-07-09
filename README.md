@@ -3,14 +3,18 @@
 * [Install and Build](#install-and-build)
 * [Developer Guide](#developer-guide)
 
-## Installing and Build
+## Install and Build
 
 You need both the `diamond-ui` runtime and some form of the compiler to 
 run diamond.
 
+### Runtime Install
+
 ```
 > npm install diamond-ui -S
 ```
+
+### Build Install and Config
 
 Using rollup:
 
@@ -29,7 +33,7 @@ export default {
     plugins: [
         diamond()
     ],
-    dest: 'build/bundle.js'
+    dest: 'bundle.js'
 };
 ```
 
