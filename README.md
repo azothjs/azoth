@@ -41,6 +41,10 @@ export default {
 
 The diamond compiler [here](https://github.com/martypdx/diamond-compiler) is the transformation function to adapt to other build systems.
 
+### Examples
+
+There are simple example apps [here](https://github.com/martypdx/diamond-example)
+
 ## Developer Guide
 
 ### Compiled Syntax
