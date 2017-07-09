@@ -1,5 +1,12 @@
 # 💎 diamond
 
+* [Install and Build](#install-and-build)
+* [Developer Guide](#developer-guide)
+
+## Installing and Build
+
+
+
 ## Developer Guide
 
 ### Compiled Syntax
