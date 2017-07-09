@@ -5,13 +5,41 @@
 
 ## Installing and Build
 
+You need both the `diamond-ui` runtime and some form of the compiler to 
+run diamond.
 
+```
+> npm install diamond-ui -S
+```
+
+Using rollup:
+
+```
+> npm install rollup-plugin-diamond -D
+```
+
+And in `rollup.config.js`:
+
+```js
+import diamond from 'rollup-plugin-diamond';
+
+export default {
+    entry: 'src/index.js',
+    format: 'iife',
+    plugins: [
+        diamond()
+    ],
+    dest: 'build/bundle.js'
+};
+```
+
+The diamond compiler [here](https://github.com/martypdx/diamond-compiler) is the transformation function to adapt to other build systems.
 
 ## Developer Guide
 
 ### Compiled Syntax
 
-The current developer syntax is valid ESNext JavaScript, making it easy to use existing IDE features.  Before it is run, parts of the source code are compiled (also valid ES JavaScript) and the html is extracted out into static template fragments. 
+The current developer syntax is valid ESNext JavaScript, making it easy to use existing IDE features.  Before it is run, parts of the source code are compiled (into valid ES JavaScript) and the html is extracted out into static template fragments. 
 
 ### Basic Templates
 
@@ -49,7 +77,7 @@ const list = items => _`
 
 ### Observables
 
-Suffix function parameters with a default value `$` (imported from the `diamond-ui` library), to mark those inputs as observables. Inside the function those arguments are unchanged, however when used within `${ ... }`, the first emitted value of the observable will be used:
+Suffix function parameters with a default value of `$`, imported from the `diamond-ui` library, to mark those inputs as observables. Inside the function those arguments are unchanged, however when used within `${ ... }`, the first emitted value of the observable will be used:
 
 ```js
 import { _, $ } from 'diamond-ui';
@@ -91,7 +119,7 @@ The returned fragment has an unsubscribe method used to stop listening to the ob
 ```js
 fragment.unsubscribe();
 name.next('San Francisco');
-// still <p>Hello Portland!</p>!
+// still: <p>Hello Portland!</p>!
 ```
 
 Expressions are supported as the template value is "mapped" from the observable(s):
@@ -110,14 +138,16 @@ y.next(1);
 
 ```
 
-Expressions maintain their scoping within the JavaScript, so outside functions 
-and values can be used:
+Expressions maintain their scoping within the module, so outside functions and values can be used:
 
 ```js
 import moment from 'moment';
 const template = (date=$) => _`<span>*${moment(date).fromNow()}</span>`;
 ```
 
+## License
+
+[MIT](LICENSE)
 
 
 
