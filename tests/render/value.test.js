@@ -1,5 +1,5 @@
-import { module, test, fixture } from './qunit';
-import { html as _ } from '../src/diamond-ui';
+import { module, test, fixture } from '../qunit';
+import { html as _ } from '../../src/diamond-ui';
 
 module('static rendering', () => {
 

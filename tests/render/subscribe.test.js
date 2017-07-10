@@ -1,11 +1,12 @@
-import { module, test, fixture } from './qunit';
-import { _, $ } from '../src/diamond-ui';
+import { module, test, fixture } from '../qunit';
+import { html as _ } from '../../src/diamond-ui';
 import { BehaviorSubject } from 'rxjs-es/BehaviorSubject';
+import { combineLatest } from 'rxjs-es/observable/combineLatest';
 
-module('mapped expression rendering', () => {
+module('subscribe rendering', () => {
 
     test('hello diamond', t => {
-        const template = (name=$) => _`<span>Hello *${name}!</span>`;
+        const template = name => _`<span>Hello @${name}!</span>`;
         
         const name = new BehaviorSubject('Diamond');
         const fragment = template(name);
@@ -21,7 +22,7 @@ module('mapped expression rendering', () => {
     });
 
     test('expression', t => {
-        const template = (x=$, y=$) => _`*${x} + *${y} = *${x + y}`;
+        const template = (x, y) => _`@${x} + @${y} = @${combineLatest(x, y, (x, y) => x + y)}`;
         
         const x = new BehaviorSubject(5);
         const y = new BehaviorSubject(2);
@@ -45,7 +46,7 @@ module('mapped expression rendering', () => {
     test('conditional block with variables', t => {
         const yes = _`<span>Yes</span>`;
         const no = _`<span>No</span>`;
-        const template = (choice=$) => _`*${choice ? yes : no}#`;
+        const template = choice => _`@${choice.map(c => c ? yes : no)}#`;
 
         const choice = new BehaviorSubject(true);
         const fragment = template(choice);
@@ -63,11 +64,11 @@ module('mapped expression rendering', () => {
     });
 
     test('block with array', t => {
-        const template = (items=$) => _`
+        const template = items => _`
             <ul>
-                *${items.map(({ name }) => _`
+                @${items.map(items=> items.map(({ name }) => _`
                     <li>${name}</li>	
-                `)}#
+                `))}#
             </ul>
         `;
 
