@@ -39,7 +39,7 @@ export default {
 
 #### Compiler
 
-The diamond compiler [here](https://github.com/martypdx/diamond-compiler) is the transformation function to adapt to other build systems.
+The core transformation is in the compiler repo [here](https://github.com/martypdx/diamond-compiler) for adapting to other build systems.
 
 ### Examples
 
@@ -49,25 +49,28 @@ There are simple example apps [here](https://github.com/martypdx/diamond-example
 
 ### Compiled Syntax
 
-The current developer syntax is 100% valid ESNext JavaScript, making it easy to use existing IDE features.  Before being run, parts of the source code are compiled (into valid ES JavaScript) and the html is extracted out into static template fragments. 
+The current developer syntax intentionally only uses valid ESNext JavaScript, making it easy to use existing IDE features.  As part of your build process, parts of the source code (functions and templates) are compiled. The static html is extracted out and the remaining expression are reworked into binding JavaScript executed at runtime.
 
 ### Basic Templates
 
 Diamond templates are JavaScript template literals prefixed with a `_` tag, usually returned
 from a function that specifies the data to be mixed into the template. 
 
-For templates that will render to the DOM once, it looks nearly identical to basic template literal string interpolation:
+The binding semantics are very explicit and require understanding how the data is to interact with the DOM, both initially and over time. 
+
+In the simplest case of using normal JavaScript objects and values, the templates will look nearly identical to basic template literal string interpolation:
 
 ```js
 import { _ } from 'diamond-ui';
 const greeting = (name=$) => _`<span>Hello ${name}!</span>`;
 ```
 
-Except that diamond templates return a document fragment instead of string:
+Except that templates return a document fragment instead of string:
 
 ```js
 const fragment = greeting('Diamond');
 document.body.appendChild(fragment);
+// <span>Hello Diamond!</span>
 ```
 
 ### Blocks
@@ -93,7 +96,37 @@ function(items) {
 
 ### Observables
 
-Suffix function parameters with a default value of `$`, imported from the `diamond-ui` library, to mark those inputs as observables. Inside the function those arguments are unchanged. However when used within `${ ... }`, the first emitted value of the observable will be used:
+Suffix function parameters with a default value of `$`, imported from the `diamond-ui` library, to mark those inputs as observables. Inside the function generally, those arguments are unchanged: 
+
+```js
+import { _, $ } from 'diamond-ui';
+import { Observable } from 'rxjs-es/Observable';
+import 'rxjs-es/add/observable/of';
+
+const greeting = (observable=$) => _`<div>${observable}</div>`;
+const name = Observable.of('Diamond');
+const fragment = greeting(name);
+document.body.appendChild(fragment);
+
+// <span>[object Object]</span>
+```
+
+This can be useful when passing observables through to other subtemplate functions.
+
+### Observable Bindings
+
+Prefix the `${ ... }` with a sigil for different binding behaviors:
+
+|sigil|type
+|---|---|
+|`*`|map|
+|`$`|first value|
+|`@`|subscribe|
+
+#### `$` First Value
+
+The first emitted value of the observable will be used, but then the binding will be
+unsubscribed:
 
 ```js
 import { _, $ } from 'diamond-ui';
@@ -108,12 +141,10 @@ document.body.appendChild(fragment);
 // <p>Hello Diamond!</p>
 ```
 
-### Observable Binding
 
 #### `*` Map 
 
-By prefixing the `${ ... }` with a `*` character, that part of the template
-will be bound to the observable and change as new values are emitted:
+Bind that part of the template to the observable and change as new values are emitted:
 
 ```js
 import { _, $ } from 'diamond-ui';
@@ -130,15 +161,7 @@ name.next('Portland');
 // <p>Hello Portland!</p>
 ```
 
-The returned fragment has an unsubscribe method used to stop listening to the observables:
-
-```js
-fragment.unsubscribe();
-name.next('San Francisco');
-// still: <p>Hello Portland!</p>!
-```
-
-Expressions are supported as the template value is "mapped" from the observable(s):
+Expressions are fully supported and can include multiple observables:
 
 ```js
 const template = (x=$, y=$) => _`*${x} + *${y} = *${x + y}`;
