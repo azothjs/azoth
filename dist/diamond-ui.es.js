@@ -171,9 +171,9 @@ function __blockBinder( index ) {
             if(!unsubscribe) return;
             
             if(Array.isArray(unsubscribe)) {
-                for(let unsub of unsubscribe) unsub.unsubscribe();
+                for(let unsub of unsubscribe) unsub.unsubscribe && unsub.unsubscribe();
             } else {
-                unsubscribe.unsubscribe();
+                unsubscribe.unsubscribe && unsubscribe.unsubscribe();
             }
         };
         
