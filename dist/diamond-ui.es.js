@@ -156,42 +156,43 @@ function textBinder(index) {
     };
 }
 
-function __blockBinder( index ) {
+function __blockBinder(index) {
     return node => {
-        const anchor = node.childNodes[ index ];
+        const anchor = node.childNodes[index];
         const insertBefore = node => anchor.parentNode.insertBefore(node, anchor);
 
-        // TODO: pass in block observe status so we know not to do this work if possible 
-        // insert a top and iterate till anchor to remove
         const top = document.createComment('block start');
         insertBefore(top, anchor);
         
-        let unsubscribe = null;
-        const callUnsubscribe = () => {
-            if(!unsubscribe) return;
+        let unsubscribes = null;
+        const unsubscribe = () => {
+            if(!unsubscribes) return;
             
-            if(Array.isArray(unsubscribe)) {
-                for(let unsub of unsubscribe) unsub.unsubscribe && unsub.unsubscribe();
+            if(Array.isArray(unsubscribes)) {
+                for(let unsub of unsubscribes) unsub.unsubscribe && unsub.unsubscribe();
             } else {
-                unsubscribe.unsubscribe && unsubscribe.unsubscribe();
+                unsubscribes.unsubscribe && unsubscribes.unsubscribe();
             }
         };
         
-        return val => {
+        const observer = val => {
             removePrior(top, anchor);
-            callUnsubscribe();
+            unsubscribe();
             const fragment = toFragment$1(val);
+
             if(Array.isArray(fragment)) {
-                unsubscribe = [];
+                unsubscribes = [];
                 for(let f of fragment) {
-                    if(f.unsubscribe) unsubscribe.push(f.unsubscribe);
+                    if(f.unsubscribe) unsubscribes.push(f.unsubscribe);
                     insertBefore(f, anchor);
                 }
             } else {
-                unsubscribe = fragment.unsubscribe || null;
+                unsubscribes = fragment.unsubscribe || null;
                 insertBefore(fragment, anchor);
             }
         };
+
+        return { observer, unsubscribe };
     };
 }
 
