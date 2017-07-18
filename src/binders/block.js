@@ -4,7 +4,7 @@ export default function __blockBinder(index) {
         const anchor = node.childNodes[index];
         const insertBefore = node => anchor.parentNode.insertBefore(node, anchor);
 
-        const top = document.createComment('block start');
+        const top = document.createComment(' block start ');
         insertBefore(top, anchor);
         
         let unsubscribes = null;

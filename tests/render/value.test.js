@@ -1,7 +1,7 @@
 import { module, test, fixture } from '../qunit';
 import { html as _ } from '../../src/diamond-ui';
 
-module('static rendering', () => {
+module('value rendering', () => {
 
     test('hello diamond', t => {
         const template = name => _`<span>Hello ${name}!</span>`;
