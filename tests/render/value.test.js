@@ -1,14 +1,14 @@
 import { module, test, fixture } from '../qunit';
-import { html as _ } from '../../src/diamond-ui';
+import { html as _ } from '../../src/azoth';
 
 module('value rendering', () => {
 
-    test('hello diamond', t => {
+    test('hello azoth', t => {
         const template = name => _`<span>Hello ${name}!</span>`;
-        const fragment = template('Diamond');
+        const fragment = template('azoth');
         t.notOk(fragment.unsubscribe);
         fixture.appendChild(fragment);
-        t.equal(fixture.cleanHTML(), '<span>Hello Diamond!</span>');
+        t.equal(fixture.cleanHTML(), '<span>Hello azoth!</span>');
     });
 
     test('expression', t => {

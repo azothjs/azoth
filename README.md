@@ -1,17 +1,17 @@
-# 💎 diamond
+# 💎 azoth
 
 * [Install and Build](#install-and-build)
 * [Developer Guide](#developer-guide)
 
 ## Install and Build
 
-You need both the `diamond-ui` runtime and some form of the compiler to 
-run diamond.
+You need both the `azoth` runtime and some form of the compiler to 
+run azoth.
 
 ### Runtime Install
 
 ```
-> npm install diamond-ui -S
+> npm install azoth -S
 ```
 
 ### Build Install and Config
@@ -19,19 +19,19 @@ run diamond.
 #### Rollup
 
 ```
-> npm install rollup-plugin-diamond -D
+> npm install rollup-plugin-azoth -D
 ```
 
 And in `rollup.config.js`:
 
 ```js
-import diamond from 'rollup-plugin-diamond';
+import azoth from 'rollup-plugin-azoth';
 
 export default {
     entry: 'src/index.js',
     format: 'iife',
     plugins: [
-        diamond()
+        azoth()
     ],
     dest: 'bundle.js'
 };
@@ -39,11 +39,11 @@ export default {
 
 #### Compiler
 
-The core transformation is in the compiler repo [here](https://github.com/martypdx/diamond-compiler) for adapting to other build systems.
+The core transformation is in the compiler repo [here](https://github.com/martypdx/azoth-compiler) for adapting to other build systems.
 
 ### Examples
 
-There are simple example apps [here](https://github.com/martypdx/diamond-example)
+There are simple example apps [here](https://github.com/martypdx/azoth-example)
 
 ## Developer Guide
 
@@ -53,7 +53,7 @@ The current developer syntax intentionally only uses valid ESNext JavaScript, ma
 
 ### Basic Templates
 
-Diamond templates are JavaScript template literals prefixed with a `_` tag, usually returned
+azoth templates are JavaScript template literals prefixed with a `_` tag, usually returned
 from a function that specifies the data to be mixed into the template. 
 
 The binding semantics are very explicit and require understanding how the data is to interact with the DOM, both initially and over time. 
@@ -61,16 +61,16 @@ The binding semantics are very explicit and require understanding how the data i
 In the simplest case of using normal JavaScript objects and values, the templates will look nearly identical to basic template literal string interpolation:
 
 ```js
-import { _ } from 'diamond-ui';
+import { _ } from 'azoth';
 const greeting = (name=$) => _`<span>Hello ${name}!</span>`;
 ```
 
 Except that templates return a document fragment instead of string:
 
 ```js
-const fragment = greeting('Diamond');
+const fragment = greeting('azoth');
 document.body.appendChild(fragment);
-// <span>Hello Diamond!</span>
+// <span>Hello azoth!</span>
 ```
 
 ### Blocks
@@ -96,15 +96,15 @@ function(items) {
 
 ### Observables
 
-Suffix function parameters with a default value of `$`, imported from the `diamond-ui` library, to mark those inputs as observables. Inside the function generally, those arguments are unchanged: 
+Suffix function parameters with a default value of `$`, imported from the `azoth` library, to mark those inputs as observables. Inside the function generally, those arguments are unchanged: 
 
 ```js
-import { _, $ } from 'diamond-ui';
+import { _, $ } from 'azoth';
 import { Observable } from 'rxjs-es/Observable';
 import 'rxjs-es/add/observable/of';
 
 const greeting = (observable=$) => _`<div>${observable}</div>`;
-const name = Observable.of('Diamond');
+const name = Observable.of('azoth');
 const fragment = greeting(name);
 document.body.appendChild(fragment);
 
@@ -129,16 +129,16 @@ The first emitted value of the observable will be used, but then the binding wil
 unsubscribed:
 
 ```js
-import { _, $ } from 'diamond-ui';
+import { _, $ } from 'azoth';
 import { Observable } from 'rxjs-es/Observable';
 import 'rxjs-es/add/observable/of';
 
 const greeting = (name=$) => _`<p>Hello ${name}!</p>`;
-const name = Observable.of('Diamond');
+const name = Observable.of('azoth');
 const fragment = greeting(name);
 document.body.appendChild(fragment);
 
-// <p>Hello Diamond!</p>
+// <p>Hello azoth!</p>
 ```
 
 
@@ -147,15 +147,15 @@ document.body.appendChild(fragment);
 Bind that part of the template to the observable and change as new values are emitted:
 
 ```js
-import { _, $ } from 'diamond-ui';
+import { _, $ } from 'azoth';
 import { BehaviorSubject } from 'rxjs-es/BehaviorSubject';
 
 const hello = (name=$) => _`<p>Hello *${name}!</p>`;
-const name = new BehaviorSubject('Diamond');
+const name = new BehaviorSubject('azoth');
 
 const fragment = hello(name);
 document.body.appendChild(fragment);
-// <p>Hello Diamond!</p>
+// <p>Hello azoth!</p>
 
 name.next('Portland');
 // <p>Hello Portland!</p>

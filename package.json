@@ -1,9 +1,9 @@
 {
-  "name": "diamond-ui",
+  "name": "azoth",
   "version": "0.0.11",
   "description": "Compiled JavaScript UI rendering library",
-  "main": "dist/diamond-ui.js",
-  "module": "dist/diamond-ui.es.js",
+  "main": "dist/azoth.js",
+  "module": "dist/azoth.es.js",
   "scripts": {
     "pretest:build": "node tests/make-index.js",
     "test:build": "rollup -c rollup/rollup.config.tests.js",
@@ -14,9 +14,9 @@
     "prebuild": "eslint src",
     "build": "rollup -c rollup/rollup.config.cjs.js && rollup -c rollup/rollup.config.es.js",
     "prepublish": "npm run build",
-    "update-compiler": "npm un rollup-plugin-diamond -D && npm i rollup-plugin-diamond -D"
+    "update-compiler": "npm un rollup-plugin-azoth -D && npm i rollup-plugin-azoth -D"
   },
-  "repository": "https://github.com/martypdx/diamond",
+  "repository": "https://github.com/martypdx/azoth",
   "author": "Marty Nelson <marty@martypdx.com> (@martypdx)",
   "license": "MIT",
   "devDependencies": {
@@ -24,7 +24,7 @@
     "npm-run-all": "^4.0.2",
     "qunit": "^1.0.0",
     "rollup": "^0.43.0",
-    "rollup-plugin-diamond": "0.0.20",
+    "rollup-plugin-azoth": "0.0.22",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-watch": "^4.0.0",
     "rxjs-es": "^5.0.0-beta.12",

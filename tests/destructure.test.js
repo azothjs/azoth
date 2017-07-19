@@ -1,5 +1,5 @@
 import { module, test, fixture } from './qunit';
-import { _, $ } from '../src/diamond-ui';
+import { _, $ } from '../src/azoth';
 import { BehaviorSubject } from 'rxjs-es/BehaviorSubject';
 import { Observable } from 'rxjs-es';
 
@@ -14,12 +14,12 @@ module('destructured rendering', () => {
             <span>*${name} the *${color.toUpperCase()}!</span>
         `;
         
-        const item = new BehaviorSubject({ name: 'Diamond', color: 'blue' });
+        const item = new BehaviorSubject({ name: 'azoth', color: 'blue' });
         const fragment = template(item);
         t.ok(fragment.unsubscribe);
 
         fixture.appendChild(fragment);
-        t.equal(fixture.cleanHTML(), '<span>Diamond the BLUE!</span>');
+        t.equal(fixture.cleanHTML(), '<span>azoth the BLUE!</span>');
 
         item.next({ name: 'Portland', color: 'red' });
         t.equal(fixture.cleanHTML(), '<span>Portland the RED!</span>');

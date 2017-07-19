@@ -1,20 +1,20 @@
 import { module, test, fixture } from '../qunit';
-import { _, $ } from '../../src/diamond-ui';
+import { _, $ } from '../../src/azoth';
 import { BehaviorSubject } from 'rxjs-es/BehaviorSubject';
 
 module('first expression rendering', () => {
 
-    test('hello diamond', t => {
+    test('hello azoth', t => {
         const template = (name=$) => _`<span>Hello $${name}!</span>`;
         
-        const name = new BehaviorSubject('Diamond');
+        const name = new BehaviorSubject('azoth');
         const fragment = template(name);
         t.ok(fragment.unsubscribe);
 
         fixture.appendChild(fragment);
-        t.equal(fixture.cleanHTML(), '<span>Hello Diamond!</span>');
+        t.equal(fixture.cleanHTML(), '<span>Hello azoth!</span>');
         name.next('Not Listening');
-        t.equal(fixture.cleanHTML(), '<span>Hello Diamond!</span>');
+        t.equal(fixture.cleanHTML(), '<span>Hello azoth!</span>');
         // still safe to call
         fragment.unsubscribe();
     });
