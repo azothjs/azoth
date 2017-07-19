@@ -16,11 +16,14 @@ export default function __blockBinder(index) {
             } else {
                 unsubscribes.unsubscribe && unsubscribes.unsubscribe();
             }
+            unsubscribes = null;
         };
         
         const observer = val => {
             removePrior(top, anchor);
             unsubscribe();
+            if(!val) return;
+            
             const fragment = toFragment(val);
 
             if(Array.isArray(fragment)) {
