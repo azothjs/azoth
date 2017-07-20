@@ -14,10 +14,10 @@ export function toFragment(childNodes) {
     return fragment;
 }
 
-const div = document.createElement('div');
+const div = document.createElement('template');
 export function makeDiv(html) {
     div.innerHTML = html;
-    return div;
+    return div.content;
 }
 
 export function makeHtml(html) {
