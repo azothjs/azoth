@@ -5,9 +5,6 @@ export default function makeBlock(observable) {
 }
 
 export class Block extends Base {
-    constructor(observable) {
-        super(observable);
-    }
 
     _render(value) {
         this._unrender();

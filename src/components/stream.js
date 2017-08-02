@@ -5,6 +5,7 @@ export default function makeStream(observable) {
 }
 
 export class Stream extends Base {
+    
     constructor(observable) {
         super(observable);
         this._unsubscribes = [];

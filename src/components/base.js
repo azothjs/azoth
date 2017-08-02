@@ -1,4 +1,5 @@
 export default class Base {
+    
     constructor(observable) {
         this._observable = observable;
         this._anchor = null;
