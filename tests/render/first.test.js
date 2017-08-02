@@ -34,6 +34,18 @@ module('first expression rendering', () => {
         t.equal(fixture.cleanHTML(), '5 + 2 = 7');
     });
 
+    test('attribute', t => {
+        const template = (foo=$) => _`<span class=$${foo}></span>`;
+       
+        const foo = new BehaviorSubject('foo');
+        const fragment1 = template(foo);
+        fixture.appendChild(fragment1);		
+        t.equal(fixture.cleanHTML(), '<span class="foo"></span>');
+
+        foo.next('bar');
+        t.equal(fixture.cleanHTML(), '<span class="foo"></span>');
+    });
+
     test('conditional block with variables', t => {
         const yes = _`<span>Yes</span>`;
         const no = _`<span>No</span>`;

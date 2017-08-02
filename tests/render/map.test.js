@@ -42,6 +42,23 @@ module('mapped expression rendering', () => {
 
     });
 
+    test('attribute', t => {
+        const template = (foo=$) => _`<span class=*${foo}></span>`;
+       
+        const foo = new BehaviorSubject('foo');
+        const fragment = template(foo);
+        fixture.appendChild(fragment);		
+        t.equal(fixture.cleanHTML(), '<span class="foo"></span>');
+
+        foo.next('bar');
+        t.equal(fixture.cleanHTML(), '<span class="bar"></span>');
+
+        fragment.unsubscribe();
+
+        foo.next('qux');
+        t.equal(fixture.cleanHTML(), '<span class="bar"></span>');
+    });
+
     test('conditional block with variables', t => {
         const yes = _`<span>Yes</span>`;
         const no = _`<span>No</span>`;

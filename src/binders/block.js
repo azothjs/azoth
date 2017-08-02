@@ -1,4 +1,3 @@
-
 export default function __blockBinder(index) {
     return node => {
         const anchor = node.childNodes[index];
@@ -12,7 +11,10 @@ export default function __blockBinder(index) {
             if(!unsubscribes) return;
             
             if(Array.isArray(unsubscribes)) {
-                for(let unsub of unsubscribes) unsub.unsubscribe && unsub.unsubscribe();
+                for(let i = 0; i < unsubscribes.length; i++) {
+                    const unsub = unsubscribes[i];
+                    if(unsub.unsubscribe) unsub.unsubscribe();
+                }
             } else {
                 unsubscribes.unsubscribe && unsubscribes.unsubscribe();
             }
@@ -28,10 +30,12 @@ export default function __blockBinder(index) {
 
             if(Array.isArray(fragment)) {
                 unsubscribes = [];
-                for(let f of fragment) {
+                for(let i = 0; i < fragment.length; i++) {
+                    const f = fragment[i];
                     if(f.unsubscribe) unsubscribes.push(f.unsubscribe);
-                    insertBefore(f, anchor);
+                    if(i !== 0) fragment[0].appendChild(f);
                 }
+                if(fragment.length) insertBefore(fragment[0], anchor);
             } else {
                 unsubscribes = fragment.unsubscribe || null;
                 insertBefore(fragment, anchor);
@@ -44,7 +48,6 @@ export default function __blockBinder(index) {
 
 const toFragment = val => typeof val === 'function' ? val() : val;
 
-// TODO: need to unsubscribe to prior fragment
 const removePrior = (top, anchor) => {
     let sibling = top.nextSibling;
     while(sibling && sibling !== anchor) {

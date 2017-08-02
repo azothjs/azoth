@@ -199,8 +199,14 @@ const removePrior = (top, anchor) => {
     }
 };
 
+function componentBinder(index) {
+    return node => {
+        return node.childNodes[index];
+    };
+}
+
 // runtime use:
 function _(){}
 function $(){}
 
-export { _, _ as html, $, renderer, makeFragment, first as __first, map as __map, combine as __combine, attrBinder as __attrBinder, textBinder as __textBinder, __blockBinder };
+export { _, _ as html, $, renderer, makeFragment, first as __first, map as __map, combine as __combine, attrBinder as __attrBinder, textBinder as __textBinder, __blockBinder, componentBinder as __componentBinder };

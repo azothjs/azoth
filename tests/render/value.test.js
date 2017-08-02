@@ -20,6 +20,15 @@ module('value rendering', () => {
 
     });
 
+    test('attribute', t => {
+        const template = foo => _`<span class=${foo}></span>`;
+       
+        const fragment1 = template('foo');
+        fixture.appendChild(fragment1);		
+        t.equal(fixture.cleanHTML(), '<span class="foo"></span>');
+
+    });
+
     test('external variables', t => {
         const upper = s => s.toUpperCase();
         const template = x => _`${upper(x)}`;
@@ -72,6 +81,30 @@ module('value rendering', () => {
                 <li>lipstick</li>
             </ul>
         `);
+    });
+
+
+    test('component', t => {
+        const Component = {
+            span: null,
+            onanchor(anchor) {
+                const span = this.span = document.createElement('SPAN');
+                span.textContent = 'Hello Component';
+                anchor.parentNode.insertBefore(span, anchor);
+            },
+            unsubscribe() {
+                this.span && this.span.remove();
+            }
+        };
+
+        const template = () => _`<div><#:${Component}/></div>`;
+
+        const fragment = template();
+        fixture.appendChild(fragment);
+        t.equal(fixture.cleanHTML(), '<div><!-- component start --><span>Hello Component</span><!-- component end --></div>');
+        fragment.unsubscribe();
+        t.equal(fixture.cleanHTML(), '<div><!-- component start --><!-- component end --></div>');
+
     });
 
 
