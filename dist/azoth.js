@@ -313,11 +313,14 @@ function __blockBinder(index) {
                 unsubscribes = [];
                 for(let i = 0; i < fragment.length; i++) {
                     const f = fragment[i];
+                    if(!f) continue;
+
                     if(f.unsubscribe) unsubscribes.push(f.unsubscribe);
                     if(i !== 0) fragment[0].appendChild(f);
                 }
                 if(fragment.length) insertBefore(fragment[0], anchor);
             } else {
+                if(!fragment) return;
                 unsubscribes = fragment.unsubscribe || null;
                 insertBefore(fragment, anchor);
             }
