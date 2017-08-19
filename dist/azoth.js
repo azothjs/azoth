@@ -2,6 +2,137 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+class Base {
+    
+    constructor(observable) {
+        this._observable = observable;
+        this._anchor = null;
+        this._topAnchor = null;
+        this._subscription = null;
+        this._unsubscribes = null;
+        
+        this.children = null;
+    }
+
+    onanchor(anchor) {
+        this._anchor = anchor;
+        this._topAnchor = anchor.previousSibling;
+        this._subscription = this._observable.subscribe(val => this._render(val));
+    }
+
+    unsubscribe() {
+        this._unrender();
+        const { _subscription: subscription } = this;
+        subscription && subscription.unsubscribe();
+    }
+
+    _insert(node) {
+        const { _anchor: anchor } = this;
+        anchor.parentNode.insertBefore(node, anchor);
+    }
+
+    _unrender() {
+        this._removePrior();
+        this._unsubscribe();
+    }
+
+    _removePrior() {
+        const { _anchor: anchor } = this;
+        let sibling = this._topAnchor.nextSibling;
+        while (sibling && sibling !== anchor) {
+            const current = sibling;
+            sibling = sibling.nextSibling;
+            current.remove();
+        }
+    }
+
+    _unsubscribe() {
+        const { _unsubscribes: unsubscribes } = this;
+        if (!unsubscribes) return;
+
+        if (Array.isArray(unsubscribes)) {
+            for (let i = 0; i < unsubscribes.length; i++) {
+                unsubscribes[i].unsubscribe();
+            }
+        } else {
+            unsubscribes.unsubscribe();
+        }
+        this._unsubscribes = null;
+    }
+}
+
+function makeBlock(observable) {
+    return new Block(observable);
+}
+
+class Block extends Base {
+
+    _render(value) {
+        this._unrender();
+
+        const { children: map } = this;
+        if (!map) return;
+
+        const fragment = map(value);
+
+        if (Array.isArray(fragment)) {
+            const unsubscribes = this._unsubscribes = [];
+            for (let i = 0; i < fragment.length; i++) {
+                const f = fragment[i];
+                if (f.unsubscribe) unsubscribes.push(f);
+                if (i !== 0) fragment[0].appendChild(f);
+            }
+            if (fragment.length) this._insert(fragment[0]);
+        } else {
+            this._unsubscribes = fragment.unsubscribe ? fragment : null;
+            this._insert(fragment);
+        }
+    }
+}
+
+function makeStream(observable) {
+    return new Stream(observable);
+}
+
+class Stream extends Base {
+    
+    constructor(observable) {
+        super(observable);
+        this._unsubscribes = [];
+    }
+
+    _unsubscribe() {
+        const { _unsubscribes: unsubscribes } = this;
+        
+        for (let i = 0; i < unsubscribes.length; i++) {
+            const unsub = unsubscribes[i];
+            unsub.unsubscribe();
+        }
+
+        this._unsubscribes = [];
+    }
+
+    _render(value) {
+        const { children: map } = this;
+        if (!map) return;
+
+        const fragment = map(value);
+        const { _unsubscribes: unsubscribes } = this;
+
+        if (Array.isArray(fragment)) {
+            for (let i = 0; i < fragment.length; i++) {
+                const f = fragment[i];
+                if (f.unsubscribe) unsubscribes.push(f);
+                if (i !== 0) fragment[0].appendChild(f);
+            }
+            if (fragment.length) this._insert(fragment[0]);
+        } else {
+            if(fragment.unsubscribe) unsubscribes.push(fragment);
+            this._insert(fragment);
+        }
+    }
+}
+
 function renderer(fragment) {
 
     init(fragment);
@@ -161,7 +292,10 @@ function __blockBinder(index) {
             if(!unsubscribes) return;
             
             if(Array.isArray(unsubscribes)) {
-                for(let unsub of unsubscribes) unsub.unsubscribe && unsub.unsubscribe();
+                for(let i = 0; i < unsubscribes.length; i++) {
+                    const unsub = unsubscribes[i];
+                    if(unsub.unsubscribe) unsub.unsubscribe();
+                }
             } else {
                 unsubscribes.unsubscribe && unsubscribes.unsubscribe();
             }
@@ -177,10 +311,12 @@ function __blockBinder(index) {
 
             if(Array.isArray(fragment)) {
                 unsubscribes = [];
-                for(let f of fragment) {
+                for(let i = 0; i < fragment.length; i++) {
+                    const f = fragment[i];
                     if(f.unsubscribe) unsubscribes.push(f.unsubscribe);
-                    insertBefore(f, anchor);
+                    if(i !== 0) fragment[0].appendChild(f);
                 }
+                if(fragment.length) insertBefore(fragment[0], anchor);
             } else {
                 unsubscribes = fragment.unsubscribe || null;
                 insertBefore(fragment, anchor);
@@ -193,7 +329,6 @@ function __blockBinder(index) {
 
 const toFragment$1 = val => typeof val === 'function' ? val() : val;
 
-// TODO: need to unsubscribe to prior fragment
 const removePrior = (top, anchor) => {
     let sibling = top.nextSibling;
     while(sibling && sibling !== anchor) {
@@ -202,6 +337,10 @@ const removePrior = (top, anchor) => {
         current.remove();
     }
 };
+
+function propBinder(name) {
+    return target => val => target[name] = val;
+}
 
 function componentBinder(index) {
     return node => {
@@ -216,6 +355,8 @@ function $(){}
 exports._ = _;
 exports.html = _;
 exports.$ = $;
+exports.Block = makeBlock;
+exports.Stream = makeStream;
 exports.renderer = renderer;
 exports.makeFragment = makeFragment;
 exports.__first = first;
@@ -224,4 +365,5 @@ exports.__combine = combine;
 exports.__attrBinder = attrBinder;
 exports.__textBinder = textBinder;
 exports.__blockBinder = __blockBinder;
+exports.__propBinder = propBinder;
 exports.__componentBinder = componentBinder;
