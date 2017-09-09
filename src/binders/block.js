@@ -30,14 +30,17 @@ export default function __blockBinder(index) {
 
             if(Array.isArray(fragment)) {
                 unsubscribes = [];
+                let toAppend = null;
                 for(let i = 0; i < fragment.length; i++) {
                     const f = fragment[i];
                     if(!f) continue;
 
                     if(f.unsubscribe) unsubscribes.push(f.unsubscribe);
-                    if(i !== 0) fragment[0].appendChild(f);
+                    
+                    if(toAppend === null) toAppend = f;
+                    else toAppend.appendChild(f);
                 }
-                if(fragment.length) insertBefore(fragment[0], anchor);
+                if(toAppend) insertBefore(toAppend, anchor);
             } else {
                 if(!fragment) return;
                 unsubscribes = fragment.unsubscribe || null;
