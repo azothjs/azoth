@@ -1,6 +1,6 @@
 /* global QUnit */
-const { test, module } = QUnit;
-export { test, module };
+const { test, module, assert } = QUnit;
+export { test, module, assert };
 export const skip = { test: () => {} };
 export const fixture = document.getElementById('qunit-fixture');
 

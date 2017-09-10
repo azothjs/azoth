@@ -5,8 +5,7 @@
 
 ## Install and Build
 
-You need both the `azoth` runtime and some form of the compiler to 
-run azoth.
+You need both the `azoth` runtime and some form of the azoth compiler (via rollup, webpack, etc) to run azoth.
 
 ### Runtime Install
 
@@ -49,11 +48,11 @@ There are simple example apps [here](https://github.com/martypdx/azoth-example)
 
 ### Compiled Syntax
 
-The current developer syntax intentionally only uses valid ESNext JavaScript, making it easy to use existing IDE features.  As part of your build process, parts of the source code (functions and templates) are compiled. The static html is extracted out and the remaining expression are reworked into binding JavaScript executed at runtime.
+The current developer syntax intentionally uses only valid ESNext JavaScript, making it easy to use existing IDE features to try azoth.  As part of your build process, parts of the source code (functions and templates) are compiled. The static html is extracted out and the remaining expression are reworked into binding JavaScript executed at runtime.
 
 ### Basic Templates
 
-azoth templates are JavaScript template literals prefixed with a `_` tag, usually returned
+Azoth templates are JavaScript template literals prefixed with a `_` tag, usually returned
 from a function that specifies the data to be mixed into the template. 
 
 The binding semantics are very explicit and require understanding how the data is to interact with the DOM, both initially and over time. 
