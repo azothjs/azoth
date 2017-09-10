@@ -129,6 +129,9 @@ class Stream extends Base {
     }
 }
 
+const range = document.createRange();
+const rawHtml = html => range.createContextualFragment(html);
+
 function renderer(fragment) {
 
     init(fragment);
@@ -147,27 +150,6 @@ function init(fragment) {
         node = nodes[i];
         node.parentNode.replaceChild(document.createTextNode(''), node);
     }
-}
-
-function makeFragment(html) {
-    return toFragment(makeDiv(html).childNodes);
-}
-
-function toFragment(childNodes) {
-    const fragment = document.createDocumentFragment();
-    
-    let node;
-    while(node = childNodes[0]) {
-        fragment.appendChild(node);
-    }
-
-    return fragment;
-}
-
-const div = document.createElement('template');
-function makeDiv(html) {
-    div.innerHTML = html;
-    return div.content;
 }
 
 function first(observable, subscriber) {
@@ -303,13 +285,13 @@ function __blockBinder(index) {
             unsubscribe();
             if(!val) return;
             
-            const fragment = toFragment$1(val);
+            const fragment = toFragment(val);
 
             if(Array.isArray(fragment)) {
                 unsubscribes = [];
                 let toAppend = null;
                 for(let i = 0; i < fragment.length; i++) {
-                    const f = fragment[i];
+                    const f = toFragment(fragment[i]);
                     if(!f) continue;
 
                     if(f.unsubscribe) unsubscribes.push(f.unsubscribe);
@@ -329,7 +311,7 @@ function __blockBinder(index) {
     };
 }
 
-const toFragment$1 = val => typeof val === 'function' ? val() : val;
+const toFragment = val => typeof val === 'function' ? val() : val;
 
 const removePrior = (top, anchor) => {
     let sibling = top.nextSibling;
@@ -354,4 +336,6 @@ function componentBinder(index) {
 function _(){}
 function $(){}
 
-export { _, _ as html, $, makeBlock as Block, makeStream as Stream, renderer, makeFragment, first as __first, map as __map, combine as __combine, attrBinder as __attrBinder, textBinder as __textBinder, __blockBinder, propBinder as __propBinder, componentBinder as __componentBinder };
+// utilities
+
+export { _, _ as html, $, rawHtml, rawHtml as __rawHtml, makeBlock as Block, makeStream as Stream, renderer as __renderer, first as __first, map as __map, combine as __combine, attrBinder as __attrBinder, textBinder as __textBinder, __blockBinder, propBinder as __propBinder, componentBinder as __componentBinder };
