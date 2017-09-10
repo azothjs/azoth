@@ -1,6 +1,6 @@
 {
   "name": "azoth",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "Compiled JavaScript UI rendering library",
   "main": "dist/azoth.js",
   "module": "dist/azoth.es.js",
