@@ -267,73 +267,65 @@ function combine(observables, combine, subscriber, once = false) {
 
 const isProp = (name, node) => name in node;
 
-function attrBinder(name) {
-    return node => {
-        return isProp(name, node)
-            ? val => node[name] = val
-            : val => node.setAttribute(name, val);
-    };
+function attrBinder(node, name) {
+    return isProp(name, node)
+        ? val => node[name] = val
+        : val => node.setAttribute(name, val);
 }
 
-function textBinder(index) {
-    return node => {
-        const text = node.childNodes[index];
-        return val => text.nodeValue = val;
-    };
+function textBinder(node) {
+    return val => node.nodeValue = val;
 }
 
-function __blockBinder(index) {
-    return node => {
-        const anchor = node.childNodes[index];
-        const insertBefore = node => anchor.parentNode.insertBefore(node, anchor);
+function __blockBinder(anchor) {
+    const insertBefore = node => anchor.parentNode.insertBefore(node, anchor);
 
-        const top = document.createComment(' block start ');
-        insertBefore(top, anchor);
+    const top = document.createComment(' block start ');
+    insertBefore(top, anchor);
+    
+    let unsubscribes = null;
+    const unsubscribe = () => {
+        if(!unsubscribes) return;
         
-        let unsubscribes = null;
-        const unsubscribe = () => {
-            if(!unsubscribes) return;
-            
-            if(Array.isArray(unsubscribes)) {
-                for(let i = 0; i < unsubscribes.length; i++) {
-                    const unsub = unsubscribes[i];
-                    if(unsub.unsubscribe) unsub.unsubscribe();
-                }
-            } else {
-                unsubscribes.unsubscribe && unsubscribes.unsubscribe();
+        if(Array.isArray(unsubscribes)) {
+            for(let i = 0; i < unsubscribes.length; i++) {
+                const unsub = unsubscribes[i];
+                if(unsub.unsubscribe) unsub.unsubscribe();
             }
-            unsubscribes = null;
-        };
-        
-        const observer = val => {
-            removePrior(top, anchor);
-            unsubscribe();
-            if(!val) return;
-            
-            const fragment = toFragment(val);
-
-            if(Array.isArray(fragment)) {
-                unsubscribes = [];
-                let toAppend = null;
-                for(let i = 0; i < fragment.length; i++) {
-                    const f = toFragment(fragment[i]);
-                    if(!f) continue;
-
-                    if(f.unsubscribe) unsubscribes.push(f.unsubscribe);
-                    
-                    if(toAppend === null) toAppend = f;
-                    else toAppend.appendChild(f);
-                }
-                if(toAppend) insertBefore(toAppend, anchor);
-            } else {
-                if(!fragment) return;
-                unsubscribes = fragment.unsubscribe || null;
-                insertBefore(fragment, anchor);
-            }
-        };
-
-        return { observer, unsubscribe };
+        } else {
+            unsubscribes.unsubscribe && unsubscribes.unsubscribe();
+        }
+        unsubscribes = null;
     };
+    
+    const observer = val => {
+        removePrior(top, anchor);
+        unsubscribe();
+        if(!val) return;
+        
+        const fragment = toFragment(val);
+
+        if(Array.isArray(fragment)) {
+            unsubscribes = [];
+            let toAppend = null;
+            for(let i = 0; i < fragment.length; i++) {
+                const f = toFragment(fragment[i]);
+                if(!f) continue;
+
+                if(f.unsubscribe) unsubscribes.push(f.unsubscribe);
+                
+                if(toAppend === null) toAppend = f;
+                else toAppend.appendChild(f);
+            }
+            if(toAppend) insertBefore(toAppend, anchor);
+        } else {
+            if(!fragment) return;
+            unsubscribes = fragment.unsubscribe || null;
+            insertBefore(fragment, anchor);
+        }
+    };
+
+    return { observer, unsubscribe };
 }
 
 const toFragment = val => typeof val === 'function' ? val() : val;
@@ -347,14 +339,8 @@ const removePrior = (top, anchor) => {
     }
 };
 
-function propBinder(name) {
-    return target => val => target[name] = val;
-}
-
-function componentBinder(index) {
-    return node => {
-        return node.childNodes[index];
-    };
+function propBinder(target, name) {
+    return val => target[name] = val;
 }
 
 // runtime use:
@@ -363,4 +349,4 @@ function $(){}
 
 // utilities
 
-export { _, _ as html, $, rawHtml, rawHtml as __rawHtml, makeBlock as Block, makeStream as Stream, Widget, renderer as __renderer, first as __first, map as __map, combine as __combine, attrBinder as __attrBinder, textBinder as __textBinder, __blockBinder, propBinder as __propBinder, componentBinder as __componentBinder };
+export { _, _ as html, $, rawHtml, rawHtml as __rawHtml, makeBlock as Block, makeStream as Stream, Widget, renderer as __renderer, first as __first, map as __map, combine as __combine, attrBinder as __attrBinder, textBinder as __textBinder, __blockBinder, propBinder as __propBinder };
