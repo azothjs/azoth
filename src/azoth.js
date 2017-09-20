@@ -23,4 +23,3 @@ export { default as __attrBinder } from './binders/attr';
 export { default as __textBinder } from './binders/text';
 export { default as __blockBinder } from './binders/block';
 export { default as __propBinder } from './binders/prop';
-export { default as __componentBinder } from './binders/component';

@@ -1,3 +1,3 @@
-export default function propBinder(name) {
-    return target => val => target[name] = val;
+export default function propBinder(target, name) {
+    return val => target[name] = val;
 }

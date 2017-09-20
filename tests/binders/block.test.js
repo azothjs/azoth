@@ -50,17 +50,14 @@ module('block binder', () => {
     });
 
     test('sibling block binders', t => {
-        const div = val => _`<div>${val}</div>`
+        const div = val => _`<div>${val}</div>`;
 
-        const template = (first=$, second=$) => _`
-            *${div(first)}#
-            *${div(second)}#
-        `;
+        const template = (first=$, second=$) => _`*${div(first)}#-*${div(second)}#`;
 
         const one = new BehaviorSubject('first');
         const two = new BehaviorSubject();
         const fragment = template(one, two);
         two.next('second');
-        testFragment(fragment, '<div>first</div><div>second</div>'); 
+        testFragment(fragment, '<div>first</div>-<div>second</div>'); 
     });
 });
