@@ -129,6 +129,31 @@ class Stream extends Base {
     }
 }
 
+class Widget {
+    
+    constructor() {
+        this._unsubscribe = null;
+    }
+
+    onanchor(anchor) {
+        const fragment = this.renderWith();
+        anchor.parentNode.insertBefore(fragment, anchor);
+        this._unsubscribe = fragment.unsubscribe || null;
+    }
+
+    unsubscribe() {
+        this._unsubscribe && this._unsubscribe();
+    }
+
+    renderWith() {
+        return this.render();
+    }
+
+    render() {
+        console.warn(`Class ${this.prototype.constructor} that extends Widget needs to implement a render() method`);
+    }
+}
+
 const range = document.createRange();
 const rawHtml = html => range.createContextualFragment(html);
 
@@ -338,4 +363,4 @@ function $(){}
 
 // utilities
 
-export { _, _ as html, $, rawHtml, rawHtml as __rawHtml, makeBlock as Block, makeStream as Stream, renderer as __renderer, first as __first, map as __map, combine as __combine, attrBinder as __attrBinder, textBinder as __textBinder, __blockBinder, propBinder as __propBinder, componentBinder as __componentBinder };
+export { _, _ as html, $, rawHtml, rawHtml as __rawHtml, makeBlock as Block, makeStream as Stream, Widget, renderer as __renderer, first as __first, map as __map, combine as __combine, attrBinder as __attrBinder, textBinder as __textBinder, __blockBinder, propBinder as __propBinder, componentBinder as __componentBinder };

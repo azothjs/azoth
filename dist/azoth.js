@@ -133,6 +133,31 @@ class Stream extends Base {
     }
 }
 
+class Widget {
+    
+    constructor() {
+        this._unsubscribe = null;
+    }
+
+    onanchor(anchor) {
+        const fragment = this.renderWith();
+        anchor.parentNode.insertBefore(fragment, anchor);
+        this._unsubscribe = fragment.unsubscribe || null;
+    }
+
+    unsubscribe() {
+        this._unsubscribe && this._unsubscribe();
+    }
+
+    renderWith() {
+        return this.render();
+    }
+
+    render() {
+        console.warn(`Class ${this.prototype.constructor} that extends Widget needs to implement a render() method`);
+    }
+}
+
 const range = document.createRange();
 const rawHtml = html => range.createContextualFragment(html);
 
@@ -349,6 +374,7 @@ exports.rawHtml = rawHtml;
 exports.__rawHtml = rawHtml;
 exports.Block = makeBlock;
 exports.Stream = makeStream;
+exports.Widget = Widget;
 exports.__renderer = renderer;
 exports.__first = first;
 exports.__map = map;
