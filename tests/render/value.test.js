@@ -29,6 +29,15 @@ module('value rendering', () => {
 
     });
 
+    test('oninit', t => {
+        const template = () => _`<span oninit=${n => n.innerText = 'foo'}></span>`;
+       
+        const fragment1 = template('foo');
+        fixture.appendChild(fragment1);		
+        t.equal(fixture.cleanHTML(), '<span>foo</span>');
+
+    });
+
     test('external variables', t => {
         const upper = s => s.toUpperCase();
         const template = x => _`${upper(x)}`;
