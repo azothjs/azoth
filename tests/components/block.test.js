@@ -1,10 +1,10 @@
-import { module, test, fixture } from '../qunit';
+import { module, test, fixture, skip } from '../qunit';
 import { _, $, Block } from '../../src/azoth';
 import { BehaviorSubject } from 'rxjs-es/BehaviorSubject';
 
 module('Block component', () => {
 
-    test('observable to single template', t => {
+    skip.test('observable to single template', t => {
         const template = (name=$) => _`<div><#:${Block(name)}>${value => _`<span>${value}</span>`}</#:></div>`;
         const name = new BehaviorSubject('Hello World');
         const fragment = template(name);
@@ -14,7 +14,7 @@ module('Block component', () => {
         t.equal(fixture.cleanHTML(), '<div><!-- component start --><!-- component end --></div>');
     });
 
-    test('observable to array of templates', t => {
+    skip.test('observable to array of templates', t => {
         const template = (colors=$) => _`<ul><#:${Block(colors)}>${colors=> colors.map(color => _`<li>${color}</li>`)}</#:></ul>`;
         const colors = new BehaviorSubject(['red', 'green', 'blue']);
         const fragment = template(colors);

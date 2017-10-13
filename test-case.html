@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Case</title>
+</head>
+<body>
+    <template id="test">
+        <div data-bind>Content</div>
+    </template>
+    <script>
+        const TIMES = 1000;
+        console.log(`Clone and return ${TIMES} times`);
+        
+        //console.logEnd = console.log;
+        const type = 'time';
+        
+        const fragment = document.getElementById('test').content;
+        
+        function runMutate() {
+            
+            function render() {
+                const clone = fragment.cloneNode(true);
+                const nodes = clone.querySelectorAll('[data-bind]');
+                nodes[nodes.length] = clone;
+                return nodes;
+            }
+        
+            let nodes = null;
+            for(let i = 0; i < 5; i++) {
+                nodes = render();
+            }
+            console[type]('mutate nodelist')
+            for(let i = 0; i < TIMES; i++) {
+                nodes = render();
+            }
+            console[type + 'End']('mutate nodelist')
+
+        }
+
+        let runNumber = 0;
+        function runTests() {
+            'use strict';
+
+            function run(test, fn) {
+                let nodes = null;
+                for(let i = 0; i < 5; i++) {
+                    nodes = fn();
+                }
+                console[type](test)
+                for(let i = 0; i < TIMES; i++) {
+                    nodes = fn();
+                }
+                console[type + 'End'](test)
+            }
+
+            console.group(`run ${++runNumber}`);
+
+            runMutate();
+
+            run('literal', function() {
+                const clone = fragment.cloneNode(true);
+                const nodes = clone.querySelectorAll('[data-bind]');
+                return { clone, nodes };
+            });
+
+            run('tuple', function() {
+                const clone = fragment.cloneNode(true);
+                const nodes = clone.querySelectorAll('[data-bind]');
+                return [ clone, nodes ];
+            });
+
+            run('defer', function() {
+                const clone = fragment.cloneNode(true);
+                const nodes = clone.querySelectorAll('[data-bind]');
+                return clone;
+            });
+
+            const div = fragment.children[0];
+            run('tricky literal', function() {
+                const clone = div.cloneNode(true);
+                const nodes = clone.querySelectorAll('[data-bind]');
+                return { clone, nodes };
+            });
+
+            run('copy', function() {
+                const clone = fragment.cloneNode(true);
+                const nodes = clone.querySelectorAll('[data-bind]');
+                const arr = new Array(nodes.length + 1);
+                for(let i = 0; i < nodes.length; i++) arr[i] = nodes[i];
+                arr[nodes.length] = clone;
+                return arr;
+            });
+
+            run('spread', function() {
+                const clone = fragment.cloneNode(true);
+                const nodes = clone.querySelectorAll('[data-bind]');
+                return [...nodes, clone];
+            });
+
+            run('Array.from plus push', function() {
+                const clone = fragment.cloneNode(true);
+                const nodes = clone.querySelectorAll('[data-bind]');
+                const arr = Array.from(nodes);
+                arr.push(clone);
+                return arr;
+            });
+
+            
+            console.groupEnd(`run ${runNumber}`);
+        };
+
+    </script>
+    <button onclick="runTests()">perf</button>
+
+</body>
+</html>

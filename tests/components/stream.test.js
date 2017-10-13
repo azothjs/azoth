@@ -1,4 +1,4 @@
-import { module, test, fixture } from '../qunit';
+import { module, test, fixture, skip } from '../qunit';
 import { _, $, Stream } from '../../src/azoth';
 import { BehaviorSubject } from 'rxjs-es/BehaviorSubject';
 import { Observable } from 'rxjs-es/Observable';
@@ -6,7 +6,7 @@ import 'rxjs-es/add/observable/of';
 
 module('Stream component', () => {
 
-    test('observable to single template', t => {
+    skip.test('observable to single template', t => {
         const template = (name=$) => _`<div><#:${Stream(name)}>${value => _`<span>${value}</span>`}</#:></div>`;
         const name = new BehaviorSubject('Hello');
         const fragment = template(name);
@@ -22,7 +22,7 @@ module('Stream component', () => {
         t.equal(fixture.cleanHTML(), '<div><!-- component start --><!-- component end --></div>');
     });
 
-    test('iterative array with single templates', t => {
+    skip.test('iterative array with single templates', t => {
         const template = (colors=$) => _`<ul><#:${Stream(colors)}>${color => _`<li>${color}</li>`}</#:></ul>`;
         const colors = Observable.of('red', 'green', 'blue');
         const fragment = template(colors);
