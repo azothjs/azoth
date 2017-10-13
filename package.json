@@ -24,7 +24,7 @@
     "npm-run-all": "^4.0.2",
     "qunit": "^1.0.0",
     "rollup": "^0.43.0",
-    "rollup-plugin-azoth": "0.0.45",
+    "rollup-plugin-azoth": "0.0.49",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-watch": "^4.0.0",
     "rxjs-es": "^5.0.0-beta.12",
