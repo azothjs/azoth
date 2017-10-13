@@ -164,8 +164,7 @@ function renderer(fragment) {
     return function render() {
         const clone = fragment.cloneNode(true);
         const nodes = clone.querySelectorAll('[data-bind]');
-        nodes[ nodes.length ] = clone;
-        return nodes;
+        return [...nodes, clone];
     };
 }
 
