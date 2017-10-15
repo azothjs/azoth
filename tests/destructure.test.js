@@ -5,7 +5,7 @@ import { Observable } from 'rxjs-es';
 
 Observable.prototype.child = function(ref) {
     return this.pluck(ref).distinctUntilChanged();
-}
+};
 
 module('destructured rendering', () => {
 
