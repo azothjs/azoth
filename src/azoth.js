@@ -9,11 +9,12 @@ export { default as Stream } from './components/stream';
 export { default as Widget } from './components/widget';
 
 // utilities
-import { rawHtml } from './dom';
+import { rawHtml, makeTemplate } from './dom';
+export { rawHtml };
 
 // injected by compiler:
+export { makeTemplate as __makeTemplate };
 export { default as __renderer } from './renderer';
-export { rawHtml, rawHtml as __rawHtml };
 
 export { default as __first } from './operators/first';
 export { default as __map } from './operators/map';
