@@ -1,21 +1,17 @@
 export default function renderer(fragment) {
 
-    init(fragment);
-
-    return function render() {
-        const clone = fragment.cloneNode(true);
-        const nodes = clone.querySelectorAll('[data-bind]');
-        return { 
-            __fragment: clone, 
-            __nodes: nodes 
-        };
-    };
-}
-
-function init(fragment) {
     const nodes = fragment.querySelectorAll('text-node');
-    for(var i = 0, node = nodes[i]; i < nodes.length; node = nodes[++i]) {
+    let node = null;
+    for(var i = 0; i < nodes.length; node = nodes[++i]) {
         node = nodes[i];
         node.parentNode.replaceChild(document.createTextNode(''), node);
     }
+
+    return function render() {
+        const clone = fragment.cloneNode(true);
+        return { 
+            __fragment: clone, 
+            __nodes: clone.querySelectorAll('[data-bind]') 
+        };
+    };
 }
