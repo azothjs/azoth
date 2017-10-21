@@ -19,6 +19,6 @@ export default class Widget {
     }
 
     render() {
-        console.warn(`Class ${this.prototype.constructor} that extends Widget needs to implement a render() method`);
+        console.warn(`Class ${this.prototype.constructor} which extends Widget needs to implement a render() method`);
     }
 }
