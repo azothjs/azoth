@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs-es/BehaviorSubject';
 
 module('Block component', () => {
 
-    skip.test('observable to single template', t => {
+    skip.test('observable to template', t => {
         const template = (name=$) => _`<div><#:${Block(name)}>${value => _`<span>${value}</span>`}</#:></div>`;
         const name = new BehaviorSubject('Hello World');
         const fragment = template(name);

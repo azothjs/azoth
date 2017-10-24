@@ -7,7 +7,7 @@ export default class Base {
         this._subscription = null;
         this._unsubscribes = null;
         
-        this.children = null;
+        this.content = null;
     }
 
     onanchor(anchor) {

@@ -23,7 +23,7 @@ export class Stream extends Base {
     }
 
     _render(value) {
-        const { children: map } = this;
+        const { map } = this;
         if (!map) return;
 
         const fragment = map(value);
