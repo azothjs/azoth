@@ -90,7 +90,8 @@ module('Array block component', () => {
         const slime = _`slime`;
         const hot = _`hot`;
         const template = (colors=$) => _`<#:${ArrayBlock(colors)} 
-            map=${color => /yellow|green/.test(color) ? slime : hot}}/>`;
+            map=${color => /yellow|green/.test(color) ? slime : hot}}
+        />`;
 
         const items = new BehaviorSubject({ index: 0, items: ['red', 'yellow', 'blue'] });
 
@@ -100,5 +101,6 @@ module('Array block component', () => {
         fragment.unsubscribe();
         t.equal(fixture.cleanHTML(), `<!-- component start --><!-- component end -->`);
     });
+
 
 });
