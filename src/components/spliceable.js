@@ -1,10 +1,10 @@
 import Index from './index-subject';
 
-export default function makeArrayBlock(observable) {
-    return new ArrayBlock(observable);
+export default function makeSpliceable(observable) {
+    return new Spliceable(observable);
 }
 
-class ArrayBlock {
+class Spliceable {
     
     constructor(observable) {
         this._observable = observable;

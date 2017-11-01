@@ -1,13 +1,13 @@
 import { module, test, fixture } from '../qunit';
-import { _, $, ArrayBlock } from '../../src/azoth';
+import { _, $, Spliceable } from '../../src/azoth';
 import { BehaviorSubject } from 'rxjs-es/BehaviorSubject';
 
-module('Array block component', () => {
+module('Spliceable block component', () => {
 
     test('single element', t => {
         const template = (colors=$) => _`
             <ul>
-                <#:${ArrayBlock(colors)} map=${color => _`<li>${color}</li>`}/>
+                <#:${Spliceable(colors)} map=${color => _`<li>${color}</li>`}/>
             </ul>
         `;
 
@@ -48,7 +48,7 @@ module('Array block component', () => {
     });
 
     test('text nodes', t => {
-        const template = (colors=$) => _`<#:${ArrayBlock(colors)} map=${color => _`${color}`}/>`;
+        const template = (colors=$) => _`<#:${Spliceable(colors)} map=${color => _`${color}`}/>`;
 
         const items = new BehaviorSubject({ index: 0, items: ['red', 'yellow', 'blue'] });
 
@@ -67,7 +67,7 @@ module('Array block component', () => {
     });
 
     test('multiple top-level nodes', t => {
-        const template = (colors=$) => _`<#:${ArrayBlock(colors)} 
+        const template = (colors=$) => _`<#:${Spliceable(colors)} 
             map=${color => _`${color}-<em>${color}</em>`}/>`;
 
         const items = new BehaviorSubject({ index: 0, items: ['red', 'yellow', 'blue'] });
@@ -89,7 +89,7 @@ module('Array block component', () => {
     test('returned template variable', t => {
         const slime = _`slime`;
         const hot = _`hot`;
-        const template = (colors=$) => _`<#:${ArrayBlock(colors)} 
+        const template = (colors=$) => _`<#:${Spliceable(colors)} 
             map=${color => /yellow|green/.test(color) ? slime : hot}}
         />`;
 
@@ -103,7 +103,7 @@ module('Array block component', () => {
     });
 
     test('live indexes', t => {
-        const template = (colors=$) => _`<#:${ArrayBlock(colors)} map=${(color, index=$) => _`*${index + 1}-${color};`}/>`;
+        const template = (colors=$) => _`<#:${Spliceable(colors)} map=${(color, index=$) => _`*${index + 1}-${color};`}/>`;
 
         const items = new BehaviorSubject({ index: 0, items: ['red', 'yellow', 'blue'] });
 
