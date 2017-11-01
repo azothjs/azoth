@@ -1,3 +1,4 @@
+import Index from './index-subject';
 
 export default function makeArrayBlock(observable) {
     return new ArrayBlock(observable);
@@ -7,18 +8,19 @@ class ArrayBlock {
     
     constructor(observable) {
         this._observable = observable;
-        this._anchor = null;
         this._blocks = [];
     }
 
     onanchor(anchor) {
-        this._topAnchor = anchor.previousSibling;        
         const { _blocks: blocks } = this;
+        const indexed = this.map.length > 1;
         
-        this._observable.subscribe(({ index, items, deleteCount }) => {
+        this._observable.subscribe(({ index: startIndex, items, deleteCount = 0 }) => {
             let toRemove = null;
-            if(items) {
-                const block = blocks[index];
+            const addCount = items ? items.length : 0;
+
+            if(addCount) {
+                const block = blocks[startIndex];
                 const before = !block ? anchor : (
                     Array.isArray(block.nodes) ? block.nodes[0] : block.nodes
                 );
@@ -27,9 +29,10 @@ class ArrayBlock {
                 const toInsert = new Array(items.length);
 
                 for(let i = 0; i < items.length; i++) {
-                    let fragment = this.map(items[i]);
+                    const index = indexed ? new Index(startIndex + i) : undefined; 
+                    let fragment = this.map(items[i], index);
                     if(typeof fragment === 'function') fragment = fragment();
-                    // TODO: check that fragment is actually document fragment???
+                    
                     const { childNodes, unsubscribe } = fragment;
 
                     let nodes = null;
@@ -41,29 +44,36 @@ class ArrayBlock {
                         nodes = childNodes[0];
                     }
 
-                    toInsert[i] = { nodes, unsubscribe };
+                    toInsert[i] = { nodes, unsubscribe, index };
                     parent.insertBefore(fragment, before);
                 }
 
-                toRemove = blocks.splice(index, deleteCount, ...toInsert);
+                toRemove = blocks.splice(startIndex, deleteCount, ...toInsert);
             }
             else {
-                toRemove = blocks.splice(index, deleteCount);
+                toRemove = blocks.splice(startIndex, deleteCount);
             }
 
             if(deleteCount > 0) removeBlocks(toRemove);
+
+            if(indexed && addCount !== deleteCount) {
+                for(let i = startIndex + addCount; i < blocks.length; i++) {
+                    blocks[i].index.next(i);
+                }
+            }
         });
     }
 
-    unsubscribe() {
+    unsubscribe() {        
         removeBlocks(this._blocks);
     }
 }
 
 function removeBlocks(blocks) {
     for(let i = 0; i < blocks.length; i++) {
-        const { nodes, unsubscribe } = blocks[i];
-        
+        const { nodes, unsubscribe, index } = blocks[i];
+        if(index) index.destroy();
+
         if(Array.isArray(nodes)) {
             for(let c = 0; c < nodes.length; c++) nodes[c].remove();
         } 

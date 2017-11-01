@@ -1,4 +1,4 @@
-import { module, test, fixture, skip } from '../qunit';
+import { module, test, fixture } from '../qunit';
 import { _, $, ArrayBlock } from '../../src/azoth';
 import { BehaviorSubject } from 'rxjs-es/BehaviorSubject';
 
@@ -98,6 +98,25 @@ module('Array block component', () => {
         const fragment = template(items);
         fixture.appendChild(fragment);
         t.equal(fixture.cleanHTML(), '<!-- component start -->hotslimehot<!-- component end -->');
+        fragment.unsubscribe();
+        t.equal(fixture.cleanHTML(), `<!-- component start --><!-- component end -->`);
+    });
+
+    test('live indexes', t => {
+        const template = (colors=$) => _`<#:${ArrayBlock(colors)} map=${(color, index=$) => _`*${index + 1}-${color};`}/>`;
+
+        const items = new BehaviorSubject({ index: 0, items: ['red', 'yellow', 'blue'] });
+
+        const fragment = template(items);
+        fixture.appendChild(fragment);
+        t.equal(fixture.cleanHTML(), '<!-- component start -->1-red;2-yellow;3-blue;<!-- component end -->');
+
+        items.next({ index: 1, deleteCount: 1 });
+        t.equal(fixture.cleanHTML(), '<!-- component start -->1-red;2-blue;<!-- component end -->');
+
+        items.next({ index: 0, deleteCount: 1, items: ['orange', 'green'] });
+        t.equal(fixture.cleanHTML(), '<!-- component start -->1-orange;2-green;3-blue;<!-- component end -->');
+
         fragment.unsubscribe();
         t.equal(fixture.cleanHTML(), `<!-- component start --><!-- component end -->`);
     });
