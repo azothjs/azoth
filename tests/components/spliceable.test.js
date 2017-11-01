@@ -98,6 +98,10 @@ module('Spliceable block component', () => {
         const fragment = template(items);
         fixture.appendChild(fragment);
         t.equal(fixture.cleanHTML(), '<!-- component start -->hotslimehot<!-- component end -->');
+        
+        items.next({ index: 0, deleteCount: 1, items: ['orange', 'green'] });
+        t.equal(fixture.cleanHTML(), '<!-- component start -->hotslimeslimehot<!-- component end -->');
+        
         fragment.unsubscribe();
         t.equal(fixture.cleanHTML(), `<!-- component start --><!-- component end -->`);
     });
