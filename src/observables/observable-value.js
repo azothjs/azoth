@@ -1,4 +1,4 @@
-export default class Index {
+export default class ObservableValue {
     constructor(value) {
         this.value = value;
         this.subscribers = null;
@@ -41,7 +41,9 @@ export default class Index {
     }
 
     next(value) {
+        if(this.value === value) return;
         this.value = value;
+        
         const { subscribers } = this;
         if(!subscribers) return;
         else if(Array.isArray(subscribers)) {

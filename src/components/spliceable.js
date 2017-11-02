@@ -1,4 +1,4 @@
-import Index from './index-subject';
+import ObservableValue from '../observables/observable-value';
 
 export default function makeSpliceable(observable) {
     return new Spliceable(observable);
@@ -29,7 +29,7 @@ class Spliceable {
                 const toInsert = new Array(items.length);
 
                 for(let i = 0; i < items.length; i++) {
-                    const index = indexed ? new Index(startIndex + i) : undefined; 
+                    const index = indexed ? new ObservableValue(startIndex + i) : undefined; 
                     let fragment = this.map(items[i], index);
                     if(typeof fragment === 'function') fragment = fragment();
                     
