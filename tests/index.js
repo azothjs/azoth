@@ -1,6 +1,7 @@
 import './destructure.test.js';
 import './binders/block.test.js';
 import './components/block.test.js';
+import './components/keyed-list.test.js';
 import './components/overlay.test.js';
 import './components/spliceable.test.js';
 import './components/stream.test.js';

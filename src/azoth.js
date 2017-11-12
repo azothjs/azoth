@@ -7,6 +7,7 @@ export function $(){}
 export { default as Block } from './components/block';
 export { default as Spliceable } from './components/spliceable';
 export { default as Overlay } from './components/overlay';
+export { default as KeyedList } from './components/keyed-list';
 export { default as Stream } from './components/stream';
 export { default as Widget } from './components/widget';
 
