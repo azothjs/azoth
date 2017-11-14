@@ -1,5 +1,5 @@
 import { module, test, fixture } from '../qunit';
-import { _, $, Overlay } from '../../src/azoth';
+import { _, $, Overlay, ObservableArray } from '../../src/azoth';
 import { BehaviorSubject } from 'rxjs-es/BehaviorSubject';
 
 module('Overlay block component', () => {
@@ -11,7 +11,7 @@ module('Overlay block component', () => {
             </ul>
         `;
 
-        const colors = new BehaviorSubject(['red', 'yellow', 'blue']);
+        const colors = new ObservableArray(['red', 'yellow', 'blue']);
 
         const fragment = template(colors);
         fixture.appendChild(fragment);
@@ -60,8 +60,8 @@ module('Overlay block component', () => {
             map=${(color=$, index) => _`${index + 1}-*${color};`}
         />`;
 
-        const colors = new BehaviorSubject(['red', 'yellow', 'blue']);
-
+        const colors = new ObservableArray(['red', 'yellow', 'blue']);
+        
         const fragment = template(colors);
         fixture.appendChild(fragment);
 
