@@ -5,8 +5,9 @@ export function $(){}
 
 // base components
 export { default as Block } from './components/block';
-export { default as Spliceable } from './components/spliceable';
-export { Overlay, ObservableArray  } from './components/overlay2';
+export { default as Spliceable } from './components/spliceable2';
+export { Overlay  } from './components/overlay3';
+export { ObservableArray  } from './observables/observable-array';
 export { default as KeyedList } from './components/keyed-list';
 export { default as Stream } from './components/stream';
 export { default as Widget } from './components/widget';
