@@ -59,4 +59,11 @@ export default class Observable {
             subscribers(value);
         }      
     }
+
+    child(prop) {
+        const val = this.value;
+        const subject = new Observable(val ? val[prop] : undefined);
+        this.subscribe(val => subject.next(val ? val[prop] : undefined));
+        return subject;
+    }
 }
