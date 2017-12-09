@@ -1,5 +1,3 @@
-import ObservableValue from '../observables/observable-value';
-
 export default function makeKeyedList(observable) {
     return new KeyedList(observable);
 }
