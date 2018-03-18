@@ -16,5 +16,9 @@ fixture.cleanHTML = function cleanHtml() {
 const stripWhitespace = string => string.replace(/\s+/g, '');
 
 QUnit.assert.contentEqual = function(actual, expected, message) {
-    this.equal(stripWhitespace(actual), stripWhitespace(expected), message);
+    this.equal(
+        stripWhitespace(actual), 
+        stripWhitespace(expected), 
+        message
+    );
 };

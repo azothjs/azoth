@@ -43,25 +43,19 @@ module('Widget component', () => {
         const fragment = template(value);
         fixture.appendChild(fragment);
         t.equal(fixture.cleanHTML(), 
-            `<!-- component start -->
-                <div>Hello one</div>
-                <input type="text">
-            <!-- component end -->`);
+            `<!-- component start --><div>Hello one</div>
+                <input type="text"><!-- component end -->`);
 
         value.next('two');
         t.equal(fixture.cleanHTML(), 
-            `<!-- component start -->
-                <div>Hello two</div>
-                <input type="text">
-            <!-- component end -->`);
+            `<!-- component start --><div>Hello two</div>
+                <input type="text"><!-- component end -->`);
 
         fragment.unsubscribe();
         value.next('three');
         t.equal(fixture.cleanHTML(), 
-            `<!-- component start -->
-                <div>Hello two</div>
-                <input type="text">
-            <!-- component end -->`);
+            `<!-- component start --><div>Hello two</div>
+                <input type="text"><!-- component end -->`);
     });
 
 });

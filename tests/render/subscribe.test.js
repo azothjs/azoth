@@ -6,7 +6,7 @@ import { combineLatest } from 'rxjs-es/observable/combineLatest';
 module('subscribe rendering', () => {
 
     test('hello azoth', t => {
-        const template = name => _`<span>Hello @${name}!</span>`;
+        const template = name => _`<span>Hello ^${name}!</span>`;
         
         const name = new BehaviorSubject('azoth');
         const fragment = template(name);
@@ -22,7 +22,7 @@ module('subscribe rendering', () => {
     });
 
     test('expression', t => {
-        const template = (x, y) => _`@${x} + @${y} = @${combineLatest(x, y, (x, y) => x + y)}`;
+        const template = (x, y) => _`^${x} + ^${y} = ^${combineLatest(x, y, (x, y) => x + y)}`;
         
         const x = new BehaviorSubject(5);
         const y = new BehaviorSubject(2);
@@ -46,7 +46,7 @@ module('subscribe rendering', () => {
     test('conditional block with variables', t => {
         const yes = _`<span>Yes</span>`;
         const no = _`<span>No</span>`;
-        const template = choice => _`@${choice.map(c => c ? yes : no)}#`;
+        const template = choice => _`^${choice.map(c => c ? yes : no)}#`;
 
         const choice = new BehaviorSubject(true);
         const fragment = template(choice);
@@ -66,7 +66,7 @@ module('subscribe rendering', () => {
     test('block with array', t => {
         const template = items => _`
             <ul>
-                @${items.map(items=> items.map(({ name }) => _`
+                ^${items.map(items=> items.map(({ name }) => _`
                     <li>${name}</li>	
                 `))}#
             </ul>

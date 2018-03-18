@@ -13,12 +13,12 @@ export { default as Stream } from './components/stream';
 export { default as Widget } from './components/widget';
 
 // utilities
-import { rawHtml, makeTemplate } from './dom';
+import { rawHtml, makeRenderer, getRenderer } from './dom';
 export { rawHtml };
 
 // injected by compiler:
-export { makeTemplate as __makeTemplate };
-export { default as __renderer } from './renderer';
+export { makeRenderer as __makeRenderer };
+export { getRenderer as __getRenderer };
 
 export { default as __first } from './operators/first';
 export { default as __map } from './operators/map';
