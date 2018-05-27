@@ -35,6 +35,7 @@ class KeyedList {
                     const { childNodes, unsubscribe } = fragment;
                     
                     let nodes = null;
+
                     if(childNodes.length > 1) {
                         nodes = new Array(childNodes.length);
                         for(let c = 0; c < childNodes.length; c++) nodes[c] = childNodes[c];
@@ -42,6 +43,7 @@ class KeyedList {
                     else {
                         nodes = childNodes[0];
                     }
+                    
                     byKey.set(key||item, { nodes, unsubscribe });
                     let before = this._getBefore(next) || anchor;
                     

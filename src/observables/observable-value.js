@@ -45,7 +45,7 @@ export default class ObservableValue {
         this.value = value;
         
         const { subscribers } = this;
-        if(!subscribers) return;
+        if(subscribers === null) return;
         else if(Array.isArray(subscribers)) {
             for(let i = 0; i < subscribers.length; i++) {
                 subscribers[i](value);
@@ -55,4 +55,11 @@ export default class ObservableValue {
             subscribers(value);
         }      
     }
+
+    // TODO
+    // child(prop) {
+    //     const subject = getSubject(val ? val[prop] : undefined)
+    //     this.subscribe(val => subject.next(val ? val[prop] : undefined))
+    //     return subject;
+    // }
 }
