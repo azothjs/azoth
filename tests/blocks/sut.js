@@ -29,10 +29,11 @@ export default class Block {
     set anchor(anchor) {
         if(!anchor || !(anchor instanceof Node)) throwNoDOM(anchor);
         this._anchor = anchor;
+        // clear
         this._topAnchor = anchor.previousSibling;
     }
 
-    // add, clear
+    // clear
     _trackUnsubscribe({ unsubscribe }) {
         if(unsubscribe === undefined) return;
         if(this._unsubscribes === null) this._unsubscribes = unsubscribe;
@@ -45,22 +46,40 @@ export default class Block {
         return this._blocks.push(nodes);  
     }
 
-    add(item) {
-        const { map } = this;
-        if(!map) return; //TODO: warn, throw, ???
-        // track DOM via blocks
-        const nodes = this._insert(map(item));
-        this._trackDOM(nodes);
+    _getFirstBlockNode(index = -1, blocks = this._blocks) {
+        if(index === -1 || index === null || index === undefined) {
+            return this._anchor;
+        }
 
+        const block = blocks[index];
+        if(block === null || block === undefined) return this._anchor;
+
+        if(Array.isArray(block)) return this._getFirstBlockNode(0, block);
+
+        const { nodes } = block;
+        return Array.isArray(nodes) ? nodes[0] : nodes;
     }
 
-    _insert(dom) {
-        if(typeof dom === 'function') dom = dom(); // recursive needed? this._insert(dom())?
+    add(item, index = -1) {
+        const { map } = this;
+        if(!map) return; //TODO: warn, throw, ???
+
+        const dom = map(item);
+        const before = this._getFirstBlockNode(index);
+        
+        const nodes = this._insert(dom, before);
+        // remove
+        this._trackDOM(nodes);
+    }
+
+    _insert(dom, before) {
+        if(typeof dom === 'function') dom = dom(); // recursive needed? return this._insert(dom());
         
         if(Array.isArray(dom)) {
+            // return map is for remove
             const map = new Array(dom.length);
             for(let i = 0; i < dom.length; i++) {
-                map[i] = this._insert(dom[i]);
+                map[i] = this._insert(dom[i], before);
             }
             return map; 
         }
@@ -75,13 +94,13 @@ export default class Block {
 
         const { _anchor: anchor } = this;
         if(!anchor) throwNoAnchor();
-        anchor.parentNode.insertBefore(dom, anchor);
+        anchor.parentNode.insertBefore(dom, before);
 
         // remove
         return { nodes, unsubscribe };
     }
 
-    removeByIndex(index) {
+    removeAt(index) {
         // // FUTURE: when single element return is put in, optimize maybe like this:
         // // (would need to get right "index" if not only childNodes of parent)
         // const node = this._anchor.parentNode.childNodes[index];
