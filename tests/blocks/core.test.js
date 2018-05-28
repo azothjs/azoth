@@ -1,4 +1,4 @@
-import { module, test, fixture, skip } from '../qunit';
+import { module, test, fixture } from '../qunit';
 import { _, $ } from '../../src/azoth';
 import Observable from '../../src/observables/observable1';
 import CoreBlock from './sut';
@@ -60,10 +60,32 @@ module('Core Block Operations', hooks => {
             t.contentEqual(fixture.cleanHTML(), '<h3>blue</h3><p>4</p><h3>red</h3><p>3</p><!--block-->');
         });
 
-        // map returns function
-        // map returns array
-        // map returns object
-        // map returns primitive
+        test('function as map return', t => {
+            block.map = cool => cool ? _`<span>blue</span>` : _`<span>blue</span>`;
+            block.add();
+            t.equal(fixture.cleanHTML(), '<span>blue</span><!--block-->');
+        });
+
+        test('array as map return', t => {
+            block.map = () => [_`<span>blue</span>`, _`<span>red</span>`];
+            block.add();
+            t.equal(fixture.cleanHTML(), '<span>blue</span><span>red</span><!--block-->');
+        });
+
+        test('throws on non-DOM resolution', t => {
+            block.map = () => ({});
+            t.throws(() => {
+                block.add();
+            }, /Expected DOM/);
+        });
+
+        test('throws on no anchor', t => {
+            let block = new CoreBlock();
+            block.map = () => _`test`;
+            t.throws(() => {
+                block.add();
+            }, /does not have an anchor/);
+        });
 
     });
 
@@ -85,9 +107,9 @@ module('Core Block Operations', hooks => {
             });
     
             test(`${name} cleared with existing prior sibling`, t => {
-                const span = document.createElement('h1');
-                span.textContent = 'Colors';
-                fixture.insertBefore(span, anchor);
+                const h1 = document.createElement('h1');
+                h1.textContent = 'Colors';
+                fixture.insertBefore(h1, anchor);
                 t.equal(fixture.cleanHTML(), '<h1>Colors</h1><!--block-->', 'has existing sibling');
     
                 block.anchor = anchor;
@@ -112,7 +134,7 @@ module('Core Block Operations', hooks => {
         hooks.beforeEach(() => block = new CoreBlock({ anchor }));
         hooks.afterEach(() => block.unsubscribe());
 
-        test('removes DOM based on index', t => {
+        test('removes top-level DOM based on index', t => {
             block.map = color => _`<span>${color}</span>`;
 
             block.add('blue');
@@ -121,6 +143,28 @@ module('Core Block Operations', hooks => {
             
             block.removeByIndex(0);
             t.equal(fixture.cleanHTML(), '<span>red</span><!--block-->');
+        });
+
+        test('removes multi-top level DOM based on index', t => {
+            block.map = ({ color, count }) => _`<h3>${color}</h3><p>${count}</p>`;
+            
+            block.add({ color: 'blue', count: 4 });
+            block.add({ color: 'red', count: 3 });
+            t.equal(fixture.cleanHTML(), '<h3>blue</h3><p>4</p><h3>red</h3><p>3</p><!--block-->');
+
+            block.removeByIndex(0);
+            t.equal(fixture.cleanHTML(), '<h3>red</h3><p>3</p><!--block-->');
+        });
+
+        test('removes array top-level DOM based on index', t => {
+            block.map = ({ color, count }) => [_`${color}`, _`${count}`];
+            
+            block.add({ color: 'blue', count: 4 });
+            block.add({ color: 'red', count: 3 });
+            t.equal(fixture.cleanHTML(), 'blue4red3<!--block-->');
+
+            block.removeByIndex(0);
+            t.equal(fixture.cleanHTML(), 'red3<!--block-->');
         });
 
     });

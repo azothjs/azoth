@@ -1,7 +1,10 @@
 /* global QUnit */
 const { test, module, assert } = QUnit;
+test.skip = () => {};
 export { test, module, assert };
+
 export const skip = { test: () => {} };
+
 export const fixture = document.getElementById('qunit-fixture');
 
 const clean = html => html
@@ -12,6 +15,8 @@ const clean = html => html
 fixture.cleanHTML = function cleanHtml() {
     return clean(this.innerHTML).trim();
 };
+
+
 
 const stripWhitespace = string => string.replace(/\s+/g, '');
 
