@@ -17,6 +17,8 @@
     "astring": "^1.8.6",
     "eslint": "^8.55.0",
     "jest-diff": "^29.7.0",
+    "rev-hash": "^4.1.0",
+    "source-map": "^0.7.4",
     "vite": "^5.0.0",
     "vite-plugin-inspect": "^0.8.1",
     "vitest": "^1.0.3"

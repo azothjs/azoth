@@ -3,7 +3,8 @@ import { generate as astringGenerate } from 'astring';
 
 const ACORN_DEFAULTS = {
     ecmaVersion: 'latest',
-    sourceType: 'module'
+    sourceType: 'module',
+    locations: true,
 };
 
 export function parse(source, options = {}) {
