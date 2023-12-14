@@ -12,43 +12,40 @@ function getAzTokens(acorn) {
     return acornAz;
 }
 
-function createAzTokens(acorn) {
-   
-    const { tokTypes : tt, tokContexts: tc } = acorn;
-    const { TokContext, TokenType } = acorn;
+function createAzTokens(acorn) { 
+    const { TokenType, TokContext } = acorn;
+    const { tokTypes : types, tokContexts: contexts } = acorn;
 
-    // new token types
-    const tokTypes = {
-        azDecorator: new TokenType('@'),
+    const az_types = {
+        azAt: new TokenType('@'),
         azHashBraceL: new TokenType('#{', { beforeExpr: true, startsExpr: true }),
     };
 
-    // new token contexts
     const az_tmpl = new TokContext('@', true);
     const tokContexts = {
         az_tmpl,
     };
 
-    tokTypes.azDecorator.updateContext = function() {
+    az_types.azAt.updateContext = function() {
         this.context.push(az_tmpl); 
     };
 
-    tokTypes.azHashBraceL.updateContext = tt.dollarBraceL.updateContext;
+    az_types.azHashBraceL.updateContext = types.dollarBraceL.updateContext;
 
-    tt.backQuote.updateContext = function() {
-        if(this.curContext() === tc.q_tmpl) { 
+    types.backQuote.updateContext = function() {
+        if(this.curContext() === contexts.q_tmpl) { 
             this.context.pop(); 
-            if(this.curContext() === tokTypes.azDecorator) { 
+            if(this.curContext() === az_types.azAt) { 
                 this.context.pop(); 
             }   
         }
         else { 
-            this.context.push(tc.q_tmpl); 
+            this.context.push(contexts.q_tmpl); 
         }
         this.exprAllowed = false;
     };
   
-    return { tokContexts: tokContexts, tokTypes: tokTypes };
+    return { tokContexts: tokContexts, tokTypes: az_types };
 }
 
 
@@ -61,8 +58,6 @@ function plugin(options, Parser) {
     const tokContexts = acorn.tokContexts;
 
     const isNewLine = acorn.isNewLine;
-    // const isIdentifierStart = acorn.isIdentifierStart;
-    // const isIdentifierChar = acorn.isIdentifierChar;
     
     
     let isAzothTemplate = false;
@@ -95,7 +90,7 @@ function plugin(options, Parser) {
             const code = this.fullCharCodeAtPos();
             if(code === 96) { // `
                 isAzothTemplate = true;
-                return this.finishToken(tok.azDecorator);
+                return this.finishToken(tok.azAt);
             }
               
             this.raise(this.pos, "Unexpected character '" + codePointToString(code) + "', expected '`'");
@@ -108,8 +103,18 @@ function plugin(options, Parser) {
             for(;;) {
                 if(this.pos >= this.input.length) this.raise(this.start, 'Unterminated template');
                 let ch = this.input.charCodeAt(this.pos);
-                // Added other interpolator types:
-                if(ch === 96 || ch === 123 || (ch === 36 || ch === 35) && this.input.charCodeAt(this.pos + 1) === 123) { // '`', '{', '${', '#{'
+
+                // Backquote
+                if(ch === 96) { // `
+                    if(this.pos === this.start && (this.type === tt.template || this.type === tt.invalidTemplate)) {
+                        ++this.pos;
+                        return this.finishToken(tt.backQuote);
+                    }
+                    out += this.input.slice(chunkStart, this.pos);
+                    return this.finishToken(tt.template, out);
+                }
+                // Interpolators:
+                if(ch === 123 || (ch === 36 || ch === 35) && this.input.charCodeAt(this.pos + 1) === 123) { // { ${ #{
                     if(this.pos === this.start && (this.type === tt.template || this.type === tt.invalidTemplate)) {
                         if(ch === 123) {
                             ++this.pos;
@@ -122,9 +127,6 @@ function plugin(options, Parser) {
                         else if(ch === 36) {
                             this.pos += 2;
                             return this.finishToken(tt.dollarBraceL);
-                        } else {
-                            ++this.pos;
-                            return this.finishToken(tt.backQuote);
                         }
                     }
                     out += this.input.slice(chunkStart, this.pos);
