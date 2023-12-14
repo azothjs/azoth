@@ -1,15 +1,14 @@
 /* eslint-disable no-useless-escape */
 import { Parser } from 'acorn';
 import { test, expect } from 'vitest';
-import az from './acorn-jsz.js';
+import acornAz from './acorn-az.js';
 
-const JsxParser = Parser.extend(az());
+const JsxParser = Parser.extend(acornAz());
 const getTokens = code => [
     ...JsxParser.tokenizer(code, { 
         ecmaVersion: 'latest', 
     })
 ].map(t => `${t.type.label}: ${t.value ?? ''}`);
-
 
 test('tokenize "@" as decorator', () => {
     const tokens = getTokens('@`<a>...</a>`');
