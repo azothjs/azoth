@@ -1,16 +1,20 @@
-import { isIdentifierStart } from 'acorn';
 
 // The map to `acorn-jsx` tokens from `acorn` namespace objects.
-const acornJszMap = new WeakMap();
+const acornAzMap = new WeakMap();
 
 // Get the original tokens for the given `acorn` namespace object.
-function getJszTokens(acorn) {
-    acorn = acorn.Parser.acorn || acorn;
-    let acornJsz = acornJszMap.get(acorn);
-    if(acornJsz) return acornJsz;
-    
-    const tt = acorn.tokTypes;
-    const tc = acorn.tokContexts;
+function getAzTokens(acorn) {
+    acorn = acorn.Parser.acorn ?? acorn;
+    let acornAz = acornAzMap.get(acorn);
+    if(acornAz) return acornAz;
+    acornAz = createAzTokens(acorn);
+    acornAzMap.set(acorn, acornAz);
+    return acornAz;
+}
+
+function createAzTokens(acorn) {
+   
+    const { tokTypes : tt, tokContexts: tc } = acorn;
     const TokContext = acorn.TokContext;
     const TokenType = acorn.TokenType;
 
@@ -20,20 +24,20 @@ function getJszTokens(acorn) {
     };
 
     const tokTypes = {
-        jszDecorator: new TokenType('@'),
-        jszHashBraceL: new TokenType('#{', { beforeExpr: true, startsExpr: true }),
+        azDecorator: new TokenType('@'),
+        azHashBraceL: new TokenType('#{', { beforeExpr: true, startsExpr: true }),
     };
   
-    tokTypes.jszDecorator.updateContext = function() {
+    tokTypes.azDecorator.updateContext = function() {
         this.context.push(tc_decorator); 
     };
 
-    tokTypes.jszHashBraceL.updateContext = tt.dollarBraceL.updateContext;
+    tokTypes.azHashBraceL.updateContext = tt.dollarBraceL.updateContext;
 
     tt.backQuote.updateContext = function() {
         if(this.curContext() === tc.q_tmpl) { 
             this.context.pop(); 
-            if(this.curContext() === tokTypes.jszDecorator) { 
+            if(this.curContext() === tokTypes.azDecorator) { 
                 this.context.pop(); 
             }   
         }
@@ -43,21 +47,18 @@ function getJszTokens(acorn) {
         this.exprAllowed = false;
     };
   
-    acornJsz = { tokContexts: tokContexts, tokTypes: tokTypes };
-    acornJszMap.set(acorn, acornJsz);
-    
+    return { tokContexts: tokContexts, tokTypes: tokTypes };
 
-    return acornJsz;
 
 }
 
 
 function plugin(options, Parser) {
     const acorn = Parser.acorn;
-    const acornJsz = getJszTokens(acorn);
+    const acornAz = getAzTokens(acorn);
 
     const tt = acorn.tokTypes;
-    const tok = acornJsz.tokTypes;
+    const tok = acornAz.tokTypes;
     const tokContexts = acorn.tokContexts;
 
     const isNewLine = acorn.isNewLine;
@@ -69,8 +70,8 @@ function plugin(options, Parser) {
   
     return class extends Parser {
         // Expose actual `tokTypes` and `tokContexts` to other plugins.
-        static get acornJsz() {
-            return acornJsz;
+        static get acornAz() {
+            return acornAz;
         }
 
         static tokenizer(input, options) {
@@ -95,7 +96,7 @@ function plugin(options, Parser) {
             const code = this.fullCharCodeAtPos();
             if(code === 96) { // `
                 isAzothTemplate = true;
-                return this.finishToken(tok.jszDecorator);
+                return this.finishToken(tok.azDecorator);
             }
               
             this.raise(this.pos, "Unexpected character '" + codePointToString(code) + "', expected '`'");
@@ -117,7 +118,7 @@ function plugin(options, Parser) {
                         }
                         if(ch === 35) {
                             this.pos += 2;
-                            return this.finishToken(tok.jszHashBraceL);
+                            return this.finishToken(tok.azHashBraceL);
                         }
                         else if(ch === 36) {
                             this.pos += 2;
@@ -163,10 +164,10 @@ function plugin(options, Parser) {
     };
 }
 
-export default function acornJszFactoryConfig(options) {
+export default function acornAzFactoryConfig(options) {
     options = options ?? {};
 
-    return function acornJszFactory(Parser) {
+    return function acornAzFactory(Parser) {
         return plugin(options, Parser);
     };
 }

@@ -1,9 +1,9 @@
 /* eslint-disable no-useless-escape */
 import { Parser } from 'acorn';
 import { test, expect } from 'vitest';
-import jsz from './acorn-jsz.js';
+import az from './acorn-jsz.js';
 
-const JsxParser = Parser.extend(jsz());
+const JsxParser = Parser.extend(az());
 const getTokens = code => [...JsxParser.tokenizer(code, { 
     ecmaVersion: 11, 
 })].map(t => `${t.type.label}: ${t.value ?? ''}`);
