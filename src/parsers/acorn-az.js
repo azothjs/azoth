@@ -54,7 +54,7 @@ function plugin(options, Parser) {
             return this.finishToken(token);
         }
 
-        // these are copied methods from base acorn parser
+        // these are copied and modified methods from base acorn parser
         readTmplToken() {
             let out = '', chunkStart = this.pos;
             for(;;) {
@@ -129,6 +129,35 @@ function plugin(options, Parser) {
                 }
             }
         }
+
+        readInvalidTemplateToken = function() {
+            for(; this.pos < this.input.length; this.pos++) {
+                switch (this.input[this.pos]) {
+                    case '\\':
+                        ++this.pos;
+                        break;
+                        // eslint-disable-next-line no-fallthrough
+                    case '#':
+                    case '$':
+                        if(this.input[this.pos + 1] !== '{') {
+                            break;
+                        }
+                    // eslint-disable-next-line no-fallthrough
+                    case '{':
+                        if(!this.curContext() === az_tmpl) {
+                            break;
+                        }
+                    // eslint-disable-next-line no-fallthrough
+                    case '`':
+                        // falls through and runs this if no break
+                        return this.finishToken(tt.invalidTemplate, this.input.slice(this.start, this.pos));
+          
+              // no default
+                }
+            }
+            this.raise(this.start, 'Unterminated template');
+        };
+          
     };
 }
 

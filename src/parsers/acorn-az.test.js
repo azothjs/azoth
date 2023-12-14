@@ -77,3 +77,26 @@ test('"{" and "#{" not recognized outside of azoth templates', () => {
       ]
     `);
 });
+
+test('invalid template still reads on invalid escape sequence', () => {
+    const tokens = getTokens('@`a\\uone${1}a\\utwo#{2}a\\uthree{3}a\\ufour`');
+    expect(tokens).toMatchInlineSnapshot(`
+      [
+        "@\`: ",
+        "invalidTemplate: a\\uone",
+        "\${: ",
+        "num: 1",
+        "}: ",
+        "invalidTemplate: a\\utwo",
+        "#{: ",
+        "num: 2",
+        "}: ",
+        "invalidTemplate: a\\uthree",
+        "{: ",
+        "num: 3",
+        "}: ",
+        "invalidTemplate: a\\ufour",
+        "\`: ",
+      ]
+    `);
+});
