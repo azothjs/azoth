@@ -4,18 +4,17 @@ import { test, expect } from 'vitest';
 import az from './acorn-jsz.js';
 
 const JsxParser = Parser.extend(az());
-const getTokens = code => [...JsxParser.tokenizer(code, { 
-    ecmaVersion: 11, 
-})].map(t => `${t.type.label}: ${t.value ?? ''}`);
+const getTokens = code => [
+    ...JsxParser.tokenizer(code, { 
+        ecmaVersion: 'latest', 
+    })
+].map(t => `${t.type.label}: ${t.value ?? ''}`);
 
 
 test('tokenize "@" as decorator', () => {
-    const tokens = getTokens('const t = @`<a>...</a>`');
+    const tokens = getTokens('@`<a>...</a>`');
     expect(tokens).toMatchInlineSnapshot(`
       [
-        "const: const",
-        "name: t",
-        "=: =",
         "@: ",
         "\`: ",
         "template: <a>...</a>",
@@ -26,55 +25,31 @@ test('tokenize "@" as decorator', () => {
 
 test('"@" must be followed by backtick', () => {
     expect(() => {
-        getTokens('const t = @name`hello world`');
+        getTokens('const t = @bad`hello world`');
     }).toThrowErrorMatchingInlineSnapshot(
-        `[SyntaxError: Unexpected character 'n', expected '\`' (1:11)]`
+        `[SyntaxError: Unexpected character 'b', expected '\`' (1:11)]`
     );
 });
 
-test('tokenize "${" as interpolator (existing behavior)', () => {
-    const tokens = getTokens('@`hello ${name}`');
+test('tokenize "${text} #{dom} {smart}" as interpolators', () => {
+    const tokens = getTokens('@`<div>${text} #{dom} {smart}</div>`');
     expect(tokens).toMatchInlineSnapshot(`
       [
         "@: ",
         "\`: ",
-        "template: hello ",
+        "template: <div>",
         "\${: ",
-        "name: name",
+        "name: text",
         "}: ",
-        "template: ",
-        "\`: ",
-      ]
-    `);
-});
-
-test('tokenize "#{" as hash interpolator', () => {
-    const tokens = getTokens('@`#{list}yo`');
-    expect(tokens).toMatchInlineSnapshot(`
-      [
-        "@: ",
-        "\`: ",
-        "template: ",
+        "template:  ",
         "#{: ",
-        "name: list",
+        "name: dom",
         "}: ",
-        "template: yo",
-        "\`: ",
-      ]
-    `);
-});
-
-test('tokenize "{" as naked interpolator', () => {
-    const tokens = getTokens('@`hello {name}!`');
-    expect(tokens).toMatchInlineSnapshot(`
-      [
-        "@: ",
-        "\`: ",
-        "template: hello ",
+        "template:  ",
         "{: ",
-        "name: name",
+        "name: smart",
         "}: ",
-        "template: !",
+        "template: </div>",
         "\`: ",
       ]
     `);
@@ -86,7 +61,7 @@ test('"{" can be escaped', () => {
       [
         "@: ",
         "\`: ",
-        "template: hello \{name}!",
+        "template: hello {name}!",
         "\`: ",
       ]
     `);
