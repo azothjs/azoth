@@ -7,7 +7,8 @@
         "onopentag",
         "onopentagname",
         "ontext",
-        "quasis"
+        "quasis",
+        "tmpl"
     ],
     "vitest.debugExclude": [
         "<node_internals>/**",

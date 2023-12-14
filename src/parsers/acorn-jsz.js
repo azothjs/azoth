@@ -15,21 +15,22 @@ function getAzTokens(acorn) {
 function createAzTokens(acorn) {
    
     const { tokTypes : tt, tokContexts: tc } = acorn;
-    const TokContext = acorn.TokContext;
-    const TokenType = acorn.TokenType;
+    const { TokContext, TokenType } = acorn;
 
-    const tc_decorator = new TokContext('@', true);
-    const tokContexts = {
-        tc_decorator,
-    };
-
+    // new token types
     const tokTypes = {
         azDecorator: new TokenType('@'),
         azHashBraceL: new TokenType('#{', { beforeExpr: true, startsExpr: true }),
     };
-  
+
+    // new token contexts
+    const az_tmpl = new TokContext('@', true);
+    const tokContexts = {
+        az_tmpl,
+    };
+
     tokTypes.azDecorator.updateContext = function() {
-        this.context.push(tc_decorator); 
+        this.context.push(az_tmpl); 
     };
 
     tokTypes.azHashBraceL.updateContext = tt.dollarBraceL.updateContext;
@@ -48,8 +49,6 @@ function createAzTokens(acorn) {
     };
   
     return { tokContexts: tokContexts, tokTypes: tokTypes };
-
-
 }
 
 
