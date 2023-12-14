@@ -1,0 +1,54 @@
+<div>
+    const greetings = () => _`
+    <ul>
+        #{items.map(({ title, image, description }) => $`
+        <li>
+            <h2>{title}</h2>
+            <img src={image.url} alt={image.alt}>
+            <p>{description}</p>
+        </li>
+        `)}
+    </ul>
+    `;
+
+    const greetings = () => @_`
+    <ul>
+        #{items.map(({ title, image, description }) =>
+        <{Greeting} title={title} image={image}>
+            )}
+    </ul>
+    `;
+
+    const Greeting = @$`
+    <ul>
+        <li>
+            <h2>{this.title}</h2>
+            <img src={this.image.url} alt={this.image.alt}>
+            <p>{this.description}</p>
+        </li>
+    </ul>
+    `;
+
+    class Greeting extends $`
+    <ul>
+        <li>
+            <h2>{this.title}</h2>
+            <img src={this.image.url} alt={this.image.alt}>
+            <p>{this.description}</p>
+        </li>
+    </ul>
+    ` {
+
+    }
+
+    }
+
+
+
+
+
+
+
+
+
+</div>

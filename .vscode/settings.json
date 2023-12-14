@@ -1,5 +1,16 @@
 {
     "cSpell.words": [
-        "astring"
+        "astring",
+        "onattribute",
+        "onclosetag",
+        "oncomment",
+        "onopentag",
+        "onopentagname",
+        "ontext",
+        "quasis"
+    ],
+    "vitest.debugExclude": [
+        "<node_internals>/**",
+        "x**/node_modules/**"
     ]
 }

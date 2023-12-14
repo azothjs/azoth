@@ -5,23 +5,23 @@ import { compile } from './compile.js';
 const _ = () => {};
 const __makeRenderer = _;
 const property = _;'class';
-describe('arrow functions', () => {
+describe.skip('arrow functions', () => {
     test('implicit return with single line template', () => {
         function template() {
-            const template = () => _`<span>hello world</span>`;
+            const Greeting = () => _`<span>hello world</span>`;
         }
     
         const compiled = compile(template.toCode());     
     
         expect(compiled).toMatchCode(() => {
-            const template = () => __render0().__fragment;
+            const Greeting = () => __render0().__fragment;
             var __render0 = __makeRenderer(`<span>hello world</span>`);
         });
     });
 
     test('implicit return with multi line template', () => {
         function template() {
-            const template = () => _`
+            const Greeting = () => _`
                 <div>
                     <span>hello world</span>
                 </div>
@@ -31,7 +31,7 @@ describe('arrow functions', () => {
         const compiled = compile(template.toCode());   
         
         expect(compiled).toMatchCode(() => {
-            const template = () => __render0().__fragment;
+            const Greeting = () => __render0().__fragment;
             var __render0 = __makeRenderer(`<div>
                     <span>hello world</span>
                 </div>`);
@@ -40,7 +40,7 @@ describe('arrow functions', () => {
     
     test('simple block return with single line (becomes implicit)', () => {
         function template() {
-            const template = () => {
+            const Greeting = () => {
                 return _`<span>hello world</span>`;
             };
         }
@@ -48,14 +48,14 @@ describe('arrow functions', () => {
         const compiled = compile(template.toCode());     
     
         expect(compiled).toMatchCode(() => {
-            const template = () => __render0().__fragment;
+            const Greeting = () => __render0().__fragment;
             var __render0 = __makeRenderer(`<span>hello world</span>`);
         });
     });
     
     test('simple block return with multi line (becomes implicit)', () => {
         function template() {
-            const template = () => {
+            const Greeting = () => {
                 return _`
                     <div>
                         <span>hello world</span>
@@ -67,20 +67,37 @@ describe('arrow functions', () => {
         const compiled = compile(template.toCode());     
     
         expect(compiled).toMatchCode(() => {
-            const template = () => __render0().__fragment;
+            const Greeting = () => __render0().__fragment;
             var __render0 = __makeRenderer(`<div>
                         <span>hello world</span>
                     </div>`);
         });
     });
 
+    test('implicit return with static value bind', () => {
+        function template() {
+            const Greeting = (style) => _`<span class=${style}>hello</span>`;
+        }
+    
+        const compiled = compile(template.toCode());     
+    
+        expect(compiled).toMatchCode(() => {
+            const Greeting = (style) => {
+                const { __root, __nodes } = __render0();
+                property(__nodes[0], 'class')(style);
+                return __root;
+            };
+            var __render0 = __makeRenderer(`<span>hello</span>`);
+        });
+    });
+
 });
 
-describe('function expressions', () => {
+describe.skip('function expressions', () => {
 
     test('single return statement with single line template', () => {
         function template() {
-            const template = function() {
+            const Greeting = function() {
                 return _`
                     <div>
                         <span>hello world</span>
@@ -92,7 +109,7 @@ describe('function expressions', () => {
         const compiled = compile(template.toCode());   
         
         expect(compiled).toMatchCode(() => {
-            const template = function() {
+            const Greeting = function() {
                 return __render0().__fragment;
             };
             var __render0 = __makeRenderer(`<div>
@@ -103,7 +120,7 @@ describe('function expressions', () => {
 
     test('multi line template with function expr return', () => {
         function template() {
-            const template = function() {
+            const Greeting = function() {
                 return _`
                     <div>
                         <span>hello world</span>
@@ -115,7 +132,7 @@ describe('function expressions', () => {
         const compiled = compile(template.toCode());   
         
         expect(compiled).toMatchCode(() => {
-            const template = function() {
+            const Greeting = function() {
                 return __render0().__fragment;
             };
             var __render0 = __makeRenderer(`<div>

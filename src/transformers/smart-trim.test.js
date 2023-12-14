@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import '../utils/code-matchers';
-import smartTrim from './smart-trim';
+import { smartTrim } from './smart-trim';
 
 describe('removes leading', () => {
     test('new line', () => {
