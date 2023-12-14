@@ -1,67 +1,30 @@
+import { getLineInfo } from 'acorn';
 
-// The map to `acorn-jsx` tokens from `acorn` namespace objects.
-const acornAzMap = new WeakMap();
-
-// Get the original tokens for the given `acorn` namespace object.
-function getAzTokens(acorn) {
-    acorn = acorn.Parser.acorn ?? acorn;
-    let acornAz = acornAzMap.get(acorn);
-    if(acornAz) return acornAz;
-    acornAz = createAzTokens(acorn);
-    acornAzMap.set(acorn, acornAz);
-    return acornAz;
+export default function acornAzFactoryConfig(options) {
+    options = options ?? {};
+    return function acornAzFactory(Parser) {
+        return plugin(options, Parser);
+    };
 }
-
-function createAzTokens(acorn) { 
-    const { TokenType, TokContext } = acorn;
-    const { tokTypes : types, tokContexts: contexts } = acorn;
-
-    const az_types = {
-        azAt: new TokenType('@'),
-        azHashBraceL: new TokenType('#{', { beforeExpr: true, startsExpr: true }),
-    };
-
-    const az_tmpl = new TokContext('@', true);
-    const tokContexts = {
-        az_tmpl,
-    };
-
-    az_types.azAt.updateContext = function() {
-        this.context.push(az_tmpl); 
-    };
-
-    az_types.azHashBraceL.updateContext = types.dollarBraceL.updateContext;
-
-    types.backQuote.updateContext = function() {
-        if(this.curContext() === contexts.q_tmpl) { 
-            this.context.pop(); 
-            if(this.curContext() === az_types.azAt) { 
-                this.context.pop(); 
-            }   
-        }
-        else { 
-            this.context.push(contexts.q_tmpl); 
-        }
-        this.exprAllowed = false;
-    };
-  
-    return { tokContexts: tokContexts, tokTypes: az_types };
-}
-
 
 function plugin(options, Parser) {
     const acorn = Parser.acorn;
     const acornAz = getAzTokens(acorn);
 
     const tt = acorn.tokTypes;
-    const tok = acornAz.tokTypes;
-    const tokContexts = acorn.tokContexts;
+    const { atBackQuote, hashBraceL } = acornAz.tokTypes;
+    const { az_tmpl } = acornAz.tokContexts;
 
     const isNewLine = acorn.isNewLine;
-    
-    
-    let isAzothTemplate = false;
-  
+
+
+    const TMPL_END = {
+        '96': tt.backQuote,
+        '36': tt.dollarBraceL,
+        '123': tt.braceL,
+        '35': hashBraceL,
+    };
+     
     return class extends Parser {
         // Expose actual `tokTypes` and `tokContexts` to other plugins.
         static get acornAz() {
@@ -73,29 +36,23 @@ function plugin(options, Parser) {
         }
 
         readToken(code) {
-            // console.log(code, String.fromCharCode(code));
-            // console.log('expression allowed', this.exprAllowed);
-
-            if(code === 64) { // @
-                this.readToken_decorator();
+            // Azoth template : "@`"
+            if(code === 64 && this.input.charCodeAt(this.pos + 1) === 96) {
+                this.pos += 2;
+                return this.finishToken(atBackQuote);
             }
-            else {
-                super.readToken(code);
-
-            }
+            super.readToken(code);
         }
 
-        readToken_decorator() {
-            ++this.pos;
-            const code = this.fullCharCodeAtPos();
-            if(code === 96) { // `
-                isAzothTemplate = true;
-                return this.finishToken(tok.azAt);
+        readTmplEnd(code) {
+            const token = TMPL_END[code];
+            if(!token) {
+                throw `Unexpected character "${String.fromCharCode(code)}" (${code}) in azothAcorn parser.readTmplEnd. This shouldn't happen.`;
             }
-              
-            this.raise(this.pos, "Unexpected character '" + codePointToString(code) + "', expected '`'");
+           
+            this.pos += token.label.length;
+            return this.finishToken(token);
         }
-
 
         // these are copied methods from base acorn parser
         readTmplToken() {
@@ -104,34 +61,44 @@ function plugin(options, Parser) {
                 if(this.pos >= this.input.length) this.raise(this.start, 'Unterminated template');
                 let ch = this.input.charCodeAt(this.pos);
 
-                // Backquote
-                if(ch === 96) { // `
-                    if(this.pos === this.start && (this.type === tt.template || this.type === tt.invalidTemplate)) {
-                        ++this.pos;
-                        return this.finishToken(tt.backQuote);
+                // Look for end of template quasi
+                const isBackQuote = ch === 96; // `
+                const isDollar = ch === 36; // $
+                const isHash = ch === 35; // #
+                const isBraceL = ch === 123; // {
+
+                if(isBackQuote || isDollar || isHash || isBraceL) {
+                    const isAzTmpl = this.curContext() === az_tmpl;
+                    const nextIsBraceL = this.input.charCodeAt(this.pos + 1) === 123; // {
+                    const isDollarBraceL = ch === 36 && nextIsBraceL; // ${
+                    const isHashBraceL = ch === 35 && nextIsBraceL; // #{
+
+                    if(!isAzTmpl && (isHashBraceL || (isBraceL && this.input.charCodeAt(this.pos - 1) === 35))) {
+                        let { line, column } = getLineInfo(this.input, this.pos);
+                        let warning = `azoth interpolator ${isHash ? '#' : ''}{...} `;
+                        warning += 'found in non-azoth template at ';
+                        warning += `(${line}:${column})`;
+                        
+                        // TODO: how would this work in vite DX?
+                        if(!import.meta.env.TEST) {
+                            // eslint-disable-next-line no-console
+                            console.warn(warning);
+                        }    
                     }
-                    out += this.input.slice(chunkStart, this.pos);
-                    return this.finishToken(tt.template, out);
-                }
-                // Interpolators:
-                if(ch === 123 || (ch === 36 || ch === 35) && this.input.charCodeAt(this.pos + 1) === 123) { // { ${ #{
-                    if(this.pos === this.start && (this.type === tt.template || this.type === tt.invalidTemplate)) {
-                        if(ch === 123) {
-                            ++this.pos;
-                            return this.finishToken(tt.braceL);
+                    else {
+                        if(isBackQuote || isDollarBraceL || (isAzTmpl && (isBraceL || isHashBraceL))) { // ` { ${ #{
+                            if(!(this.pos === this.start && (this.type === tt.template || this.type === tt.invalidTemplate))) {
+                            // finish template token:
+                                out += this.input.slice(chunkStart, this.pos);
+                                return this.finishToken(tt.template, out);
+                            }
+                            // finish boundary token (backQuote or interpolator)
+                            return this.readTmplEnd(ch);
                         }
-                        if(ch === 35) {
-                            this.pos += 2;
-                            return this.finishToken(tok.azHashBraceL);
-                        }
-                        else if(ch === 36) {
-                            this.pos += 2;
-                            return this.finishToken(tt.dollarBraceL);
-                        }
+
                     }
-                    out += this.input.slice(chunkStart, this.pos);
-                    return this.finishToken(tt.template, out);
                 }
+                
                 if(ch === 92) { // '\'
                     out += this.input.slice(chunkStart, this.pos);
                     out += this.readEscapedChar(true);
@@ -165,15 +132,63 @@ function plugin(options, Parser) {
     };
 }
 
-export default function acornAzFactoryConfig(options) {
-    options = options ?? {};
 
-    return function acornAzFactory(Parser) {
-        return plugin(options, Parser);
+// The map to `acorn-jsx` tokens from `acorn` namespace objects.
+const acornAzMap = new WeakMap();
+
+// Get the original tokens for the given `acorn` namespace object.
+function getAzTokens(acorn) {
+    acorn = acorn.Parser.acorn ?? acorn;
+    let acornAz = acornAzMap.get(acorn);
+    if(acornAz) return acornAz;
+    acornAz = createAzTokens(acorn);
+    acornAzMap.set(acorn, acornAz);
+    return acornAz;
+}
+
+function createAzTokens(acorn) { 
+    const { TokenType, TokContext } = acorn;
+    const { tokTypes : types, tokContexts: contexts } = acorn;
+
+    /* new azoth token context based on query template */
+    const { isExpr, preserveSpace, override, generator } = contexts.q_tmpl;
+    const az_tmpl = new TokContext('@`', isExpr, preserveSpace, override, generator);
+
+    /* new azoth token types */
+
+    // azoth @` tagged template
+    const atBackQuote = new TokenType('@`');
+    atBackQuote.updateContext = function() {
+        this.context.push(az_tmpl); 
+    };    
+    // extend backQuote.updateContext to close @` as well
+    const bQUpdateSuper = types.backQuote.updateContext;
+    types.backQuote.updateContext = function(prevType) {
+        if(this.curContext() !== az_tmpl){
+            return bQUpdateSuper.call(this, prevType);
+        }
+
+        this.context.pop();
+        this.exprAllowed = false;
+
+    };
+
+    // azoth #{ dom interpolator
+    const hashBraceL = new TokenType('#{', { beforeExpr: true, startsExpr: true });
+    hashBraceL.updateContext = types.dollarBraceL.updateContext;
+
+    return { 
+        tokContexts: { 
+            az_tmpl
+        }, 
+        tokTypes: { 
+            atBackQuote, 
+            hashBraceL 
+        } 
     };
 }
 
-// TODO: open issue on acornjs for exporting utils
+// TODO: open issue on acorn for exporting utils
 function codePointToString(code) {
     // UTF-16 Decoding
     if(code <= 0xFFFF) return String.fromCharCode(code);
