@@ -8,7 +8,7 @@ import { getTemplatesAst } from './utils/get-templates.js';
 const _ = () => {};
 const isAzoth = node => node.tag?.name === '_';
 
-test('html-only template (no binding)', () => {
+test.skip('html-only template (no binding)', () => {
     function template() {
         const Greeting = () => _`<span>hello world</span>`;
     }

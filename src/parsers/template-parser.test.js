@@ -12,7 +12,7 @@ const getHtml = (wrapperFn) => {
     return html;
 };
 
-describe.skip('basic html handling in templates', () => {
+describe('basic html handling in templates', () => {
     test('single span with class and text content', () => {
         function t1() {
             _/*html*/`
@@ -59,7 +59,7 @@ describe.skip('basic html handling in templates', () => {
         expect(html).toMatchInlineSnapshot(`"<div><div><div><div><div></div></div></div></div></div>"`);
     });
 
-    // TODO: html parsing  possible errors
+    // TODO: handle html parsing possible errors
 });
 
 describe.skip('text bindings', () => {
