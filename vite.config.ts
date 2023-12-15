@@ -2,21 +2,29 @@ import { defineConfig } from 'vite';
 import Inspect from 'vite-plugin-inspect';
 
 export default defineConfig({
+    test: {
+        snapshotFormat: {
+        },
+    },
     plugins: [
         Inspect()       
     ],
 });
 
+
+
+
+
 const jsFile = /\.js$/;
 
 function myPlugin() {
 
-    const items = [];
+    const items: string[] = [];
 
     const transform = {
         name: 'transform-az-plugin',
         enforce: 'pre',
-        transform(source, id) {
+        transform(source, id:string) {
             if(!jsFile.test(id)) return;
             items.push(id);
             return source.replace(/baa/g, 'banana');
