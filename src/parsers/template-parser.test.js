@@ -3,7 +3,6 @@ import { getTemplatesAst } from '../utils/get-templates.js';
 import { parse } from './template-parser.js';
 import '../utils/code-matchers.js';
 
-
 const _ = () => {};
 
 const getHtml = (wrapperFn) => {
