@@ -10,7 +10,7 @@
 // https://github.com/acornjs/acorn-jsx/blob/main/index.js
 
 import { getLineInfo } from 'acorn';
-import { getAzTokens } from './az-tokens';
+import { getAzTokens } from './tokens';
 
 export default function acornAzFactoryConfig(options) {
     options = options ?? {};
@@ -95,7 +95,7 @@ function plugin(options, Parser) {
                     const isDollarBraceL = isDollar && hasBraceLNext; // ${
                     const isHashBraceL = isHash && hasBraceLNext; // #{
 
-                    // Azoth interpolator found in normal template. Could be no-op
+                    // Azoth interpolator found in normal template. 
                     if(!isAzTmpl && (isHashBraceL || (isBraceL && this.input.charCodeAt(this.pos - 1) === 35))) {
                         // If the DX works and no syntax highlight we can prob skip.
                         // Still would need the if because it prevents the else code and

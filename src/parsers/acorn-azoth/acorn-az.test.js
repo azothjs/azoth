@@ -4,14 +4,14 @@ import { test, expect } from 'vitest';
 import acornAz from './acorn-az.js';
 
 const JsxParser = Parser.extend(acornAz());
-const getTokens = code => [
-    ...JsxParser.tokenizer(code, { 
-        ecmaVersion: 'latest', 
+const tokenize = code => [
+    ...JsxParser.tokenizer(code, {
+        ecmaVersion: 'latest',
     })
 ].map(t => `${t.type.label}: ${t.value ?? ''}`);
 
 test('normal template still works', () => {
-    const tokens = getTokens('`a${"b"}c`');
+    const tokens = tokenize('`a${"b"}c`');
     expect(tokens).toMatchInlineSnapshot(`
       [
         "\`: ",
@@ -26,7 +26,7 @@ test('normal template still works', () => {
 });
 
 test('tokenize "@" as decorator', () => {
-    const tokens = getTokens('@`<a>...</a>`');
+    const tokens = tokenize('@`<a>...</a>`');
     expect(tokens).toMatchInlineSnapshot(`
       [
         "@\`: ",
@@ -38,14 +38,14 @@ test('tokenize "@" as decorator', () => {
 
 test('"@`" is atomic, "@" itself has no special meaning', () => {
     expect(() => {
-        getTokens('const t = @bad`hello world`');
+        tokenize('const t = @bad`hello world`');
     }).toThrowErrorMatchingInlineSnapshot(
         `[SyntaxError: Unexpected character '@' (1:10)]`
     );
 });
 
 test('tokenize "${text} #{dom} {smart}" as interpolators', () => {
-    const tokens = getTokens('@`<div>${text} #{dom} {smart}</div>`');
+    const tokens = tokenize('@`<div>${text} #{dom} {smart}</div>`');
     expect(tokens).toMatchInlineSnapshot(`
       [
         "@\`: ",
@@ -68,7 +68,7 @@ test('tokenize "${text} #{dom} {smart}" as interpolators', () => {
 });
 
 test('"{" can be escaped', () => {
-    const tokens = getTokens('@`hello \\{name}!`');
+    const tokens = tokenize('@`hello \\{name}!`');
     expect(tokens).toMatchInlineSnapshot(`
       [
         "@\`: ",
@@ -79,7 +79,7 @@ test('"{" can be escaped', () => {
 });
 
 test('"{" and "#{" not recognized outside of azoth templates', () => {
-    const tokens = getTokens('`<div>${text} #{dom} {smart}</div>`');
+    const tokens = tokenize('`<div>${text} #{dom} {smart}</div>`');
     expect(tokens).toMatchInlineSnapshot(`
       [
         "\`: ",
@@ -95,7 +95,7 @@ test('"{" and "#{" not recognized outside of azoth templates', () => {
 
 test('invalid template still reads on invalid escape sequence', () => {
     
-    const tokens = getTokens('@`a\\uone${1}a\\utwo#{2}a\\uthree{3}a\\ufour`');
+    const tokens = tokenize('@`a\\uone${1}a\\utwo#{2}a\\uthree{3}a\\ufour`');
   
     expect(tokens).toMatchInlineSnapshot(`
       [
@@ -120,7 +120,7 @@ test('invalid template still reads on invalid escape sequence', () => {
 
 test('invalid template still reads on normal template', () => {
     
-    const tokens = getTokens('`a\\uone${1}a\\utwo#{2}a\\uthree{3}a\\ufour`');
+    const tokens = tokenize('`a\\uone${1}a\\utwo#{2}a\\uthree{3}a\\ufour`');
   
     expect(tokens).toMatchInlineSnapshot(`
       [
@@ -134,3 +134,5 @@ test('invalid template still reads on normal template', () => {
       ]
     `);
 });
+
+
