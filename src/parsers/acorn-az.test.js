@@ -10,6 +10,21 @@ const getTokens = code => [
     })
 ].map(t => `${t.type.label}: ${t.value ?? ''}`);
 
+test('normal template still works', () => {
+    const tokens = getTokens('`a${"b"}c`');
+    expect(tokens).toMatchInlineSnapshot(`
+      [
+        "\`: ",
+        "template: a",
+        "\${: ",
+        "string: b",
+        "}: ",
+        "template: c",
+        "\`: ",
+      ]
+    `);
+});
+
 test('tokenize "@" as decorator', () => {
     const tokens = getTokens('@`<a>...</a>`');
     expect(tokens).toMatchInlineSnapshot(`
@@ -79,7 +94,9 @@ test('"{" and "#{" not recognized outside of azoth templates', () => {
 });
 
 test('invalid template still reads on invalid escape sequence', () => {
+    
     const tokens = getTokens('@`a\\uone${1}a\\utwo#{2}a\\uthree{3}a\\ufour`');
+  
     expect(tokens).toMatchInlineSnapshot(`
       [
         "@\`: ",
@@ -96,6 +113,23 @@ test('invalid template still reads on invalid escape sequence', () => {
         "num: 3",
         "}: ",
         "invalidTemplate: a\\ufour",
+        "\`: ",
+      ]
+    `);
+});
+
+test('invalid template still reads on normal template', () => {
+    
+    const tokens = getTokens('`a\\uone${1}a\\utwo#{2}a\\uthree{3}a\\ufour`');
+  
+    expect(tokens).toMatchInlineSnapshot(`
+      [
+        "\`: ",
+        "invalidTemplate: a\\uone",
+        "\${: ",
+        "num: 1",
+        "}: ",
+        "invalidTemplate: a\\utwo#{2}a\\uthree{3}a\\ufour",
         "\`: ",
       ]
     `);

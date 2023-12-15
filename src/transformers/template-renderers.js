@@ -1,6 +1,5 @@
 import revHash from 'rev-hash';
 import { declareRender } from './fragment';
-import smartTrim from './smart-trim';
 import { 
     MAKE_RENDERER_IMPORT,
     GET_RENDERER_IMPORT } from './identifiers';
@@ -12,7 +11,6 @@ export class InlineRenderer {
     }
 
     add(html) {
-        html = smartTrim(html);
         const { map } = this;
         if(map.has(html)) return map.get(html).index;
 
@@ -58,7 +56,6 @@ class ModuleByIdRenderer {
     add(html) {
         const { map, set } = this;
 
-        html = smartTrim(html);
         const hash = revHash(html);
 
         if(!map.has(hash)) {

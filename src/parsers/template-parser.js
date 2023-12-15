@@ -1,6 +1,6 @@
 import { Parser } from 'htmlparser2';
-import { smartTrimLeft, smartTrimRight } from './transformers/smart-trim.js';
-import voidElements from './utils/void-elements.js';
+import { smartTrimLeft, smartTrimRight } from '../transformers/smart-trim.js';
+import voidElements from '../utils/void-elements.js';
 
 export function parse(ast) {
 

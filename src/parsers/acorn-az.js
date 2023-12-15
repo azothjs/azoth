@@ -1,4 +1,16 @@
+/* eslint-disable no-fallthrough */
+// Acorn source uses intentional fallthrough in switch/case
+
+// Writing this plugin leaned on the acorn-jsx example.
+// Plugin structure and acorn extending pretty much the same.
+// Heavy refactoring on code structure, within the constraints
+// of being an acorn parser extension and favoring some of
+// it's existing style and paradigm.
+//
+// https://github.com/acornjs/acorn-jsx/blob/main/index.js
+
 import { getLineInfo } from 'acorn';
+import { getAzTokens } from './az-tokens';
 
 export default function acornAzFactoryConfig(options) {
     options = options ?? {};
@@ -17,7 +29,6 @@ function plugin(options, Parser) {
 
     const isNewLine = acorn.isNewLine;
 
-
     const TMPL_END = {
         '96': tt.backQuote,
         '36': tt.dollarBraceL,
@@ -26,7 +37,7 @@ function plugin(options, Parser) {
     };
      
     return class extends Parser {
-        // Expose actual `tokTypes` and `tokContexts` to other plugins.
+        // Expose azoth `tokTypes` and `tokContexts` to other plugins.
         static get acornAz() {
             return acornAz;
         }
@@ -54,14 +65,25 @@ function plugin(options, Parser) {
             return this.finishToken(token);
         }
 
-        // these are copied and modified methods from base acorn parser
+        // These are copied and modified methods from base acorn parser.
+        // Acorn is  mindful of call stack size and excessive function calling
+        // as these add up in the hot path of a speed optimized parser.  
         readTmplToken() {
             let out = '', chunkStart = this.pos;
             for(;;) {
                 if(this.pos >= this.input.length) this.raise(this.start, 'Unterminated template');
                 let ch = this.input.charCodeAt(this.pos);
 
-                // Look for end of template quasi
+                /* Method change start */
+
+                // This is the changed code for possible end to template quasi token.
+                // One strange thing to note is that this code will be visited twice:
+                // 1. The token is found trying to read more of the string,
+                // so we need to finishToken on tt.template (quasi string)
+                // 2. The token is found at the start of trying to ready a string,
+                // so we need to finish that token to the output.
+                // That logic 
+
                 const isBackQuote = ch === 96; // `
                 const isDollar = ch === 36; // $
                 const isHash = ch === 35; // #
@@ -69,11 +91,15 @@ function plugin(options, Parser) {
 
                 if(isBackQuote || isDollar || isHash || isBraceL) {
                     const isAzTmpl = this.curContext() === az_tmpl;
-                    const nextIsBraceL = this.input.charCodeAt(this.pos + 1) === 123; // {
-                    const isDollarBraceL = ch === 36 && nextIsBraceL; // ${
-                    const isHashBraceL = ch === 35 && nextIsBraceL; // #{
+                    const hasBraceLNext = (isHash || isDollar) && this.input.charCodeAt(this.pos + 1) === 123; // {
+                    const isDollarBraceL = isDollar && hasBraceLNext; // ${
+                    const isHashBraceL = isHash && hasBraceLNext; // #{
 
+                    // Azoth interpolator found in normal template. Could be no-op
                     if(!isAzTmpl && (isHashBraceL || (isBraceL && this.input.charCodeAt(this.pos - 1) === 35))) {
+                        // If the DX works and no syntax highlight we can prob skip.
+                        // Still would need the if because it prevents the else code and
+                        // allows for continued execution
                         let { line, column } = getLineInfo(this.input, this.pos);
                         let warning = `azoth interpolator ${isHash ? '#' : ''}{...} `;
                         warning += 'found in non-azoth template at ';
@@ -85,20 +111,27 @@ function plugin(options, Parser) {
                             console.warn(warning);
                         }    
                     }
-                    else {
-                        if(isBackQuote || isDollarBraceL || (isAzTmpl && (isBraceL || isHashBraceL))) { // ` { ${ #{
-                            if(!(this.pos === this.start && (this.type === tt.template || this.type === tt.invalidTemplate))) {
-                            // finish template token:
-                                out += this.input.slice(chunkStart, this.pos);
-                                return this.finishToken(tt.template, out);
-                            }
+                    // handle end via ` (overall template) or start of interpolator
+                    else if(isBackQuote || isDollarBraceL || (isAzTmpl && (isBraceL || isHashBraceL))) { // ` { ${ #{
+                        // Means we already finished the template quasi token and restarted
+                        // via readTmplToken(). We test for this by checking position is
+                        // still at start of token and a template quasi has been started.
+                        // (keep in mind string quasi in template literal still exists even 
+                        // if empty string)
+                        if(this.pos === this.start && (this.type === tt.template || this.type === tt.invalidTemplate)) {
                             // finish boundary token (backQuote or interpolator)
                             return this.readTmplEnd(ch);
                         }
 
+                        // otherwise, finish template token:
+                        out += this.input.slice(chunkStart, this.pos);
+                        return this.finishToken(tt.template, out);
                     }
+
+                    // be aware if conditions not met, things continue below
                 }
-                
+                /* Method change end */
+
                 if(ch === 92) { // '\'
                     out += this.input.slice(chunkStart, this.pos);
                     out += this.readEscapedChar(true);
@@ -109,12 +142,9 @@ function plugin(options, Parser) {
                     switch (ch) {
                         case 13:
                             if(this.input.charCodeAt(this.pos) === 10) ++this.pos;
-                        // in the acorn source code, so we assume on purpose
-                        /* eslint-disable no-fallthrough */
                         case 10:
                             out += '\n';
                             break;
-                        /* eslint-enable no-fallthrough */
                         default:
                             out += String.fromCharCode(ch);
                             break;
@@ -132,27 +162,27 @@ function plugin(options, Parser) {
 
         readInvalidTemplateToken = function() {
             for(; this.pos < this.input.length; this.pos++) {
-                switch (this.input[this.pos]) {
+                const code = this.input[this.pos];
+                switch (code) {
                     case '\\':
                         ++this.pos;
                         break;
-                        // eslint-disable-next-line no-fallthrough
                     case '#':
                     case '$':
                         if(this.input[this.pos + 1] !== '{') {
                             break;
                         }
-                    // eslint-disable-next-line no-fallthrough
+                        // fallthrough if #{ or ${
                     case '{':
-                        if(!this.curContext() === az_tmpl) {
+                        if(code !== '$' && this.curContext() !== az_tmpl) {
                             break;
                         }
-                    // eslint-disable-next-line no-fallthrough
-                    case '`':
-                        // falls through and runs this if no break
+                        // fallthrough if ${ or azoth template with #{ or {
+                    case '`': // Template done so invalid quasi token done.
+                        // This line unchanged from acorn
                         return this.finishToken(tt.invalidTemplate, this.input.slice(this.start, this.pos));
           
-              // no default
+                    // no default
                 }
             }
             this.raise(this.start, 'Unterminated template');
@@ -161,61 +191,6 @@ function plugin(options, Parser) {
     };
 }
 
-
-// The map to `acorn-jsx` tokens from `acorn` namespace objects.
-const acornAzMap = new WeakMap();
-
-// Get the original tokens for the given `acorn` namespace object.
-function getAzTokens(acorn) {
-    acorn = acorn.Parser.acorn ?? acorn;
-    let acornAz = acornAzMap.get(acorn);
-    if(acornAz) return acornAz;
-    acornAz = createAzTokens(acorn);
-    acornAzMap.set(acorn, acornAz);
-    return acornAz;
-}
-
-function createAzTokens(acorn) { 
-    const { TokenType, TokContext } = acorn;
-    const { tokTypes : types, tokContexts: contexts } = acorn;
-
-    /* new azoth token context based on query template */
-    const { isExpr, preserveSpace, override, generator } = contexts.q_tmpl;
-    const az_tmpl = new TokContext('@`', isExpr, preserveSpace, override, generator);
-
-    /* new azoth token types */
-
-    // azoth @` tagged template
-    const atBackQuote = new TokenType('@`');
-    atBackQuote.updateContext = function() {
-        this.context.push(az_tmpl); 
-    };    
-    // extend backQuote.updateContext to close @` as well
-    const bQUpdateSuper = types.backQuote.updateContext;
-    types.backQuote.updateContext = function(prevType) {
-        if(this.curContext() !== az_tmpl){
-            return bQUpdateSuper.call(this, prevType);
-        }
-
-        this.context.pop();
-        this.exprAllowed = false;
-
-    };
-
-    // azoth #{ dom interpolator
-    const hashBraceL = new TokenType('#{', { beforeExpr: true, startsExpr: true });
-    hashBraceL.updateContext = types.dollarBraceL.updateContext;
-
-    return { 
-        tokContexts: { 
-            az_tmpl
-        }, 
-        tokTypes: { 
-            atBackQuote, 
-            hashBraceL 
-        } 
-    };
-}
 
 // TODO: open issue on acorn for exporting utils
 function codePointToString(code) {

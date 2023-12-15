@@ -14,5 +14,6 @@
     "vitest.debugExclude": [
         "<node_internals>/**",
         "x**/node_modules/**"
-    ]
+    ],
+    "deno.enable": false,
 }
