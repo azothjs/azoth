@@ -2,7 +2,7 @@
 import { Parser } from 'acorn';
 import acornAz from './acorn-az.js';
 import { test, expect } from 'vitest';
-import { addSerializers } from './ast-serializer.js';
+import addSerializers from './ast-serializer.js';
 
 const AzParser = Parser.extend(acornAz());
 const parse = code => AzParser.parse(code, {
@@ -11,8 +11,7 @@ const parse = code => AzParser.parse(code, {
 
 test('normal template still works', () => {
     const code = '`hello ${name} from ${"world"} & ${x + y}`';
-    const ast = parse(code); //.body[0].expression;
-    
+    const ast = parse(code);
     addSerializers(expect);
 
     expect(ast).toMatchInlineSnapshot(`
