@@ -2,7 +2,7 @@
 import { Parser } from 'acorn';
 import acornAz from './acorn-az.js';
 import { test, expect } from 'vitest';
-import addSerializers from './ast-serializer.js';
+import addSerializers from './ast-serializers.js';
 
 const AzParser = Parser.extend(acornAz());
 const parse = code => AzParser.parse(code, {
