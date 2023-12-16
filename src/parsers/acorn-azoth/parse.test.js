@@ -6,12 +6,16 @@ import addSerializers from './ast-serializers.js';
 import '../../utils/code-matchers.js';
 
 const AzParser = Parser.extend(acornAz());
-const parse = code => {
-    if(code?.toCode) code = code.toBody();
-    return AzParser.parse(code, {
+
+function parse(code) {
+    if(code.toBody) code = code.toBody();
+    const ast = AzParser.parse(code, {
         ecmaVersion: 'latest',
-    }).body[0].expression;
-};
+    });
+  
+    // remove preamble nodes
+    return ast.body[0].expression;
+}
 
 addSerializers(expect, { printLog: false });
 
@@ -21,11 +25,11 @@ test('normal template literal', () => {
     };
 
     expect(parse(code)).toMatchInlineSnapshot(`
-      TemplateLiteral
-        expressions [
-          place
+      TemplateLiteral 
+        expressions: [
+          Identifier name='place'
         ]
-        quasis [
+        quasis: [
           'hello '
           ''
         ]
@@ -38,18 +42,25 @@ test('azoth template literal', () => {
     };
 
     expect(parse(code)).toMatchInlineSnapshot(`
-      AzothTemplate
-        template TemplateLiteral
-          expressions [
-           \${  place
-             {  x + y
-            #{  dom
-          ]
-          quasis [
+      AzothTemplate 
+        template TemplateLiteral 
+          quasis: [
             'hello '
             ' '
             ' '
             ''
+          ]
+          bindings: [
+      '\${'
+      '{'
+      '#{'
+          ]
+          expressions: [
+            Identifier name='place'
+            BinaryExpression operator='+'
+              left Identifier name='x',
+              right Identifier name='y'
+            Identifier name='dom'
           ]
     `);
 });

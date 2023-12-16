@@ -16,4 +16,8 @@
         "x**/node_modules/**"
     ],
     "deno.enable": false,
+    "typescript.format.enable": false,
+    "javascript.format.enable": true,
+    "javascript.suggestionActions.enabled": true,
+    "javascript.validate.enable": false,
 }

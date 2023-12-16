@@ -1,194 +1,220 @@
 import { Node } from 'acorn';
 import { generate } from 'astring';
 
-class CodeExpression {
-    constructor(expr, binding, config, indentation) {
-        const code = generate(expr);
-        const lines = code.split('\n');
-        let [firstLine] = lines;
-        if(lines.length > 1) firstLine += ` ...+${lines.length - 1}`;
-        let prefix = config.indent;
-        if(binding) {
-            if(binding === '#{') prefix = '  ' + binding;
-            else if(binding === '{') prefix = '   ' + binding;
-            // ${ outputs escaped as \${ so no adjustment
-            else prefix = ' ' + binding;
-            firstLine = `${prefix}  ${firstLine}`;
-        }
-        else {
-            firstLine = `${prefix}${firstLine}`;
-        }
+// class CodeExpression {
+//     constructor(expr, binding, config, indentation) {
+//         const code = generate(expr);
+//         const lines = code.split('\n');
+//         let [firstLine] = lines;
+//         if(lines.length > 1) firstLine += ` ...+${lines.length - 1}`;
+//         let prefix = config.indent;
+//         if(binding) {
+//             if(binding === '#{') prefix = '  ' + binding;
+//             else if(binding === '{') prefix = '   ' + binding;
+//             // ${ outputs escaped as \${ so no adjustment
+//             else prefix = ' ' + binding;
+//             firstLine = `${prefix}  ${firstLine}`;
+//         }
+//         else {
+//             firstLine = `${prefix}${firstLine}`;
+//         }
 
         
-        this.code = firstLine;
-    }
-}
+//         this.code = firstLine;
+//     }
+// }
 
-function serializeCodeExpr({ code }, config, indentation) {
-    return `${indentation.slice(0, -config.indent.length)}${code}`;
-}
+// function serializeCodeExpr({ code }, config, indentation) {
+//     return `${indentation.slice(0, -config.indent.length)}${code}`;
+// }
 
-// Type tests
-const instanceCheck = Constructor => val => val instanceof Constructor;
-const isNode = instanceCheck(Node);
-const isCodeExpr = instanceCheck(CodeExpression);
-const testNodeType = type => val => isNode(val) && val.type === type;
-const isArray = Array.isArray;
-const pojoProto = Object.getPrototypeOf({});
-const isPojo = val => {
-    if(!val || typeof val !== 'object') return false;
-    return Object.getPrototypeOf(val) === pojoProto;
-};
+
+// const pojoProto = Object.getPrototypeOf({});
+// const isPojo = val => {
+//     if(!val || typeof val !== 'object') return false;
+//     return Object.getPrototypeOf(val) === pojoProto;
+// };
 
 //serializers
-export const pojoSerializer = {
-    name: 'pojo',
-    test: isPojo,
-    serialize: JSON.stringify
+// export const pojoSerializer = {
+//     name: 'pojo',
+//     test: isPojo,
+//     serialize: JSON.stringify
+// };
+
+export const string = {
+    name: 'string',
+    test: s => typeof s === 'string',
+    serialize(string, config, indentation, depth, refs, printer) {
+        return `'${string}'`;
+    },
 };
 
-export const arraySerializer = {
+export const templateElement = {
+    name: 'tmplEl',
+    test: val => node.test(val) && val.type === 'TemplateElement',
+    serialize({ type, value }, config, indentation) {
+        return `${indentation}'${value.raw.replaceAll('\n', '⏎')}'`;
+    },
+};
+
+export const array = {
     name: 'array',
-    test: isArray,
-    serialize: serializeArray,
-};
-
-export const nodeSerializer = { 
-    name: 'node',
-    test: isNode,
-    serialize: serializeNode, 
-};
-
-export const tmplElSerializer = {
-    name: 'tmpEl',
-    test: testNodeType('TemplateElement'),
-    serialize: serializeTmplEl
-};
-
-export const tmplLitSerializer = {
-    name: 'tmpLit',
-    test: testNodeType('TemplateLiteral'),
-    serialize: serializeTmplLit
-};
-
-export const codeExprSerializer = {
-    name: 'code',
-    test: isCodeExpr,
-    serialize: serializeCodeExpr
-};
-
-// order matters, pretty-format tests bottom up
-const serializers = [
-    pojoSerializer,
-    arraySerializer,
-    nodeSerializer,
-    tmplLitSerializer,
-    tmplElSerializer,
-    codeExprSerializer,
-];
-
-export default function addSerializers(expect, { printLog = false } = {}) {
-    serializers.forEach(s => {
-        if(printLog) s = wrap(s);
-        expect.addSnapshotSerializer(s);
-    });
-}
-
-const excludeKeys = new Set(['type', 'sourceType', 'start', 'end']);
-
-function bucketChildren(node) {
-    const props = [], nodes = [], arrays = [];
-    for(const entry of Object.entries(node)){
-        const [key, val] = entry;        
-        const bucket = isNode(val) ? nodes : (isArray(val) ? arrays : props);
-        bucket.push(entry);
-    }
-    return { props, nodes, arrays };
-}
-
-export function serializeNode(node, config, indentation, depth, refs, printer) {
-    const buckets = bucketChildren(node);
-    return printNode(buckets, node, config, indentation, depth, refs, printer);      
-} 
-
-function printNode(buckets, node, config, indentation, depth, refs, printer) {
-    const { props, nodes, arrays } = buckets;
-    const childIndent = indentation + config.indent;
+    test: Array.isArray,
+    serialize(array, config, indentation, depth, refs, printer) {
+        if(!array.length) return '[]';
     
-    let out = '';
-    out += printProps(props, node, config, indentation, depth, refs, printer);
-    out += printNodeProps(nodes, config, childIndent, depth, refs, printer);
-    out += printArrays(node, arrays, config, childIndent, depth, refs, printer);
+        const childIndentation = indentation + config.indent;
+        return `[\n${array
+            .map(each => printer(each, config, childIndentation, depth, refs))
+            .join('\n')
+        }\n${indentation}]`;
+    },
+};
+
+export const object = {
+    name: 'object',
+    test: o => !!o && typeof o === 'object',
+    serialize(obj, config, indentation, depth, refs, printer) {
+        const buckets = bucketEntries(obj);
+
+        let out = `${indentation}${obj.constructor.name}`;
+        const childIndent = indentation + config.indent;
+        
+        const exclude = config.excludeKeys;
+        config.excludeKeys = false;
+        out += printBuckets(buckets, config, childIndent, depth, refs, printer);
+        config.excludeKeys = exclude;
+
+        return out;
+    },
+};
+
+export const node = { 
+    name: 'node',
+    test: val => (val instanceof Node),
+    serialize(node, config, indentation, depth, refs, printer) {
+        const data = { 
+            type: node.type, 
+            buckets: bucketEntries(node) 
+        };
+        return printNode(data, config, indentation, depth, refs, printer);
+    },
+};
+
+// export const templateLiteral = {
+//     name: 'tmplLit',
+//     test: val => node.test(val) && val.type === 'TemplateLiteral',
+//     serialize(node, config, indentation, depth, refs, printer) {
+//         const buckets = bucketEntries(node);
+//         const exprEntry = buckets.arrays.find(([key]) => key === 'expressions');
+//         const bindEntry = buckets.arrays.find(([key]) => key === 'bindings');
+//         const bindings = bindEntry?.[1]; 
+//         // if(exprEntry) {
+//         //     exprEntry[1] = exprEntry[1].map((expr, i) => {
+//         //         const binding = bindings ? bindings[i] : undefined;
+//         //         return new CodeExpression(expr, binding, config, indentation);
+//         //     });
+//         // }
+            
+//         return printNode(({ type: node.type, buckets }, config, indentation, depth, refs, printer));      
+//     }
+// };
+
+
+function printNode({ type, buckets }, config, indentation, depth, refs, printer) {
+    let out = `${indentation}${type}`;
+    buckets.primitives = buckets.primitives.filter(([key]) => key !== 'type');
+
+    const childIndent = indentation + config.indent;
+    const exclude = config.excludeKeys;
+    config.excludeKeys = new Set(['type', 'sourceType', 'start', 'end']);
+    out += printBuckets(buckets, config, childIndent, depth, refs, printer);
+    config.excludeKeys = exclude;
+
+    delete config.excludeKeys;
     return out;
 }
 
-function printArrays(node, arrays, config, indentation, depth, refs, printer) {
-    const printArray = arr => printer(arr, config, indentation, depth, refs);
-    
-    // hacky fix for not showing bindings on template literals
-    let filtered = arrays;
-    if(node.type === 'TemplateLiteral') {
-        filtered = arrays.filter(([key]) => key !== 'bindings');
+function bucketEntries(obj) {
+    const objects = [], arrays = [], primitives = [];
+    for(const entry of Object.entries(obj)){
+        const [, val] = entry;        
+        const bucket = array.test(val) ? arrays : (object.test(val) ? objects : primitives);
+        bucket.push(entry);
     }
-
-    return filtered.map(([key, val]) => {
-        let out = `\n${indentation}${key} [`;
-        const printedArray = printArray(val);
-        if(printedArray) {
-            out += `\n${printedArray}\n${indentation}`;
-        }
-        out += ']';
-        return out;
-    }).join('');
+    return { objects, arrays, primitives };
 }
 
-function printNodeProps(nodes, config, indentation, depth, refs, printer) {
-    const printNode = node => printer(node, config, indentation, depth, refs);
-    return nodes.map(([key, val]) => {
+function printBuckets({ primitives, objects, arrays, }, config, indentation, depth, refs, printer) {
+    return [
+        printPrimitives(primitives, config, '', depth, refs, printer),
+        printObjects(objects, config, indentation, depth, refs, printer),
+        printChildArrays(arrays, config, indentation, depth, refs, printer),
+    ].join('');
+}
+
+function printPrimitives(primitives, config, indentation, depth, refs, printer) {
+    if(!primitives.length) return '';
+
+    if(config.excludeKeys) {
+        primitives = primitives.filter(([key]) => !config.excludeKeys.has(key));
+    }
+    
+    const printProp = val => printer(val, config, '', depth, refs);
+    const formatted = ' ' + primitives
+        .map(([key, val]) => `${key}=${printProp(val)}`)
+        .join(' ');
+
+    return formatted;
+}
+
+function printObjects(objects, config, indentation, depth, refs, printer) {
+    if(!objects.length) return '';
+
+    const printNode = object => printer(object, config, indentation, depth, refs);
+    return objects.map(([key, val]) => {
         const pn = printNode(val).trimStart();
         return `\n${indentation}${key} ${pn}`;
     });
 }
 
-function printProps(props, node, config, indentation, depth, refs, printer) {
-    const printProp = val => printer(val, config, '', depth, refs);
-    const formatted = props
-        .filter(([key]) => !excludeKeys.has(key))
-        .map(([key, val]) => ` ${key}: ${printProp(val)}`)
-        .join(',');
-    return `${indentation}${node.type}${formatted}`;
+function printChildArrays(arrays, config, indentation, depth, refs, printer) {
+    if(!arrays.length) return '';
+
+    const printArray = array => printer(array, config, indentation, depth, refs);
+    return arrays
+        .map(([key, val]) => `\n${indentation}${key}: ${printArray(val)}`)
+        .join('');
 }
 
-function serializeArray(array, config, indentation, depth, refs, printer) {
-    if(!array?.length) return '';
+// export const codeExprSerializer = {
+//     name: 'code',
+//     test: isCodeExpr,
+//     serialize: serializeCodeExpr
+// };
 
-    indentation += config.indent;
-    return array.map(each => {
-        return printer(each, config, indentation, depth, refs);
-    }).join('\n');
-}
+// order matters, pretty-format tests bottom up
+const serializers = [
+    // pojoSerializer,
+    object,
+    node,
+    templateElement,
+    array,
+    string,
+    // tmplLitSerializer,
+    // codeExprSerializer,
+];
 
-function serializeTmplEl({ type, value }, config, indentation) {
-    return `${indentation}'${value.raw.replaceAll('\n', '⏎')}'`;
-}
-
-function serializeTmplLit(node, config, indentation, depth, refs, printer) {
-    const buckets = bucketChildren(node);
-    const exprEntry = buckets.arrays.find(([key]) => key === 'expressions');
-    const bindEntry = buckets.arrays.find(([key]) => key === 'bindings');
-    const bindings = bindEntry?.[1]; 
-    if(exprEntry) {
-        exprEntry[1] = exprEntry[1].map((expr, i) => {
-            const binding = bindings ? bindings[i] : undefined;
-            return new CodeExpression(expr, binding, config, indentation);
-        });
-    }
-    
-    return printNode(buckets, node, config, indentation, depth, refs, printer);      
+export default function addSerializers(expect, { log = false } = {}) {
+    serializers.forEach(s => {
+        if(log) s = wrap(s);
+        expect.addSnapshotSerializer(s);
+    });
 }
 
 const log = (type, name = '', val, result = '') => {
-    let displayValue = isArray(val) ? `[${'.'.repeat(val.length)}]` : (val?.type || val);
+    let displayValue = Array.isArray(val) ? `[${'.'.repeat(val.length)}]` : (val?.type || val);
     // eslint-disable-next-line no-console
     console.log(
         type.padEnd(7, ' '), 
@@ -205,7 +231,7 @@ const logSerialize = (name, val) => {
 };
 
 let count = 0;
-function wrap({ name = `s${count++}`, test, serialize }) {
+function wrap({ test, serialize, name = serialize.name }) {
     return {
         test(val) {
             const pass = test(val);
