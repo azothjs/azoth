@@ -15,7 +15,7 @@ const parse = code => {
 
 addSerializers(expect, { printLog: false });
 
-test('normal template', () => {
+test('normal template literal', () => {
     const code = () => {
         `hello ${place}`;
     };
@@ -32,7 +32,7 @@ test('normal template', () => {
     `);
 });
 
-test('azoth template', () => {
+test('azoth template literal', () => {
     const code = () => {
         _`hello ${place} {x + y} #{dom}`;
     };
