@@ -1,7 +1,29 @@
 import { Node } from 'acorn';
+import { generate } from 'astring';
+
+function formatMultiline(text) {
+    const lines = text.split('\n');
+    return lines[0] + lines.length > 1 ? '...' : '';
+}
+class CodeExpression {
+    constructor(expr) {
+        const code = generate(expr);
+        const lines = code.split('\n');
+        let [firstLine] = lines;
+        if(lines.length > 1) firstLine += ` ...+${lines.length - 1}`;
+        this.code = firstLine ;
+    }
+}
+
+function serializeCodeExpr({ code }, config, indentation) {
+    return `${indentation + config.indent}${code}`;
+}
 
 // Type tests
-const isAstNode = val => val instanceof Node;
+const instanceCheck = Constructor => val => val instanceof Constructor;
+const isNode = instanceCheck(Node);
+const isCodeExpr = instanceCheck(CodeExpression);
+const testNodeType = type => val => isNode(val) && val.type === type;
 const isArray = Array.isArray;
 const pojoProto = Object.getPrototypeOf({});
 const isPojo = val => {
@@ -24,14 +46,26 @@ export const arraySerializer = {
 
 export const nodeSerializer = { 
     name: 'node',
-    test: isAstNode,
+    test: isNode,
     serialize: serializeNode, 
 };
 
 export const tmplElSerializer = {
     name: 'tmpEl',
-    test: val => isAstNode(val) && val.type === 'TemplateElement',
+    test: testNodeType('TemplateElement'),
     serialize: serializeTmplEl
+};
+
+export const tmplLitSerializer = {
+    name: 'tmpLit',
+    test: testNodeType('TemplateLiteral'),
+    serialize: serializeTmplLit
+};
+
+export const codeExprSerializer = {
+    name: 'code',
+    test: isCodeExpr,
+    serialize: serializeCodeExpr
 };
 
 // order matters, pretty-format tests bottom up
@@ -39,7 +73,9 @@ const serializers = [
     pojoSerializer,
     arraySerializer,
     nodeSerializer,
-    tmplElSerializer
+    tmplLitSerializer,
+    tmplElSerializer,
+    codeExprSerializer,
 ];
 
 export default function addSerializers(expect, { printLog = false } = {}) {
@@ -55,16 +91,20 @@ function bucketChildren(node) {
     const props = [], nodes = [], arrays = [];
     for(const entry of Object.entries(node)){
         const [, val] = entry;
-        const bucket = isAstNode(val) ? nodes : (isArray(val) ? arrays : props);
+        const bucket = isNode(val) ? nodes : (isArray(val) ? arrays : props);
         bucket.push(entry);
     }
     return { props, nodes, arrays };
 }
 
 export function serializeNode(node, config, indentation, depth, refs, printer) {
-    // Bucket [key, value] entries by kind of child
-    const { props, nodes, arrays } = bucketChildren(node);
+    const buckets = bucketChildren(node);
+    return printNode(buckets, node, config, indentation, depth, refs, printer);      
+} 
 
+function printNode(buckets, node, config, indentation, depth, refs, printer) {
+    const { props, nodes, arrays } = buckets;
+    
     let out = '';
 
     const printProp = val => printer(val, config, '', depth, refs);
@@ -76,25 +116,24 @@ export function serializeNode(node, config, indentation, depth, refs, printer) {
     const childIndent = indentation + config.indent;
 
     const printNode = node => printer(node, config, childIndent, depth, refs);
-    out += nodes.map(([key, val]) => { 
+    out += nodes.map(([key, val]) => {
         const pn = printNode(val).trimStart();
-        let out = `\n${childIndent}${key}: ${pn}`;
+        let out = `\n${childIndent}${key} ${pn}`;
         return out;
     });
-            
+
     const printArray = arr => printer(arr, config, childIndent, depth, refs);
     out += arrays.map(([key, val]) => {
-        let out = `\n${childIndent}${key}[`;
+        let out = `\n${childIndent}${key} [`;
         const printedArray = printArray(val);
         if(printedArray) {
-            out += `\n${printedArray}\n${childIndent}`; 
+            out += `\n${printedArray}\n${childIndent}`;
         }
         out += ']';
         return out;
     }).join('');
-        
     return out;
-} 
+}
 
 function serializeArray(array, config, indentation, depth, refs, printer) {
     if(!array?.length) return '';
@@ -106,15 +145,26 @@ function serializeArray(array, config, indentation, depth, refs, printer) {
 }
 
 function serializeTmplEl({ type, value }, config, indentation) {
-    return `${indentation}${type} '${value.raw}'`;
+    return `${indentation} '${value.raw.replaceAll('\n', '⏎')}'`;
 }
 
+function serializeTmplLit(node, config, indentation, depth, refs, printer) {
+    const buckets = bucketChildren(node);
+    const entry = buckets.arrays.find(([key]) => key === 'expressions');
+    if(entry) {
+        entry[1] = entry[1].map(expr => {
+            return new CodeExpression(expr, indentation, config.indent);
+        });
+    }
+    
+    return printNode(buckets, node, config, indentation, depth, refs, printer);      
+}
 
 const log = (type, name = '', val, result = '') => {
     let displayValue = isArray(val) ? `[${'.'.repeat(val.length)}]` : (val?.type || val);
     // eslint-disable-next-line no-console
     console.log(
-        type.padEnd(6, ' '), 
+        type.padEnd(7, ' '), 
         name.padEnd(6, ' '), 
         result.toString().padEnd(6, ' '), 
         displayValue
