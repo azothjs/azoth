@@ -1,46 +1,46 @@
-/* eslint-disable no-useless-escape */
+/* eslint-disable no-undef */
 import { Parser } from 'acorn';
 import { test, expect } from 'vitest';
 import acornAz from './acorn-az.js';
+import addSerializers from './ast-serializers.js';
+import '../../utils/code-matchers.js';
 
 const AzParser = Parser.extend(acornAz());
-const parse = code => AzParser.parse(code, {
-    ecmaVersion: 'latest',
+const parse = code => {
+    if(code?.toCode) code = code.toBody();
+    return AzParser.parse(code, {
+        ecmaVersion: 'latest',
+    }).body[0].expression;
+};
+
+addSerializers(expect, { printLog: false });
+
+test('normal template with static', () => {
+    const code = () => {
+        `hello`;
+    };
+
+    expect(parse(code)).toMatchInlineSnapshot(`
+      TemplateLiteral
+        expressions []
+        quasis [
+           'hello'
+        ]
+    `);
 });
 
-test('normal template still works', () => {
-    const code = '``';
+test('azoth template with static', () => {
+    const code = () => {
+        _`hello`;
+    };
+
     expect(parse(code)).toMatchInlineSnapshot(`
-      Node {
-        "body": [
-          Node {
-            "end": 2,
-            "expression": Node {
-              "end": 2,
-              "expressions": [],
-              "quasis": [
-                Node {
-                  "end": 1,
-                  "start": 1,
-                  "tail": true,
-                  "type": "TemplateElement",
-                  "value": {
-                    "cooked": "",
-                    "raw": "",
-                  },
-                },
-              ],
-              "start": 0,
-              "type": "TemplateLiteral",
-            },
-            "start": 0,
-            "type": "ExpressionStatement",
-          },
-        ],
-        "end": 2,
-        "sourceType": "script",
-        "start": 0,
-        "type": "Program",
-      }
+      TaggedTemplateExpression
+        tag Identifier name: "_",
+        quasi TemplateLiteral
+          expressions []
+          quasis [
+             'hello'
+          ]
     `);
 });
