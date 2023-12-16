@@ -3,7 +3,7 @@ import { Parser } from 'acorn';
 import { test, expect } from 'vitest';
 import acornAz from './acorn-az.js';
 
-const JsxParser = Parser.extend(acornAz());
+const JsxParser = Parser.extend(acornAz({ sigil: '_' }));
 const tokenize = code => [
     ...JsxParser.tokenizer(code, {
         ecmaVersion: 'latest',
@@ -25,8 +25,8 @@ test('normal template still works', () => {
     `);
 });
 
-test('tokenize "@" as decorator', () => {
-    const tokens = tokenize('@`<a>...</a>`');
+test('tokenize SIGIL as "SIGIL`"', () => {
+    const tokens = tokenize('_`<a>...</a>`');
     expect(tokens).toMatchInlineSnapshot(`
       [
         "@\`: ",
@@ -36,16 +36,20 @@ test('tokenize "@" as decorator', () => {
     `);
 });
 
-test('"@`" is atomic, "@" itself has no special meaning', () => {
-    expect(() => {
-        tokenize('const t = @bad`hello world`');
-    }).toThrowErrorMatchingInlineSnapshot(
-        `[SyntaxError: Unexpected character '@' (1:10)]`
-    );
+test('"_`" is atomic token, "_" itself has no special meaning', () => {
+    const tokens = tokenize('_ `hello`');
+    expect(tokens).toMatchInlineSnapshot(`
+      [
+        "name: _",
+        "\`: ",
+        "template: hello",
+        "\`: ",
+      ]
+    `);
 });
 
 test('tokenize "${text} #{dom} {smart}" as interpolators', () => {
-    const tokens = tokenize('@`<div>${text} #{dom} {smart}</div>`');
+    const tokens = tokenize('_`<div>${text} #{dom} {smart}</div>`');
     expect(tokens).toMatchInlineSnapshot(`
       [
         "@\`: ",
@@ -68,7 +72,7 @@ test('tokenize "${text} #{dom} {smart}" as interpolators', () => {
 });
 
 test('"{" can be escaped', () => {
-    const tokens = tokenize('@`hello \\{name}!`');
+    const tokens = tokenize('_`hello \\{name}!`');
     expect(tokens).toMatchInlineSnapshot(`
       [
         "@\`: ",
@@ -95,7 +99,7 @@ test('"{" and "#{" not recognized outside of azoth templates', () => {
 
 test('invalid template still reads on invalid escape sequence', () => {
     
-    const tokens = tokenize('@`a\\uone${1}a\\utwo#{2}a\\uthree{3}a\\ufour`');
+    const tokens = tokenize('_`a\\uone${1}a\\utwo#{2}a\\uthree{3}a\\ufour`');
   
     expect(tokens).toMatchInlineSnapshot(`
       [

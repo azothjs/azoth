@@ -1,22 +1,31 @@
 import { Node } from 'acorn';
 import { generate } from 'astring';
 
-function formatMultiline(text) {
-    const lines = text.split('\n');
-    return lines[0] + lines.length > 1 ? '...' : '';
-}
 class CodeExpression {
-    constructor(expr) {
+    constructor(expr, binding, config, indentation) {
         const code = generate(expr);
         const lines = code.split('\n');
         let [firstLine] = lines;
         if(lines.length > 1) firstLine += ` ...+${lines.length - 1}`;
-        this.code = firstLine ;
+        let prefix = config.indent;
+        if(binding) {
+            if(binding === '#{') prefix = '  ' + binding;
+            else if(binding === '{') prefix = '   ' + binding;
+            // ${ outputs escaped as \${ so no adjustment
+            else prefix = ' ' + binding;
+            firstLine = `${prefix}  ${firstLine}`;
+        }
+        else {
+            firstLine = `${prefix}${firstLine}`;
+        }
+
+        
+        this.code = firstLine;
     }
 }
 
 function serializeCodeExpr({ code }, config, indentation) {
-    return `${indentation + config.indent}${code}`;
+    return `${indentation.slice(0, -config.indent.length)}${code}`;
 }
 
 // Type tests
@@ -90,7 +99,7 @@ const excludeKeys = new Set(['type', 'sourceType', 'start', 'end']);
 function bucketChildren(node) {
     const props = [], nodes = [], arrays = [];
     for(const entry of Object.entries(node)){
-        const [, val] = entry;
+        const [key, val] = entry;        
         const bucket = isNode(val) ? nodes : (isArray(val) ? arrays : props);
         bucket.push(entry);
     }
@@ -104,35 +113,50 @@ export function serializeNode(node, config, indentation, depth, refs, printer) {
 
 function printNode(buckets, node, config, indentation, depth, refs, printer) {
     const { props, nodes, arrays } = buckets;
+    const childIndent = indentation + config.indent;
     
     let out = '';
+    out += printProps(props, node, config, indentation, depth, refs, printer);
+    out += printNodeProps(nodes, config, childIndent, depth, refs, printer);
+    out += printArrays(node, arrays, config, childIndent, depth, refs, printer);
+    return out;
+}
 
+function printArrays(node, arrays, config, indentation, depth, refs, printer) {
+    const printArray = arr => printer(arr, config, indentation, depth, refs);
+    
+    // hacky fix for not showing bindings on template literals
+    let filtered = arrays;
+    if(node.type === 'TemplateLiteral') {
+        filtered = arrays.filter(([key]) => key !== 'bindings');
+    }
+
+    return filtered.map(([key, val]) => {
+        let out = `\n${indentation}${key} [`;
+        const printedArray = printArray(val);
+        if(printedArray) {
+            out += `\n${printedArray}\n${indentation}`;
+        }
+        out += ']';
+        return out;
+    }).join('');
+}
+
+function printNodeProps(nodes, config, indentation, depth, refs, printer) {
+    const printNode = node => printer(node, config, indentation, depth, refs);
+    return nodes.map(([key, val]) => {
+        const pn = printNode(val).trimStart();
+        return `\n${indentation}${key} ${pn}`;
+    });
+}
+
+function printProps(props, node, config, indentation, depth, refs, printer) {
     const printProp = val => printer(val, config, '', depth, refs);
     const formatted = props
         .filter(([key]) => !excludeKeys.has(key))
         .map(([key, val]) => ` ${key}: ${printProp(val)}`)
         .join(',');
-    out += `${indentation}${node.type}${formatted}`;
-    const childIndent = indentation + config.indent;
-
-    const printNode = node => printer(node, config, childIndent, depth, refs);
-    out += nodes.map(([key, val]) => {
-        const pn = printNode(val).trimStart();
-        let out = `\n${childIndent}${key} ${pn}`;
-        return out;
-    });
-
-    const printArray = arr => printer(arr, config, childIndent, depth, refs);
-    out += arrays.map(([key, val]) => {
-        let out = `\n${childIndent}${key} [`;
-        const printedArray = printArray(val);
-        if(printedArray) {
-            out += `\n${printedArray}\n${childIndent}`;
-        }
-        out += ']';
-        return out;
-    }).join('');
-    return out;
+    return `${indentation}${node.type}${formatted}`;
 }
 
 function serializeArray(array, config, indentation, depth, refs, printer) {
@@ -145,15 +169,18 @@ function serializeArray(array, config, indentation, depth, refs, printer) {
 }
 
 function serializeTmplEl({ type, value }, config, indentation) {
-    return `${indentation} '${value.raw.replaceAll('\n', '⏎')}'`;
+    return `${indentation}'${value.raw.replaceAll('\n', '⏎')}'`;
 }
 
 function serializeTmplLit(node, config, indentation, depth, refs, printer) {
     const buckets = bucketChildren(node);
-    const entry = buckets.arrays.find(([key]) => key === 'expressions');
-    if(entry) {
-        entry[1] = entry[1].map(expr => {
-            return new CodeExpression(expr, indentation, config.indent);
+    const exprEntry = buckets.arrays.find(([key]) => key === 'expressions');
+    const bindEntry = buckets.arrays.find(([key]) => key === 'bindings');
+    const bindings = bindEntry?.[1]; 
+    if(exprEntry) {
+        exprEntry[1] = exprEntry[1].map((expr, i) => {
+            const binding = bindings ? bindings[i] : undefined;
+            return new CodeExpression(expr, binding, config, indentation);
         });
     }
     

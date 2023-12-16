@@ -23,8 +23,8 @@ function createAzTokens(acorn) {
 
     /* new azoth token types */
     // azoth @` tagged template
-    const atBackQuote = new TokenType('@`');
-    atBackQuote.updateContext = function() {
+    const sigilQuote = new TokenType('@`');
+    sigilQuote.updateContext = function() {
         this.context.push(az_tmpl);
     };
     // extend backQuote.updateContext to close @` as well
@@ -48,7 +48,7 @@ function createAzTokens(acorn) {
             az_tmpl
         },
         tokTypes: {
-            atBackQuote,
+            sigilQuote,
             hashBraceL
         }
     };

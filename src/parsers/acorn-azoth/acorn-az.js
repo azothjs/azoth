@@ -19,15 +19,22 @@ export default function acornAzFactoryConfig(options) {
     };
 }
 
+const DEFAULT_SIGIL = '_';
+
 function plugin(options, Parser) {
+    const SIGIL = (options?.sigil ?? '_')[0];
+    const SIGIL_CODE = SIGIL.charCodeAt(0);
+    
     const acorn = Parser.acorn;
     const acornAz = getAzTokens(acorn);
 
     const tt = acorn.tokTypes;
-    const { atBackQuote, hashBraceL } = acornAz.tokTypes;
+    const { sigilQuote, hashBraceL } = acornAz.tokTypes;
     const { az_tmpl } = acornAz.tokContexts;
 
     const isNewLine = acorn.isNewLine;
+
+    const lBraces = new Set([hashBraceL, tt.dollarBraceL, tt.braceL]);
 
     const TMPL_END = {
         '96': tt.backQuote,
@@ -38,19 +45,22 @@ function plugin(options, Parser) {
      
     return class extends Parser {
         // Expose azoth `tokTypes` and `tokContexts` to other plugins.
+        // Cause that's what the jsx plugin did, ;)
         static get acornAz() {
             return acornAz;
         }
+
+        /* Tokenization Methods */
 
         static tokenizer(input, options) {
             return new this(options, input);
         }
 
         readToken(code) {
-            // Azoth template : "@`"
-            if(code === 64 && this.input.charCodeAt(this.pos + 1) === 96) {
+            // Azoth template : SIGIL`
+            if(code === SIGIL_CODE && this.input.charCodeAt(this.pos + 1) === 96) {
                 this.pos += 2;
-                return this.finishToken(atBackQuote);
+                return this.finishToken(sigilQuote);
             }
             super.readToken(code);
         }
@@ -187,15 +197,49 @@ function plugin(options, Parser) {
             }
             this.raise(this.start, 'Unterminated template');
         };
+
+        /* Parsing Methods */
+        parseExprAtomDefault() {
+            if(this.type !== sigilQuote) {
+                return super.parseExprAtomDefault();
+            }
+
+            return this.parseAzothTemplate();
+        }
+
+        // copied from acorn "parseTemplate" in acorn
+        parseAzothTemplate() {
+            const azothNode = this.startNode();
+            const node = this.startNode();
+            this.next();
+
+            node.expressions = [];
+            node.bindings = [];
+            let curElt = this.parseTemplateElement({ isTagged : false });
+            node.quasis = [curElt];
+
+            while(!curElt.tail) {
+                if(this.type === tt.eof) this.raise(this.pos, 'Unterminated template literal');
+                
+                if(!lBraces.has(this.type)) {
+                    this.unexpected();
+                }
+                node.bindings.push(this.type.label);
+                
+                this.next();
+                node.expressions.push(this.parseExpression());
+                
+                this.expect(tt.braceR);
+                
+                node.quasis.push(curElt = this.parseTemplateElement({ isTagged : true }));
+            }
+
+            this.next();
+            this.finishNode(node, 'TemplateLiteral');
+            azothNode.template = node;
+            return this.finishNode(azothNode, 'AzothTemplate');
+
+        }
           
     };
-}
-
-
-// TODO: open issue on acorn for exporting utils
-function codePointToString(code) {
-    // UTF-16 Decoding
-    if(code <= 0xFFFF) return String.fromCharCode(code);
-    code -= 0x10000;
-    return String.fromCharCode((code >> 10) + 0xD800, (code & 1023) + 0xDC00);
 }

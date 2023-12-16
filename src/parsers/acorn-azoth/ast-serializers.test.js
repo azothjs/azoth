@@ -19,17 +19,17 @@ test('normal template still works', () => {
     expect(ast).toMatchInlineSnapshot(`
       TemplateLiteral
         expressions [
-            name
-            "world"
-            x + y
-            [1, 3, 4]
+          name
+          "world"
+          x + y
+          [1, 3, 4]
         ]
         quasis [
-           'hello ''
-           '' from '
-           ' & '
-           ' '
-           ''
+          'hello ''
+          '' from '
+          ' & '
+          ' '
+          ''
         ]
     `);
 });
@@ -46,11 +46,11 @@ test('multi line quasi and expression handling', () => {
     expect(ast).toMatchInlineSnapshot(`
       TemplateLiteral
         expressions [
-            (() => { ...+2
+          (() => { ...+2
         ]
         quasis [
-           '⏎        outer '
-           '!!!⏎    '
+          '⏎        outer '
+          '!!!⏎    '
         ]
     `);
 });

@@ -15,32 +15,41 @@ const parse = code => {
 
 addSerializers(expect, { printLog: false });
 
-test('normal template with static', () => {
+test('normal template', () => {
     const code = () => {
-        `hello`;
+        `hello ${place}`;
     };
 
     expect(parse(code)).toMatchInlineSnapshot(`
       TemplateLiteral
-        expressions []
+        expressions [
+          place
+        ]
         quasis [
-           'hello'
+          'hello '
+          ''
         ]
     `);
 });
 
-test('azoth template with static', () => {
+test('azoth template', () => {
     const code = () => {
-        _`hello`;
+        _`hello ${place} {x + y} #{dom}`;
     };
 
     expect(parse(code)).toMatchInlineSnapshot(`
-      TaggedTemplateExpression
-        tag Identifier name: "_",
-        quasi TemplateLiteral
-          expressions []
+      AzothTemplate
+        template TemplateLiteral
+          expressions [
+           \${  place
+             {  x + y
+            #{  dom
+          ]
           quasis [
-             'hello'
+            'hello '
+            ' '
+            ' '
+            ''
           ]
     `);
 });
