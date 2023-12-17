@@ -215,22 +215,27 @@ function plugin(options, Parser) {
 
             // asymmetrical first template element
             let curElt = this.parseTemplateElement({ isTagged : false });
+            
             node.quasis = [curElt];
             node.bindings = [];
-            node.expressions = [];
 
             while(!curElt.tail) {
                 if(this.type === tt.eof) this.raise(this.pos, 'Unterminated template literal');
                 // expect ${, #{, or {
                 if(!lBraces.has(this.type)) this.unexpected();
-                node.bindings.push(this.type.label);
+                const binding = this.startNode();
+                binding.binder = this.type.label;
+                node.bindings.push(binding);
+
                 this.next();
                 // ...expression ...
-                node.expressions.push(this.parseExpression());
+                binding.expression = this.parseExpression();
+                
                 // }
                 this.expect(tt.braceR);
+                this.finishNode(binding, 'AzothBinding');
                 
-                // template element
+                // next template element
                 node.quasis.push(curElt = this.parseTemplateElement({ isTagged : true }));
             }
 

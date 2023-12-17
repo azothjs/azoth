@@ -38,7 +38,7 @@ test('normal template literal', () => {
 
 test('azoth template literal', () => {
     const code = () => {
-        _`hello ${place} {x + y} #{dom}`;
+        _`hello ${place}, sum {x + y} blog #{dom}`;
     };
 
     expect(parse(code)).toMatchInlineSnapshot(`
@@ -46,21 +46,14 @@ test('azoth template literal', () => {
         template TemplateLiteral 
           quasis: [
             'hello '
-            ' '
-            ' '
+            ', sum '
+            ' blog '
             ''
           ]
           bindings: [
-      '\${'
-      '{'
-      '#{'
-          ]
-          expressions: [
-            Identifier name='place'
-            BinaryExpression operator='+'
-              left Identifier name='x',
-              right Identifier name='y'
-            Identifier name='dom'
+           \${ place
+             { x + y
+            #{ dom
           ]
     `);
 });

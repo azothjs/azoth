@@ -102,24 +102,35 @@ export const node = {
     },
 };
 
-// export const templateLiteral = {
-//     name: 'tmplLit',
-//     test: val => node.test(val) && val.type === 'TemplateLiteral',
-//     serialize(node, config, indentation, depth, refs, printer) {
-//         const buckets = bucketEntries(node);
-//         const exprEntry = buckets.arrays.find(([key]) => key === 'expressions');
-//         const bindEntry = buckets.arrays.find(([key]) => key === 'bindings');
-//         const bindings = bindEntry?.[1]; 
-//         // if(exprEntry) {
-//         //     exprEntry[1] = exprEntry[1].map((expr, i) => {
-//         //         const binding = bindings ? bindings[i] : undefined;
-//         //         return new CodeExpression(expr, binding, config, indentation);
-//         //     });
-//         // }
-            
-//         return printNode(({ type: node.type, buckets }, config, indentation, depth, refs, printer));      
-//     }
-// };
+export const binding = {
+    name: 'bind',
+    test: val => node.test(val) && val.type === 'AzothBinding',
+    serialize(binding, config, indentation, depth, refs, printer) {
+        const { binder, expression } = binding;
+
+        // binders right align visually
+        // $ gets escaped, ends up as \$ so back into prior indent
+        const indent = binder === '${' ? indentation.slice(0, -1) : indentation;
+
+        const lines = generate(expression).split('\n');
+        let [firstLine] = lines;
+        if(lines.length > 1) firstLine += ` ...+${lines.length - 1}`;
+
+        return `${indent}${binder.padStart(2, ' ')} ${firstLine}`;
+    }
+};
+
+// order matters, pretty-format tests bottom up
+const serializers = [
+    // pojoSerializer,
+    object,
+    node,
+    templateElement,
+    array,
+    string,
+    binding,
+    // codeExprSerializer,
+];
 
 
 function printNode({ type, buckets }, config, indentation, depth, refs, printer) {
@@ -194,17 +205,6 @@ function printChildArrays(arrays, config, indentation, depth, refs, printer) {
 //     serialize: serializeCodeExpr
 // };
 
-// order matters, pretty-format tests bottom up
-const serializers = [
-    // pojoSerializer,
-    object,
-    node,
-    templateElement,
-    array,
-    string,
-    // tmplLitSerializer,
-    // codeExprSerializer,
-];
 
 export default function addSerializers(expect, { log = false } = {}) {
     serializers.forEach(s => {
