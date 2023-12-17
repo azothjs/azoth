@@ -148,8 +148,8 @@ function printObjects(objects, config, indentation, depth, refs, printer) {
 
     const printNode = object => printer(object, config, indentation, depth, refs);
     return objects.map(([key, val]) => {
-        const pn = printNode(val).trimStart();
-        return `\n${indentation}${key} ${pn}`;
+        const printed = printNode(val).trimStart();
+        return `\n${indentation}${key} ${printed}`;
     });
 }
 
@@ -179,7 +179,6 @@ const logSerialize = (name, val) => {
     log('print', name, val);
 };
 
-let count = 0;
 function wrap({ test, serialize, name = serialize.name }) {
     return {
         test(val) {
