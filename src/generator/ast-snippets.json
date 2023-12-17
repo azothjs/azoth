@@ -1,0 +1,48 @@
+{
+  "type": "Program",
+  "start": 0,
+  "end": 40,
+  "body": [
+    {
+      "type": "VariableDeclaration",
+      "start": 0,
+      "end": 40,
+      "declarations": [
+        {
+          "type": "VariableDeclarator",
+          "start": 6,
+          "end": 39,
+          "id": {
+            "type": "Identifier",
+            "start": 6,
+            "end": 14,
+            "name": "renderer"
+          },
+          "init": {
+            "type": "CallExpression",
+            "start": 17,
+            "end": 39,
+            "callee": {
+              "type": "Identifier",
+              "start": 17,
+              "end": 31,
+              "name": "__makeTemplate"
+            },
+            "arguments": [
+              {
+                "type": "Literal",
+                "start": 32,
+                "end": 38,
+                "value": "html",
+                "raw": "'html'"
+              }
+            ],
+            "optional": false
+          }
+        }
+      ],
+      "kind": "const"
+    }
+  ],
+  "sourceType": "script"
+}

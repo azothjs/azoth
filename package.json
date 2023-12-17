@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint --ext js ./src",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest -u --ui"
   },
   "devDependencies": {
     "@vitest/ui": "^1.0.4",

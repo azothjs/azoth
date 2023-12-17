@@ -4,7 +4,7 @@ import voidElements from '../utils/void-elements.js';
 
 export function parse(ast) {
 
-    const { expressions, quasis } = ast.quasi;
+    const { quasis } = ast;
 
     const html = [];
 
@@ -21,17 +21,17 @@ export function parse(ast) {
     
     const handler = {
         onopentagname(name) {
-            console.log('onopentagname', name);
+            // console.log('onopentagname', name);
             closeOpenTag();
             elements.push({ name, inTagOpen: true });
             html.push(`<${name}`);
         },
         onattribute(name, value, quote) {
-            console.log('onattribute', name, value, quote);
+            // console.log('onattribute', name, value, quote);
             html.push(` ${name}="${value}"`);
         },
         onopentag(name, attributes, isImplied) {
-            console.log('onopentag', name, attributes, isImplied);
+            // console.log('onopentag', name, attributes, isImplied);
         },
         ontext(text) {
             if(html.length === 0) {
@@ -40,12 +40,12 @@ export function parse(ast) {
             
             closeOpenTag();
             
-            console.log('ontext >>' + text + '<<');
+            // console.log('ontext >>' + text + '<<');
 
             html.push(text);
         },
         onclosetag(name, isImplied) {
-            console.log('onclosetag', name, isImplied);
+            // console.log('onclosetag', name, isImplied);
             if(isImplied) {                
                 html.push(voidElements.has(name) ? '>' : '/>'); 
                 elements.pop();
@@ -56,7 +56,7 @@ export function parse(ast) {
             }
         },
         oncomment(comment) {
-            console.log('oncomment', comment);
+            // console.log('oncomment', comment);
         },
     };
 
@@ -66,14 +66,14 @@ export function parse(ast) {
         let html = quasi.value.raw;
         if(i === 0) html = smartTrimLeft(html);
         // last quasi (quasis length is one more than expressions)
-        if(i === expressions.length) html = smartTrimRight(html);
+        if(i === quasis.length - 1) html = smartTrimRight(html);
         
         parser.write(html);
         
-        const expression = expressions[i];
-        if(!expression) return;
+        // const expression = expressions[i];
+        // if(!expression) return;
 
-        parser.write('<text-node/>');
+        // parser.write('<text-node/>');
         
     });
 
