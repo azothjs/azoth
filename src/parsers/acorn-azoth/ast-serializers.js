@@ -1,46 +1,12 @@
 import { Node } from 'acorn';
 import { generate } from 'astring';
 
-// class CodeExpression {
-//     constructor(expr, binding, config, indentation) {
-//         const code = generate(expr);
-//         const lines = code.split('\n');
-//         let [firstLine] = lines;
-//         if(lines.length > 1) firstLine += ` ...+${lines.length - 1}`;
-//         let prefix = config.indent;
-//         if(binding) {
-//             if(binding === '#{') prefix = '  ' + binding;
-//             else if(binding === '{') prefix = '   ' + binding;
-//             // ${ outputs escaped as \${ so no adjustment
-//             else prefix = ' ' + binding;
-//             firstLine = `${prefix}  ${firstLine}`;
-//         }
-//         else {
-//             firstLine = `${prefix}${firstLine}`;
-//         }
-
-        
-//         this.code = firstLine;
-//     }
-// }
-
-// function serializeCodeExpr({ code }, config, indentation) {
-//     return `${indentation.slice(0, -config.indent.length)}${code}`;
-// }
-
-
-// const pojoProto = Object.getPrototypeOf({});
-// const isPojo = val => {
-//     if(!val || typeof val !== 'object') return false;
-//     return Object.getPrototypeOf(val) === pojoProto;
-// };
-
-//serializers
-// export const pojoSerializer = {
-//     name: 'pojo',
-//     test: isPojo,
-//     serialize: JSON.stringify
-// };
+export default function addSerializers(expect, { log = false } = {}) {
+    serializers.forEach(s => {
+        if(log) s = wrap(s);
+        expect.addSnapshotSerializer(s);
+    });
+}
 
 export const string = {
     name: 'string',
@@ -122,16 +88,23 @@ export const binding = {
 
 // order matters, pretty-format tests bottom up
 const serializers = [
-    // pojoSerializer,
     object,
     node,
     templateElement,
+    binding,
     array,
     string,
-    binding,
-    // codeExprSerializer,
 ];
 
+function bucketEntries(obj) {
+    const objects = [], arrays = [], primitives = [];
+    for(const entry of Object.entries(obj)){
+        const [, val] = entry;        
+        const bucket = array.test(val) ? arrays : (object.test(val) ? objects : primitives);
+        bucket.push(entry);
+    }
+    return { objects, arrays, primitives };
+}
 
 function printNode({ type, buckets }, config, indentation, depth, refs, printer) {
     let out = `${indentation}${type}`;
@@ -145,16 +118,6 @@ function printNode({ type, buckets }, config, indentation, depth, refs, printer)
 
     delete config.excludeKeys;
     return out;
-}
-
-function bucketEntries(obj) {
-    const objects = [], arrays = [], primitives = [];
-    for(const entry of Object.entries(obj)){
-        const [, val] = entry;        
-        const bucket = array.test(val) ? arrays : (object.test(val) ? objects : primitives);
-        bucket.push(entry);
-    }
-    return { objects, arrays, primitives };
 }
 
 function printBuckets({ primitives, objects, arrays, }, config, indentation, depth, refs, printer) {
@@ -197,20 +160,6 @@ function printChildArrays(arrays, config, indentation, depth, refs, printer) {
     return arrays
         .map(([key, val]) => `\n${indentation}${key}: ${printArray(val)}`)
         .join('');
-}
-
-// export const codeExprSerializer = {
-//     name: 'code',
-//     test: isCodeExpr,
-//     serialize: serializeCodeExpr
-// };
-
-
-export default function addSerializers(expect, { log = false } = {}) {
-    serializers.forEach(s => {
-        if(log) s = wrap(s);
-        expect.addSnapshotSerializer(s);
-    });
 }
 
 const log = (type, name = '', val, result = '') => {
