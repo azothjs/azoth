@@ -26,20 +26,24 @@ const azothGenerator = {
         const setIndent = () => indent = indent = state.indent.repeat(state.indentLevel);
         const removeIndent = () => (--state.indentLevel, setIndent());
 
-        state.write(`(() =>${state.lineEnd}`);
+        state.write(`(() => {${state.lineEnd}`);
         addIndent();
         
+        // renderer
         state.write(`${indent}const __renderer = __makeRenderer(\`${html}\`);${lE}`);
-        state.write(`${indent}const fn = () =>${lE}`);
+
+        // rendering function
+        state.write(`${indent}const fn = () => {${lE}`);
         addIndent();
-        state.write(`${indent}return __renderer();${lE}`);
-        
+        state.write(`${indent}return __renderer().__root;${lE}`);
         removeIndent();
         state.write(`${indent}};${lE}`);
 
+        state.write(`${indent}return fn;${lE}`);
+
         
         removeIndent();
-        state.write(`)()`);
+        state.write(`})()`);
         
     
     },

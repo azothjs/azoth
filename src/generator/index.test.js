@@ -33,12 +33,13 @@ it('generates from azoth ast static template', ({ expect }) => {
     }; 
 
     expect(transpile(code)).toMatchInlineSnapshot(`
-      "(() =>
+      "(() => {
         const __renderer = __makeRenderer(\`<p>hello</p>\`);
-        const fn = () =>
-          return __renderer();
+        const fn = () => {
+          return __renderer().__root;
         };
-      )();
+        return fn;
+      })();
       "
     `);
 });
