@@ -1,16 +1,16 @@
 import { GENERATOR, generate } from 'astring';
 import { parse as parseTemplate } from '../parsers/template-parser.js';
 
-export function azothGenerate(ast) {
+export function azothGenerate(ast, config) {
     const { ArrowFunctionExpression } = GENERATOR;
-
+    
     return generate(ast, {
+        ...config,
         generator: {
             ...GENERATOR,
             superArrowFunctionExpression: ArrowFunctionExpression,
             ...azothGenerator,
         },
-        // indent: '  '
     });
 }
 
@@ -18,6 +18,7 @@ const { ArrowFunctionExpression } = GENERATOR;
 
 const azothGenerator = {
     AzothTemplate(node, state) {
+        node.name = '_';
         const { html } = parseTemplate(node.template);
         const { lineEnd: lE, /*, writeComments */ } = state;
         
@@ -26,17 +27,24 @@ const azothGenerator = {
         const setIndent = () => indent = indent = state.indent.repeat(state.indentLevel);
         const removeIndent = () => (--state.indentLevel, setIndent());
 
-        state.write(`(() => {${state.lineEnd}`);
+        state.write(`(() => {${state.lineEnd}`, node);
         addIndent();
         
         // renderer
-        state.write(`${indent}const __renderer = __makeRenderer(\`${html}\`);${lE}`);
+        state.write(`${indent}const __renderer = __makeRenderer(`, node);
+        state.write(`\``, node.template);
+        // TODO: segment into template parts for source map
+        state.write(`${html}`);
+        state.write(`\``);
+        state.write(`);${lE}`);
 
         // rendering function
-        state.write(`${indent}const fn = () => {${lE}`);
-        addIndent();
-        state.write(`${indent}return __renderer().__root;${lE}`);
-        removeIndent();
+        state.write(`${indent}const fn = () => {${lE}`, node);
+        {
+            addIndent();
+            state.write(`${indent}return __renderer().__root;${lE}`, node);
+            removeIndent();
+        }       
         state.write(`${indent}};${lE}`);
 
         state.write(`${indent}return fn;${lE}`);

@@ -1,83 +1,166 @@
-import { Parser } from 'htmlparser2';
+import { Parser as HtmlParser } from 'htmlparser2';
 import { smartTrimLeft, smartTrimRight } from '../transformers/smart-trim.js';
 import voidElements from '../utils/void-elements.js';
 
-export function parse(ast) {
+export function parse(azNode) {
+    const { template } = azNode;
+    const { quasis, bindings } = template;
 
-    const { quasis } = ast;
+    // element context
+    let context = null;
+    const contextStack = [];
+    const peek = () => contextStack.at(-1); 
+    const addContext = (name) => {
+        const ctx = {
+            inTagOpen: true,
+            el: {
+                name,
+                childCount: 0
+            },
+            attrs: []
+        };
+        contextStack.push(ctx);
+        context = ctx; 
+    };
+    const removeContext = () => {
+        contextStack.pop();
+        context = contextStack.at(-1);
+    };
 
-    const html = [];
+    // add a root context for parsing ease
+    addContext('<>');
 
-    const elements = [];
-    const peek = () => elements.at(-1);
+    // html builder for current template element
+    let html = [];
+    let chunks = [];
+    const pushHtmlChunk = () => {
+        const chunk = html;
+        html = [];
+        if(chunk.length) chunks.push(chunk);
+        return chunk;
+    };
 
     const closeOpenTag = () => {
-        const curEl = peek();
-        if(curEl?.inTagOpen) {
+        if(attribute) addAttribute(attribute);
+
+        const curEl = peek();        
+        if(curEl.inTagOpen) {
             curEl.inTagOpen = false;
             html.push('>');
         }
     };
+
+    let attribute = null;
+    const addAttribute = () => {
+        const { name, value, quote } = attribute;
+        context.attrs.push(` ${name}=${quote}${value}${quote}`);
+        attribute = null;
+    };
+
     
     const handler = {
         onopentagname(name) {
-            // console.log('onopentagname', name);
-            closeOpenTag();
-            elements.push({ name, inTagOpen: true });
+            // increment index on parent context and close its opening
+            context.el.childCount++;
+            // closeOpenTag();
+            // make this context the current context
+            addContext(name);
             html.push(`<${name}`);
+            html.push(context.attrs);
         },
         onattribute(name, value, quote) {
-            // console.log('onattribute', name, value, quote);
-            html.push(` ${name}="${value}"`);
+            if(attribute) addAttribute();
+            attribute = { name, value, quote };
         },
         onopentag(name, attributes, isImplied) {
-            // console.log('onopentag', name, attributes, isImplied);
-        },
-        ontext(text) {
-            if(html.length === 0) {
-                text = smartTrimLeft(text);
-            }
-            
             closeOpenTag();
-            
-            // console.log('ontext >>' + text + '<<');
-
+        },
+        ontext(text) {            
+            // closeOpenTag();
+            context.el.childCount++;
             html.push(text);
         },
         onclosetag(name, isImplied) {
-            // console.log('onclosetag', name, isImplied);
-            if(isImplied) {                
-                html.push(voidElements.has(name) ? '>' : '/>'); 
-                elements.pop();
-            }
-            else {
-                closeOpenTag();
-                html.push(`</${name}>`);
-            }
+            // either close with >, />, or </tag>
+            if(isImplied && !voidElements.has(name)) html.push('/'); 
+            // closeOpenTag();
+            if(!isImplied) html.push(`</${name}>`);
+
+            removeContext();
         },
         oncomment(comment) {
-            // console.log('oncomment', comment);
+            // implement me...
         },
     };
 
-    var parser = new Parser(handler, { recognizeSelfClosing: true });
+    var parser = new HtmlParser(handler, { recognizeSelfClosing: true });
 
-    quasis.forEach((quasi, i) => {
-        let html = quasi.value.raw;
-        if(i === 0) html = smartTrimLeft(html);
-        // last quasi (quasis length is one more than expressions)
-        if(i === quasis.length - 1) html = smartTrimRight(html);
-        
-        parser.write(html);
-        
-        // const expression = expressions[i];
-        // if(!expression) return;
+    // opening quasi
+    let quasi = quasis[0];
+    let text = smartTrimLeft(quasi.value.raw);
+    parser.write(text);
+    pushHtmlChunk();
 
-        // parser.write('<text-node/>');
-        
-    });
+    // binding targets
+    const targets = [];
 
+    for(let i = 0; i < bindings.length; i++) {
+        const binding = bindings[i];
+        const { el } = context;
+
+        let queryIndex = targets.lastIndexOf(el);
+        if(queryIndex === -1) queryIndex = (targets.push(el) - 1);
+        binding.queryIndex = queryIndex;
+        
+        // use the obj ref so will be child count by the end
+        binding.element = el;
+        
+        let trimmedQuote = '';
+        if(context.inTagOpen) {
+            /* property binder */
+            if(attribute) addAttribute();
+
+            // This forces the parser to close the 
+            // attribute as it might be waiting for
+            // more attribute text content
+            let quote = text.at(-1);
+            if(quote !== '"' || quote !== "'") quote = '"';    
+            parser.write(trimmedQuote = quote);
+            
+            if(attribute) binding.propertyKey = attribute.name;
+            // remove the html attribute (it won't get pushed)
+            attribute = null;
+        }
+        else { /* child node (text or block) */
+            
+            // copy value as el will increment w/ more added
+            binding.childIndex = el.childCount;
+            parser.write('<text-node></text-node>');
+        }
+
+        pushHtmlChunk();
+
+        // next template element
+        quasi = quasis[i + 1];
+        text = quasi.value.raw;
+        if(trimmedQuote && text[0] === trimmedQuote) {
+            text = text.slice(1);
+        }
+        else {
+            // TODO: Quote match validation errors
+        }
+        if(i + 1 === bindings.length) text = smartTrimRight(text);
+        parser.write(text);
+    }
+    
     parser.end();
+    
+    // don't forget the last chunk!
+    pushHtmlChunk();
+    azNode.chunks = chunks.map(chunk => chunk.flat().join(''));
 
-    return { html: html.join('') };
+    // TBD:
+    // azNode.targets = targets;
+
+    return azNode;
 }

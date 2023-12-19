@@ -51,13 +51,12 @@ test('"_`" is atomic token, "_" itself has no special meaning', () => {
 test('SIGIL + block comment okay though...', () => {
     const tokens = tokenize('_/*html*/`hello`');
     expect(tokens).toMatchInlineSnapshot(`
-    [
-      "name: _",
-      "\`: ",
-      "template: hello",
-      "\`: ",
-    ]
-  `);
+      [
+        "@\`: ",
+        "template: hello",
+        "\`: ",
+      ]
+    `);
 });
 
 test('tokenize "${text} #{dom} {smart}" as interpolators', () => {

@@ -22,7 +22,7 @@ export default function acornAzFactoryConfig(options) {
 const DEFAULT_SIGIL = '_';
 
 function plugin(options, Parser) {
-    const SIGIL = (options?.sigil ?? '_')[0];
+    const SIGIL = (options?.sigil ?? DEFAULT_SIGIL)[0];
     const SIGIL_CODE = SIGIL.charCodeAt(0);
     
     const acorn = Parser.acorn;
@@ -58,9 +58,23 @@ function plugin(options, Parser) {
 
         readToken(code) {
             // Azoth template : SIGIL`
-            if(code === SIGIL_CODE && this.input.charCodeAt(this.pos + 1) === 96) {
-                this.pos += 2;
-                return this.finishToken(sigilQuote);
+            if(code === SIGIL_CODE) {
+                const { input, pos } = this;
+
+                this.pos++;
+
+                if(input.charCodeAt(this.pos) === 47        // "/"
+                    && input.charCodeAt(pos + 2) === 42) { // *
+                    this.skipBlockComment(); // will advance this.pos
+                }
+
+                if(input.charCodeAt(this.pos) === 96) { // `
+                    this.pos++;
+                    return this.finishToken(sigilQuote);
+                }
+                else {
+                    this.pos = pos;
+                }
             }
             super.readToken(code);
         }

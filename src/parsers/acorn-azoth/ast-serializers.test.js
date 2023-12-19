@@ -18,10 +18,11 @@ test('normal static template', () => {
     const ast = fullParse(code);
 
     expect(ast).toMatchInlineSnapshot(`
-      Program 
+      Program
+        sourceType: 'script'
         body: [
-          ExpressionStatement 
-            expression TemplateLiteral 
+          ExpressionStatement
+            expression:       TemplateLiteral
               expressions: []
               quasis: [
                 'hello'
@@ -35,18 +36,30 @@ test('normal template still works', () => {
     const ast = parse(code);
 
     expect(ast).toMatchInlineSnapshot(`
-      TemplateLiteral 
+      TemplateLiteral
         expressions: [
-          Identifier name='name'
-          Literal value='world' raw='"world"'
-          BinaryExpression operator='+'
-            left Identifier name='x',
-            right Identifier name='y'
-          ArrayExpression 
+          Identifier
+            name: 'name'
+          Literal
+            value: 'world'
+            raw: '"world"'
+          BinaryExpression
+            operator: '+'
+            left:       Identifier
+              name: 'x',
+            right:       Identifier
+              name: 'y'
+          ArrayExpression
             elements: [
-              Literal value=1 raw='1'
-              Literal value=3 raw='3'
-              Literal value=4 raw='4'
+              Literal
+                value: 1
+                raw: '1'
+              Literal
+                value: 3
+                raw: '3'
+              Literal
+                value: 4
+                raw: '4'
             ]
         ]
         quasis: [
@@ -69,14 +82,19 @@ test('multi line quasi and expression handling', () => {
     const ast = parse(fn.toCode());
 
     expect(ast).toMatchInlineSnapshot(`
-      TemplateLiteral 
+      TemplateLiteral
         expressions: [
-          CallExpression optional=false
-            callee ArrowFunctionExpression id=null expression=false generator=false async=false
-              body BlockStatement 
+          CallExpression
+            optional: false
+            callee:       ArrowFunctionExpression
+              id: null
+              expression: false
+              generator: false
+              async: false
+              body:         BlockStatement
                 body: [
-                  ReturnStatement 
-                    argument TemplateLiteral 
+                  ReturnStatement
+                    argument:               TemplateLiteral
                       expressions: []
                       quasis: [
                         'inner'

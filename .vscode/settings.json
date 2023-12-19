@@ -20,4 +20,5 @@
     "javascript.format.enable": true,
     "javascript.suggestionActions.enabled": true,
     "javascript.validate.enable": false,
+    "diffEditor.renderSideBySideInlineBreakpoint": 700,
 }

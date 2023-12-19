@@ -24,7 +24,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Azoth Generate DEBUG",
+            "name": "Azoth DEBUG",
             "autoAttachChildProcesses": true,
             "skipFiles": [
                 "<node_internals>/**",
@@ -34,7 +34,7 @@
             "args": [
                 "run",
                 "-t",
-                "generates from azoth ast"
+                "property binders"
             ],
             "smartStep": true,
             "console": "integratedTerminal"

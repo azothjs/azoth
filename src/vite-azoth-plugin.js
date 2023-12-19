@@ -1,26 +1,40 @@
 import { Parser } from 'acorn';
 import acornAz from './parsers/acorn-azoth/acorn-az.js';
 import { azothGenerate as generate } from './generator';
-
-const AzParser = Parser.extend(acornAz());
-
-const parse = code => AzParser.parse(code, {
-    ecmaVersion: 'latest',
-    sourceType: 'module'
-});
-
-const transpile = code => generate(parse(code));
+import { SourceMapGenerator } from 'source-map';
+import { normalizePath } from 'vite';
 
 const jsFile = /\.js$/;
 
 export default function AzothPlugin() {
 
+    const AzParser = Parser.extend(acornAz());
+
+    const parse = code => AzParser.parse(code, {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        locations: true,
+    });
+    
+    const transpile = (input, sourceMap) => {
+        const ast = parse(input);
+        const code = generate(ast, { sourceMap });
+        return { code, map: sourceMap };
+    };
+
+
     const transform = {
         name: 'rollup-azoth-plugin',
         enforce: 'pre',
         transform(source, id) {
-            if(!jsFile.test(id)) return;
-            return transpile(source);
+            if(!jsFile.test(id) || !id.includes('src/www/')) return;
+
+            const path = normalizePath(id);
+            const sourceMap = new SourceMapGenerator({ 
+                file: path.split('/').at(-1)
+            });
+
+            return transpile(source, sourceMap);
         },
 
     };

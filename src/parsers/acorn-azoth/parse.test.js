@@ -25,9 +25,10 @@ test('normal template literal', () => {
     };
 
     expect(parse(code)).toMatchInlineSnapshot(`
-      TemplateLiteral 
+      TemplateLiteral
         expressions: [
-          Identifier name='place'
+          Identifier
+            name: 'place'
         ]
         quasis: [
           'hello '
@@ -42,8 +43,8 @@ test('azoth template literal', () => {
     };
 
     expect(parse(code)).toMatchInlineSnapshot(`
-      AzothTemplate 
-        template TemplateLiteral 
+      AzothTemplate
+        template:   TemplateLiteral
           quasis: [
             'hello '
             ', sum '
@@ -51,9 +52,15 @@ test('azoth template literal', () => {
             ''
           ]
           bindings: [
-           \${ place
-             { x + y
-            #{ dom
+            AzothBinding
+              binder: '\${'
+              expression: 'place'
+            AzothBinding
+              binder: '{'
+              expression: 'x + y'
+            AzothBinding
+              binder: '#{'
+              expression: 'dom'
           ]
     `);
 });

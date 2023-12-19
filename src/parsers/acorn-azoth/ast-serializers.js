@@ -1,7 +1,12 @@
 import { Node } from 'acorn';
 import { generate } from 'astring';
 
-export default function addSerializers(expect, { log = false } = {}) {
+let excluded = [];
+export default function addSerializers(expect, { 
+    log = false, 
+    excludeKeys = ['type', 'start', 'end'] 
+} = {}) {
+    excluded = excludeKeys;
     serializers.forEach(s => {
         if(log) s = wrap(s);
         expect.addSnapshotSerializer(s);
@@ -41,16 +46,21 @@ export const array = {
 export const object = {
     name: 'object',
     test: o => !!o && typeof o === 'object',
-    serialize(obj, config, indentation, depth, refs, printer) {
-        const buckets = bucketEntries(obj);
+    serialize(obj, config, indentation, depth, refs, printer) {        
+        const excludes = [...excluded];
+        let out = indentation;
+        let objName = obj.constructor.name;
+        if(objName === 'Object') objName = '';
+        const hasType = !objName && obj.type;
+        if(hasType) {
+            objName = obj.type;
+            excludes.push('type');
+        }
+        out += objName;
 
-        let out = `${indentation}${obj.constructor.name}`;
+        const buckets = bucketEntries(obj, excludes);
         const childIndent = indentation + config.indent;
-        
-        const exclude = config.excludeKeys;
-        config.excludeKeys = false;
         out += printBuckets(buckets, config, childIndent, depth, refs, printer);
-        config.excludeKeys = exclude;
 
         return out;
     },
@@ -62,7 +72,7 @@ export const node = {
     serialize(node, config, indentation, depth, refs, printer) {
         const data = { 
             type: node.type, 
-            buckets: bucketEntries(node) 
+            buckets: bucketEntries(node, ['type', ...excluded]) 
         };
         return printNode(data, config, indentation, depth, refs, printer);
     },
@@ -72,17 +82,13 @@ export const binding = {
     name: 'bind',
     test: val => node.test(val) && val.type === 'AzothBinding',
     serialize(binding, config, indentation, depth, refs, printer) {
-        const { binder, expression } = binding;
+        const { expression: expr, ...rest } = binding;
 
-        // binders right align visually
-        // $ gets escaped, ends up as \$ so back into prior indent
-        const indent = binder === '${' ? indentation.slice(0, -1) : indentation;
+        const lines = generate(expr).split('\n');
+        let [expression] = lines;
+        if(lines.length > 1) expression += ` ...+${lines.length - 1}`;
 
-        const lines = generate(expression).split('\n');
-        let [firstLine] = lines;
-        if(lines.length > 1) firstLine += ` ...+${lines.length - 1}`;
-
-        return `${indent}${binder.padStart(2, ' ')} ${firstLine}`;
+        return printer({ ...rest, expression }, config, indentation, depth, refs);
     }
 };
 
@@ -96,10 +102,11 @@ const serializers = [
     string,
 ];
 
-function bucketEntries(obj) {
+function bucketEntries(obj, excludeKeys = []) {
     const objects = [], arrays = [], primitives = [];
     for(const entry of Object.entries(obj)){
-        const [, val] = entry;        
+        const [key, val] = entry;        
+        if(excludeKeys && excludeKeys.includes(key)) continue;
         const bucket = array.test(val) ? arrays : (object.test(val) ? objects : primitives);
         bucket.push(entry);
     }
@@ -108,21 +115,14 @@ function bucketEntries(obj) {
 
 function printNode({ type, buckets }, config, indentation, depth, refs, printer) {
     let out = `${indentation}${type}`;
-    buckets.primitives = buckets.primitives.filter(([key]) => key !== 'type');
-
     const childIndent = indentation + config.indent;
-    const exclude = config.excludeKeys;
-    config.excludeKeys = new Set(['type', 'sourceType', 'start', 'end']);
     out += printBuckets(buckets, config, childIndent, depth, refs, printer);
-    config.excludeKeys = exclude;
-
-    delete config.excludeKeys;
     return out;
 }
 
 function printBuckets({ primitives, objects, arrays, }, config, indentation, depth, refs, printer) {
     return [
-        printPrimitives(primitives, config, '', depth, refs, printer),
+        printPrimitives(primitives, config, indentation, depth, refs, printer),
         printObjects(objects, config, indentation, depth, refs, printer),
         printChildArrays(arrays, config, indentation, depth, refs, printer),
     ].join('');
@@ -130,15 +130,13 @@ function printBuckets({ primitives, objects, arrays, }, config, indentation, dep
 
 function printPrimitives(primitives, config, indentation, depth, refs, printer) {
     if(!primitives.length) return '';
-
-    if(config.excludeKeys) {
-        primitives = primitives.filter(([key]) => !config.excludeKeys.has(key));
-    }
     
     const printProp = val => printer(val, config, '', depth, refs);
-    const formatted = ' ' + primitives
-        .map(([key, val]) => `${key}=${printProp(val)}`)
-        .join(' ');
+    const formatted = primitives
+        .map(([key, val]) => {
+            return `\n${indentation}${key}: ${printProp(val)}`;
+        })
+        .join('');
 
     return formatted;
 }
@@ -148,8 +146,8 @@ function printObjects(objects, config, indentation, depth, refs, printer) {
 
     const printNode = object => printer(object, config, indentation, depth, refs);
     return objects.map(([key, val]) => {
-        const printed = printNode(val).trimStart();
-        return `\n${indentation}${key} ${printed}`;
+        const printed = printNode(val);
+        return `\n${indentation}${key}: ${printed}`;
     });
 }
 

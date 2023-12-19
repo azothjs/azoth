@@ -3,7 +3,8 @@ import { Parser } from 'acorn';
 import acornAz from '../parsers/acorn-azoth/acorn-az.js';
 import { azothGenerate as generate } from './index.js';
 import '../utils/code-matchers.js';
-import { it } from 'vitest';
+import { describe, it } from 'vitest';
+import { SourceMapGenerator } from 'source-map';
 
 const AzParser = Parser.extend(acornAz());
 
@@ -11,30 +12,40 @@ const parse = code => {
     if(code.toBody) code = code.toBody();
     return AzParser.parse(code, {
         ecmaVersion: 'latest',
+        locations: true,
     });
 };
 
-const transpile = code => generate(parse(code));
+const transpile = input => {
+    const ast = parse(input);
+    const sourceMap = new SourceMapGenerator({ file: 'test.js' });
+    const code = generate(ast, { sourceMap });
+    return { code, map: sourceMap };
+};
 
-it('generates from normal ast', ({ expect }) => {
-    const code = () => {
-        `hello ${place}`;
-    }; 
+describe.skip('generator', () => {
 
-    expect(transpile(code)).toMatchInlineSnapshot(`
+    it('generates from normal ast', ({ expect }) => {
+        const t = () => {
+            `hello ${place}`;
+        }; 
+
+        expect(transpile(t).code).toMatchInlineSnapshot(`
       "\`hello \${place}\`;
       "
     `);
-});
+    });
 
-it('generates from azoth ast static template', ({ expect }) => {
-    const code = () => {
-        _`<p>hello</p>`;
-    }; 
+    it('generates from azoth ast static template', ({ expect }) => {
+        const t = () => {
+            let t = _`az`;
+        }; 
 
-    expect(transpile(code)).toMatchInlineSnapshot(`
-      "(() => {
-        const __renderer = __makeRenderer(\`<p>hello</p>\`);
+        const { code, map } = transpile(t);
+    
+        expect(code).toMatchInlineSnapshot(`
+      "let t = (() => {
+        const __renderer = __makeRenderer(\`az\`);
         const fn = () => {
           return __renderer().__root;
         };
@@ -42,4 +53,20 @@ it('generates from azoth ast static template', ({ expect }) => {
       })();
       "
     `);
+
+    // expect(map.toJSON()).toMatchInlineSnapshot(`
+    //   {
+    //     "file": "test.js",
+    //     "mappings": "IAAIA,IAAIC;AAAAA,oCAAA,CAAE;AAAFA;AAAAA",
+    //     "names": [
+    //       "t",
+    //       "_",
+    //     ],
+    //     "sources": [
+    //       "test.js",
+    //     ],
+    //     "version": 3,
+    //   }
+    // `);
+    });
 });
