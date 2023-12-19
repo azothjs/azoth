@@ -1,8 +1,8 @@
 import { Parser as HtmlParser } from 'htmlparser2';
 import voidElements from '../utils/void-elements.js';
 
-export const leftRegex = /^\s*[\r\n]+\s*/g;
-export const rightRegex = /\s*[\r\n]+\s*$/g;
+export const SMART_TRIM_START = /^\s*[\r\n]+\s*/g;
+export const SMART_TRIM_END = /\s*[\r\n]+\s*$/g;
 
 export function parse(azNode) {
     const { template } = azNode;
@@ -105,7 +105,7 @@ export function parse(azNode) {
 
     // opening template element html
     let quasi = quasis[0];
-    let text = quasi.value.raw.replace(leftRegex, '');
+    let text = quasi.value.raw.replace(SMART_TRIM_START, '');
     if(text) parser.write(text);
     pushHtmlChunk();
 
@@ -162,7 +162,7 @@ export function parse(azNode) {
             // TODO: Quote match validation errors
         }
         if(i + 1 === bindings.length) {
-            text = text.replace(rightRegex, '');
+            text = text.replace(SMART_TRIM_END, '');
         }
 
         parser.write(text);
