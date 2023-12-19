@@ -1,4 +1,4 @@
-import { expect, describe, test } from 'vitest';
+import { describe, test } from 'vitest';
 import './utils/code-matchers.js';
 import { compile } from './compile.js';
 
@@ -6,7 +6,7 @@ const _ = () => {};
 const __makeRenderer = _;
 const property = _;'class';
 describe.skip('arrow functions', () => {
-    test('implicit return with single line template', () => {
+    test('implicit return with single line template', ({ expect }) => {
         function template() {
             const Greeting = () => _`<span>hello world</span>`;
         }
@@ -19,7 +19,7 @@ describe.skip('arrow functions', () => {
         });
     });
 
-    test('implicit return with multi line template', () => {
+    test('implicit return with multi line template', ({ expect }) => {
         function template() {
             const Greeting = () => _`
                 <div>
@@ -38,7 +38,7 @@ describe.skip('arrow functions', () => {
         });
     });
     
-    test('simple block return with single line (becomes implicit)', () => {
+    test('simple block return with single line (becomes implicit)', ({ expect }) => {
         function template() {
             const Greeting = () => {
                 return _`<span>hello world</span>`;
@@ -53,7 +53,7 @@ describe.skip('arrow functions', () => {
         });
     });
     
-    test('simple block return with multi line (becomes implicit)', () => {
+    test('simple block return with multi line (becomes implicit)', ({ expect }) => {
         function template() {
             const Greeting = () => {
                 return _`
@@ -74,7 +74,7 @@ describe.skip('arrow functions', () => {
         });
     });
 
-    test('implicit return with static value bind', () => {
+    test('implicit return with static value bind', ({ expect }) => {
         function template() {
             const Greeting = (style) => _`<span class=${style}>hello</span>`;
         }
@@ -95,7 +95,7 @@ describe.skip('arrow functions', () => {
 
 describe.skip('function expressions', () => {
 
-    test('single return statement with single line template', () => {
+    test('single return statement with single line template', ({ expect }) => {
         function template() {
             const Greeting = function() {
                 return _`
@@ -118,7 +118,7 @@ describe.skip('function expressions', () => {
         });
     });
 
-    test('multi line template with function expr return', () => {
+    test('multi line template with function expr return', ({ expect }) => {
         function template() {
             const Greeting = function() {
                 return _`

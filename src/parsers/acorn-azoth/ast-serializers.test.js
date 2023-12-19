@@ -1,9 +1,10 @@
 /* eslint-disable no-useless-escape */
 import { Parser } from 'acorn';
 // import acornAz from './acorn-az.js';
-import { test, expect } from 'vitest';
+import { beforeEach, test } from 'vitest';
 import addSerializers from './ast-serializers.js';
 import '../../utils/code-matchers.js';
+import { toMatchCode } from '../../utils/code-matchers.js';
 
 // const AzParser = Parser.extend(acornAz());
 const fullParse = code => Parser.parse(code, {
@@ -11,9 +12,12 @@ const fullParse = code => Parser.parse(code, {
 });
 const parse = code => fullParse(code).body[0].expression;
 
-addSerializers(expect, { log: false });
+beforeEach(async ({ expect }) => {
+    expect.extend(toMatchCode);
+    addSerializers(expect, { log: false });
+});
 
-test('normal static template', () => {
+test('normal static template', ({ expect }) => {
     const code = '`hello`';
     const ast = fullParse(code);
 
@@ -31,7 +35,7 @@ test('normal static template', () => {
     `);
 });
 
-test('normal template still works', () => {
+test('normal template still works', ({ expect }) => {
     const code = '`hello \'${name}\' from ${"world"} & ${x + y} ${[1, 3, 4]}`';
     const ast = parse(code);
 
@@ -72,7 +76,7 @@ test('normal template still works', () => {
     `);
 });
 
-test('multi line quasi and expression handling', () => {
+test('multi line quasi and expression handling', ({ expect }) => {
     const fn = () => `
         outer ${ (() => {
         return `inner`;

@@ -1,4 +1,4 @@
-import { expect, describe, test } from 'vitest';
+import { describe, test } from 'vitest';
 import './utils/code-matchers.js';
 import { compile } from './template-function.js';
 import { parse } from './utils/ast.js';

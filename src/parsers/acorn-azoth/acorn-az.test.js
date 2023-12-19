@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-escape */
 import { Parser } from 'acorn';
-import { test, expect } from 'vitest';
+import { test } from 'vitest';
 import acornAz from './acorn-az.js';
 
 const JsxParser = Parser.extend(acornAz({ sigil: '_' }));
@@ -10,7 +10,7 @@ const tokenize = code => [
     })
 ].map(t => `${t.type.label}: ${t.value ?? ''}`);
 
-test('normal template still works', () => {
+test('normal template still works', ({ expect }) => {
     const tokens = tokenize('`a${"b"}c`');
     expect(tokens).toMatchInlineSnapshot(`
       [
@@ -25,7 +25,7 @@ test('normal template still works', () => {
     `);
 });
 
-test('tokenize SIGIL as "SIGIL`"', () => {
+test('tokenize SIGIL as "SIGIL`"', ({ expect }) => {
     const tokens = tokenize('_`<a>...</a>`');
     expect(tokens).toMatchInlineSnapshot(`
       [
@@ -36,7 +36,7 @@ test('tokenize SIGIL as "SIGIL`"', () => {
     `);
 });
 
-test('"_`" is atomic token, "_" itself has no special meaning', () => {
+test('"_`" is atomic token, "_" itself has no special meaning', ({ expect }) => {
     const tokens = tokenize('_ `hello`');
     expect(tokens).toMatchInlineSnapshot(`
       [
@@ -48,7 +48,7 @@ test('"_`" is atomic token, "_" itself has no special meaning', () => {
     `);
 });
 
-test('SIGIL + block comment okay though...', () => {
+test('SIGIL + block comment okay though...', ({ expect }) => {
     const tokens = tokenize('_/*html*/`hello`');
     expect(tokens).toMatchInlineSnapshot(`
       [
@@ -59,7 +59,7 @@ test('SIGIL + block comment okay though...', () => {
     `);
 });
 
-test('tokenize "${text} #{dom} {smart}" as interpolators', () => {
+test('tokenize "${text} #{dom} {smart}" as interpolators', ({ expect }) => {
     const tokens = tokenize('_`<div>${text} #{dom} {smart}</div>`');
     expect(tokens).toMatchInlineSnapshot(`
       [
@@ -82,7 +82,7 @@ test('tokenize "${text} #{dom} {smart}" as interpolators', () => {
     `);
 });
 
-test('"{" can be escaped', () => {
+test('"{" can be escaped', ({ expect }) => {
     const tokens = tokenize('_`hello \\{name}!`');
     expect(tokens).toMatchInlineSnapshot(`
       [
@@ -93,7 +93,7 @@ test('"{" can be escaped', () => {
     `);
 });
 
-test('"{" and "#{" not recognized outside of azoth templates', () => {
+test('"{" and "#{" not recognized outside of azoth templates', ({ expect }) => {
     const tokens = tokenize('`<div>${text} #{dom} {smart}</div>`');
     expect(tokens).toMatchInlineSnapshot(`
       [
@@ -108,7 +108,7 @@ test('"{" and "#{" not recognized outside of azoth templates', () => {
     `);
 });
 
-test('invalid template still reads on invalid escape sequence', () => {
+test('invalid template still reads on invalid escape sequence', ({ expect }) => {
     
     const tokens = tokenize('_`a\\uone${1}a\\utwo#{2}a\\uthree{3}a\\ufour`');
   
@@ -133,7 +133,7 @@ test('invalid template still reads on invalid escape sequence', () => {
     `);
 });
 
-test('invalid template still reads on normal template', () => {
+test('invalid template still reads on normal template', ({ expect }) => {
     
     const tokens = tokenize('`a\\uone${1}a\\utwo#{2}a\\uthree{3}a\\ufour`');
   

@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import { Parser } from 'acorn';
-import { test, expect } from 'vitest';
+import { test } from 'vitest';
 import acornAz from './acorn-az.js';
 import addSerializers from './ast-serializers.js';
 import '../../utils/code-matchers.js';
@@ -19,7 +19,7 @@ function parse(code) {
 
 addSerializers(expect, { printLog: false });
 
-test('normal template literal', () => {
+test('normal template literal', ({ expect }) => {
     const code = () => {
         `hello ${place}`;
     };
@@ -37,7 +37,7 @@ test('normal template literal', () => {
     `);
 });
 
-test('azoth template literal', () => {
+test('azoth template literal', ({ expect }) => {
     const code = () => {
         _`hello ${place}, sum {x + y} blog #{dom}`;
     };

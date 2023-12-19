@@ -1,38 +1,42 @@
-import { expect, test } from 'vitest';
-import './code-matchers';
+import { beforeEach, test } from 'vitest';
+import { toMatchCode } from './code-matchers';
 const _ = () => {};
 
 const code = `
     (x, y) => \`<span>*\${x + y}</span>\`;
 `.trim();
 
-test('named function', () => {
+beforeEach(async ({ expect }) => {
+    expect.extend(toMatchCode);
+});
+
+test('named function', ({ expect }) => {
     function template() {
         (x, y) => `<span>*${x + y}</span>`;
     }   
     expect(template).toMatchCode(code);
 });
 
-test('arrow with block', () => {
+test('arrow with block', ({ expect }) => {
     const template = () => {
         (x, y) => `<span>*${x + y}</span>`;
     };
     expect(template).toMatchCode(code);
 });
 
-test('arrow no block formatted as expression (no-semi)', () => {
+test('arrow no block formatted as expression (no-semi)', ({ expect }) => {
     const template = () => (x, y) => `<span>*${x + y}</span>`;
     expect(template).toMatchCode(code.slice(0, -1)); // no semicolon
 });
 
-test('custom matcher works with not', () => {
+test('custom matcher works with not', ({ expect }) => {
     function template() {
         (a) => `<span>${a}</span>`;
     }
     expect(template).not.toMatchCode(code);
 });
 
-test('indentation normalized for multiline', () => {
+test('indentation normalized for multiline', ({ expect }) => {
     function template() {
         const obj = {
             name: 'bob',

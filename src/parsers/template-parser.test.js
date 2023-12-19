@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, test } from 'vitest';
 import { parse } from './template-parser.js';
 import '../utils/code-matchers.js';
 import { Parser } from 'acorn';
@@ -22,17 +22,33 @@ const parseTemplate = (code) => {
 const getHtml = (code) => parseTemplate(code).html;
 
 describe('basic html handling in templates', () => {
-    test('single span with class and text content', () => {
+    test('single span with class and text content', ({ expect }) => {
         function t1() {
             _/*html*/`
                 <span class="greeting">hello world</span>
             `;
         }
-        const html = getHtml(t1);
-        expect(html).toMatchInlineSnapshot(`undefined`);
+        const ast = parseTemplate(t1);
+        expect(ast).toMatchInlineSnapshot(`
+          Node {
+            "end": 82,
+            "start": 0,
+            "template": Node {
+              "bindings": [],
+              "end": 82,
+              "quasis": [
+                "<span class="greeting">hello world</span>
+                      ",
+              ],
+              "start": 0,
+              "type": "TemplateLiteral",
+            },
+            "type": "AzothTemplate",
+          }
+        `);
     });
 
-    test('void and self-closing elements', () => {
+    test('void and self-closing elements', ({ expect }) => {
         function t1() {
             _/*html*/`
                 <br>
@@ -49,7 +65,7 @@ describe('basic html handling in templates', () => {
         expect(html).toMatchInlineSnapshot(`undefined`);
     });
 
-    test('nested elements', () => {
+    test('nested elements', ({ expect }) => {
         function t1() {
             _/*html*/`
                 <div><div><div><div><div></div></div></div></div></div>
@@ -57,6 +73,16 @@ describe('basic html handling in templates', () => {
         }
         const html = getHtml(t1);
     
+        expect(html).toMatchInlineSnapshot(`undefined`);
+    });
+
+    test('html comments are copied', ({ expect }) => {
+        function t1() {
+            _/*html*/`
+              <span class="greeting"><!--hello--> world</span>
+          `;
+        }
+        const html = getHtml(t1);
         expect(html).toMatchInlineSnapshot(`undefined`);
     });
 

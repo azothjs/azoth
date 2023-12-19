@@ -12,7 +12,7 @@ export function parse(azNode) {
     let context = null;
     const contextStack = [];
     const peek = () => contextStack.at(-1); 
-    const addContext = (name) => {
+    const pushContext = (name) => {
         const ctx = {
             el: {
                 name,
@@ -25,13 +25,13 @@ export function parse(azNode) {
         contextStack.push(ctx);
         context = ctx; 
     };
-    const removeContext = () => {
+    const popContext = () => {
         contextStack.pop();
         context = contextStack.at(-1);
     };
     
     // add a root context for parsing ease
-    addContext('<>');
+    pushContext('<>');
 
     // html builder for current template element
     let chunks = [];
@@ -69,10 +69,8 @@ export function parse(azNode) {
     
     const handler = {
         onopentagname(name) {
-            // parent
-            context.el.childrenLength++;
-            // make this context the current context
-            addContext(name);
+            context.el.childrenLength++; // parent element
+            pushContext(name);
             html.push(`<${name}`);
             html.push(context.attributes);
         },
@@ -80,24 +78,20 @@ export function parse(azNode) {
             if(attribute) addAttribute();
             attribute = { name, value, quote };
         },
-        onopentag(name, attributes, isImplied) {
-            closeOpenTag();
-        },
+        onopentag: closeOpenTag,
         ontext(text) {            
-            // closeOpenTag();
             context.el.childrenLength++;
             html.push(text);
         },
         onclosetag(name, isImplied) {
-            // either close with >, />, or </tag>
+            // Close with either >, />, or </tag>
             if(isImplied && !voidElements.has(name)) html.push('/'); 
-            // closeOpenTag();
             if(!isImplied) html.push(`</${name}>`);
-
-            removeContext();
+            popContext();
         },
         oncomment(comment) {
             // implement me...
+            console.log(comment);
         },
     };
 
