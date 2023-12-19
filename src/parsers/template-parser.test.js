@@ -94,7 +94,7 @@ describe('Bindings', () => {
                   expression: 'name'
                   element:         
                     name: 'p'
-                    childCount: 3
+                    childrenLength: 3
                 AzothBinding
                   binder: '{'
                   queryIndex: 1
@@ -102,7 +102,7 @@ describe('Bindings', () => {
                   expression: 'count'
                   element:         
                     name: 'span'
-                    childCount: 1
+                    childrenLength: 1
                 AzothBinding
                   binder: '{'
                   queryIndex: 2
@@ -110,7 +110,7 @@ describe('Bindings', () => {
                   expression: 'x'
                   element:         
                     name: 'p'
-                    childCount: 5
+                    childrenLength: 5
                 AzothBinding
                   binder: '{'
                   queryIndex: 2
@@ -118,7 +118,7 @@ describe('Bindings', () => {
                   expression: 'y'
                   element:         
                     name: 'p'
-                    childCount: 5
+                    childrenLength: 5
                 AzothBinding
                   binder: '{'
                   queryIndex: 2
@@ -126,7 +126,7 @@ describe('Bindings', () => {
                   expression: 'x + y'
                   element:         
                     name: 'p'
-                    childCount: 5
+                    childrenLength: 5
                 AzothBinding
                   binder: '#{'
                   queryIndex: 3
@@ -134,7 +134,7 @@ describe('Bindings', () => {
                   expression: 'block'
                   element:         
                     name: 'p'
-                    childCount: 1
+                    childrenLength: 1
               ]
         `);
     });
@@ -164,7 +164,7 @@ describe('Bindings', () => {
                   expression: 'type'
                   element:         
                     name: 'p'
-                    childCount: 1
+                    childrenLength: 1
                 AzothBinding
                   binder: '{'
                   queryIndex: 0
@@ -172,14 +172,14 @@ describe('Bindings', () => {
                   expression: 'isRequired'
                   element:         
                     name: 'p'
-                    childCount: 1
+                    childrenLength: 1
                 AzothBinding
                   binder: '{'
                   queryIndex: 1
                   expression: 'sectionType'
                   element:         
                     name: 'div'
-                    childCount: 0
+                    childrenLength: 0
               ]
         `);
     });
@@ -206,7 +206,7 @@ describe('Bindings', () => {
                   expression: 'sectionType'
                   element:         
                     name: 'div'
-                    childCount: 0
+                    childrenLength: 0
               ]
         `);
     });
@@ -223,55 +223,19 @@ describe('Bindings', () => {
         const ast = parseTemplate(code);
         
         expect(ast).toMatchInlineSnapshot(`
-          AzothTemplate
-            template:   TemplateLiteral
-              bindings: [
-                AzothBinding
-                  binder: '{'
-                  queryIndex: 0
-                  childIndex: 0
-                  expression: 'greeting'
-                  element:         
-                    name: 'h1'
-                    childCount: 1
-                AzothBinding
-                  binder: '\${'
-                  queryIndex: 1
-                  childIndex: 1
-                  expression: 'name'
-                  element:         
-                    name: 'p'
-                    childCount: 3
-                AzothBinding
-                  binder: '{'
-                  queryIndex: 2
-                  childIndex: 0
-                  expression: 'count'
-                  element:         
-                    name: 'span'
-                    childCount: 2
-              ]
-            targets: [
-              
-                name: 'h1'
-                childCount: 1
-              
-                name: 'p'
-                childCount: 3
-              
-                name: 'span'
-                childCount: 2
-            ]
-            chunks: [
-          '><div>
-                              <h1'
-          '><text-node></text-node>'
-          '</h1>
-                              <p>hello <text-node></text-node>'
-          '!</p>
-                              <p>count: <span><text-node></text-node>'
-            ]
-        `);
+                    AzothTemplate
+                      template:   TemplateLiteral
+                        bindings: [
+                          AzothBinding
+                            binder: '{'
+                            queryIndex: 0
+                            propertyKey: 'class'
+                            expression: 'sectionType'
+                            element:         
+                              name: 'div'
+                              childrenLength: 0
+                        ]
+                  `);
     });
 
 });

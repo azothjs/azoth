@@ -1,42 +1,41 @@
 import { Parser as HtmlParser } from 'htmlparser2';
-import { smartTrimLeft, smartTrimRight } from '../transformers/smart-trim.js';
 import voidElements from '../utils/void-elements.js';
 
-
-// element context
-let context = null;
-const contextStack = [];
-const peek = () => contextStack.at(-1); 
-const addContext = (name) => {
-    const ctx = {
-        inTagOpen: true,
-        el: {
-            name,
-            childCount: 0
-        },
-        attrs: [],
-        isBound: false,
-    };
-    contextStack.push(ctx);
-    context = ctx; 
-};
-const removeContext = () => {
-    contextStack.pop();
-    context = contextStack.at(-1);
-};
-
+export const leftRegex = /^\s*[\r\n]+\s*/g;
+export const rightRegex = /\s*[\r\n]+\s*$/g;
 
 export function parse(azNode) {
     const { template } = azNode;
     const { quasis, bindings } = template;
 
+    // element context
+    let context = null;
+    const contextStack = [];
+    const peek = () => contextStack.at(-1); 
+    const addContext = (name) => {
+        const ctx = {
+            el: {
+                name,
+                childrenLength: 0
+            },
+            inTagOpen: true,
+            attributes: [],
+            isBound: false,
+        };
+        contextStack.push(ctx);
+        context = ctx; 
+    };
+    const removeContext = () => {
+        contextStack.pop();
+        context = contextStack.at(-1);
+    };
     
     // add a root context for parsing ease
     addContext('<>');
 
     // html builder for current template element
-    let html = [];
     let chunks = [];
+    let html = [];
     const pushHtmlChunk = () => {
         const chunk = html;
         html = [];
@@ -58,10 +57,10 @@ export function parse(azNode) {
     const addAttribute = (attr = attribute) => {
         let { name, value = '', quote = '' } = attr;
         if(value === '') {
-            context.attrs.push(` ${name}`);
+            context.attributes.push(` ${name}`);
         }
         else {
-            context.attrs.push(` ${name}=${quote}${value}${quote}`);
+            context.attributes.push(` ${name}=${quote}${value}${quote}`);
         }
 
         if(attr === attribute) attribute = null;
@@ -70,13 +69,12 @@ export function parse(azNode) {
     
     const handler = {
         onopentagname(name) {
-            // increment index on parent context and close its opening
-            context.el.childCount++;
-            // closeOpenTag();
+            // parent
+            context.el.childrenLength++;
             // make this context the current context
             addContext(name);
             html.push(`<${name}`);
-            html.push(context.attrs);
+            html.push(context.attributes);
         },
         onattribute(name, value, quote) {
             if(attribute) addAttribute();
@@ -87,7 +85,7 @@ export function parse(azNode) {
         },
         ontext(text) {            
             // closeOpenTag();
-            context.el.childCount++;
+            context.el.childrenLength++;
             html.push(text);
         },
         onclosetag(name, isImplied) {
@@ -105,10 +103,10 @@ export function parse(azNode) {
 
     var parser = new HtmlParser(handler, { recognizeSelfClosing: true });
 
-    // opening quasi
+    // opening template element html
     let quasi = quasis[0];
-    let text = smartTrimLeft(quasi.value.raw);
-    parser.write(text);
+    let text = quasi.value.raw.replace(leftRegex, '');
+    if(text) parser.write(text);
     pushHtmlChunk();
 
     // binding targets
@@ -143,7 +141,7 @@ export function parse(azNode) {
         else { /* child node (text or block) */
             
             // copy value as el will increment w/ more added
-            binding.childIndex = el.childCount;
+            binding.childIndex = el.childrenLength;
             parser.write('<text-node></text-node>');
         }
 
@@ -163,7 +161,10 @@ export function parse(azNode) {
         else {
             // TODO: Quote match validation errors
         }
-        if(i + 1 === bindings.length) text = smartTrimRight(text);
+        if(i + 1 === bindings.length) {
+            text = text.replace(rightRegex, '');
+        }
+
         parser.write(text);
     }
     
