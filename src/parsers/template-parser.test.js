@@ -138,16 +138,16 @@ describe('Bindings', () => {
               ]
             chunks: [
           '<div>    
-                          <p>hello '
+                          <p data-bind>hello '
           '<text-node></text-node>'
           '!</p>
-                          <p>count: <span><text-node></text-node>'
+                          <p>count: <span data-bind><text-node></text-node>'
           '</span></p>
-                          <p><text-node></text-node>'
+                          <p data-bind><text-node></text-node>'
           ' + <text-node></text-node>'
           ' = <text-node></text-node>'
           '</p>
-                          <p><text-node></text-node>'
+                          <p data-bind><text-node></text-node>'
           '</p>
                       </div>'
             ]
@@ -197,9 +197,9 @@ describe('Bindings', () => {
                     childCount: 0
               ]
             chunks: [
-          '<p name="title"'
+          '<p data-bind name="title"'
           '>
-                          /<div style="color: red"'
+                          /<div style="color: red" data-bind'
           '/'
             ]
         `);
@@ -230,7 +230,7 @@ describe('Bindings', () => {
                     childCount: 0
               ]
             chunks: [
-          '<div style="color: red"'
+          '<div style="color: red" data-bind'
           '></div>'
             ]
         `);

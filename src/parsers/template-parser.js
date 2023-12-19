@@ -17,7 +17,8 @@ export function parse(azNode) {
                 name,
                 childCount: 0
             },
-            attrs: []
+            attrs: [],
+            isBound: false,
         };
         contextStack.push(ctx);
         context = ctx; 
@@ -51,10 +52,16 @@ export function parse(azNode) {
     };
 
     let attribute = null;
-    const addAttribute = () => {
-        const { name, value, quote } = attribute;
-        context.attrs.push(` ${name}=${quote}${value}${quote}`);
-        attribute = null;
+    const addAttribute = (attr = attribute) => {
+        let { name, value = '', quote = '' } = attr;
+        if(value === '') {
+            context.attrs.push(` ${name}`);
+        }
+        else {
+            context.attrs.push(` ${name}=${quote}${value}${quote}`);
+        }
+
+        if(attr === attribute) attribute = null;
     };
 
     
@@ -111,7 +118,6 @@ export function parse(azNode) {
         let queryIndex = targets.lastIndexOf(el);
         if(queryIndex === -1) queryIndex = (targets.push(el) - 1);
         binding.queryIndex = queryIndex;
-        
         // use the obj ref so will be child count by the end
         binding.element = el;
         
@@ -136,6 +142,11 @@ export function parse(azNode) {
             // copy value as el will increment w/ more added
             binding.childIndex = el.childCount;
             parser.write('<text-node></text-node>');
+        }
+
+        if(!context.isBound) {
+            addAttribute({ name: 'data-bind' });
+            context.isBound = true;
         }
 
         pushHtmlChunk();
