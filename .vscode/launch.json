@@ -34,7 +34,7 @@
             "args": [
                 "run",
                 "-t",
-                "property binders"
+                "void and self\\-closing elements"
             ],
             "smartStep": true,
             "console": "integratedTerminal"

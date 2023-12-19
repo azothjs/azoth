@@ -122,3 +122,13 @@ function childText(el: HTMLElement, index: number) {
 
     return fn;
 })();
+
+
+
+// _`<p>{~emoji.name}: {~emoji.text}</p>`
+
+function () {
+    const emoji = await getCoolEmoji();
+    const card = emoji => _`<p>${await emoji.name, await emoji.text}: {emoji.text}</p>`
+    return card;
+}

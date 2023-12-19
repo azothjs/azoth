@@ -94,12 +94,12 @@ export const binding = {
 
 // order matters, pretty-format tests bottom up
 const serializers = [
-    object,
-    node,
-    templateElement,
-    binding,
-    array,
-    string,
+    // object,
+    // node,
+    // templateElement,
+    // binding,
+    // array,
+    // string,
 ];
 
 function bucketEntries(obj, excludeKeys = []) {

@@ -1,5 +1,6 @@
 import './style.css';
 import { _, __makeRenderer } from '../azoth/index.js';
+import './r-and-d.js';
 
 const template = _/*html*/`
     <main>
@@ -13,25 +14,25 @@ const template = _/*html*/`
     </main>
 `;
 
-// const template = _/*html*/`az`;
+// // const template = _/*html*/`az`;
 
-document.body.append(template());
+// document.body.append(template());
 
-// let $ = (strings, ...exprs) => () => (String.raw(strings, ...exprs));
-class $ {}
-class Component extends $ {
+// // let $ = (strings, ...exprs) => () => (String.raw(strings, ...exprs));
+// class $ {}
+// class Component extends $ {
     
-    render = _`
-        <p><span></span></p>
-    `;
+//     render = _`
+//         <p><span></span></p>
+//     `;
     
-    constructor(name) {
-        super();
-        this.name = name;
-    }
+//     constructor(name) {
+//         super();
+//         this.name = name;
+//     }
 
 	
-}
+// }
 
-let c = new Component('azoth');
-console.log(c.render());
+// let c = new Component('azoth');
+// console.log(c.render());

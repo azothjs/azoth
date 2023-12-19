@@ -1,27 +1,23 @@
 import { Parser as HtmlParser } from 'htmlparser2';
 import voidElements from '../utils/void-elements.js';
-
-export const SMART_TRIM_START = /^\s*[\r\n]+\s*/g;
-export const SMART_TRIM_END = /\s*[\r\n]+\s*$/g;
+import { 
+    SMART_TRIM, 
+    SMART_TRIM_END, 
+    SMART_TRIM_START 
+} from './smart-trim';
 
 export function parse(azNode) {
     const { template } = azNode;
     const { quasis, bindings } = template;
+
+    const childNodeReplacement = '<child-node></child-node>';
 
     // element context
     let context = null;
     const contextStack = [];
     const peek = () => contextStack.at(-1); 
     const pushContext = (name) => {
-        const ctx = {
-            el: {
-                name,
-                childrenLength: 0
-            },
-            inTagOpen: true,
-            attributes: [],
-            isBound: false,
-        };
+        const ctx = new ElementContext(name);
         contextStack.push(ctx);
         context = ctx; 
     };
@@ -100,76 +96,100 @@ export function parse(azNode) {
     // opening template element html
     let quasi = quasis[0];
     let text = quasi.value.raw.replace(SMART_TRIM_START, '');
-    if(text) parser.write(text);
-    pushHtmlChunk();
-
-    // binding targets
-    const targets = [];
-
-    for(let i = 0; i < bindings.length; i++) {
-        const binding = bindings[i];
-        const { el } = context;
-
-        let queryIndex = targets.lastIndexOf(el);
-        if(queryIndex === -1) queryIndex = (targets.push(el) - 1);
-        binding.queryIndex = queryIndex;
-        // use the obj ref so will be child count by the end
-        binding.element = el;
+    const isStatic = quasis.length === 1; // no bindings
+    if(isStatic) text = text.replace(SMART_TRIM_END, '');
         
-        let trimmedQuote = '';
-        if(context.inTagOpen) {
-            /* property binder */
-            if(attribute) addAttribute();
-
-            // This forces the parser to close the 
-            // attribute as it might be waiting for
-            // more attribute text content
-            let quote = text.at(-1);
-            if(quote !== '"' || quote !== "'") quote = '"';    
-            parser.write(trimmedQuote = quote);
-            
-            if(attribute) binding.propertyKey = attribute.name;
-            // remove the html attribute (it won't get pushed)
-            attribute = null;
-        }
-        else { /* child node (text or block) */
-            
-            // copy value as el will increment w/ more added
-            binding.childIndex = el.childrenLength;
-            parser.write('<text-node></text-node>');
-        }
-
-        if(!context.isBound) {
-            addAttribute({ name: 'data-bind' });
-            context.isBound = true;
-        }
-
+    if(text) parser.write(text);
+    
+    if(!isStatic) {
+        if(text) parser.write(text);
         pushHtmlChunk();
 
-        // next template element
-        quasi = quasis[i + 1];
-        text = quasi.value.raw;
-        if(trimmedQuote && text[0] === trimmedQuote) {
-            text = text.slice(1);
-        }
-        else {
-            // TODO: Quote match validation errors
-        }
-        if(i + 1 === bindings.length) {
-            text = text.replace(SMART_TRIM_END, '');
-        }
+        const targets = [];
 
-        parser.write(text);
+        for(let i = 0; i < bindings.length; i++) {
+            const binding = bindings[i];
+            const { el } = context;
+
+            let queryIndex = targets.lastIndexOf(el);
+            if(queryIndex === -1) queryIndex = (targets.push(el) - 1);
+            binding.queryIndex = queryIndex;
+            // obj ref so childrenLength property will increase if more added
+            binding.element = el;
+        
+            let trimmedQuote = '';
+
+            if(context.inTagOpen) { /* property binder via attribute */
+                // Add any prior attribute of this element to html
+                if(attribute) addAttribute();
+
+                // This forces the parser to close the current
+                // bound attribute as it waits for more attribute
+                // than just the equal sign <el attr={val}>
+                // TODO: test with quoted attr binding
+                let quote = text.at(-1);
+                if(quote !== '"' || quote !== "'") quote = '"';    
+                parser.write(trimmedQuote = quote);
+            
+                if(attribute) binding.propertyKey = attribute.name;
+                
+                // Clear attribute so it does NOT get pushed to
+                // html (we are setting as an element property)
+                attribute = null;
+            }
+            else { /* child node (text or block) */
+            
+                // copy current value as *this* bindings index
+                binding.childIndex = el.childrenLength;
+                parser.write(childNodeReplacement);
+            }
+
+            if(!context.isBound) {
+                addAttribute({ name: 'data-bind' });
+                context.isBound = true;
+            }
+
+            pushHtmlChunk();
+
+            // next template element
+            quasi = quasis[i + 1];
+            text = quasi.value.raw;
+            if(trimmedQuote && text[0] === trimmedQuote) {
+                text = text.slice(1);
+            }
+            else {
+            // TODO: Quote match validation errors
+            }
+            if(i + 1 === bindings.length) {
+                text = text.replace(SMART_TRIM_END, '');
+            }
+
+            parser.write(text);
+        }
     }
     
     parser.end();
     
-    // don't forget the last chunk!
-    pushHtmlChunk();
+    
+    pushHtmlChunk(); // don't forget the last chunk!
     template.quasis = chunks.map(chunk => chunk.flat().join(''));
 
     // TBD:
     // azNode.targets = targets;
 
     return azNode;
+}
+
+class ElementContext {
+    el = null;
+    inTagOpen = true;
+    attributes = [];
+    isBound = false;
+
+    constructor(name) {
+        this.el = {
+            name,
+            childrenLength: 0
+        };
+    }
 }
