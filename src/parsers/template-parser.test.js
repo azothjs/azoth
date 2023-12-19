@@ -136,21 +136,6 @@ describe('Bindings', () => {
                     name: 'p'
                     childCount: 1
               ]
-            chunks: [
-          '<div>    
-                          <p data-bind>hello '
-          '<text-node></text-node>'
-          '!</p>
-                          <p>count: <span data-bind><text-node></text-node>'
-          '</span></p>
-                          <p data-bind><text-node></text-node>'
-          ' + <text-node></text-node>'
-          ' = <text-node></text-node>'
-          '</p>
-                          <p data-bind><text-node></text-node>'
-          '</p>
-                      </div>'
-            ]
         `);
     });
 
@@ -196,12 +181,6 @@ describe('Bindings', () => {
                     name: 'div'
                     childCount: 0
               ]
-            chunks: [
-          '<p data-bind name="title"'
-          '>
-                          /<div style="color: red" data-bind'
-          '/'
-            ]
         `);
     });
 
@@ -229,10 +208,6 @@ describe('Bindings', () => {
                     name: 'div'
                     childCount: 0
               ]
-            chunks: [
-          '<div style="color: red" data-bind'
-          '></div>'
-            ]
         `);
     });
 

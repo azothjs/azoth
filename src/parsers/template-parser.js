@@ -168,7 +168,7 @@ export function parse(azNode) {
     
     // don't forget the last chunk!
     pushHtmlChunk();
-    azNode.chunks = chunks.map(chunk => chunk.flat().join(''));
+    template.quasis = chunks.map(chunk => chunk.flat().join(''));
 
     // TBD:
     // azNode.targets = targets;
