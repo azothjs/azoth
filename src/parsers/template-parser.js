@@ -2,32 +2,35 @@ import { Parser as HtmlParser } from 'htmlparser2';
 import { smartTrimLeft, smartTrimRight } from '../transformers/smart-trim.js';
 import voidElements from '../utils/void-elements.js';
 
+
+// element context
+let context = null;
+const contextStack = [];
+const peek = () => contextStack.at(-1); 
+const addContext = (name) => {
+    const ctx = {
+        inTagOpen: true,
+        el: {
+            name,
+            childCount: 0
+        },
+        attrs: [],
+        isBound: false,
+    };
+    contextStack.push(ctx);
+    context = ctx; 
+};
+const removeContext = () => {
+    contextStack.pop();
+    context = contextStack.at(-1);
+};
+
+
 export function parse(azNode) {
     const { template } = azNode;
     const { quasis, bindings } = template;
 
-    // element context
-    let context = null;
-    const contextStack = [];
-    const peek = () => contextStack.at(-1); 
-    const addContext = (name) => {
-        const ctx = {
-            inTagOpen: true,
-            el: {
-                name,
-                childCount: 0
-            },
-            attrs: [],
-            isBound: false,
-        };
-        contextStack.push(ctx);
-        context = ctx; 
-    };
-    const removeContext = () => {
-        contextStack.pop();
-        context = contextStack.at(-1);
-    };
-
+    
     // add a root context for parsing ease
     addContext('<>');
 
@@ -168,7 +171,7 @@ export function parse(azNode) {
     
     // don't forget the last chunk!
     pushHtmlChunk();
-    azNode.chunks = chunks.map(chunk => chunk.flat().join(''));
+    template.quasis = chunks.map(chunk => chunk.flat().join(''));
 
     // TBD:
     // azNode.targets = targets;

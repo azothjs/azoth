@@ -23,7 +23,7 @@ const transpile = input => {
     return { code, map: sourceMap };
 };
 
-describe.skip('generator', () => {
+describe('generator', () => {
 
     it('generates from normal ast', ({ expect }) => {
         const t = () => {
@@ -36,7 +36,7 @@ describe.skip('generator', () => {
     `);
     });
 
-    it('generates from azoth ast static template', ({ expect }) => {
+    it.skip('generates from azoth ast static template', ({ expect }) => {
         const t = () => {
             let t = _`az`;
         }; 
