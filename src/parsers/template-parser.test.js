@@ -19,7 +19,7 @@ const parseTemplate = (code) => {
     return parse(template);
 };
 
-const getQuasis = code => parseTemplate(code).template.quasis;
+const getQuasis = tmpl => parseTemplate(tmpl).template.quasis;
 const getHtml = (code) => parseTemplate(code).html;
 
 beforeEach(async ({ expect }) => {
@@ -27,65 +27,62 @@ beforeEach(async ({ expect }) => {
     addSerializers(expect, { excludeKeys: ['type', 'start', 'end'] });
 });
 
-describe.concurrent('static html handling in templates', () => {
-    test('element with class and text content', ({ expect }) => {
-        function t1() {
-            _/*html*/`
-                <span class="greeting">hello world</span>
-            `;
-        }
-        const quasis = getQuasis(t1);
-        expect(quasis).toMatchInlineSnapshot();
-    });
+describe('static html handling in templates', () => {
+    test('element with class and text content', ({ expect }) => 
+        expect(getQuasis(() => _/*html*/`
+
+            <span class="greeting">hello world</span>
+
+        `)).toMatchInlineSnapshot(`
+          [
+            "<span class="greeting">hello world</span>",
+          ]
+        `)
+    );
 
     test('void and self-closing elements', ({ expect }) => {
-        function t1() {
-            _/*html*/`
-                <br>
-                <br/>
-                <self-closing/>
-                <self-closing/>text
-                <self-closing></self-closing>
-                <div></div>
-                <div>text</div>
-            `;
-        }
-        const quasis = getQuasis(t1);
-
-        expect(quasis).toMatchInlineSnapshot([
-            `<br>
-                <br>
-                <self-closing>/
-                <self-closing>/text
-                <self-closing></self-closing>
-                <div></div>
-                <div>text</div>`,
-        ]);
+        expect(getQuasis(() => _/*html*/`            
+            <br>
+            <br/>
+            <self-closing/>
+            <self-closing/>text
+            <self-closing></self-closing>
+            <div></div>
+            <div>text</div>
+           
+        `)).toMatchInlineSnapshot(`
+          [
+            "<br>
+                      <br>
+                      <self-closing>/
+                      <self-closing>/text
+                      <self-closing></self-closing>
+                      <div></div>
+                      <div>text</div>",
+          ]
+        `);
     });
 
     test('nested elements', ({ expect }) => {
-        function t1() {
-            _/*html*/`
-                <div><div><div><div><div></div></div></div></div></div>
-            `;
-        }
-        const quasis = getQuasis(t1);
-    
-        expect(quasis).toMatchInlineSnapshot([
-            '<div><div><div><div><div></div></div></div></div></div>',
-        ]);
+        expect(getQuasis(() => _/*html*/`
+
+            <div><div><div><div><div></div></div></div></div></div>
+        
+        `)).toMatchInlineSnapshot(`
+          [
+            "<div><div><div><div><div></div></div></div></div></div>",
+          ]
+        `);
     });
 
     test('html comments are copied', ({ expect }) => {
-        function t1() {
-            _/*html*/`
-              <span class="greeting"><!--hello--> world</span>
-          `;
-        }
-        const quasis = getQuasis(t1);
-        expect(quasis).toMatchInlineSnapshot(`
+        expect(getQuasis(() => _/*html*/`
+
+            <span class="greeting"><!--hello--> world</span>
+        
+        `)).toMatchInlineSnapshot(`
           [
-            "<span class="greeting"> world</span>",
+            "<span class="greeting"><!--hello--> world</span>",
           ]
         `);
     });

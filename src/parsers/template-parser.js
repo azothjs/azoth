@@ -86,8 +86,7 @@ export function parse(azNode) {
             popContext();
         },
         oncomment(comment) {
-            // implement me...
-            console.log(comment);
+            html.push(`<!--${comment}-->`);
         },
     };
 
