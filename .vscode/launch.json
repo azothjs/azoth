@@ -34,7 +34,7 @@
             "args": [
                 "run",
                 "-t",
-                "void and self\\-closing elements"
+                "normal template literal"
             ],
             "smartStep": true,
             "console": "integratedTerminal"

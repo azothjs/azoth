@@ -1,5 +1,5 @@
 import { Parser } from 'acorn';
-import acornAz from './parsers/acorn-azoth/acorn-az.js';
+import acornAzothPlugin from './parsers/acorn-azoth';
 import { azothGenerate as generate } from './generator';
 import { SourceMapGenerator } from 'source-map';
 import { normalizePath } from 'vite';
@@ -8,7 +8,7 @@ const jsFile = /\.js$/;
 
 export default function AzothPlugin() {
 
-    const AzParser = Parser.extend(acornAz());
+    const AzParser = Parser.extend(acornAzothPlugin());
 
     const parse = code => AzParser.parse(code, {
         ecmaVersion: 'latest',

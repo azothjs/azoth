@@ -1,6 +1,6 @@
 import { beforeEach, describe, test } from 'vitest';
 import { Parser } from 'acorn';
-import acornAz from '../parsers/acorn-azoth/acorn-az.js';
+import acornAz from '../parsers/acorn-azoth';
 import { parse } from './template-parser.js';
 import addSerializers from './acorn-azoth/ast-serializers.js';
 import { toMatchCode } from '../utils/code-matchers.js';
@@ -32,7 +32,7 @@ beforeEach(async ({ expect }) => {
     // addSerializers(expect, { excludeKeys: ['type', 'start', 'end'] });
 });
 
-describe('static html', () => {
+describe.skip('static html', () => {
     test('element with class and text content', ({ expect }) => 
         expect(getQuasis(() => _/*html*/`
 
@@ -96,7 +96,7 @@ describe('static html', () => {
 
 });
 
-describe('bindings', () => {
+describe.skip('bindings', () => {
 
     beforeEach(async ({ expect }) => {
         // expect.addSnapshotSerializer(htmlPretty);

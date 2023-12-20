@@ -1,6 +1,5 @@
 /* eslint-disable no-useless-escape */
 import { Parser } from 'acorn';
-// import acornAz from './acorn-az.js';
 import { beforeEach, test } from 'vitest';
 import addSerializers from './ast-serializers.js';
 import '../../utils/code-matchers.js';

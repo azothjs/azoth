@@ -1,5 +1,3 @@
-
-
 type emoji = { name: string, text: string };
 type emojiStream = (emoji: emoji) => void;
 

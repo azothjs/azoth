@@ -1,54 +1,42 @@
+export function create(acorn) {
+    const { TokenType, TokContext } = acorn; // classes
+    const { tokTypes, tokContexts } = acorn; // instances
 
+    /* new context types */
+    
+    // dom template context based on query (string) template
+    const { isExpr, preserveSpace, override, generator } = tokContexts.q_tmpl;
+    const dom_tmpl = new TokContext('#`', isExpr, preserveSpace, override, generator);
 
-// The map to `acorn-az` tokens from `acorn` namespace objects.
-const acornAzMap = new WeakMap();
-
-// Get the original tokens for the given `acorn` namespace object.
-export function getAzTokens(acorn) {
-    acorn = acorn.Parser.acorn ?? acorn;
-    let acornAz = acornAzMap.get(acorn);
-    if(acornAz) return acornAz;
-    acornAz = createAzTokens(acorn);
-    acornAzMap.set(acorn, acornAz);
-    return acornAz;
-}
-
-function createAzTokens(acorn) {
-    const { TokenType, TokContext } = acorn;
-    const { tokTypes: types, tokContexts: contexts } = acorn;
-
-    /* new azoth token context based on query template */
-    const { isExpr, preserveSpace, override, generator } = contexts.q_tmpl;
-    const az_tmpl = new TokContext('@`', isExpr, preserveSpace, override, generator);
-
-    /* new azoth token types */
-    // azoth @` tagged template
-    const sigilQuote = new TokenType('@`');
-    sigilQuote.updateContext = function() {
-        this.context.push(az_tmpl);
+    /* new token types */
+    
+    // #` token type
+    const hashQuote = new TokenType('#`');
+    hashQuote.updateContext = function() {
+        this.context.push(dom_tmpl);
     };
-    // extend backQuote.updateContext to close @` as well
-    const bQUpdateSuper = types.backQuote.updateContext;
-    types.backQuote.updateContext = function(prevType) {
-        if(this.curContext() !== az_tmpl) {
+
+    // Extend backQuote.updateContext to close dom_tmpl context
+    const bQUpdateSuper = tokTypes.backQuote.updateContext;
+    tokTypes.backQuote.updateContext = function(prevType) {
+        if(this.curContext() !== dom_tmpl) {
             return bQUpdateSuper.call(this, prevType);
         }
-
         this.context.pop();
         this.exprAllowed = false;
-
     };
 
-    // azoth #{ dom interpolator
+    // #{ dom interpolator
     const hashBraceL = new TokenType('#{', { beforeExpr: true, startsExpr: true });
-    hashBraceL.updateContext = types.dollarBraceL.updateContext;
+    // } updates context for #{, ${, and {
+    hashBraceL.updateContext = tokTypes.dollarBraceL.updateContext;
 
     return {
         tokContexts: {
-            az_tmpl
+            dom_tmpl
         },
         tokTypes: {
-            sigilQuote,
+            hashQuote,
             hashBraceL
         }
     };

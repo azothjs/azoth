@@ -9,32 +9,19 @@
 //
 // https://github.com/acornjs/acorn-jsx/blob/main/index.js
 
-import { getLineInfo, isNewLine } from 'acorn';
-import { getAzTokens } from './tokens';
-
-export default function acornAzFactoryConfig(options) {
-    options = options ?? {};
-    return function acornAzFactory(Parser) {
-        return plugin(options, Parser);
-    };
-}
-
-const DEFAULT_SIGIL = '_';
-
-function plugin(options, Parser) {
-    const SIGIL = (options?.sigil ?? DEFAULT_SIGIL)[0];
-    const SIGIL_CODE = SIGIL.charCodeAt(0);
+export function extend(Parser, azTokens) {
+    const SIGIL_CODE = '#'.charCodeAt(0);
     
     const acorn = Parser.acorn;
-    const acornAz = getAzTokens(acorn);
+    const { isNewLine, getLineInfo } = acorn;
 
     const tt = acorn.tokTypes;
-    const { sigilQuote, hashBraceL } = acornAz.tokTypes;
-    const { az_tmpl } = acornAz.tokContexts;
+    const { hashQuote, hashBraceL } = azTokens.tokTypes;
+    const { dom_tmpl } = azTokens.tokContexts;
 
     const lBraces = new Set([hashBraceL, tt.dollarBraceL, tt.braceL]);
     
-    const TMPL_END = {
+    const TMPL_PUNCTUATION = {
         '96': tt.backQuote,
         '36': tt.dollarBraceL,
         '123': tt.braceL,
@@ -44,14 +31,13 @@ function plugin(options, Parser) {
     return class extends Parser {
         // Expose azoth `tokTypes` and `tokContexts` to other plugins.
         // Cause that's what the jsx plugin did, ;)
-        static get acornAz() {
-            return acornAz;
+        static get azothTokens() {
+            return azTokens;
         }
 
-        /* Tokenization Methods */
-
-        static tokenizer(input, options) {
-            return new this(options, input);
+        /* Tokenization Method */
+        static tokenizer(input, options, start) {
+            return new this(options, input, start);
         }
 
         readToken(code) {
@@ -66,25 +52,21 @@ function plugin(options, Parser) {
                     this.skipBlockComment(); // will advance this.pos
                 }
 
-                if(input.charCodeAt(this.pos) === 96) { // `
+                const charCode = input.charCodeAt(this.pos);
+
+                if(charCode === 96) { // `
                     this.pos++;
-                    return this.finishToken(sigilQuote);
+                    return this.finishToken(hashQuote);
                 }
                 else {
-                    this.pos = pos;
+                    this.raise(this.pos, `Expected "\`" after "#" but found character "${String.fromCharCode(charCode)}"`);
                 }
             }
             super.readToken(code);
         }
 
         readTmplEnd(code) {
-            const token = TMPL_END[code];
-            if(!token) {
-                throw `Unexpected character "${String.fromCharCode(code)}" (${code}) in azothAcorn parser.readTmplEnd. This shouldn't happen.`;
-            }
-           
-            this.pos += token.label.length;
-            return this.finishToken(token);
+
         }
 
         // These are copied and modified methods from base acorn parser.
@@ -112,7 +94,7 @@ function plugin(options, Parser) {
                 const isBraceL = ch === 123; // {
 
                 if(isBackQuote || isDollar || isHash || isBraceL) {
-                    const isAzTmpl = this.curContext() === az_tmpl;
+                    const isAzTmpl = this.curContext() === dom_tmpl;
                     const hasBraceLNext = (isHash || isDollar) && this.input.charCodeAt(this.pos + 1) === 123; // {
                     const isDollarBraceL = isDollar && hasBraceLNext; // ${
                     const isHashBraceL = isHash && hasBraceLNext; // #{
@@ -142,7 +124,9 @@ function plugin(options, Parser) {
                         // if empty string)
                         if(this.pos === this.start && (this.type === tt.template || this.type === tt.invalidTemplate)) {
                             // finish boundary token (backQuote or interpolator)
-                            return this.readTmplEnd(ch);
+                            const token = TMPL_PUNCTUATION[ch];
+                            this.pos += token.label.length;
+                            return this.finishToken(token);
                         }
 
                         // otherwise, finish template token:
@@ -197,7 +181,7 @@ function plugin(options, Parser) {
                         }
                         // fallthrough if #{ or ${
                     case '{':
-                        if(code !== '$' && this.curContext() !== az_tmpl) {
+                        if(code !== '$' && this.curContext() !== dom_tmpl) {
                             break;
                         }
                         // fallthrough if ${ or azoth template with #{ or {
@@ -213,7 +197,7 @@ function plugin(options, Parser) {
 
         /* Parsing Methods */
         parseExprAtomDefault() {
-            if(this.type !== sigilQuote) {
+            if(this.type !== hashQuote) {
                 return super.parseExprAtomDefault();
             }
 
