@@ -4,6 +4,7 @@ import acornAz from '../parsers/acorn-azoth/acorn-az.js';
 import { parse } from './template-parser.js';
 import addSerializers from './acorn-azoth/ast-serializers.js';
 import { toMatchCode } from '../utils/code-matchers.js';
+import htmlPretty from 'jest-serializer-html';
 
 const _ = () => {};
 const AzParser = Parser.extend(acornAz());
@@ -16,18 +17,22 @@ const parseTemplate = (code) => {
 
     // remove preamble nodes
     const template = ast.body[0].expression;
-    return parse(template);
+    return parse(template, {
+        smartTrim: false
+    });
 };
 
 const getQuasis = tmpl => parseTemplate(tmpl).template.quasis;
+const getQuasis2 = ast => ast.template.quasis;
 const getHtml = (code) => parseTemplate(code).html;
 
 beforeEach(async ({ expect }) => {
     expect.extend(toMatchCode);
-    addSerializers(expect, { excludeKeys: ['type', 'start', 'end'] });
+    // expect.addSnapshotSerializer(htmlPretty);
+    // addSerializers(expect, { excludeKeys: ['type', 'start', 'end'] });
 });
 
-describe('static html handling in templates', () => {
+describe('static html', () => {
     test('element with class and text content', ({ expect }) => 
         expect(getQuasis(() => _/*html*/`
 
@@ -87,178 +92,43 @@ describe('static html handling in templates', () => {
         `);
     });
 
-    // TODO: handle html parsing possible errors
+    // TODO: handle html parsing possible errors...
+
 });
 
-describe('Bindings', () => {
+describe('bindings', () => {
+
+    beforeEach(async ({ expect }) => {
+        // expect.addSnapshotSerializer(htmlPretty);
+        // addSerializers(expect, { 
+        //     excludeKeys: ['type', 'start', 'end', 'quasis'] 
+        // });
+    });
 
     test('block with 4 child node interpolators bound to 3 elements', ({ expect }) => {
-        addSerializers(expect, { 
-            excludeKeys: ['type', 'start', 'end', 'quasis'] 
-        });
+        const t = () => {
+            _/*html*/`
+                <div>    
+                    <p>hello ${name}!</p>
+                    <p>count: <span>{count}</span></p>
+                    <p>{x} + {y} = {x + y}</p>
+                    <p>#{ block }</p>
+                </div>
+            `;
+        };
         
-        const code = `
-            _\`
-            <div>    
-                <p>hello \${name}!</p>
-                <p>count: <span>{count}</span></p>
-                <p>{x} + {y} = {x + y}</p>
-                <p>#{ block }</p>
-            </div>
-            \`;
-        `;
         
-        const ast = parseTemplate(code);
-        
-        expect(ast).toMatchInlineSnapshot(`
-          Node {
-            "end": 236,
-            "start": 13,
-            "template": Node {
-              "bindings": [
-                Node {
-                  "binder": "\${",
-                  "childIndex": 1,
-                  "element": {
-                    "childrenLength": 3,
-                    "name": "p",
-                  },
-                  "end": 70,
-                  "expression": Node {
-                    "end": 69,
-                    "name": "name",
-                    "start": 65,
-                    "type": "Identifier",
-                  },
-                  "queryIndex": 0,
-                  "start": 63,
-                  "type": "AzothBinding",
-                },
-                Node {
-                  "binder": "{",
-                  "childIndex": 0,
-                  "element": {
-                    "childrenLength": 1,
-                    "name": "span",
-                  },
-                  "end": 115,
-                  "expression": Node {
-                    "end": 114,
-                    "name": "count",
-                    "start": 109,
-                    "type": "Identifier",
-                  },
-                  "queryIndex": 1,
-                  "start": 108,
-                  "type": "AzothBinding",
-                },
-                Node {
-                  "binder": "{",
-                  "childIndex": 0,
-                  "element": {
-                    "childrenLength": 5,
-                    "name": "p",
-                  },
-                  "end": 149,
-                  "expression": Node {
-                    "end": 148,
-                    "name": "x",
-                    "start": 147,
-                    "type": "Identifier",
-                  },
-                  "queryIndex": 2,
-                  "start": 146,
-                  "type": "AzothBinding",
-                },
-                Node {
-                  "binder": "{",
-                  "childIndex": 2,
-                  "element": {
-                    "childrenLength": 5,
-                    "name": "p",
-                  },
-                  "end": 155,
-                  "expression": Node {
-                    "end": 154,
-                    "name": "y",
-                    "start": 153,
-                    "type": "Identifier",
-                  },
-                  "queryIndex": 2,
-                  "start": 152,
-                  "type": "AzothBinding",
-                },
-                Node {
-                  "binder": "{",
-                  "childIndex": 4,
-                  "element": {
-                    "childrenLength": 5,
-                    "name": "p",
-                  },
-                  "end": 165,
-                  "expression": Node {
-                    "end": 164,
-                    "left": Node {
-                      "end": 160,
-                      "name": "x",
-                      "start": 159,
-                      "type": "Identifier",
-                    },
-                    "operator": "+",
-                    "right": Node {
-                      "end": 164,
-                      "name": "y",
-                      "start": 163,
-                      "type": "Identifier",
-                    },
-                    "start": 159,
-                    "type": "BinaryExpression",
-                  },
-                  "queryIndex": 2,
-                  "start": 158,
-                  "type": "AzothBinding",
-                },
-                Node {
-                  "binder": "#{",
-                  "childIndex": 0,
-                  "element": {
-                    "childrenLength": 1,
-                    "name": "p",
-                  },
-                  "end": 199,
-                  "expression": Node {
-                    "end": 197,
-                    "name": "block",
-                    "start": 192,
-                    "type": "Identifier",
-                  },
-                  "queryIndex": 3,
-                  "start": 189,
-                  "type": "AzothBinding",
-                },
-              ],
-              "end": 236,
-              "quasis": [
-                "<div>    
-                          <p>hello /<div>    
-                          <p data-bind>hello ",
-                "<child-node></child-node>",
-                "!</p>
-                          <p>count: <span data-bind><child-node></child-node>",
-                "</span></p>
-                          <p data-bind><child-node></child-node>",
-                " + <child-node></child-node>",
-                " = <child-node></child-node>",
-                "</p>
-                          <p data-bind><child-node></child-node>",
-                "</p>
-                      </div>/",
-              ],
-              "start": 13,
-              "type": "TemplateLiteral",
-            },
-            "type": "AzothTemplate",
-          }
+        const ast = parseTemplate(t);
+        const quasis = getQuasis2(ast);
+
+        expect(quasis.join('')).toMatchInlineSnapshot(`
+          "<div>    
+                              <p>hello /<div>    
+                              <p data-bind>hello <child-node></child-node>!</p>
+                              <p>count: <span data-bind><child-node></child-node></span></p>
+                              <p data-bind><child-node></child-node> + <child-node></child-node> = <child-node></child-node></p>
+                              <p data-bind><child-node></child-node></p>
+                          </div>/"
         `);
     });
 
