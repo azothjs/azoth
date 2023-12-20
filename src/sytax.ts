@@ -1,4 +1,5 @@
 
+
 type emoji = { name: string, text: string };
 type emojiStream = (emoji: emoji) => void;
 
@@ -48,6 +49,44 @@ function childText(el: HTMLElement, index: number) {
     return (content : string) => childNode.textContent = content
 
 }
+
+
+class Template1 {
+    static template = dom(`c1d46e`);
+    
+    constructor(targets) {
+        const { root, targets } = template();
+        this.root = root;
+        const t0 = targets[0];              
+        this.t0_0 = t0.childNodes[0];
+        this.t0_2 = t0.childNodes[1];
+        this.t2 = targets[2];
+    }
+
+    // s1(obs, handler = null) {
+    //     const fn = handler ? v => this.u1(handler(v)) : v => this.u1(v);
+    //     subscription(obs.subscribe(fn));
+    // }
+
+    u2(val) {
+        this.t2.class = val
+    }
+
+    u1(emoji) {
+        this.t0_0.textContent = emoji.name;                        
+        this.t0_2.textContent = emoji.text; 
+    }
+}
+
+// _`<p>{~emoji.name}: {~emoji.text}</p>`;
+(() => {
+    return () => {
+        const t1 = new Template1();
+        t1.u2 = x + y;
+        subscription(root, emoji.subscribe((emoji : emoji) => t1.u1(emoji)));
+        return root;
+    }
+})();
 
 (() => {
     // _`<p>{~emoji.name}: {~emoji.text}</p>`;
@@ -129,6 +168,45 @@ function childText(el: HTMLElement, index: number) {
 
 function () {
     const emoji = await getCoolEmoji();
-    const card = emoji => _`<p>${await emoji.name, await emoji.text}: {emoji.text}</p>`
+    const card = (emoji : any) => _`<p>${await emoji.name, await emoji.text}: {emoji.text}</p>`
     return card;
 }
+
+// state 
+const cat = 'felix';
+const favorite = 'fish';
+const lives = 2;
+
+// const p = /*html*/`
+//     <p><strong>Hello</strong><em>{name}</em></p>
+// `;
+// document.body.append(p);
+
+const p = document.createElement('p')
+p.innerHTML = /*html*/`
+    <p class=${lives < 3 && 'warning'}>
+        ${cat} <strong>loves</strong> <em>${favorite}</em>
+    </p>
+`;
+document.body.append(p);
+
+const _ = () : HTMLElement => { return document.createElement('p'); }
+
+// Azoth
+const p = /*#*//*html*/`
+    <p class="{lives < 3 && 'warning'}">
+        {cat} <strong>loves</strong> <em>{favorite}</em>
+    </p>
+`;
+
+const p = (() => {
+    const { root, targets } = azoth('1er3d5');
+    const p = targets[0], em = targets[1];
+    p.textContent = cat;
+    p.className = lives < 3 && 'warning';
+    em.textContent = favorite;
+    return root
+})();
+
+document.body.append(p);
+
