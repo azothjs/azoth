@@ -9,7 +9,7 @@
 //
 // https://github.com/acornjs/acorn-jsx/blob/main/index.js
 
-import { getLineInfo } from 'acorn';
+import { getLineInfo, isNewLine } from 'acorn';
 import { getAzTokens } from './tokens';
 
 export default function acornAzFactoryConfig(options) {
@@ -32,17 +32,15 @@ function plugin(options, Parser) {
     const { sigilQuote, hashBraceL } = acornAz.tokTypes;
     const { az_tmpl } = acornAz.tokContexts;
 
-    const isNewLine = acorn.isNewLine;
-
     const lBraces = new Set([hashBraceL, tt.dollarBraceL, tt.braceL]);
-
+    
     const TMPL_END = {
         '96': tt.backQuote,
         '36': tt.dollarBraceL,
         '123': tt.braceL,
         '35': hashBraceL,
     };
-     
+    
     return class extends Parser {
         // Expose azoth `tokTypes` and `tokContexts` to other plugins.
         // Cause that's what the jsx plugin did, ;)
@@ -160,7 +158,8 @@ function plugin(options, Parser) {
                     out += this.input.slice(chunkStart, this.pos);
                     out += this.readEscapedChar(true);
                     chunkStart = this.pos;
-                } else if(isNewLine(ch)) {
+                // isNewLine is imported from acorn for this call
+                } else if(isNewLine(ch)) { 
                     out += this.input.slice(chunkStart, this.pos);
                     ++this.pos;
                     switch (ch) {
