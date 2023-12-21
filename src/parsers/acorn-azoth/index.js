@@ -28,6 +28,10 @@ function azParserFactory(Parser = AcornParser) {
     return AzParser;
 }
 
+export function parse(input, options, startPos) {
+    return azParserFactory().parse(input, options, startPos);
+}
+
 export function tokenizer(input, options, startPos) {
     return azParserFactory().tokenizer(input, options, startPos);
 }

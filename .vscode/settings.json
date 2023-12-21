@@ -9,6 +9,7 @@
         "onopentagname",
         "ontext",
         "quasis",
+        "templatize",
         "tmpl"
     ],
     "typescript.format.enable": false,

@@ -1,111 +1,133 @@
-import { beforeEach, describe, test } from 'vitest';
-import { Parser } from 'acorn';
-import acornAz from '../parsers/acorn-azoth';
-import { parse } from './template-parser.js';
-import addSerializers from './acorn-azoth/ast-serializers.js';
-import { toMatchCode } from '../utils/code-matchers.js';
-import htmlPretty from 'jest-serializer-html';
+import { beforeEach, describe, test, } from 'vitest';
+import { parse } from '.';
+import addSerializers from './ast-serializers.js';
+import { toMatchCode } from '../../utils/code-matchers.js';
 
-const _ = () => {};
-const AzParser = Parser.extend(acornAz());
-
+const options = { ecmaVersion: 'latest' };
 const parseTemplate = (code) => {
     if(code.toBody) code = code.toBody();
-    const ast = AzParser.parse(code, {
-        ecmaVersion: 'latest',
-    });
-
+    const ast = parse(code, options);
     // remove preamble nodes
-    const template = ast.body[0].expression;
-    return parse(template, {
-        smartTrim: false
-    });
+    return ast.body[0].expression.template;
 };
 
-const getQuasis = tmpl => parseTemplate(tmpl).template.quasis;
-const getQuasis2 = ast => ast.template.quasis;
-const getHtml = (code) => parseTemplate(code).html;
+describe('static html', () => {
 
-beforeEach(async ({ expect }) => {
-    expect.extend(toMatchCode);
-    // expect.addSnapshotSerializer(htmlPretty);
-    // addSerializers(expect, { excludeKeys: ['type', 'start', 'end'] });
-});
+    beforeEach(async (context) => {
+        const { expect } = context;
+        context.firstQuasi = html => {
+            const { quasis } = parseTemplate(html);
+            expect(quasis.length).toBe(1);
+            const [{ type, tail, value }] = quasis;
+            expect(type).toBe('TemplateElement');
+            expect(tail).toBe(true);
+            return value.raw;
+        };
+    });
 
-describe.skip('static html', () => {
-    test('element with class and text content', ({ expect }) => 
-        expect(getQuasis(() => _/*html*/`
+    test('simple text content', ({ expect, firstQuasi }) => {
+        const code = firstQuasi(`#\`hi\``);
+        expect(code).toMatchInlineSnapshot(`"hi"`);
+    });
+        
+    test('element with class and text content', ({ expect, firstQuasi }) => {
+        const code = `#\`<span class="greeting">hello world</span>\``;
+        expect(firstQuasi(code)).toMatchInlineSnapshot(
+            `"<span class="greeting">hello world</span>"`
+        );
+    });
 
-            <span class="greeting">hello world</span>
-
-        `)).toMatchInlineSnapshot(`
-          [
-            "<span class="greeting">hello world</span>",
-          ]
-        `)
-    );
-
-    test('void and self-closing elements', ({ expect }) => {
-        expect(getQuasis(() => _/*html*/`            
+    test('void and self-closing elements', ({ expect, firstQuasi }) => {
+        const code = `#\`
             <br>
             <br/>
             <self-closing/>
             <self-closing/>text
             <self-closing></self-closing>
             <div></div>
-            <div>text</div>
-           
-        `)).toMatchInlineSnapshot(`
-          [
-            "<br>
+            <div>text</div>        
+        \``;
+
+        expect(firstQuasi(code)).toMatchInlineSnapshot(`
+          "
                       <br>
-                      <self-closing>/
-                      <self-closing>/text
+                      <br/>
+                      <self-closing/>
+                      <self-closing/>text
                       <self-closing></self-closing>
                       <div></div>
-                      <div>text</div>",
-          ]
+                      <div>text</div>        
+                  "
         `);
     });
 
-    test('nested elements', ({ expect }) => {
-        expect(getQuasis(() => _/*html*/`
-
-            <div><div><div><div><div></div></div></div></div></div>
-        
-        `)).toMatchInlineSnapshot(`
-          [
-            "<div><div><div><div><div></div></div></div></div></div>",
-          ]
-        `);
+    test('nested elements', ({ expect, firstQuasi }) => {
+        const code = `#\`<div><div><div><div><div></div></div></div></div></div>\``;
+        expect(firstQuasi(code)).toMatchInlineSnapshot(
+            `"<div><div><div><div><div></div></div></div></div></div>"`
+        );
     });
 
-    test('html comments are copied', ({ expect }) => {
-        expect(getQuasis(() => _/*html*/`
-
-            <span class="greeting"><!--hello--> world</span>
-        
-        `)).toMatchInlineSnapshot(`
-          [
-            "<span class="greeting"><!--hello--> world</span>",
-          ]
-        `);
+    test('html comments are copied', ({ expect, firstQuasi }) => {
+        const code = `#\`<span class="greeting"><!--hello--> world</span>\``;
+        expect(firstQuasi(code)).toMatchInlineSnapshot(
+            `"<span class="greeting"><!--hello--> world</span>"`
+        );
     });
 
     // TODO: handle html parsing possible errors...
 
 });
 
-describe.skip('bindings', () => {
+describe('bindings', () => {
 
-    beforeEach(async ({ expect }) => {
-        // expect.addSnapshotSerializer(htmlPretty);
-        // addSerializers(expect, { 
-        //     excludeKeys: ['type', 'start', 'end', 'quasis'] 
-        // });
+    beforeEach(async (context) => {
+        const { expect } = context;
+        expect.extend(toMatchCode);
+        context.templatize = code => {
+            const { expressions, quasis } = parseTemplate(code);
+            return {
+                expressions,
+                quasis: quasis.map(q => q.value.raw)
+            };
+        };
     });
 
-    test('block with 4 child node interpolators bound to 3 elements', ({ expect }) => {
+    test.only('simple template with single {...} interpolator', ({ expect, templatize }) => {
+        const { expressions, quasis } = templatize(`
+            #\`
+                <div>    
+                    <p>hello \${name}!</p>
+                    <p>count: <span>{count}</span></p>
+                    <p>{x} + {y} = {x + y}</p>
+                    <p>#{ block }</p>
+                </div>
+            \`;
+        `);
+
+        expect(expressions).toMatchInlineSnapshot(`undefined`);
+        
+        expect(quasis).toMatchInlineSnapshot(`
+          [
+            "
+                          <div>    
+                              <p>hello ",
+            "!</p>
+                              <p>count: <span>",
+            "</span></p>
+                              <p>",
+            " + ",
+            " = ",
+            "</p>
+                              <p>",
+            "</p>
+                          </div>
+                      ",
+          ]
+        `);
+    });
+
+    test.skip('block with 4 child node interpolators bound to 3 elements', ({ expect, templatize }) => {
         const t = () => {
             _/*html*/`
                 <div>    
@@ -132,7 +154,7 @@ describe.skip('bindings', () => {
         `);
     });
 
-    test('property bynders', ({ expect }) => {
+    test.skip('property bynders', ({ expect }) => {
         addSerializers(expect, { 
             excludeKeys: ['type', 'start', 'end', 'quasis'] 
         });
@@ -221,7 +243,7 @@ describe.skip('bindings', () => {
         `);
     });
 
-    test('property binders 2', ({ expect }) => {
+    test.skip('property binders 2', ({ expect }) => {
         addSerializers(expect, { 
             excludeKeys: ['type', 'start', 'end', 'quasis'] 
         });

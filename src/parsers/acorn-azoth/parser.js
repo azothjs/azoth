@@ -102,7 +102,7 @@ export function extend(Parser, azTokens) {
                     // Azoth interpolator found in normal template. 
                     if(!isAzTmpl && (isHashBraceL || (isBraceL && this.input.charCodeAt(this.pos - 1) === 35))) {
                         // If the DX works and no syntax highlight we can prob skip.
-                        // Still would need the if because it prevents the else code and
+                        // Still would need the "if" because it prevents the else code and
                         // allows for continued execution
                         let { line, column } = getLineInfo(this.input, this.pos);
                         let warning = `azoth interpolator ${isHash ? '#' : ''}{...} `;

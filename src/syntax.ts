@@ -1,3 +1,12 @@
+
+
+function render(...p?) : Node {
+    console.log('yo')
+    return document.createElement('p')
+}
+
+
+
 type emoji = { name: string, text: string };
 type emojiStream = (emoji: emoji) => void;
 
@@ -101,6 +110,10 @@ class Template1 {
         return root;
     }
 })();
+
+
+
+
 
 (() => {
     // _`<p>{~emoji.name}: {~emoji.text}</p>`;

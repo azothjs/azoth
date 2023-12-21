@@ -1,10 +1,19 @@
 import { Parser as HtmlParser } from 'htmlparser2';
-import voidElements from '../utils/void-elements.js';
-import { 
-    SMART_TRIM, 
-    SMART_TRIM_END, 
-    SMART_TRIM_START 
-} from './smart-trim';
+import voidElements from '../../utils/void-elements.js';
+
+class ElementContext {
+    el = null;
+    inTagOpen = true;
+    attributes = [];
+    isBound = false;
+
+    constructor(name) {
+        this.el = {
+            name,
+            childrenLength: 0
+        };
+    }
+}
 
 export function parse(azNode) {
     const { template } = azNode;
@@ -62,7 +71,6 @@ export function parse(azNode) {
         if(attr === attribute) attribute = null;
     };
 
-    
     const handler = {
         onopentagname(name) {
             context.el.childrenLength++; // parent element
@@ -92,20 +100,16 @@ export function parse(azNode) {
 
     var parser = new HtmlParser(handler, { recognizeSelfClosing: true });
 
-    // opening template element html
+    // walk the ast and iterate through by expression and quasi
     let quasi = quasis[0];
-    let text = quasi.value.raw.replace(SMART_TRIM_START, '');
-    const isStatic = quasis.length === 1; // no bindings
-    if(isStatic) text = text.replace(SMART_TRIM_END, '');
-        
+    let text = quasi.value.raw;    
     if(text) parser.write(text);
     
-    if(!isStatic) {
+    if(quasis.length > 1) {
         if(text) parser.write(text);
         pushHtmlChunk();
 
         const targets = [];
-
         for(let i = 0; i < bindings.length; i++) {
             const binding = bindings[i];
             const { el } = context;
@@ -159,36 +163,18 @@ export function parse(azNode) {
             else {
             // TODO: Quote match validation errors
             }
-            if(i + 1 === bindings.length) {
-                text = text.replace(SMART_TRIM_END, '');
-            }
 
             parser.write(text);
         }
     }
     
     parser.end();
-    
-    
     pushHtmlChunk(); // don't forget the last chunk!
+    
     template.quasis = chunks.map(chunk => chunk.flat().join(''));
 
     // TBD:
     // azNode.targets = targets;
 
     return azNode;
-}
-
-class ElementContext {
-    el = null;
-    inTagOpen = true;
-    attributes = [];
-    isBound = false;
-
-    constructor(name) {
-        this.el = {
-            name,
-            childrenLength: 0
-        };
-    }
 }
