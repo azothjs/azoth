@@ -54,7 +54,7 @@ export function extend(Parser, azTokens) {
 
                 const charCode = input.charCodeAt(this.pos);
 
-                if(charCode === 96) { // `
+                if(charCode === 96) { // "`"
                     this.pos++;
                     return this.finishToken(hashQuote);
                 }
@@ -63,10 +63,6 @@ export function extend(Parser, azTokens) {
                 }
             }
             super.readToken(code);
-        }
-
-        readTmplEnd(code) {
-
         }
 
         // These are copied and modified methods from base acorn parser.
