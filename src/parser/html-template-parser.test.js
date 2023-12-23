@@ -1,5 +1,5 @@
 import { beforeEach, describe, test, } from 'vitest';
-import { getParser } from './template-parser.js';
+import { getParser } from './html-template-parser.js';
 import { addSerializers } from './serializers.js';
  
 beforeEach(context => {

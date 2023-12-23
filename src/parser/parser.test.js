@@ -1,6 +1,6 @@
 import { beforeEach, describe, test, } from 'vitest';
 import { parse } from './index.js';
-import { toMatchCode } from '../../utils/code-matchers.js';
+import { toMatchCode } from '../utils/code-matchers.js';
 
 const options = { ecmaVersion: 'latest' };
 const parseTemplate = (code) => {

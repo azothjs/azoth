@@ -9,7 +9,7 @@
 //
 // https://github.com/acornjs/acorn-jsx/blob/main/index.js
 
-import { create } from './tokens';
+import { create } from './tokens.js';
 import { Parser as AcornParser } from 'acorn';
 import { extend } from './parser.js';
 

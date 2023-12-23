@@ -1,11 +1,12 @@
 import { Parser as HtmlParser } from 'htmlparser2';
-import voidElements from '../../utils/void-elements.js';
+import voidElements from './void-elements.js';
 
 class ElementContext {
     el = null;
     inTagOpen = true;
     attributes = [];
     isBound = false;
+    bindings = [];
 
     constructor(name) {
         this.el = {
@@ -97,6 +98,9 @@ export function getParser() {
         onclosetag(name, isImplied) {
             // void, self-closing, tags
             // TODO: how do we replicate what the dev wrote?
+
+            console.log(context.isBound, context.bindings);
+
             if(!voidElements.has(name)) html.push(`</${name}>`);
             if(context.isBound) addAttribute({ name: 'data-bind' });
             popContext();
@@ -138,6 +142,7 @@ export function getParser() {
 
         // el obj ref - length property will increase if more added
         const binding = { queryIndex, element: el, };
+        context.bindings.push(binding);
         bindings.push(binding);
         context.isBound = true;
 
@@ -148,27 +153,23 @@ export function getParser() {
 
             // figure out if there was an opening quote
             const match = text.match(endQuote) ?? '';
-            if(match && match.length > 1) {
-                parser.write(eatQuote = match[1]);
-            } 
-            else {
-                parser.write('""');
-
-            }
+            const quote = match?.length > 1 ? match[1] : '""';
+            parser.write(eatQuote = quote);
         
             if(attribute) binding.property = attribute.name;
-            
-            // Clear attribute so it does NOT get pushed to
-            // html (we are setting as an element property)
+            // TODO: else { when would we end up here? } 
+
+            // Clear attribute from outputting to the html
+            // as will be set via assignment to el.property instead
             attribute = null;
         }
         else { /* child node (text or block) */
-            // copy current value as *this* bindings index
+            // copy current value by assigning to binding index,
+            // el.length will increase as more children added
             const index = binding.index = el.length;
             const replacement = replaceChildNodeWith(index);
             html.push(replacement);
             el.length++;
-
         }
     }
 
