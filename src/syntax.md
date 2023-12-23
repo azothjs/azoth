@@ -21,34 +21,70 @@ syntax              | interpolator syntax
 
 ## AST
 
-```
-TemplateDOMLiteral
-  expressions: (AzothExpression | Expression) []
-    AzothExpression > Expression:
-        expression: Node
-        inputs:     Identifier[]
-  quasis: (TemplateElement | HtmlTemplateElement) []
-    HtmlTemplateElement > TemplateElement
-        value: { raw, cooked }
-        tail: false
-        identifier: (AttributeIdentifier | ChildNodeIdentifier)
-            AttributeIdentifier > Identifier
-                name: attribute name
-                bind: 'property' | 'attribute'
-                binder: '{' | '#{' | '${' 
-            ChildNodeIdentifier > Identifier
-                name: '1',
-                bind: 'child' | 'element'
-                binder: '{' | '#{' | '${' 
+```js
+DomTemplateLiteral
+    expressions: (AzothExpression | Expression) []
+        AzothExpression:
+            expression: Node
+            inputs:     Identifier[]
+    quasis: [
+        TemplateElement
+            value: { raw, cooked }
+            tail: false
+    ]
+    bindings: DomBinding []
+        DomElementBinding
+            name: 'tag' | '<>'
+            queryIndex: 1
+            property: 
+                NumericLiteral (child)
+                    value: 2
+                    extra: { raw, rawValue }
+                Identifier
+                    name: 'class' 
+            interpolator: InterpolatedExpression
+                name: '{' | '#{' | '${'
 ```
 
-TBD:
+## TBD
 
+### reactivity
+
+```js
+AzothExpression:
+    expression: Node
+    inputs:     Identifier[]
 ```
-AzothTemplateExpression > TaggedTemplateExpression
+
+```js
+AzothTemplateExpression (vs TaggedTemplateExpression)
     tag
     quasi TemplateDOMLiteral
     ???
     
 ```
+
+### call expression
+
+maybe for set attribute?
+
+```js
+    CallExpression (attribute)
+        callee: MemberExpression
+            object: Identity
+                name: 'tag'
+            computed: false
+            property:
+                StringLiteral
+                    value: 'value'
+                    extra: { raw, rawValue }
+```
     
+string literal for property? vs identifier
+
+```js
+property: 
+    StringLiteral
+        value: 'value'
+        extra: { raw, rawValue }
+```

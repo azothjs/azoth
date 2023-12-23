@@ -1,6 +1,6 @@
 import './style.css';
 import { _, __makeRenderer } from '../azoth/index.js';
-import './r-and-d.js';
+import './lab.js';
 
 const template = _/*html*/`
     <main>

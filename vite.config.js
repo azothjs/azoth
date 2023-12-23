@@ -4,7 +4,8 @@ import AzothPlugin from './src/vite-azoth-plugin.js';
 
 export default defineConfig({
     test: {
-        // update: true
+        // update: true,
+        testTimeout: 30_000,
     },
     plugins: [
         // AzothPlugin(),

@@ -206,40 +206,40 @@ export function extend(Parser, azTokens) {
 
         // copied from acorn "parseTemplate" in acorn
         parseAzothTemplate() {
-            const azothNode = this.startNode();
             const node = this.startNode();
             this.next();
 
             // asymmetrical first template element
-            let curElt = this.parseTemplateElement({ isTagged : false });
+            let curElt = this.parseTemplateElement({ isTagged : false }); // isTagged controls invalid escape sequences
             
             node.quasis = [curElt];
-            node.bindings = [];
+            node.expressions = [];
 
             while(!curElt.tail) {
                 if(this.type === tt.eof) this.raise(this.pos, 'Unterminated template literal');
                 // expect ${, #{, or {
                 if(!lBraces.has(this.type)) this.unexpected();
-                const binding = this.startNode();
-                binding.binder = this.type.label;
-                node.bindings.push(binding);
+
+                // TODO: Reactive expressions
+                // const azothExpr = this.startNode();
+                // node.expressions.push(azothExpr);
 
                 this.next();
                 // ...expression ...
-                binding.expression = this.parseExpression();
+                const expr = this.parseExpression();
+                node.expressions.push(expr);
                 
                 // }
                 this.expect(tt.braceR);
-                this.finishNode(binding, 'AzothBinding');
+
+                // this.finishNode(azothExpr, 'AzothExpression');
                 
                 // next template element
                 node.quasis.push(curElt = this.parseTemplateElement({ isTagged : true }));
             }
 
             this.next();
-            this.finishNode(node, 'TemplateLiteral');
-            azothNode.template = node;
-            return this.finishNode(azothNode, 'AzothTemplate');
+            return this.finishNode(node, 'TemplateDomLiteral');
 
         }
           
