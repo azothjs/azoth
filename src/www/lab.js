@@ -1,14 +1,30 @@
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+// const cats = ['felix', 'duchess', 'tom'];
 
-class Component {
-    cat = 'default cat';
-    rendered = `<p>Hello ${this.cat}</p>`;
-    
-    constructor(cat) {
-        this.cat = 'puss in boots';
-    }
+function * cats() {
+    yield 'felix';
+    yield 'duchess';
+    yield 'tom';
+}
+const catsIterator = cats();
+// catsIterator[Symbol.iterator]
+
+const template = `hello ${[...catsIterator]}`;
+console.log(template);
+
+async function * effect() {
+    yield 'loading...';
+    sleep(5000);
+    yield 'duchess';
 }
 
-let c = new Component();
+// function * formatGreeting()
 
-console.log(c.renderer);
+const effectIterator = effect();
+// effectIterator[Symbol.asyncIterator])
+
+for await (const cat of effect()) {
+    console.log(cat);
+}
+
