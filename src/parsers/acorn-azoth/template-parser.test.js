@@ -283,7 +283,7 @@ describe('bindings', () => {
               [
                 { "queryIndex": 0, "name": "input", "property": "class" },
                 { "queryIndex": 0, "name": "input", "property": "name" },
-                { "queryIndex": 0, "name": "input", "property": "maxlength" },
+                { "queryIndex": 0, "name": "input", "property": "maxLength" },
                 { "queryIndex": 0, "name": "input", "property": "disabled" },
               ]
             `);

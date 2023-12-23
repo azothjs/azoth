@@ -95,9 +95,8 @@ export function getParser() {
             html.push(text);
         },
         onclosetag(name, isImplied) {
-            // void, self-closing, normal ??? 
-            // TODO: if(isImplied && !config.allowSelfClosing)..warning?
-            // maybe only for custom elements, throw or ignore?
+            // void, self-closing, tags
+            // TODO: how do we replicate what the dev wrote?
             if(!voidElements.has(name)) html.push(`</${name}>`);
             if(context.isBound) addAttribute({ name: 'data-bind' });
             popContext();
@@ -110,6 +109,7 @@ export function getParser() {
 
     const parser = new HtmlParser(handler, { 
         lowerCaseTags: false,
+        lowerCaseAttributeNames: false,
         recognizeSelfClosing: true 
     });
 
