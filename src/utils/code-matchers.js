@@ -1,7 +1,9 @@
 import { diffStringsUnified as diff } from 'jest-diff';
-import { expect } from 'vitest';
+
 import { parse, generate } from './ast.js';
 import './to-code.js';
+
+export const toMatchCode = { toMatchCode: codeEqual };
 
 const tryParse = (name, code) => {
     try {
@@ -57,7 +59,3 @@ function codeEqual(received, expected) {
     };
 
 }
-
-expect.extend({
-    toMatchCode: codeEqual,
-});

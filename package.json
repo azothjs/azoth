@@ -9,16 +9,25 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint --ext js ./src",
-    "test": "vitest"
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "devDependencies": {
     "acorn": "^8.11.2",
     "acorn-walk": "^8.3.1",
     "astring": "^1.8.6",
     "eslint": "^8.55.0",
+    "htmlparser2": "^9.0.0",
     "jest-diff": "^29.7.0",
+    "jest-serializer-html": "^7.1.0",
+    "pretty-format-ast": "^1.0.1",
+    "rev-hash": "^4.1.0",
+    "source-map": "^0.7.4",
     "vite": "^5.0.0",
-    "vite-plugin-inspect": "^0.8.1",
-    "vitest": "^1.0.3"
+    "vite-plugin-inspect": "^0.8.1"
+  },
+  "dependencies": {
+    "@vitest/ui": "^1.1.0",
+    "vitest": "^1.1.0"
   }
 }

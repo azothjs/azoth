@@ -6,6 +6,10 @@ Function.prototype.toCode = function() {
     return generate(ast);
 };
 
+Function.prototype.toBody = function() {
+    return getBody(this);
+};
+
 function getBody(fn) {
     const trimmed = fn.toString().trim();
     const length = trimmed.length;

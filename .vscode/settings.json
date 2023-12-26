@@ -1,5 +1,19 @@
 {
     "cSpell.words": [
-        "astring"
-    ]
+        "astring",
+        "backquote",
+        "onattribute",
+        "onclosetag",
+        "oncomment",
+        "onopentag",
+        "onopentagname",
+        "ontext",
+        "quasis",
+        "templatize",
+        "tmpl"
+    ],
+    "typescript.format.enable": false,
+    "javascript.format.enable": true,
+    "javascript.suggestionActions.enabled": true,
+    "javascript.validate.enable": false,
 }
