@@ -226,5 +226,21 @@ describe('bindings', () => {
               ]
             `);
         });
+
+        test('no quote or empty attributes', ({ expect, parser }) => {
+            parser.write(`<input class=`);
+            parser.write(` required name=`);
+            parser.write(` type=`);
+            const { quasis, bindings } = parser.end(`>`);
+
+            expect(quasis).toMatchInlineSnapshot(`"<input required data-bind>"`);
+            expect(bindings).toMatchInlineSnapshot(`
+              [
+                { "queryIndex": 0, "name": "input", "property": "class" },
+                { "queryIndex": 0, "name": "input", "property": "name" },
+                { "queryIndex": 0, "name": "input", "property": "type" },
+              ]
+            `);
+        });
     });
 });

@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import { Parser } from 'acorn';
-import acornAz from '../parsers/acorn-azoth';
+import acornAz from '../parser';
 import { azothGenerate as generate } from './index.js';
 import '../utils/code-matchers.js';
 import { describe, it } from 'vitest';
@@ -25,7 +25,7 @@ const transpile = input => {
 
 describe.skip('generator', () => {
 
-    it('generates from normal ast', ({ expect }) => {
+    it.skip('generates from normal ast', ({ expect }) => {
         const t = () => {
             `hello ${place}`;
         }; 

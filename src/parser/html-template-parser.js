@@ -84,7 +84,7 @@ export function getParser() {
         },
         onopentag() {           
             context.inTagOpen = false;
-            html.push(context.attributes);
+            html.push(context.attributes); // open for further adds & removes
             html.push('>');
         },
         ontext(text) {            
