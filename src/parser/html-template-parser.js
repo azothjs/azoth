@@ -90,17 +90,21 @@ export function getParser() {
             if(attribute) addAttribute();
             attribute = { name, value, quote };
         },
-        onopentag: closeOpenTag,
+        onopentag() {
+            if(attribute) addAttribute(attribute);
+        
+            if(context.inTagOpen) {
+                context.inTagOpen = false;
+                html.push('>');
+            }
+ 
+        },
         ontext(text) {            
             context.el.length++;
             html.push(text);
         },
         onclosetag(name, isImplied) {
             // void, self-closing, tags
-            // TODO: how do we replicate what the dev wrote?
-
-            console.log(context.isBound, context.bindings);
-
             if(!voidElements.has(name)) html.push(`</${name}>`);
             if(context.isBound) addAttribute({ name: 'data-bind' });
             popContext();
