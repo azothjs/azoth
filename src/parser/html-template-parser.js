@@ -20,18 +20,20 @@ class ElementContext {
 class ContextStack {
     stack = [];
     current = null;
+    root = null;
 
     constructor() {
-        this.current = this.pushContext('<>');
-        this.current.inTagOpen = false;
+        this.root = this.current = this.push('<>');
+        this.root.inTagOpen = false;
     }
 
-    pushContext(name) {
+    push(name) {
         const ctx = new ElementContext(name);
         this.stack.push(this.current = ctx);
+        return ctx;
     }
 
-    popContext(){
+    pop(){
         this.stack.pop();
         this.current = this.stack.at(-1);
     }
@@ -47,67 +49,53 @@ export function getParser() {
     const replaceChildNodeWith = index => `<!--child[${index}]-->`;
 
     // element context
-    let context = null;
-    const contextStack = [];
-
-    // extend Array
-    const pushContext = (name) => {
-        const ctx = new ElementContext(name);
-        contextStack.push(ctx);
-        return context = ctx; 
-    };
-    const popContext = () => {
-        contextStack.pop();
-        context = contextStack.at(-1);
-    };
-    
-    // constructor:
-    // add a root context for parsing ease
-    const root = pushContext('<>');
-    root.inTagOpen = false;
+    let context = new ContextStack();
 
     let html = [];
 
     const handler = {
         onopentagname(name) {
-            context.el.length++; // parent childNodes
-            pushContext(name);
+            context.current.el.length++; // parent childNodes
+            context.push(name);
             html.push(`<${name}`);
         },
         onattribute(name, value, quote) {
-            const binding = context.waiting;
-            context.waiting = null;
+            const { current } = context;
+            const binding = current.waiting;
+            current.waiting = null;
             if(binding) binding.property = name;
 
             value ??= '';
             const isEmpty = !quote && !value;
-            context.attributes.push(isEmpty ? ` ${name}` : ` ${name}="${value}"`);
+            current.attributes.push(isEmpty ? ` ${name}` : ` ${name}="${value}"`);
         },
-        onopentag() {           
-            context.inTagOpen = false;
-            html.push(context.attributes); // open for further adds & removes
+        onopentag() {    
+            const { current } = context;       
+            current.inTagOpen = false;
+            html.push(current.attributes); // open for further adds & removes
             html.push('>');
         },
         ontext(text) {            
-            context.el.length++;
+            context.current.el.length++;
             html.push(text);
         },
         onclosetag(name, isImplied) {
+            const { current } = context;
             // void, self-closing, tags
             if(!voidElements.has(name)) html.push(`</${name}>`);
 
-            if(context.bindings.length) {
-                const { bindings, attributes } = context;
+            if(current.bindings.length) {
+                const { bindings, attributes } = current;
                 for(let i = 0; i < bindings.length; i++) {
                     attributes[bindings[i].attributeIndex] = '';
                 }
                 handler.onattribute('data-bind');
             }
 
-            popContext();
+            context.pop();
         },
         oncomment(comment) {
-            context.el.length++;
+            context.current.el.length++;
             html.push(`<!--${comment}-->`);
         },
     };
@@ -135,20 +123,21 @@ export function getParser() {
     function write(text) {
         writeText(text);
 
-        const { el } = context;
+        const { current, root } = context;
+        const { el } = current;
         // queryIndex is the index of element in querySelectorAll bound els
         let queryIndex = targets.lastIndexOf(el);
-        if(queryIndex === -1 && context !== root) queryIndex = (targets.push(el) - 1);
+        if(queryIndex === -1 && current !== root) queryIndex = (targets.push(el) - 1);
 
         // el obj ref - length property will increase if more added
         const binding = { queryIndex, element: el, };
-        context.bindings.push(binding);
+        current.bindings.push(binding);
         templateBindings.push(binding); // ?
 
         /* property binder via attribute */
-        if(context.inTagOpen) { 
-            binding.attributeIndex = context.attributes.length;
-            context.waiting = binding;
+        if(current.inTagOpen) { 
+            binding.attributeIndex = current.attributes.length;
+            current.waiting = binding;
             // force the onattribute to by full set of matching quotes
             const match = text.match(endQuote) ?? '';
             const quote = match?.length > 1 ? match[1] : '""';
