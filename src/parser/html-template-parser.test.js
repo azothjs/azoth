@@ -275,7 +275,7 @@ describe('bindings', () => {
 
             expect(quasis).toMatchInlineSnapshot(`
               [
-                "<input required "' type='text' data-bind"
+                "<input required type='text' data-bind"
                 "><p></p>"
               ]
             `);
