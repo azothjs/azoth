@@ -1,44 +1,6 @@
 import { Parser as HtmlParser } from 'htmlparser2';
 import voidElements from './void-elements.js';
 
-class ElementContext {
-    el = null;
-    inTagOpen = true;
-    attributes = [];
-    bindings = [];
-    waiting = null;
-
-    constructor(name) {
-        this.el = {
-            name,
-            keys: 0,
-            length: 0
-        };
-    }
-}
-
-class ContextStack {
-    stack = [];
-    current = null;
-    root = null;
-
-    constructor() {
-        this.root = this.current = this.push('<>');
-        this.root.inTagOpen = false;
-    }
-
-    push(name) {
-        const ctx = new ElementContext(name);
-        this.stack.push(this.current = ctx);
-        return ctx;
-    }
-
-    pop(){
-        this.stack.pop();
-        this.current = this.stack.at(-1);
-    }
-}
-
 // test cases at https://regex101.com/r/2kW0JN
 // (note no global flags, remove when copying from regex101)
 const startQuote = /^\s*["]/;
@@ -46,72 +8,18 @@ const endQuote = /(?:=)\s*(["|'])\s*$/;
 
 export function getParser() {
 
-    const replaceChildNodeWith = index => `<!--child[${index}]-->`;
-
-    // element context
-    let context = new ContextStack();
-
-    let html = [];
-
-    const handler = {
-        onopentagname(name) {
-            context.current.el.length++; // parent childNodes
-            context.push(name);
-            html.push(`<${name}`);
-        },
-        onattribute(name, value, quote) {
-            const { current } = context;
-            const binding = current.waiting;
-            current.waiting = null;
-            if(binding) binding.property = name;
-
-            value ??= '';
-            const isEmpty = !quote && !value;
-            current.attributes.push(isEmpty ? ` ${name}` : ` ${name}="${value}"`);
-        },
-        onopentag() {    
-            const { current } = context;       
-            current.inTagOpen = false;
-            html.push(current.attributes); // open for further adds & removes
-            html.push('>');
-        },
-        ontext(text) {            
-            context.current.el.length++;
-            html.push(text);
-        },
-        onclosetag(name, isImplied) {
-            const { current } = context;
-            // void, self-closing, tags
-            if(!voidElements.has(name)) html.push(`</${name}>`);
-
-            if(current.bindings.length) {
-                const { bindings, attributes } = current;
-                for(let i = 0; i < bindings.length; i++) {
-                    attributes[bindings[i].attributeIndex] = '';
-                }
-                handler.onattribute('data-bind');
-            }
-
-            context.pop();
-        },
-        oncomment(comment) {
-            context.current.el.length++;
-            html.push(`<!--${comment}-->`);
-        },
-    };
-
-    const parser = new HtmlParser(handler, { 
+    const context = new TemplateContext();
+    const parser = new HtmlParser(context, { 
         lowerCaseTags: false,
         lowerCaseAttributeNames: false,
         recognizeSelfClosing: true 
     });
 
-    let length = 0;
     const targets = [];
-    const templateBindings = [];
 
+    // writeText needs to consider whether the prior .write()  
+    // added quotation marks which now need to be removed
     let eatQuote = '';
-
     function writeText(text) {
         if(text) {
             if(eatQuote && text[0] === eatQuote) text = text.slice(1);
@@ -129,28 +37,21 @@ export function getParser() {
         let queryIndex = targets.lastIndexOf(el);
         if(queryIndex === -1 && current !== root) queryIndex = (targets.push(el) - 1);
 
-        // el obj ref - length property will increase if more added
         const binding = { queryIndex, element: el, };
-        current.bindings.push(binding);
-        templateBindings.push(binding); // ?
 
         /* property binder via attribute */
         if(current.inTagOpen) { 
-            binding.attributeIndex = current.attributes.length;
-            current.waiting = binding;
-            // force the onattribute to by full set of matching quotes
+            context.addPropertyBinder(binding);
+
+            // Force the attribute to close properly by 
+            // ensuring full set of matching quotes happen
             const match = text.match(endQuote) ?? '';
             const quote = match?.length > 1 ? match[1] : '""';
             parser.write(eatQuote = quote);
         }
         /* child node (text or block) */
         else { 
-            // copy current value by assigning to binding index,
-            // el.length will increase as more children added
-            const index = binding.childIndex = el.length;
-            const replacement = replaceChildNodeWith(index);
-            html.push(replacement);
-            el.length++;
+            context.addChildBinder(binding);
         }
     }
 
@@ -161,14 +62,133 @@ export function getParser() {
             parser.end();
             
             return {
-                bindings: templateBindings.map(({ queryIndex, element: { name, length }, property, childIndex }) => {
-                    return property ? { queryIndex, name, property } : { queryIndex, name, childIndex, length };
+                bindings: context.bindings.map(({ 
+                    queryIndex, 
+                    element: { name, length }, 
+                    property, 
+                    childIndex 
+                }) => {
+                    return property ? 
+                        { queryIndex, name, property } : 
+                        { queryIndex, name, childIndex, length };
                 }),
                 // Originally placed into quasi chunks:
                 // quasis: chunks.map(chunk => chunk.flat().join(''))
-                html: html.flat().join('')
+                html: context.html.flat().join('')
             };
         }
     };
 
+}
+
+
+class ElementContext {
+    el = null;
+    inTagOpen = true;
+    attributes = [];
+    bindings = [];
+    waiting = null;
+
+    constructor(name) {
+        this.el = {
+            name,
+            keys: 0,
+            length: 0
+        };
+    }
+}
+
+class TemplateContext {
+    html = [];
+    stack = [];
+    bindings = [];
+    
+    propertyBinding = null;
+    root = null;
+    current = null;
+
+    constructor() {
+        this.root = this.current = this.push('<>');
+        this.root.inTagOpen = false;
+    }
+
+    push(name) {
+        const ctx = new ElementContext(name);
+        this.stack.push(this.current = ctx);
+        return ctx;
+    }
+
+    addChildBinder(binding) {
+        this.bindings.push(binding);
+        this.current.bindings.push(binding);
+        const { el } = this.current;
+        // copy current value by assigning to binding index,
+        // el.length will increase as more children added
+        const index = binding.childIndex = el.length;
+        const replacement = `<!--child[${index}]-->`; // TODO: externalize replacement = i => `...`
+        this.html.push(replacement);
+        el.length++;
+    }
+
+    addPropertyBinder(binding) {
+        this.bindings.push(binding);
+        this.current.bindings.push(binding);
+        const { current } = this;
+        binding.attributeIndex = current.attributes.length;
+        this.propertyBinding = binding;
+    }
+
+    pop(){
+        this.stack.pop();
+        this.current = this.stack.at(-1);
+    }
+
+    onopentagname(name) {
+        this.current.el.length++; // parent childNodes
+        this.push(name);
+        this.html.push(`<${name}`);
+    }
+        
+    onattribute(name, value, quote) {
+        const binding = this.propertyBinding;
+        this.propertyBinding = null;
+        if(binding) binding.property = name;
+
+        value ??= '';
+        const isEmpty = !quote && !value;
+        this.current.attributes.push(isEmpty ? ` ${name}` : ` ${name}="${value}"`);
+    }
+        
+    onopentag() {    
+        const { current } = this;       
+        current.inTagOpen = false;
+        this.html.push(current.attributes); // open for further adds & removes
+        this.html.push('>');
+    }
+        
+    ontext(text) {            
+        this.current.el.length++;
+        this.html.push(text);
+    }
+        
+    onclosetag(name, isImplied) {
+        const { current: { bindings, attributes } } = this;
+        // void, self-closing, tags
+        if(!voidElements.has(name)) this.html.push(`</${name}>`);
+
+        if(bindings.length) {
+            for(let i = 0; i < bindings.length; i++) {
+                attributes[bindings[i].attributeIndex] = '';
+            }
+            this.onattribute('data-bind');
+        }
+
+        this.pop();
+    }
+        
+    oncomment(comment) {
+        this.current.el.length++;
+        this.html.push(`<!--${comment}-->`);
+    }
+        
 }
