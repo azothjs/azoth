@@ -5,14 +5,35 @@ class ElementContext {
     el = null;
     inTagOpen = true;
     attributes = [];
-    isBound = false;
     bindings = [];
+    waiting = null;
 
     constructor(name) {
         this.el = {
             name,
+            keys: 0,
             length: 0
         };
+    }
+}
+
+class ContextStack {
+    stack = [];
+    current = null;
+
+    constructor() {
+        this.current = this.pushContext('<>');
+        this.current.inTagOpen = false;
+    }
+
+    pushContext(name) {
+        const ctx = new ElementContext(name);
+        this.stack.push(this.current = ctx);
+    }
+
+    popContext(){
+        this.stack.pop();
+        this.current = this.stack.at(-1);
     }
 }
 
@@ -28,7 +49,8 @@ export function getParser() {
     // element context
     let context = null;
     const contextStack = [];
-    const peek = () => contextStack.at(-1); 
+
+    // extend Array
     const pushContext = (name) => {
         const ctx = new ElementContext(name);
         contextStack.push(ctx);
@@ -39,65 +61,31 @@ export function getParser() {
         context = contextStack.at(-1);
     };
     
+    // constructor:
     // add a root context for parsing ease
     pushContext('<>');
     context.inTagOpen = false;
 
-
-    // html builder for current template element
-    let chunks = [];
     let html = [];
-    const pushHtmlChunk = () => {
-        const chunk = html;
-        html = [];
-        if(chunk.length) chunks.push(chunk);
-        return chunk;
-    };
-
-    const closeOpenTag = () => {
-        if(attribute) addAttribute(attribute);
-        
-        if(context.inTagOpen) {
-            context.inTagOpen = false;
-            html.push('>');
-        }
- 
-    };
-
-    let attribute = null;
-    const addAttribute = (attr = attribute) => {
-        let { name, value, quote } = attr;
-        quote ??= '';
-        value ??= '';
-        if(quote || value) {
-            context.attributes.push(` ${name}=${quote}${value}${quote}`);
-        }
-        else {
-            context.attributes.push(` ${name}`);
-        }
-
-        if(attr === attribute) attribute = null;
-    };
-
     const handler = {
         onopentagname(name) {
-            context.el.length++; // parent element
+            context.el.length++; // parent childNodes
             pushContext(name);
             html.push(`<${name}`);
-            html.push(context.attributes);
         },
         onattribute(name, value, quote) {
-            if(attribute) addAttribute();
-            attribute = { name, value, quote };
+            const binding = context.waiting;
+            context.waiting = null;
+            if(binding) binding.property = name;
+
+            value ??= '';
+            const isEmpty = !quote && !value;
+            context.attributes.push(isEmpty ? ` ${name}` : ` ${name}="${value}"`);
         },
-        onopentag() {
-            if(attribute) addAttribute(attribute);
-        
-            if(context.inTagOpen) {
-                context.inTagOpen = false;
-                html.push('>');
-            }
- 
+        onopentag() {           
+            context.inTagOpen = false;
+            html.push(context.attributes); // open for further adds & removes
+            html.push('>');
         },
         ontext(text) {            
             context.el.length++;
@@ -106,7 +94,15 @@ export function getParser() {
         onclosetag(name, isImplied) {
             // void, self-closing, tags
             if(!voidElements.has(name)) html.push(`</${name}>`);
-            if(context.isBound) addAttribute({ name: 'data-bind' });
+
+            if(context.bindings.length) {
+                const { bindings, attributes } = context;
+                for(let i = 0; i < bindings.length; i++) {
+                    attributes[bindings[i].attributeIndex] = '';
+                }
+                handler.onattribute('data-bind');
+            }
+
             popContext();
         },
         oncomment(comment) {
@@ -122,8 +118,8 @@ export function getParser() {
     });
 
     let length = 0;
-    const bindings = [];
     const targets = [];
+    const templateBindings = [];
 
     let eatQuote = '';
 
@@ -137,7 +133,6 @@ export function getParser() {
 
     function write(text) {
         writeText(text);
-        pushHtmlChunk();
 
         const { el } = context;
         // queryIndex is the index of element in querySelectorAll bound els
@@ -147,30 +142,22 @@ export function getParser() {
         // el obj ref - length property will increase if more added
         const binding = { queryIndex, element: el, };
         context.bindings.push(binding);
-        bindings.push(binding);
-        context.isBound = true;
+        templateBindings.push(binding); // ?
 
-        if(context.inTagOpen) { /* property binder via attribute */
-            // Add any prior attribute of this element to html
-            // (only missing on first attribute)
-            if(attribute) addAttribute();
-
-            // figure out if there was an opening quote
+        /* property binder via attribute */
+        if(context.inTagOpen) { 
+            binding.attributeIndex = context.attributes.length;
+            context.waiting = binding;
+            // force the onattribute to by full set of matching quotes
             const match = text.match(endQuote) ?? '';
             const quote = match?.length > 1 ? match[1] : '""';
             parser.write(eatQuote = quote);
-        
-            if(attribute) binding.property = attribute.name;
-            // TODO: else { when would we end up here? } 
-
-            // Clear attribute from outputting to the html
-            // as will be set via assignment to el.property instead
-            attribute = null;
         }
-        else { /* child node (text or block) */
+        /* child node (text or block) */
+        else { 
             // copy current value by assigning to binding index,
             // el.length will increase as more children added
-            const index = binding.index = el.length;
+            const index = binding.childIndex = el.length;
             const replacement = replaceChildNodeWith(index);
             html.push(replacement);
             el.length++;
@@ -182,13 +169,13 @@ export function getParser() {
         end(text) {
             writeText(text);
             parser.end();
-            pushHtmlChunk(); 
-            
+
             return {
-                bindings: bindings.map(({ queryIndex, element: { name, length }, property, index }) => {
+                bindings: templateBindings.map(({ queryIndex, element: { name, length }, property, index }) => {
                     return property ? { queryIndex, name, property } : { queryIndex, name, index, length };
                 }),
-                quasis: chunks.map(chunk => chunk.flat().join(''))
+                // quasis: chunks.map(chunk => chunk.flat().join(''))
+                quasis: html.flat().join('')
             };
         }
     };

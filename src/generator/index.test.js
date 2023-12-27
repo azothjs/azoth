@@ -25,7 +25,7 @@ const transpile = input => {
 
 describe.skip('generator', () => {
 
-    it('generates from normal ast', ({ expect }) => {
+    it.skip('generates from normal ast', ({ expect }) => {
         const t = () => {
             `hello ${place}`;
         }; 
