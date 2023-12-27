@@ -13,7 +13,7 @@ describe('static html', () => {
         expect(template).toMatchInlineSnapshot(`
           {
             "bindings": [],
-            "quasis": "hi",
+            "html": "hi",
           }
         `);
     });
@@ -23,7 +23,7 @@ describe('static html', () => {
         expect(template).toMatchInlineSnapshot(`
           {
             "bindings": [],
-            "quasis": "<input name="cat" required class="cool" type="text">",
+            "html": "<input name="cat" required class="cool" type="text">",
           }
         `);
     });
@@ -33,7 +33,7 @@ describe('static html', () => {
         expect(template).toMatchInlineSnapshot(`
           {
             "bindings": [],
-            "quasis": "<span class="greeting">hello world</span>",
+            "html": "<span class="greeting">hello world</span>",
           }
         `);
     });
@@ -43,7 +43,7 @@ describe('static html', () => {
         expect(template).toMatchInlineSnapshot(`
           {
             "bindings": [],
-            "quasis": "<self-closing></self-closing>",
+            "html": "<self-closing></self-closing>",
           }
         `);
     });
@@ -61,7 +61,7 @@ describe('static html', () => {
         expect(template).toMatchInlineSnapshot(`
           {
             "bindings": [],
-            "quasis": "
+            "html": "
                       <br>
                       <br>
                       <self-closing></self-closing>text
@@ -78,7 +78,7 @@ describe('static html', () => {
         expect(template).toMatchInlineSnapshot(`
           {
             "bindings": [],
-            "quasis": "<div><div><div><div><div></div></div></div></div></div>",
+            "html": "<div><div><div><div><div></div></div></div></div></div>",
           }
         `);
     });
@@ -88,7 +88,7 @@ describe('static html', () => {
         expect(template).toMatchInlineSnapshot(`
           {
             "bindings": [],
-            "quasis": "<span class="greeting"><!--hello--> world</span>",
+            "html": "<span class="greeting"><!--hello--> world</span>",
           }
         `);
 
@@ -101,38 +101,54 @@ describe('bindings', () => {
 
     describe('child nodes', () => {
       
-        test('empty root', ({ expect, parser }) => {
+        test('empty root with binding', ({ expect, parser }) => {
             parser.write(``);
-            const { quasis, bindings } = parser.end(``);
+            const { html, bindings } = parser.end(``);
 
-            expect(quasis).toMatchInlineSnapshot(`"<!--child[0]-->"`);
+            expect(html).toMatchInlineSnapshot(`"<!--child[0]-->"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": 0, "name": "<>", "length": 1 },
+                { "queryIndex": -1, "name": "<>", "childIndex": 0, "length": 1 },
+              ]
+            `);
+        });
+
+        test('two bindings at root', ({ expect, parser }) => {
+            parser.write(``);
+            parser.write(``);
+            const { html, bindings } = parser.end(``);
+
+            expect(html).toMatchInlineSnapshot(`"<!--child[0]--><!--child[1]-->"`);
+            expect(bindings).toMatchInlineSnapshot(`
+              [
+                { "queryIndex": -1, "name": "<>", "childIndex": 0, "length": 2 },
+                { "queryIndex": -1, "name": "<>", "childIndex": 1, "length": 2 },
               ]
             `);
         });
       
         test('element with text and interpolator', ({ expect, parser }) => {
             parser.write(`<p>hello `);
-            const { quasis, bindings } = parser.end(`!</p>`);
+            const { html, bindings } = parser.end(`!</p>`);
 
-            expect(quasis).toMatchInlineSnapshot(`"<p data-bind>hello <!--child[1]-->!</p>"`);
+            expect(html).toMatchInlineSnapshot(`"<p data-bind>hello <!--child[1]-->!</p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": 0, "name": "p", "length": 3 },
+                { "queryIndex": 0, "name": "p", "childIndex": 1, "length": 3 },
               ]
             `);
         });
 
         test('element with text, html comment, interpolator', ({ expect, parser }) => {
             parser.write(`<p>hello <!--comment 1-->`);
-            const { quasis, bindings } = parser.end(`<!--comment 2--> and welcome!</p>`);
+            const { html, bindings } = parser.end(`<!--comment 2--> and welcome!</p>`);
 
-            expect(quasis).toMatchInlineSnapshot(`"<p data-bind>hello <!--comment 1--><!--child[2]--><!--comment 2--> and welcome!</p>"`);
+            expect(html).toMatchInlineSnapshot(
+                `"<p data-bind>hello <!--comment 1--><!--child[2]--><!--comment 2--> and welcome!</p>"`
+            );
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": 0, "name": "p", "length": 5 },
+                { "queryIndex": 0, "name": "p", "childIndex": 2, "length": 5 },
               ]
             `);
         });
@@ -143,17 +159,17 @@ describe('bindings', () => {
             parser.write(` and `);
             parser.write(` equals <span>`);
             parser.write(`</span></p> <p>`);
-            const { quasis, bindings } = parser.end(`</p>`);
+            const { html, bindings } = parser.end(`</p>`);
 
-            expect(quasis).toMatchInlineSnapshot(`"<p data-bind>hello <!--child[1]-->!</p> <p data-bind>sum of <!--child[1]--> and <!--child[3]--> equals <span data-bind><!--child[0]--></span></p> <p data-bind><!--child[0]--></p>"`);
+            expect(html).toMatchInlineSnapshot(`"<p data-bind>hello <!--child[1]-->!</p> <p data-bind>sum of <!--child[1]--> and <!--child[3]--> equals <span data-bind><!--child[0]--></span></p> <p data-bind><!--child[0]--></p>"`);
 
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": 0, "name": "p", "length": 3 },
-                { "queryIndex": 1, "name": "p", "length": 6 },
-                { "queryIndex": 1, "name": "p", "length": 6 },
-                { "queryIndex": 2, "name": "span", "length": 1 },
-                { "queryIndex": 3, "name": "p", "length": 1 },
+                { "queryIndex": 0, "name": "p", "childIndex": 1, "length": 3 },
+                { "queryIndex": 1, "name": "p", "childIndex": 1, "length": 6 },
+                { "queryIndex": 1, "name": "p", "childIndex": 3, "length": 6 },
+                { "queryIndex": 2, "name": "span", "childIndex": 0, "length": 1 },
+                { "queryIndex": 3, "name": "p", "childIndex": 0, "length": 1 },
               ]
             `);
         });
@@ -163,9 +179,9 @@ describe('bindings', () => {
       
         test('single unquoted attribute', ({ expect, parser }) => {
             parser.write(`<p class=`);
-            const { quasis, bindings } = parser.end(`></p>`);
+            const { html, bindings } = parser.end(`></p>`);
 
-            expect(quasis).toMatchInlineSnapshot(`"<p data-bind></p>"`);
+            expect(html).toMatchInlineSnapshot(`"<p data-bind></p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
                 { "queryIndex": 0, "name": "p", "property": "class" },
@@ -175,9 +191,9 @@ describe('bindings', () => {
 
         test('preceding empty attribute', ({ expect, parser }) => {
             parser.write(`<input required class=`);
-            const { quasis, bindings } = parser.end(`>`);
+            const { html, bindings } = parser.end(`>`);
 
-            expect(quasis).toMatchInlineSnapshot(`"<input required data-bind>"`);
+            expect(html).toMatchInlineSnapshot(`"<input required data-bind>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
                 { "queryIndex": 0, "name": "input", "property": "class" },
@@ -187,9 +203,9 @@ describe('bindings', () => {
 
         test('single double-quoted attribute', ({ expect, parser }) => {
             parser.write(`<p class="`);
-            const { quasis, bindings } = parser.end(`"></p>`);
+            const { html, bindings } = parser.end(`"></p>`);
 
-            expect(quasis).toMatchInlineSnapshot(`"<p data-bind></p>"`);
+            expect(html).toMatchInlineSnapshot(`"<p data-bind></p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
                 { "queryIndex": 0, "name": "p", "property": "class" },
@@ -199,9 +215,9 @@ describe('bindings', () => {
 
         test('single single-quoted attribute', ({ expect, parser }) => {
             parser.write(`<p class='`);
-            const { quasis, bindings } = parser.end(`'></p>`);
+            const { html, bindings } = parser.end(`'></p>`);
 
-            expect(quasis).toMatchInlineSnapshot(`"<p data-bind></p>"`);
+            expect(html).toMatchInlineSnapshot(`"<p data-bind></p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
                 { "queryIndex": 0, "name": "p", "property": "class" },
@@ -209,19 +225,14 @@ describe('bindings', () => {
             `);
         });
 
-        test('mix of attribute use cases including static and bound attributes', ({ expect, parser }) => {
+        test('multiple attributes with mix of bound, static, and empty', ({ expect, parser }) => {
             parser.write(`<input class=`);
             parser.write(` required name="`);
             parser.write(`" maxLength='`);
             parser.write(`' type='text' disabled=`);
-            const { quasis, bindings } = parser.end(`></p>`);
+            const { html, bindings } = parser.end(`></p>`);
 
-            expect(quasis).toMatchInlineSnapshot(`
-              [
-                "<input required type='text' data-bind"
-                "><p></p>"
-              ]
-            `);
+            expect(html).toMatchInlineSnapshot(`"<input required type="text" data-bind><p></p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
                 { "queryIndex": 0, "name": "input", "property": "class" },
@@ -232,13 +243,13 @@ describe('bindings', () => {
             `);
         });
 
-        test('no quote or empty attributes', ({ expect, parser }) => {
+        test('all no quote or empty attributes', ({ expect, parser }) => {
             parser.write(`<input class=`);
             parser.write(` required name=`);
             parser.write(` type=`);
-            const { quasis, bindings } = parser.end(`>`);
+            const { html, bindings } = parser.end(`>`);
 
-            expect(quasis).toMatchInlineSnapshot(`"<input required data-bind>"`);
+            expect(html).toMatchInlineSnapshot(`"<input required data-bind>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
                 { "queryIndex": 0, "name": "input", "property": "class" },

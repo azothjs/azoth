@@ -54,7 +54,7 @@ export function getParser() {
     const pushContext = (name) => {
         const ctx = new ElementContext(name);
         contextStack.push(ctx);
-        context = ctx; 
+        return context = ctx; 
     };
     const popContext = () => {
         contextStack.pop();
@@ -63,10 +63,11 @@ export function getParser() {
     
     // constructor:
     // add a root context for parsing ease
-    pushContext('<>');
-    context.inTagOpen = false;
+    const root = pushContext('<>');
+    root.inTagOpen = false;
 
     let html = [];
+
     const handler = {
         onopentagname(name) {
             context.el.length++; // parent childNodes
@@ -137,7 +138,7 @@ export function getParser() {
         const { el } = context;
         // queryIndex is the index of element in querySelectorAll bound els
         let queryIndex = targets.lastIndexOf(el);
-        if(queryIndex === -1) queryIndex = (targets.push(el) - 1);
+        if(queryIndex === -1 && context !== root) queryIndex = (targets.push(el) - 1);
 
         // el obj ref - length property will increase if more added
         const binding = { queryIndex, element: el, };
@@ -169,13 +170,14 @@ export function getParser() {
         end(text) {
             writeText(text);
             parser.end();
-
+            
             return {
-                bindings: templateBindings.map(({ queryIndex, element: { name, length }, property, index }) => {
-                    return property ? { queryIndex, name, property } : { queryIndex, name, index, length };
+                bindings: templateBindings.map(({ queryIndex, element: { name, length }, property, childIndex }) => {
+                    return property ? { queryIndex, name, property } : { queryIndex, name, childIndex, length };
                 }),
+                // Originally placed into quasi chunks:
                 // quasis: chunks.map(chunk => chunk.flat().join(''))
-                quasis: html.flat().join('')
+                html: html.flat().join('')
             };
         }
     };
