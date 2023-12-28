@@ -2,47 +2,57 @@ import { Parser as HtmlParser } from 'htmlparser2';
 import voidElements from './void-elements.js';
 
 // test cases at https://regex101.com/r/2kW0JN
-// (note no global flags, remove when copying from regex101)
-const startQuote = /^\s*["]/;
-const endQuote = /(?:=)\s*(["|'])\s*$/;
+const endQuote = /(?:=)\s*(["|'])\s*$/; // note no flags
+// const startQuote = /^\s*["]/;
 
 export function getParser() {
+    return new TemplateParser();
+}
 
-    const template = new TemplateContext();
-    const parser = new HtmlParser(template, { 
-        lowerCaseTags: false,
-        lowerCaseAttributeNames: false,
-        recognizeSelfClosing: true 
-    });
+class TemplateParser {
 
-    function write(text) {
-        writeText(text);
-        const binding = template.createBinding();
-        if(template.nextAttributeBinding) { 
+    template = null;
+    parser = null;
+    eatQuote = '';
+
+    constructor() {
+        this.template = new TemplateContext();
+        this.parser = new HtmlParser(this.template, { 
+            lowerCaseTags: false,
+            lowerCaseAttributeNames: false,
+            recognizeSelfClosing: true 
+        });
+    }
+
+    write(text) {
+        this.writeText(text);
+        const binding = this.template.createBinding();
+        if(this.template.nextAttributeBinding) { 
             // Force parser to call onattribute by writing quotes
             const match = text.match(endQuote) ?? '';
             const quote = match?.length > 1 ? match[1] : '""';
-            parser.write(eatQuote = quote);
+            this.parser.write(this.eatQuote = quote);
         }
     }
 
     // writeText needs to consider whether the prior .write()  
     // added quotation marks which now need to be removed
-    let eatQuote = '';
-    function writeText(text) {
+    writeText(text) {
         if(text) {
-            if(eatQuote && text[0] === eatQuote) text = text.slice(1);
-            parser.write(text);
+            // TODO: what about whitespace like ="{....} ",
+            // shouldn't this use startQuote regex???
+            if(this.eatQuote && text[0] === this.eatQuote) text = text.slice(1);
+            this.parser.write(text);
         }
-        eatQuote = '';
+        this.eatQuote = '';
     }
 
-    function end(text) {
-        writeText(text);
-        parser.end();
+    end(text) {
+        this.writeText(text);
+        this.parser.end();
             
         return {
-            bindings: template.bindings.map(({ 
+            bindings: this.template.bindings.map(({ 
                 element: { name, queryIndex, length }, 
                 property, 
                 index: childIndex 
@@ -51,54 +61,11 @@ export function getParser() {
                     { queryIndex, name, property } : 
                     { queryIndex, name, childIndex, length };
             }),
-            html: template.html.flat().join('')
+            html: this.template.html.flat().join('')
         };
-    }
-    
-    return { write, end };
+    }   
 }
 
-
-class ElementContext {
-    attributes = [];
-    inTagOpen = true;
-    name = '';
-    keys = 0;
-    length = 0;
-    queryIndex = -1;
-    isBound = false;
-
-    constructor(name) {
-        this.name = name;
-    }
-
-    addAttribute(attr) {
-        this.attributes.push(attr);
-    }
-}
-
-class Binding {
-    static attributeName = 'data-bind';
-    element = null;
-    constructor(element) {
-        this.element = element;
-        this.element.isBound = true;
-    }
-}
-
-class PropertyBinding extends Binding {
-    property = '';
-}
-
-class ChildBinding extends Binding {
-    index = -1;
-    replacement = '';
-    constructor(element) {
-        super(element);
-        this.index = element.length;
-        this.replacement = `<!--child[${this.index}]-->`;
-    }
-}
 
 class TemplateContext {
     html = [];
@@ -195,4 +162,45 @@ class TemplateContext {
         this.element.length++;
         this.html.push(`<!--${comment}-->`);
     } 
+}
+
+class ElementContext {
+    attributes = [];
+    inTagOpen = true;
+    name = '';
+    keys = 0;
+    length = 0;
+    queryIndex = -1;
+    isBound = false;
+
+    constructor(name) {
+        this.name = name;
+    }
+
+    addAttribute(attr) {
+        this.attributes.push(attr);
+    }
+}
+
+class Binding {
+    static attributeName = 'data-bind';
+    element = null;
+    constructor(element) {
+        this.element = element;
+        this.element.isBound = true;
+    }
+}
+
+class PropertyBinding extends Binding {
+    property = '';
+}
+
+class ChildBinding extends Binding {
+    index = -1;
+    replacement = '';
+    constructor(element) {
+        super(element);
+        this.index = element.length;
+        this.replacement = `<!--child[${this.index}]-->`;
+    }
 }
