@@ -9,6 +9,8 @@
 //
 // https://github.com/acornjs/acorn-jsx/blob/main/index.js
 
+import { getParser } from './html-template-parser.js';
+
 export function extend(Parser, azTokens) {
     const SIGIL_CODE = '#'.charCodeAt(0);
     
@@ -205,9 +207,11 @@ export function extend(Parser, azTokens) {
             const node = this.startNode();
             this.next();
 
+            const parser = getParser();
+
             // asymmetrical first template element
-            let curElt = this.parseTemplateElement({ isTagged : false }); // isTagged controls invalid escape sequences
-            
+            let curElt = this.parseTemplateElement({ isTagged : false }); // isTagged controls invalid escape sequences            
+            // parser.write(curElt.value.raw);
             node.quasis = [curElt];
             node.expressions = [];
 
@@ -230,9 +234,16 @@ export function extend(Parser, azTokens) {
 
                 // this.finishNode(azothExpr, 'AzothExpression');
                 
+                parser.write(curElt.value.raw);
+
                 // next template element
                 node.quasis.push(curElt = this.parseTemplateElement({ isTagged : true }));
+
+                if(curElt.tail) parser.end(curElt.value.raw);
             }
+            const { html, bindings } = parser.end();
+            node.html = parser.html;
+            node.bindings = bindings;
 
             this.next();
             return this.finishNode(node, 'TemplateDomLiteral');

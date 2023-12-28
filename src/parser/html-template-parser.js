@@ -1,8 +1,6 @@
 import { Parser as HtmlParser } from 'htmlparser2';
 import voidElements from './void-elements.js';
 
-// test cases at https://regex101.com/r/2kW0JN
-const endQuote = /(?:=)\s*(["|'])\s*$/; // note no flags
 // const startQuote = /^\s*["]/;
 
 export function getParser() {
@@ -11,8 +9,15 @@ export function getParser() {
 
 class TemplateParser {
 
+    // out
+    html = '';
+    bindings = null; 
+
+    // template context state
     template = null;
+    // htmlparser2
     parser = null;
+    // carry-over quote information for attr=${interpolator}
     eatQuote = '';
 
     constructor() {
@@ -24,14 +29,18 @@ class TemplateParser {
         });
     }
 
+    // test cases at https://regex101.com/r/2kW0JN
+    static #endQuote = /(?:=)\s*(["|'])\s*$/; // note no flags
+
     write(text) {
         this.writeText(text);
         const binding = this.template.createBinding();
         if(this.template.nextAttributeBinding) { 
-            // Force parser to call onattribute by writing quotes
-            const match = text.match(endQuote) ?? '';
-            const quote = match?.length > 1 ? match[1] : '""';
-            this.parser.write(this.eatQuote = quote);
+            // finish attribute via quote(s): match ='{ or ="{, no match means = {
+            const match = text.match(TemplateParser.#endQuote) ?? '';
+            const quote = match?.length > 1 ? match[1] : '""'; // close ', ", or ""
+            // parser will call onattribute
+            this.parser.write(this.eatQuote = quote); // don't rewrite quote!
         }
     }
 
@@ -51,18 +60,18 @@ class TemplateParser {
         this.writeText(text);
         this.parser.end();
             
-        return {
-            bindings: this.template.bindings.map(({ 
-                element: { name, queryIndex, length }, 
-                property, 
-                index: childIndex 
-            }) => {
-                return property ? 
-                    { queryIndex, name, property } : 
-                    { queryIndex, name, childIndex, length };
-            }),
-            html: this.template.html.flat().join('')
-        };
+        this.bindings = this.template.bindings.map(({ 
+            element: { name, queryIndex, length }, 
+            property, 
+            index: childIndex 
+        }) => {
+            return property ? 
+                { queryIndex, name, property } : 
+                { queryIndex, name, childIndex, length };
+        });
+        this.html = this.template.html.flat().join('');
+
+        return { bindings: this.bindings, html: this.html };
     }   
 }
 
