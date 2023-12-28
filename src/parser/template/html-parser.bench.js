@@ -1,6 +1,5 @@
 import { beforeEach, describe, test, bench } from 'vitest';
-import { getParser } from './html-template-parser.js';
-import { addSerializers } from './serializers.js';
+import { getParser } from './html-parser.js';
  
 bench('parse template attributes', () => {
     const parser = getParser();

@@ -1,6 +1,6 @@
 import { beforeEach, describe, test, } from 'vitest';
-import { getParser } from './html-template-parser.js';
-import { addSerializers } from './serializers.js';
+import { getParser } from './html-parser.js';
+import { addSerializers } from '../serializers.js';
  
 beforeEach(context => {
     context.parser = getParser();
@@ -67,8 +67,7 @@ describe('static html', () => {
                       <self-closing></self-closing>text
                       <custom-element></custom-element>
                       <div></div>
-                      <div>text</div>        
-                  ",
+                      <div>text</div>",
           }
         `);
     });

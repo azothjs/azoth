@@ -201,11 +201,9 @@ describe('templates', () => {
                 "type": "Identifier",
               },
             ],
-            "html": "
-                          <p data-bind>hello <!--child[1]-->!</p>
+            "html": "<p data-bind>hello <!--child[1]-->!</p>
                           <p>count: <span data-bind><!--child[0]--></span></p>
-                          <p data-bind><!--child[0]--></p>
-                      ",
+                          <p data-bind><!--child[0]--></p>",
           }
         `);
     });
@@ -323,11 +321,9 @@ describe('templates', () => {
                 "type": "Identifier",
               },
             ],
-            "html": "
-                          <p data-bind>hello!</p>
+            "html": "<p data-bind>hello!</p>
                           <input name="title" data-bind>
-                          <div style="color: red" data-bind></div>
-                      ",
+                          <div style="color: red" data-bind></div>",
           }
         `);
     });

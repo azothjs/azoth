@@ -9,7 +9,7 @@
 //
 // https://github.com/acornjs/acorn-jsx/blob/main/index.js
 
-import { getParser } from './html-template-parser.js';
+import { getParser } from './template/html-parser.js';
 
 export function extend(Parser, azTokens) {
     const SIGIL_CODE = '#'.charCodeAt(0);

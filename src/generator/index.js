@@ -1,5 +1,5 @@
 import { GENERATOR, generate } from 'astring';
-import { getParser as parseTemplate } from '../parser/html-template-parser.js';
+import { getParser as parseTemplate } from '../parser/template/html-parser.js';
 
 export function azothGenerate(ast, config) {
     const { ArrowFunctionExpression } = GENERATOR;

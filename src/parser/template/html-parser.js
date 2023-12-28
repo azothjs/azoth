@@ -1,5 +1,6 @@
 import { Parser as HtmlParser } from 'htmlparser2';
-import voidElements from './void-elements.js';
+import voidElements from '../void-elements.js';
+import { LAST_QUOTE, NEXT_QUOTE, DEV_TRIM_END, DEV_TRIM_START } from './regex.js';
 
 export function getParser() {
     return new TemplateParser();
@@ -17,6 +18,8 @@ class TemplateParser {
     parser = null;
     // carry-over quote information for attr=${interpolator}
     eatQuote = '';
+    // detect first write
+    hasWritten = false;
 
     constructor() {
         this.template = new TemplateContext();
@@ -26,16 +29,18 @@ class TemplateParser {
             recognizeSelfClosing: true 
         });
     }
-
-    // test cases at https://regex101.com/r/eJJwAv/1
-    static #endQuote = /(?:=)\s*(["|']?)\s*$/; // no flags
-
+    
     write(text) {
+        if(!this.hasWritten) {
+            text = text.replace(DEV_TRIM_START, '');
+            this.hasWritten = true;
+        }
+
         this.writeText(text);
         const binding = this.template.createBinding();
         if(this.template.nextAttributeBinding) { 
             // finish attribute via quote(s): match ='{, ="{, ={ no match means attr...{
-            const match = text.match(TemplateParser.#endQuote);
+            const match = text.match(LAST_QUOTE);
             if(match) {
                 let [, quote] = match;
                 // parser will call onattribute
@@ -51,14 +56,12 @@ class TemplateParser {
         }
     }
 
-    static #startQuote = /^\s*(["|'])/;
-
     // writeText needs to consider whether the prior .write()  
     // added quotation marks which now need to be removed
     writeText(text) {
         if(text) {
             if(this.eatQuote) {
-                const match = TemplateParser.#startQuote.exec(text);
+                const match = text.match(NEXT_QUOTE);
                 if(match) {
                     const [fullMatch, quote] = match;
                     if(quote === this.eatQuote) text = text.slice(fullMatch.length);
@@ -70,6 +73,7 @@ class TemplateParser {
     }
 
     end(text) {
+        text = text?.replace(DEV_TRIM_END, '');
         this.writeText(text);
         this.parser.end();
             
