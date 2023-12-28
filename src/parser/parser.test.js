@@ -3,21 +3,119 @@ import { parse } from './index.js';
 import { toMatchCode } from '../utils/code-matchers.js';
 
 const options = { ecmaVersion: 'latest' };
-const parseTemplate = (code) => {
+const parseToAst = (code) => {
     if(code.toBody) code = code.toBody();
-    const ast = parse(code, options);
-    // remove preamble nodes
-    const node = ast.body[0].expression;
-    return node;
+    return parse(code, options);
+};
+const parseTemplate = (code) => {
+    const ast = parseToAst(code);
+    return ast.body[0].expression; // remove preamble nodes
 };
 
-describe('expressions', () => {
+describe('normal templates (no transformation)', () => {
+    test('template literal', ({ expect }) => {
+        const template = parseTemplate(/*html*/`\`<p>hello \${name}!</p>\``);
+
+        expect(template).toMatchInlineSnapshot(`
+          Node {
+            "end": 23,
+            "expressions": [
+              Node {
+                "end": 16,
+                "name": "name",
+                "start": 12,
+                "type": "Identifier",
+              },
+            ],
+            "quasis": [
+              Node {
+                "end": 10,
+                "start": 1,
+                "tail": false,
+                "type": "TemplateElement",
+                "value": {
+                  "cooked": "<p>hello ",
+                  "raw": "<p>hello ",
+                },
+              },
+              Node {
+                "end": 22,
+                "start": 17,
+                "tail": true,
+                "type": "TemplateElement",
+                "value": {
+                  "cooked": "!</p>",
+                  "raw": "!</p>",
+                },
+              },
+            ],
+            "start": 0,
+            "type": "TemplateLiteral",
+          }
+        `);
+    });
+
+    test('tagged template literal', ({ expect, templatize }) => {
+        const template = parseTemplate(/*html*/`tag\`<p>hello \${name}!</p>\``);
+
+        expect(template).toMatchInlineSnapshot(`
+          Node {
+            "end": 26,
+            "quasi": Node {
+              "end": 26,
+              "expressions": [
+                Node {
+                  "end": 19,
+                  "name": "name",
+                  "start": 15,
+                  "type": "Identifier",
+                },
+              ],
+              "quasis": [
+                Node {
+                  "end": 13,
+                  "start": 4,
+                  "tail": false,
+                  "type": "TemplateElement",
+                  "value": {
+                    "cooked": "<p>hello ",
+                    "raw": "<p>hello ",
+                  },
+                },
+                Node {
+                  "end": 25,
+                  "start": 20,
+                  "tail": true,
+                  "type": "TemplateElement",
+                  "value": {
+                    "cooked": "!</p>",
+                    "raw": "!</p>",
+                  },
+                },
+              ],
+              "start": 3,
+              "type": "TemplateLiteral",
+            },
+            "start": 0,
+            "tag": Node {
+              "end": 3,
+              "name": "tag",
+              "start": 0,
+              "type": "Identifier",
+            },
+            "type": "TaggedTemplateExpression",
+          }
+        `);
+    });
+});
+
+describe('templates', () => {
 
     beforeEach(async (context) => {
         const { expect } = context;
         expect.extend(toMatchCode);
         context.templatize = code => {
-            const { expressions, quasis, html, bindings } = parseTemplate(code);
+            const { expressions, html, bindings } = parseTemplate(code);
             return {
                 expressions,
                 html,

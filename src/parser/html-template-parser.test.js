@@ -260,3 +260,72 @@ describe('bindings', () => {
         });
     });
 });
+
+
+describe('attribute quote handling', () => {
+
+    beforeEach(({ expect }) => addSerializers(expect));
+
+    test('extra space before next quote', ({ expect, parser }) => {
+        parser.write(`<input name="`);
+        parser.write(`   " type='`);
+        const { html, bindings } = parser.end(`   '>`);
+
+        expect(html).toMatchInlineSnapshot(`"<input data-bind>"`);
+        expect(bindings).toMatchInlineSnapshot(`
+          [
+            { "queryIndex": 0, "name": "input", "property": "name" },
+            { "queryIndex": 0, "name": "input", "property": "type" },
+          ]
+        `);
+    });
+
+    test('extra space before interpolator', ({ expect, parser }) => {
+        parser.write(`<input name="  `);
+        parser.write(`" type='  `);
+        const { html, bindings } = parser.end(`'>`);
+
+        expect(html).toMatchInlineSnapshot(`"<input data-bind>"`);
+        expect(bindings).toMatchInlineSnapshot(`
+          [
+            { "queryIndex": 0, "name": "input", "property": "name" },
+            { "queryIndex": 0, "name": "input", "property": "type" },
+          ]
+        `);
+    });
+
+    test('no quotes', ({ expect, parser }) => {
+        parser.write(`<input class=`);
+        parser.write(`required  type=`);
+        const { html, bindings } = parser.end(`>`);
+
+        expect(html).toMatchInlineSnapshot(`"<input required data-bind>"`);
+        expect(bindings).toMatchInlineSnapshot(`
+          [
+            { "queryIndex": 0, "name": "input", "property": "class" },
+            { "queryIndex": 0, "name": "input", "property": "type" },
+          ]
+        `);
+    });
+
+    test.skip('mixed', ({ expect, parser }) => {
+        parser.write(`<input class=`);
+        parser.write(` name="`);
+        parser.write(`   " maxLength='`);
+        parser.write(`  ' type="   `);
+        parser.write(`" style='   `);
+        parser.write(`' required   `);
+        const { html, bindings } = parser.end(`>`);
+
+        expect(html).toMatchInlineSnapshot(`"<input data-bind>"`);
+        expect(bindings).toMatchInlineSnapshot(`
+          [
+            { "queryIndex": 0, "name": "input", "property": "class" },
+            { "queryIndex": 0, "name": "input", "property": "name" },
+            { "queryIndex": 0, "name": "input", "property": "maxLength" },
+            { "queryIndex": 0, "name": "input", "property": "type" },
+            { "queryIndex": 0, "name": "input", "property": "style" },
+          ]
+        `);
+    });
+});

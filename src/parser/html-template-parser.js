@@ -1,8 +1,6 @@
 import { Parser as HtmlParser } from 'htmlparser2';
 import voidElements from './void-elements.js';
 
-// const startQuote = /^\s*["]/;
-
 export function getParser() {
     return new TemplateParser();
 }
@@ -29,28 +27,40 @@ class TemplateParser {
         });
     }
 
-    // test cases at https://regex101.com/r/2kW0JN
-    static #endQuote = /(?:=)\s*(["|'])\s*$/; // note no flags
+    // test cases at https://regex101.com/r/eJJwAv/1
+    static #endQuote = /(?:=)\s*(["|']?)\s*$/; // no flags
 
     write(text) {
         this.writeText(text);
         const binding = this.template.createBinding();
         if(this.template.nextAttributeBinding) { 
-            // finish attribute via quote(s): match ='{ or ="{, no match means = {
-            const match = text.match(TemplateParser.#endQuote) ?? '';
-            const quote = match?.length > 1 ? match[1] : '""'; // close ', ", or ""
-            // parser will call onattribute
-            this.parser.write(this.eatQuote = quote); // don't rewrite quote!
+            // finish attribute via quote(s): match ='{, ="{, ={ no match means attr...{
+            const match = text.match(TemplateParser.#endQuote);
+            if(match) {
+                let [, quote] = match;
+                // parser will call onattribute
+                this.parser.write(this.eatQuote = quote || '""');
+            }
+            else {
+                // for now error
+                throw new Error(`Interpolator in attribute not preceded by =, =', or ="`);
+            }
         }
     }
+
+    static #startQuote = /^\s*(["|'])/;
 
     // writeText needs to consider whether the prior .write()  
     // added quotation marks which now need to be removed
     writeText(text) {
         if(text) {
-            // TODO: what about whitespace like ="{....} ",
-            // shouldn't this use startQuote regex???
-            if(this.eatQuote && text[0] === this.eatQuote) text = text.slice(1);
+            if(this.eatQuote) {
+                const match = TemplateParser.#startQuote.exec(text);
+                if(match) {
+                    const [fullMatch, quote] = match;
+                    if(quote === this.eatQuote) text = text.slice(fullMatch.length);
+                }
+            }
             this.parser.write(text);
         }
         this.eatQuote = '';
