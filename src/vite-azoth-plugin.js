@@ -1,5 +1,5 @@
 import { Parser } from 'acorn';
-import acornAzothPlugin from './parsers/acorn-azoth';
+import acornAzothPlugin from './parser';
 import { azothGenerate as generate } from './generator';
 import { SourceMapGenerator } from 'source-map';
 import { normalizePath } from 'vite';
