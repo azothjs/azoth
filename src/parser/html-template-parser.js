@@ -8,12 +8,23 @@ const endQuote = /(?:=)\s*(["|'])\s*$/;
 
 export function getParser() {
 
-    const templateContext = new TemplateContext();
-    const parser = new HtmlParser(templateContext, { 
+    const template = new TemplateContext();
+    const parser = new HtmlParser(template, { 
         lowerCaseTags: false,
         lowerCaseAttributeNames: false,
         recognizeSelfClosing: true 
     });
+
+    function write(text) {
+        writeText(text);
+        const binding = template.createBinding();
+        if(template.nextAttributeBinding) { 
+            // Force parser to call onattribute by writing quotes
+            const match = text.match(endQuote) ?? '';
+            const quote = match?.length > 1 ? match[1] : '""';
+            parser.write(eatQuote = quote);
+        }
+    }
 
     // writeText needs to consider whether the prior .write()  
     // added quotation marks which now need to be removed
@@ -26,65 +37,67 @@ export function getParser() {
         eatQuote = '';
     }
 
-    function write(text) {
+    function end(text) {
         writeText(text);
-
-        const { element, root } = templateContext;
-       
-        const binding = templateContext.createBinding();
-        /* property binder via attribute */
-        if(binding.type === 'property') { 
-            // Force the attribute to close properly by 
-            // ensuring full set of matching quotes happen
-            const match = text.match(endQuote) ?? '';
-            const quote = match?.length > 1 ? match[1] : '""';
-            parser.write(eatQuote = quote);
-        }
-    }
-
-    return {
-        write,
-        end(text) {
-            writeText(text);
-            parser.end();
+        parser.end();
             
-            return {
-                bindings: templateContext.bindings.map(({ 
-                    element: { name, queryIndex, length }, 
-                    property, 
-                    childIndex 
-                }) => {
-                    return property ? 
-                        { queryIndex, name, property } : 
-                        { queryIndex, name, childIndex, length };
-                }),
-                // Originally placed into quasi chunks:
-                // quasis: chunks.map(chunk => chunk.flat().join(''))
-                html: templateContext.html.flat().join('')
-            };
-        }
-    };
-
+        return {
+            bindings: template.bindings.map(({ 
+                element: { name, queryIndex, length }, 
+                property, 
+                index: childIndex 
+            }) => {
+                return property ? 
+                    { queryIndex, name, property } : 
+                    { queryIndex, name, childIndex, length };
+            }),
+            html: template.html.flat().join('')
+        };
+    }
+    
+    return { write, end };
 }
 
 
 class ElementContext {
-    inTagOpen = true;
     attributes = [];
-    bindings = [];
-    waiting = null;
+    inTagOpen = true;
     name = '';
     keys = 0;
     length = 0;
     queryIndex = -1;
+    isBound = false;
 
     constructor(name) {
         this.name = name;
     }
+
+    addAttribute(attr) {
+        this.attributes.push(attr);
+    }
 }
 
 class Binding {
-    
+    static attributeName = 'data-bind';
+    element = null;
+    constructor(element) {
+        this.element = element;
+        this.element.isBound = true;
+    }
+}
+
+class PropertyBinding extends Binding {
+    property = '';
+}
+
+class ChildBinding extends Binding {
+    index = -1;
+    replacement = '';
+    constructor(element) {
+        super(element);
+        this.index = element.length;
+        this.replacement = `<!--child[${this.index}]-->`;
+    }
 }
 
 class TemplateContext {
@@ -94,19 +107,20 @@ class TemplateContext {
     targets = [];
     root = null;
     
-    // context state
+    // current element context
     element = null;
-    propertyBinding = null;
+    // carry-over binding that comes before its own attribute
+    nextAttributeBinding = null;
 
     constructor() {
-        this.root = this.element = this.push('<>');
+        this.push('<>');
+        this.root = this.element; 
         this.root.inTagOpen = false;
     }
 
     push(name) {
-        const ctx = new ElementContext(name);
-        this.stack.push(this.element = ctx);
-        return ctx;
+        const context = new ElementContext(name);
+        this.stack.push(this.element = context);
     }
 
     createBinding() {
@@ -116,39 +130,20 @@ class TemplateContext {
         if(element.queryIndex === -1 && element !== root) {
             element.queryIndex = targets.push(element) - 1;
         }
-        const binding = { element };
-        element.bindings.push(binding);
-        
-        this.bindings.push(binding);
 
-        /* property binder via attribute */
+        let binding = null;
         if(element.inTagOpen) {
-            this.addPropertyBinder(binding);
+            binding = new PropertyBinding(element);
+            this.nextAttributeBinding = binding;
         }
         else {
-            this.addChildBinder(binding);
+            binding = new ChildBinding(element);
+            this.html.push(binding.replacement);
+            element.length++;
         }
-
-
-        return binding;
+        this.bindings.push(binding);
     }
 
-    addChildBinder(binding) {
-        // copy element value by assigning to binding index,
-        // this.element.length will increase as more children added
-        binding.type = 'child';
-        const index = binding.childIndex = this.element.length;
-        const replacement = `<!--child[${index}]-->`; // TODO: externalize replacement = i => `...`
-        this.html.push(replacement);
-        this.element.length++;
-    }
-
-    addPropertyBinder(binding) {
-        const { element } = this;
-        binding.attributeIndex = element.attributes.length;
-        binding.type = 'property';
-        this.propertyBinding = binding;
-    }
 
     pop(){
         this.stack.pop();
@@ -156,51 +151,48 @@ class TemplateContext {
     }
 
     onopentagname(name) {
-        this.element.length++; // parent childNodes
-        this.push(name);
+        const parent = this.element;
+        parent.length++;
+        this.push(name); // new open tag now this.element
         this.html.push(`<${name}`);
     }
         
     onattribute(name, value, quote) {
-        const binding = this.propertyBinding;
-        this.propertyBinding = null;
-        if(binding) binding.property = name;
+        const binding = this.nextAttributeBinding;
+        this.nextAttributeBinding = null;
 
-        value ??= '';
-        const isEmpty = !quote && !value;
-        this.element.attributes.push(isEmpty ? ` ${name}` : ` ${name}="${value}"`);
+        if(binding) {
+            binding.property = name;
+        }
+        else {
+            value ??= '';
+            const isEmpty = !quote && !value;
+            this.element.addAttribute(isEmpty ? ` ${name}` : ` ${name}="${value}"`);
+        }
     }
         
     onopentag() {    
-        const { element } = this;       
-        element.inTagOpen = false;
-        this.html.push(element.attributes); // open for further adds & removes
-        this.html.push('>');
+        this.element.inTagOpen = false;
+        // el.attributes open for further adds & removes
+        this.html.push(this.element.attributes, '>');
     }
         
     ontext(text) {            
-        this.element.length++;
         this.html.push(text);
+        this.element.length++;
     }
         
     onclosetag(name, isImplied) {
-        const { element: { bindings, attributes } } = this;
         // void, self-closing, tags
         if(!voidElements.has(name)) this.html.push(`</${name}>`);
-
-        if(bindings.length) {
-            for(let i = 0; i < bindings.length; i++) {
-                attributes[bindings[i].attributeIndex] = '';
-            }
-            this.onattribute('data-bind');
+        if(this.element.isBound) {
+            this.onattribute(Binding.attributeName);
         }
-
         this.pop();
     }
         
     oncomment(comment) {
         this.element.length++;
         this.html.push(`<!--${comment}-->`);
-    }
-        
+    } 
 }
