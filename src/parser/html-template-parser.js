@@ -46,6 +46,9 @@ class TemplateParser {
                 throw new Error(`Interpolator in attribute not preceded by =, =', or ="`);
             }
         }
+        else {
+            // TODO: edge case like <input{...} should throw
+        }
     }
 
     static #startQuote = /^\s*(["|'])/;

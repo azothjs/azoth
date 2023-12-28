@@ -308,13 +308,12 @@ describe('attribute quote handling', () => {
         `);
     });
 
-    test.skip('mixed', ({ expect, parser }) => {
+    test('mixed', ({ expect, parser }) => {
         parser.write(`<input class=`);
         parser.write(` name="`);
         parser.write(`   " maxLength='`);
         parser.write(`  ' type="   `);
         parser.write(`" style='   `);
-        parser.write(`' required   `);
         const { html, bindings } = parser.end(`>`);
 
         expect(html).toMatchInlineSnapshot(`"<input data-bind>"`);
@@ -327,5 +326,16 @@ describe('attribute quote handling', () => {
             { "queryIndex": 0, "name": "input", "property": "style" },
           ]
         `);
+    });
+
+    describe.each([
+        `<input required`,
+        `<input required    `,
+        `<input `,
+        // `<input`, TODO edge case
+    ])('invalid attribute binder', (template) => {
+        test.fails(template, ({ parser }) => {
+            parser.write(template);
+        });
     });
 });
