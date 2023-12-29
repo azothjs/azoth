@@ -9,7 +9,7 @@
 //
 // https://github.com/acornjs/acorn-jsx/blob/main/index.js
 
-import { getParser } from './template/html-parser.js';
+import { TemplateParser } from './template/html-parser.js';
 
 export function extend(Parser, azTokens) {
     const SIGIL_CODE = '#'.charCodeAt(0);
@@ -202,18 +202,20 @@ export function extend(Parser, azTokens) {
             return this.parseAzothTemplate();
         }
 
-        // copied from acorn "parseTemplate" in acorn
+        // based on "parseTemplate" in acorn
         parseAzothTemplate() {
             const node = this.startNode();
             this.next();
 
-            const parser = getParser();
+            const parser = new TemplateParser();
 
-            // asymmetrical first template element
+            // start with template elements read as always +1 in length vs expressions
             let curElt = this.parseTemplateElement({ isTagged : false }); // isTagged controls invalid escape sequences            
-            // parser.write(curElt.value.raw);
             node.quasis = [curElt];
             node.expressions = [];
+            if(curElt.tail) {
+                parser.end(curElt.value.raw);
+            }
 
             while(!curElt.tail) {
                 if(this.type === tt.eof) this.raise(this.pos, 'Unterminated template literal');
@@ -224,12 +226,12 @@ export function extend(Parser, azTokens) {
                 // const azothExpr = this.startNode();
                 // node.expressions.push(azothExpr);
 
+                // ...expression...
                 this.next();
-                // ...expression ...
                 const expr = this.parseExpression();
                 node.expressions.push(expr);
                 
-                // }
+                // closing }
                 this.expect(tt.braceR);
 
                 // this.finishNode(azothExpr, 'AzothExpression');
@@ -241,9 +243,8 @@ export function extend(Parser, azTokens) {
 
                 if(curElt.tail) parser.end(curElt.value.raw);
             }
-            const { html, bindings } = parser.end();
             node.html = parser.html;
-            node.bindings = bindings;
+            node.bindings = parser.bindings;
 
             this.next();
             return this.finishNode(node, 'TemplateDomLiteral');

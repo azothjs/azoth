@@ -124,6 +124,18 @@ describe('templates', () => {
         };
     });
 
+    test('static template', ({ expect, templatize }) => {
+        const template = templatize(/*html*/`#\`<p>hello</p>\``);
+
+        expect(template).toMatchInlineSnapshot(`
+          {
+            "bindings": [],
+            "expressions": [],
+            "html": "<p>hello</p>",
+          }
+        `);
+    });
+
     test('simple template with single {...} interpolator', ({ expect, templatize }) => {
         const template = templatize(/*html*/`#\`<p>hello {name}!</p>\``);
 
@@ -378,7 +390,7 @@ describe('templates', () => {
                   "bindings": [],
                   "end": 59,
                   "expressions": [],
-                  "html": "",
+                  "html": "guest",
                   "quasis": [
                     Node {
                       "end": 58,
@@ -398,7 +410,7 @@ describe('templates', () => {
                   "bindings": [],
                   "end": 48,
                   "expressions": [],
-                  "html": "",
+                  "html": "<span>VIP</span>",
                   "quasis": [
                     Node {
                       "end": 47,

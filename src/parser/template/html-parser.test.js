@@ -1,9 +1,24 @@
 import { beforeEach, describe, test, } from 'vitest';
-import { getParser } from './html-parser.js';
+import { TemplateParser } from './html-parser.js';
 import { addSerializers } from '../serializers.js';
  
 beforeEach(context => {
-    context.parser = getParser();
+    context.parser = new TemplateParser();
+});
+
+describe('parser operations', () => {
+    test.fails('error calling write after end', ({ parser }) => {
+        parser.end();
+        parser.write();
+    });
+
+    test('same html and bindings on repeated end call or parser props', ({ expect, parser }) => {
+        parser.write();
+        const { html, bindings } = parser.end();
+        const { html: h2, bindings: b2 } = parser.end();
+        expect(html).toBe(h2).toBe(parser.html);
+        expect(bindings).toBe(b2).toBe(parser.bindings);
+    });
 });
 
 describe('static html', () => {
@@ -61,8 +76,7 @@ describe('static html', () => {
         expect(template).toMatchInlineSnapshot(`
           {
             "bindings": [],
-            "html": "
-                      <br>
+            "html": "<br>
                       <br>
                       <self-closing></self-closing>text
                       <custom-element></custom-element>

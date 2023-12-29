@@ -1,25 +1,18 @@
 import { Parser as HtmlParser } from 'htmlparser2';
 import voidElements from '../void-elements.js';
-import { LAST_QUOTE, NEXT_QUOTE, DEV_TRIM_END, DEV_TRIM_START } from './regex.js';
+import { LAST_QUOTE, NEXT_QUOTE, DEV_TRIM } from './regex.js';
 
-export function getParser() {
-    return new TemplateParser();
-}
-
-class TemplateParser {
-
-    // out
+export class TemplateParser {
+    // final state after .end()
     html = '';
-    bindings = null; 
+    bindings = []; 
 
-    // template context state
+    // template context state,
+    // implements handler for htmlparser2
     template = null;
-    // htmlparser2
     parser = null;
     // carry-over quote information for attr=${interpolator}
     eatQuote = '';
-    // detect first write
-    hasWritten = false;
 
     constructor() {
         this.template = new TemplateContext();
@@ -31,9 +24,8 @@ class TemplateParser {
     }
     
     write(text) {
-        if(!this.hasWritten) {
-            text = text.replace(DEV_TRIM_START, '');
-            this.hasWritten = true;
+        if(this.parser.ended) {
+            throw new Error('Cannot call parser.write() after parser.end()');
         }
 
         this.writeText(text);
@@ -56,10 +48,9 @@ class TemplateParser {
         }
     }
 
-    // writeText needs to consider whether the prior .write()  
-    // added quotation marks which now need to be removed
     writeText(text) {
         if(text) {
+            // remove equivalent quotation marks added by prior parser.write()
             if(this.eatQuote) {
                 const match = text.match(NEXT_QUOTE);
                 if(match) {
@@ -73,7 +64,13 @@ class TemplateParser {
     }
 
     end(text) {
-        text = text?.replace(DEV_TRIM_END, '');
+        if(this.parser.ended) {
+            if(text) {
+                throw new Error('Cannot call parser.end with text if parser.end has already been called.');
+            }
+            return { bindings: this.bindings, html: this.html };
+        }
+
         this.writeText(text);
         this.parser.end();
             
@@ -86,7 +83,10 @@ class TemplateParser {
                 { queryIndex, name, property } : 
                 { queryIndex, name, childIndex, length };
         });
-        this.html = this.template.html.flat().join('');
+        this.html = this.template.html
+            .flat()
+            .join('')
+            .replace(DEV_TRIM, '');
 
         return { bindings: this.bindings, html: this.html };
     }   
