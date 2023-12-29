@@ -1,12 +1,8 @@
 /* eslint-disable no-fallthrough */
-// Acorn source uses intentional fallthrough in switch/case
-
-// Writing this plugin leaned on the acorn-jsx example.
-// Plugin structure and acorn extending pretty much the same.
-// Heavy refactoring on code structure, within the constraints
-// of being an acorn parser extension and favoring some of
-// it's existing style and paradigm.
-//
+// - Acorn source uses intentional fallthrough in switch/case.
+// - Code structure within the constraints of being an acorn 
+// parser extension and favoring some of it's existing style and paradigm.
+// - Initial inspiration and example on getting started
 // https://github.com/acornjs/acorn-jsx/blob/main/index.js
 
 import { TemplateParser } from './template/html-parser.js';
