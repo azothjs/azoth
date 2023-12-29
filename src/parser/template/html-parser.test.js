@@ -121,7 +121,7 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<!--child[0]-->"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": -1, "name": "<>", "childIndex": 0, "length": 1 },
+                { "type": "ChildBinding", "queryIndex": -1, "name": "<>", "childIndex": 0, "length": 1 },
               ]
             `);
         });
@@ -134,8 +134,8 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<!--child[0]--><!--child[1]-->"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": -1, "name": "<>", "childIndex": 0, "length": 2 },
-                { "queryIndex": -1, "name": "<>", "childIndex": 1, "length": 2 },
+                { "type": "ChildBinding", "queryIndex": -1, "name": "<>", "childIndex": 0, "length": 2 },
+                { "type": "ChildBinding", "queryIndex": -1, "name": "<>", "childIndex": 1, "length": 2 },
               ]
             `);
         });
@@ -147,7 +147,7 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<p data-bind>hello <!--child[1]-->!</p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": 0, "name": "p", "childIndex": 1, "length": 3 },
+                { "type": "ChildBinding", "queryIndex": 0, "name": "p", "childIndex": 1, "length": 3 },
               ]
             `);
         });
@@ -161,7 +161,7 @@ describe('bindings', () => {
             );
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": 0, "name": "p", "childIndex": 2, "length": 5 },
+                { "type": "ChildBinding", "queryIndex": 0, "name": "p", "childIndex": 2, "length": 5 },
               ]
             `);
         });
@@ -178,11 +178,11 @@ describe('bindings', () => {
 
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": 0, "name": "p", "childIndex": 1, "length": 3 },
-                { "queryIndex": 1, "name": "p", "childIndex": 1, "length": 6 },
-                { "queryIndex": 1, "name": "p", "childIndex": 3, "length": 6 },
-                { "queryIndex": 2, "name": "span", "childIndex": 0, "length": 1 },
-                { "queryIndex": 3, "name": "p", "childIndex": 0, "length": 1 },
+                { "type": "ChildBinding", "queryIndex": 0, "name": "p", "childIndex": 1, "length": 3 },
+                { "type": "ChildBinding", "queryIndex": 1, "name": "p", "childIndex": 1, "length": 6 },
+                { "type": "ChildBinding", "queryIndex": 1, "name": "p", "childIndex": 3, "length": 6 },
+                { "type": "ChildBinding", "queryIndex": 2, "name": "span", "childIndex": 0, "length": 1 },
+                { "type": "ChildBinding", "queryIndex": 3, "name": "p", "childIndex": 0, "length": 1 },
               ]
             `);
         });
@@ -197,7 +197,7 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<p data-bind></p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": 0, "name": "p", "property": "class" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "p", "property": "class" },
               ]
             `);
         });
@@ -209,7 +209,7 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<input required data-bind>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": 0, "name": "input", "property": "class" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "class" },
               ]
             `);
         });
@@ -221,7 +221,7 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<p data-bind></p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": 0, "name": "p", "property": "class" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "p", "property": "class" },
               ]
             `);
         });
@@ -233,7 +233,7 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<p data-bind></p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": 0, "name": "p", "property": "class" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "p", "property": "class" },
               ]
             `);
         });
@@ -248,10 +248,10 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<input required type="text" data-bind><p></p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": 0, "name": "input", "property": "class" },
-                { "queryIndex": 0, "name": "input", "property": "name" },
-                { "queryIndex": 0, "name": "input", "property": "maxLength" },
-                { "queryIndex": 0, "name": "input", "property": "disabled" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "class" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "name" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "maxLength" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "disabled" },
               ]
             `);
         });
@@ -265,9 +265,9 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<input required data-bind>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "queryIndex": 0, "name": "input", "property": "class" },
-                { "queryIndex": 0, "name": "input", "property": "name" },
-                { "queryIndex": 0, "name": "input", "property": "type" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "class" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "name" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "type" },
               ]
             `);
         });
@@ -287,8 +287,8 @@ describe('attribute quote handling', () => {
         expect(html).toMatchInlineSnapshot(`"<input data-bind>"`);
         expect(bindings).toMatchInlineSnapshot(`
           [
-            { "queryIndex": 0, "name": "input", "property": "name" },
-            { "queryIndex": 0, "name": "input", "property": "type" },
+            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "name" },
+            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "type" },
           ]
         `);
     });
@@ -301,8 +301,8 @@ describe('attribute quote handling', () => {
         expect(html).toMatchInlineSnapshot(`"<input data-bind>"`);
         expect(bindings).toMatchInlineSnapshot(`
           [
-            { "queryIndex": 0, "name": "input", "property": "name" },
-            { "queryIndex": 0, "name": "input", "property": "type" },
+            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "name" },
+            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "type" },
           ]
         `);
     });
@@ -315,8 +315,8 @@ describe('attribute quote handling', () => {
         expect(html).toMatchInlineSnapshot(`"<input required data-bind>"`);
         expect(bindings).toMatchInlineSnapshot(`
           [
-            { "queryIndex": 0, "name": "input", "property": "class" },
-            { "queryIndex": 0, "name": "input", "property": "type" },
+            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "class" },
+            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "type" },
           ]
         `);
     });
@@ -332,11 +332,11 @@ describe('attribute quote handling', () => {
         expect(html).toMatchInlineSnapshot(`"<input data-bind>"`);
         expect(bindings).toMatchInlineSnapshot(`
           [
-            { "queryIndex": 0, "name": "input", "property": "class" },
-            { "queryIndex": 0, "name": "input", "property": "name" },
-            { "queryIndex": 0, "name": "input", "property": "maxLength" },
-            { "queryIndex": 0, "name": "input", "property": "type" },
-            { "queryIndex": 0, "name": "input", "property": "style" },
+            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "class" },
+            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "name" },
+            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "maxLength" },
+            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "type" },
+            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "style" },
           ]
         `);
     });

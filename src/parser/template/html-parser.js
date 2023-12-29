@@ -75,13 +75,14 @@ export class TemplateParser {
         this.parser.end();
             
         this.bindings = this.template.bindings.map(({ 
+            type,
             element: { name, queryIndex, length }, 
             property, 
             index: childIndex 
         }) => {
             return property ? 
-                { queryIndex, name, property } : 
-                { queryIndex, name, childIndex, length };
+                { type, queryIndex, name, property } : 
+                { type, queryIndex, name, childIndex, length };
         });
         this.html = this.template.html
             .flat()
@@ -211,9 +212,12 @@ class ElementContext {
 class Binding {
     static attributeName = 'data-bind';
     element = null;
+    type = '';
+
     constructor(element) {
         this.element = element;
         this.element.isBound = true;
+        this.type = this.constructor.name;
     }
 }
 

@@ -147,6 +147,7 @@ describe('templates', () => {
                 "length": 3,
                 "name": "p",
                 "queryIndex": 0,
+                "type": "ChildBinding",
               },
             ],
             "expressions": [
@@ -179,18 +180,21 @@ describe('templates', () => {
                 "length": 3,
                 "name": "p",
                 "queryIndex": 0,
+                "type": "ChildBinding",
               },
               {
                 "childIndex": 0,
                 "length": 1,
                 "name": "span",
                 "queryIndex": 1,
+                "type": "ChildBinding",
               },
               {
                 "childIndex": 0,
                 "length": 1,
                 "name": "p",
                 "queryIndex": 2,
+                "type": "ChildBinding",
               },
             ],
             "expressions": [
@@ -233,18 +237,21 @@ describe('templates', () => {
                 "length": 5,
                 "name": "p",
                 "queryIndex": 0,
+                "type": "ChildBinding",
               },
               {
                 "childIndex": 2,
                 "length": 5,
                 "name": "p",
                 "queryIndex": 0,
+                "type": "ChildBinding",
               },
               {
                 "childIndex": 4,
                 "length": 5,
                 "name": "p",
                 "queryIndex": 0,
+                "type": "ChildBinding",
               },
             ],
             "expressions": [
@@ -284,7 +291,7 @@ describe('templates', () => {
         `);
     });
 
-    test('property binders 1', ({ expect, templatize }) => {
+    test('property binders', ({ expect, templatize }) => {
         
         const template = templatize(`
             #\`
@@ -301,16 +308,19 @@ describe('templates', () => {
                 "name": "p",
                 "property": "class",
                 "queryIndex": 0,
+                "type": "PropertyBinding",
               },
               {
                 "name": "input",
                 "property": "required",
                 "queryIndex": 1,
+                "type": "PropertyBinding",
               },
               {
                 "name": "div",
                 "property": "class",
                 "queryIndex": 2,
+                "type": "PropertyBinding",
               },
             ],
             "expressions": [
@@ -340,30 +350,96 @@ describe('templates', () => {
         `);
     });
 
-    test('property binders 2', ({ expect, templatize }) => {
+    test('property and child binders', ({ expect, templatize }) => {
         
         const template = templatize(`
-            #\`<div style="color: red" class="{sectionType}"></div>\`;
+            #\`
+            <section>
+                <h2 class="item-header">{title}
+                <p class={category}>
+                    <span class={type}>Hello</span> {name}!
+                    {description}
+                </p>
+            </section>
+            \`;
         `);
         
         expect(template).toMatchInlineSnapshot(`
           {
             "bindings": [
               {
-                "name": "div",
-                "property": "class",
+                "childIndex": 0,
+                "length": 4,
+                "name": "h2",
                 "queryIndex": 0,
+                "type": "ChildBinding",
+              },
+              {
+                "name": "p",
+                "property": "class",
+                "queryIndex": 1,
+                "type": "PropertyBinding",
+              },
+              {
+                "name": "span",
+                "property": "class",
+                "queryIndex": 2,
+                "type": "PropertyBinding",
+              },
+              {
+                "childIndex": 3,
+                "length": 7,
+                "name": "p",
+                "queryIndex": 1,
+                "type": "ChildBinding",
+              },
+              {
+                "childIndex": 5,
+                "length": 7,
+                "name": "p",
+                "queryIndex": 1,
+                "type": "ChildBinding",
               },
             ],
             "expressions": [
               Node {
-                "end": 58,
-                "name": "sectionType",
-                "start": 47,
+                "end": 84,
+                "name": "title",
+                "start": 79,
+                "type": "Identifier",
+              },
+              Node {
+                "end": 120,
+                "name": "category",
+                "start": 112,
+                "type": "Identifier",
+              },
+              Node {
+                "end": 160,
+                "name": "type",
+                "start": 156,
+                "type": "Identifier",
+              },
+              Node {
+                "end": 180,
+                "name": "name",
+                "start": 176,
+                "type": "Identifier",
+              },
+              Node {
+                "end": 215,
+                "name": "description",
+                "start": 204,
                 "type": "Identifier",
               },
             ],
-            "html": "<div style="color: red" data-bind></div>",
+            "html": "<section>
+                          <h2 class="item-header" data-bind><!--child[0]-->
+                          <p data-bind>
+                              <span data-bind>Hello</span> <!--child[3]-->!
+                              <!--child[5]-->
+                          </p>
+                      </h2></section>",
           }
         `);
     });
@@ -382,6 +458,7 @@ describe('templates', () => {
                 "length": 1,
                 "name": "p",
                 "queryIndex": 0,
+                "type": "ChildBinding",
               },
             ],
             "expressions": [
