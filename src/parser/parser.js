@@ -1,9 +1,9 @@
 /* eslint-disable no-fallthrough */
 // - Acorn source uses intentional fallthrough in switch/case.
 // - Code structure within the constraints of being an acorn 
-// parser extension and favoring some of it's existing style and paradigm.
-// - Initial inspiration and example on getting started
-// https://github.com/acornjs/acorn-jsx/blob/main/index.js
+//   parser plugin and favoring it's existing style and paradigm.
+// - Initial inspiration and example on getting started:
+//   https://github.com/acornjs/acorn-jsx/blob/main/index.js
 
 import { TemplateParser } from './template/html-parser.js';
 
