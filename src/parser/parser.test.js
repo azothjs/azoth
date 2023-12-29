@@ -158,7 +158,7 @@ describe('templates', () => {
                 "type": "Identifier",
               },
             ],
-            "html": "<p data-bind>hello <!--child[1]-->!</p>",
+            "html": "<p data-bind>hello <text-node></text-node>!</p>",
           }
         `);
     });
@@ -217,9 +217,9 @@ describe('templates', () => {
                 "type": "Identifier",
               },
             ],
-            "html": "<p data-bind>hello <!--child[1]-->!</p>
-                          <p>count: <span data-bind><!--child[0]--></span></p>
-                          <p data-bind><!--child[0]--></p>",
+            "html": "<p data-bind>hello <text-node></text-node>!</p>
+                          <p>count: <span data-bind><text-node></text-node></span></p>
+                          <p data-bind><text-node></text-node></p>",
           }
         `);
     });
@@ -286,7 +286,7 @@ describe('templates', () => {
                 "type": "BinaryExpression",
               },
             ],
-            "html": "<p data-bind><!--child[0]--> + <!--child[2]--> = <!--child[4]--></p>",
+            "html": "<p data-bind><text-node></text-node> + <text-node></text-node> = <text-node></text-node></p>",
           }
         `);
     });
@@ -434,10 +434,10 @@ describe('templates', () => {
               },
             ],
             "html": "<section>
-                          <h2 class="item-header" data-bind><!--child[0]-->
+                          <h2 class="item-header" data-bind><text-node></text-node>
                           <p data-bind>
-                              <span data-bind>Hello</span> <!--child[3]-->!
-                              <!--child[5]-->
+                              <span data-bind>Hello</span> <text-node></text-node>!
+                              <text-node></text-node>
                           </p>
                       </h2></section>",
           }
@@ -514,7 +514,7 @@ describe('templates', () => {
                 "type": "ConditionalExpression",
               },
             ],
-            "html": "<p data-bind><!--child[0]--></p>",
+            "html": "<p data-bind><text-node></text-node></p>",
           }
         `);
     });

@@ -118,7 +118,7 @@ describe('bindings', () => {
             parser.write(``);
             const { html, bindings } = parser.end(``);
 
-            expect(html).toMatchInlineSnapshot(`"<!--child[0]-->"`);
+            expect(html).toMatchInlineSnapshot(`"<text-node></text-node>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
                 { "type": "ChildBinding", "queryIndex": -1, "name": "<>", "childIndex": 0, "length": 1 },
@@ -131,7 +131,7 @@ describe('bindings', () => {
             parser.write(``);
             const { html, bindings } = parser.end(``);
 
-            expect(html).toMatchInlineSnapshot(`"<!--child[0]--><!--child[1]-->"`);
+            expect(html).toMatchInlineSnapshot(`"<text-node></text-node><text-node></text-node>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
                 { "type": "ChildBinding", "queryIndex": -1, "name": "<>", "childIndex": 0, "length": 2 },
@@ -144,7 +144,7 @@ describe('bindings', () => {
             parser.write(`<p>hello `);
             const { html, bindings } = parser.end(`!</p>`);
 
-            expect(html).toMatchInlineSnapshot(`"<p data-bind>hello <!--child[1]-->!</p>"`);
+            expect(html).toMatchInlineSnapshot(`"<p data-bind>hello <text-node></text-node>!</p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
                 { "type": "ChildBinding", "queryIndex": 0, "name": "p", "childIndex": 1, "length": 3 },
@@ -157,7 +157,7 @@ describe('bindings', () => {
             const { html, bindings } = parser.end(`<!--comment 2--> and welcome!</p>`);
 
             expect(html).toMatchInlineSnapshot(
-                `"<p data-bind>hello <!--comment 1--><!--child[2]--><!--comment 2--> and welcome!</p>"`
+                `"<p data-bind>hello <!--comment 1--><text-node></text-node><!--comment 2--> and welcome!</p>"`
             );
             expect(bindings).toMatchInlineSnapshot(`
               [
@@ -174,7 +174,7 @@ describe('bindings', () => {
             parser.write(`</span></p> <p>`);
             const { html, bindings } = parser.end(`</p>`);
 
-            expect(html).toMatchInlineSnapshot(`"<p data-bind>hello <!--child[1]-->!</p> <p data-bind>sum of <!--child[1]--> and <!--child[3]--> equals <span data-bind><!--child[0]--></span></p> <p data-bind><!--child[0]--></p>"`);
+            expect(html).toMatchInlineSnapshot(`"<p data-bind>hello <text-node></text-node>!</p> <p data-bind>sum of <text-node></text-node> and <text-node></text-node> equals <span data-bind><text-node></text-node></span></p> <p data-bind><text-node></text-node></p>"`);
 
             expect(bindings).toMatchInlineSnapshot(`
               [

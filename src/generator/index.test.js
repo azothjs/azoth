@@ -61,11 +61,11 @@ describe.only('generator', () => {
     
         expect(code).toMatchInlineSnapshot(`
           "(() => {
-            const __renderer = __makeRenderer(\`<p data-bind><!--child[0]--></p>\`);
+            const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
             const fn = () => {
               const { __root, __targets } = __renderer();
               __targets[0].class = category;
-              __targets[0].childNodes[0] = text;
+              __targets[0].childNodes[0].textContent = text;
               return __root;
             };
             return fn;

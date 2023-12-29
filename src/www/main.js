@@ -1,38 +1,18 @@
 import './style.css';
-import { _, __makeRenderer } from '../azoth/index.js';
-import './lab.js';
+import { __makeRenderer } from '../azoth/index.js';
+// import './lab.js';
 
-const template = _/*html*/`
+const template = ({ title, category, description }) => #`
     <main>
-        <h2>Rendered Azoth template!</h2>
-        <ul>
-            <li>one</li>
-            <li>two</li>
-            <li>three</li>
-        </ul>
-        <pre>what? \u0026#128102</pre>
+        <h2>Rendered {title}</h2>
+        <p class={category}>{description}</p>
     </main>
 `;
 
-// // const template = _/*html*/`az`;
-
-// document.body.append(template());
-
-// // let $ = (strings, ...exprs) => () => (String.raw(strings, ...exprs));
-// class $ {}
-// class Component extends $ {
-    
-//     render = _`
-//         <p><span></span></p>
-//     `;
-    
-//     constructor(name) {
-//         super();
-//         this.name = name;
-//     }
-
-	
-// }
-
-// let c = new Component('azoth');
-// console.log(c.render());
+const dom = template({ 
+    title: 'azoth', 
+    category: 'ftw', 
+    description: 'hello template',
+});
+const d2 = dom()
+document.body.append(d2);

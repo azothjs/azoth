@@ -75,7 +75,7 @@ const azothGenerator = {
     },
 
     ChildBinding({ queryIndex, childIndex }, state) {
-        state.write(`__targets[${queryIndex}].childNodes[${childIndex}]`);
+        state.write(`__targets[${queryIndex}].childNodes[${childIndex}].textContent`);
     },
 
     // ArrowFunctionExpression(node, state) {

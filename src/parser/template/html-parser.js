@@ -231,6 +231,7 @@ class ChildBinding extends Binding {
     constructor(element) {
         super(element);
         this.index = element.length;
-        this.replacement = `<!--child[${this.index}]-->`;
+        // this.replacement = `<!--child[${this.index}]-->`;
+        this.replacement = `<text-node></text-node>`;
     }
 }

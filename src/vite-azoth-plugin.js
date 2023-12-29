@@ -13,13 +13,13 @@ export default function AzothPlugin() {
     const parse = code => AzParser.parse(code, {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        locations: true,
+        // locations: true,
     });
     
-    const transpile = (input, sourceMap) => {
+    const transpile = (input) => {
         const ast = parse(input);
-        const code = generate(ast, { sourceMap });
-        return { code, map: sourceMap };
+        const code = generate(ast);
+        return code;
     };
 
 
@@ -30,11 +30,11 @@ export default function AzothPlugin() {
             if(!jsFile.test(id) || !id.includes('src/www/')) return;
 
             const path = normalizePath(id);
-            const sourceMap = new SourceMapGenerator({ 
-                file: path.split('/').at(-1)
-            });
+            // const sourceMap = new SourceMapGenerator({ 
+            //     file: path.split('/').at(-1)
+            // });
 
-            return transpile(source, sourceMap);
+            return transpile(source /*, sourceMap*/);
         },
 
     };
