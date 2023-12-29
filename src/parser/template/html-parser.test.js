@@ -1,9 +1,24 @@
 import { beforeEach, describe, test, } from 'vitest';
-import { getParser } from './html-template-parser.js';
-import { addSerializers } from './serializers.js';
+import { TemplateParser } from './html-parser.js';
+import { addSerializers } from '../serializers.js';
  
 beforeEach(context => {
-    context.parser = getParser();
+    context.parser = new TemplateParser();
+});
+
+describe('parser operations', () => {
+    test.fails('error calling write after end', ({ parser }) => {
+        parser.end();
+        parser.write();
+    });
+
+    test('same html and bindings on repeated end call or parser props', ({ expect, parser }) => {
+        parser.write();
+        const { html, bindings } = parser.end();
+        const { html: h2, bindings: b2 } = parser.end();
+        expect(html).toBe(h2).toBe(parser.html);
+        expect(bindings).toBe(b2).toBe(parser.bindings);
+    });
 });
 
 describe('static html', () => {
@@ -61,14 +76,12 @@ describe('static html', () => {
         expect(template).toMatchInlineSnapshot(`
           {
             "bindings": [],
-            "html": "
-                      <br>
+            "html": "<br>
                       <br>
                       <self-closing></self-closing>text
                       <custom-element></custom-element>
                       <div></div>
-                      <div>text</div>        
-                  ",
+                      <div>text</div>",
           }
         `);
     });
@@ -257,6 +270,85 @@ describe('bindings', () => {
                 { "queryIndex": 0, "name": "input", "property": "type" },
               ]
             `);
+        });
+    });
+});
+
+
+describe('attribute quote handling', () => {
+
+    beforeEach(({ expect }) => addSerializers(expect));
+
+    test('extra space before next quote', ({ expect, parser }) => {
+        parser.write(`<input name="`);
+        parser.write(`   " type='`);
+        const { html, bindings } = parser.end(`   '>`);
+
+        expect(html).toMatchInlineSnapshot(`"<input data-bind>"`);
+        expect(bindings).toMatchInlineSnapshot(`
+          [
+            { "queryIndex": 0, "name": "input", "property": "name" },
+            { "queryIndex": 0, "name": "input", "property": "type" },
+          ]
+        `);
+    });
+
+    test('extra space before interpolator', ({ expect, parser }) => {
+        parser.write(`<input name="  `);
+        parser.write(`" type='  `);
+        const { html, bindings } = parser.end(`'>`);
+
+        expect(html).toMatchInlineSnapshot(`"<input data-bind>"`);
+        expect(bindings).toMatchInlineSnapshot(`
+          [
+            { "queryIndex": 0, "name": "input", "property": "name" },
+            { "queryIndex": 0, "name": "input", "property": "type" },
+          ]
+        `);
+    });
+
+    test('no quotes', ({ expect, parser }) => {
+        parser.write(`<input class=`);
+        parser.write(`required  type=`);
+        const { html, bindings } = parser.end(`>`);
+
+        expect(html).toMatchInlineSnapshot(`"<input required data-bind>"`);
+        expect(bindings).toMatchInlineSnapshot(`
+          [
+            { "queryIndex": 0, "name": "input", "property": "class" },
+            { "queryIndex": 0, "name": "input", "property": "type" },
+          ]
+        `);
+    });
+
+    test('mixed', ({ expect, parser }) => {
+        parser.write(`<input class=`);
+        parser.write(` name="`);
+        parser.write(`   " maxLength='`);
+        parser.write(`  ' type="   `);
+        parser.write(`" style='   `);
+        const { html, bindings } = parser.end(`>`);
+
+        expect(html).toMatchInlineSnapshot(`"<input data-bind>"`);
+        expect(bindings).toMatchInlineSnapshot(`
+          [
+            { "queryIndex": 0, "name": "input", "property": "class" },
+            { "queryIndex": 0, "name": "input", "property": "name" },
+            { "queryIndex": 0, "name": "input", "property": "maxLength" },
+            { "queryIndex": 0, "name": "input", "property": "type" },
+            { "queryIndex": 0, "name": "input", "property": "style" },
+          ]
+        `);
+    });
+
+    describe.each([
+        `<input required`,
+        `<input required    `,
+        `<input `,
+        // `<input`, TODO edge case
+    ])('invalid attribute binder', (template) => {
+        test.fails(template, ({ parser }) => {
+            parser.write(template);
         });
     });
 });

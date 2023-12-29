@@ -1,18 +1,17 @@
 import { Parser as HtmlParser } from 'htmlparser2';
-import voidElements from './void-elements.js';
+import voidElements from '../void-elements.js';
+import { LAST_QUOTE, NEXT_QUOTE, DEV_TRIM } from './regex.js';
 
-// test cases at https://regex101.com/r/2kW0JN
-const endQuote = /(?:=)\s*(["|'])\s*$/; // note no flags
-// const startQuote = /^\s*["]/;
+export class TemplateParser {
+    // final state after .end()
+    html = '';
+    bindings = []; 
 
-export function getParser() {
-    return new TemplateParser();
-}
-
-class TemplateParser {
-
+    // template context state,
+    // implements handler for htmlparser2
     template = null;
     parser = null;
+    // carry-over quote information for attr=${interpolator}
     eatQuote = '';
 
     constructor() {
@@ -23,46 +22,73 @@ class TemplateParser {
             recognizeSelfClosing: true 
         });
     }
-
+    
     write(text) {
+        if(this.parser.ended) {
+            throw new Error('Cannot call parser.write() after parser.end()');
+        }
+
         this.writeText(text);
         const binding = this.template.createBinding();
         if(this.template.nextAttributeBinding) { 
-            // Force parser to call onattribute by writing quotes
-            const match = text.match(endQuote) ?? '';
-            const quote = match?.length > 1 ? match[1] : '""';
-            this.parser.write(this.eatQuote = quote);
+            // finish attribute via quote(s): match ='{, ="{, ={ no match means attr...{
+            const match = text.match(LAST_QUOTE);
+            if(match) {
+                let [, quote] = match;
+                // parser will call onattribute
+                this.parser.write(this.eatQuote = quote || '""');
+            }
+            else {
+                // for now error
+                throw new Error(`Interpolator in attribute not preceded by =, =', or ="`);
+            }
+        }
+        else {
+            // TODO: edge case like <input{...} should throw
         }
     }
 
-    // writeText needs to consider whether the prior .write()  
-    // added quotation marks which now need to be removed
     writeText(text) {
         if(text) {
-            // TODO: what about whitespace like ="{....} ",
-            // shouldn't this use startQuote regex???
-            if(this.eatQuote && text[0] === this.eatQuote) text = text.slice(1);
+            // remove equivalent quotation marks added by prior parser.write()
+            if(this.eatQuote) {
+                const match = text.match(NEXT_QUOTE);
+                if(match) {
+                    const [fullMatch, quote] = match;
+                    if(quote === this.eatQuote) text = text.slice(fullMatch.length);
+                }
+            }
             this.parser.write(text);
         }
         this.eatQuote = '';
     }
 
     end(text) {
+        if(this.parser.ended) {
+            if(text) {
+                throw new Error('Cannot call parser.end with text if parser.end has already been called.');
+            }
+            return { bindings: this.bindings, html: this.html };
+        }
+
         this.writeText(text);
         this.parser.end();
             
-        return {
-            bindings: this.template.bindings.map(({ 
-                element: { name, queryIndex, length }, 
-                property, 
-                index: childIndex 
-            }) => {
-                return property ? 
-                    { queryIndex, name, property } : 
-                    { queryIndex, name, childIndex, length };
-            }),
-            html: this.template.html.flat().join('')
-        };
+        this.bindings = this.template.bindings.map(({ 
+            element: { name, queryIndex, length }, 
+            property, 
+            index: childIndex 
+        }) => {
+            return property ? 
+                { queryIndex, name, property } : 
+                { queryIndex, name, childIndex, length };
+        });
+        this.html = this.template.html
+            .flat()
+            .join('')
+            .replace(DEV_TRIM, '');
+
+        return { bindings: this.bindings, html: this.html };
     }   
 }
 

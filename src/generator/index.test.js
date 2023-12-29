@@ -31,42 +31,31 @@ describe.skip('generator', () => {
         }; 
 
         expect(transpile(t).code).toMatchInlineSnapshot(`
-      "\`hello \${place}\`;
-      "
-    `);
+          "\`hello \${place}\`;
+          "
+        `);
     });
 
     it.skip('generates from azoth ast static template', ({ expect }) => {
-        const t = () => {
-            let t = _`az`;
-        }; 
+        const t = `#\`azoth\``;
 
-        const { code, map } = transpile(t);
+        const { code } = transpile(t);
     
-        expect(code).toMatchInlineSnapshot(`
-      "let t = (() => {
-        const __renderer = __makeRenderer(\`az\`);
-        const fn = () => {
-          return __renderer().__root;
-        };
-        return fn;
-      })();
-      "
-    `);
-
-    // expect(map.toJSON()).toMatchInlineSnapshot(`
-    //   {
-    //     "file": "test.js",
-    //     "mappings": "IAAIA,IAAIC;AAAAA,oCAAA,CAAE;AAAFA;AAAAA",
-    //     "names": [
-    //       "t",
-    //       "_",
-    //     ],
-    //     "sources": [
-    //       "test.js",
-    //     ],
-    //     "version": 3,
-    //   }
-    // `);
+        expect(code).toMatchInlineSnapshot();
     });
 });
+
+// expect(map.toJSON()).toMatchInlineSnapshot(`
+//   {
+//     "file": "test.js",
+//     "mappings": "IAAIA,IAAIC;AAAAA,oCAAA,CAAE;AAAFA;AAAAA",
+//     "names": [
+//       "t",
+//       "_",
+//     ],
+//     "sources": [
+//       "test.js",
+//     ],
+//     "version": 3,
+//   }
+// `);

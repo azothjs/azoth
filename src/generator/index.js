@@ -1,5 +1,4 @@
 import { GENERATOR, generate } from 'astring';
-import { getParser as parseTemplate } from '../parser/html-template-parser.js';
 
 export function azothGenerate(ast, config) {
     const { ArrowFunctionExpression } = GENERATOR;
@@ -19,7 +18,8 @@ const { ArrowFunctionExpression } = GENERATOR;
 const azothGenerator = {
     AzothTemplate(node, state) {
         node.name = '_';
-        const { html } = parseTemplate(node.template);
+        // const { html } = parseTemplate(node.template);
+        const html = '';
         const { lineEnd: lE, /*, writeComments */ } = state;
         
         let indent = state.indent;
