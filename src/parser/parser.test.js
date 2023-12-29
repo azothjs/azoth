@@ -404,7 +404,7 @@ describe('templates', () => {
                     },
                   ],
                   "start": 51,
-                  "type": "TemplateDomLiteral",
+                  "type": "DomTemplateLiteral",
                 },
                 "consequent": Node {
                   "bindings": [],
@@ -424,7 +424,7 @@ describe('templates', () => {
                     },
                   ],
                   "start": 29,
-                  "type": "TemplateDomLiteral",
+                  "type": "DomTemplateLiteral",
                 },
                 "end": 59,
                 "start": 21,

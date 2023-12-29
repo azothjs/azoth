@@ -243,9 +243,7 @@ export function extend(Parser, azTokens) {
             node.bindings = parser.bindings;
 
             this.next();
-            return this.finishNode(node, 'TemplateDomLiteral');
-
+            return this.finishNode(node, 'DomTemplateLiteral');
         }
-          
     };
 }
