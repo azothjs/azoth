@@ -1,54 +1,177 @@
 import { beforeEach, describe, test, } from 'vitest';
 import { parse } from './index.js';
-import { toMatchCode } from '../utils/code-matchers.js';
 
 const options = { ecmaVersion: 'latest' };
+const parseToAst = (code) => {
+    return parse(code, options);
+};
 const parseTemplate = (code) => {
-    if(code.toBody) code = code.toBody();
-    const ast = parse(code, options);
-    // remove preamble nodes
-    const node = ast.body[0].expression;
-    return node;
+    const ast = parseToAst(code);
+    return ast.body[0].expression; // remove preamble nodes
 };
 
-describe('expressions', () => {
+describe('normal templates (no transformation)', () => {
+    test('template literal', ({ expect }) => {
+        const template = parseTemplate(/*html*/`\`<p>hello \${name}!</p>\``);
+
+        expect(template).toMatchInlineSnapshot(`
+          Node {
+            "end": 23,
+            "expressions": [
+              Node {
+                "end": 16,
+                "name": "name",
+                "start": 12,
+                "type": "Identifier",
+              },
+            ],
+            "quasis": [
+              Node {
+                "end": 10,
+                "start": 1,
+                "tail": false,
+                "type": "TemplateElement",
+                "value": {
+                  "cooked": "<p>hello ",
+                  "raw": "<p>hello ",
+                },
+              },
+              Node {
+                "end": 22,
+                "start": 17,
+                "tail": true,
+                "type": "TemplateElement",
+                "value": {
+                  "cooked": "!</p>",
+                  "raw": "!</p>",
+                },
+              },
+            ],
+            "start": 0,
+            "type": "TemplateLiteral",
+          }
+        `);
+    });
+
+    test('tagged template literal', ({ expect, templatize }) => {
+        const template = parseTemplate(/*html*/`tag\`<p>hello \${name}!</p>\``);
+
+        expect(template).toMatchInlineSnapshot(`
+          Node {
+            "end": 26,
+            "quasi": Node {
+              "end": 26,
+              "expressions": [
+                Node {
+                  "end": 19,
+                  "name": "name",
+                  "start": 15,
+                  "type": "Identifier",
+                },
+              ],
+              "quasis": [
+                Node {
+                  "end": 13,
+                  "start": 4,
+                  "tail": false,
+                  "type": "TemplateElement",
+                  "value": {
+                    "cooked": "<p>hello ",
+                    "raw": "<p>hello ",
+                  },
+                },
+                Node {
+                  "end": 25,
+                  "start": 20,
+                  "tail": true,
+                  "type": "TemplateElement",
+                  "value": {
+                    "cooked": "!</p>",
+                    "raw": "!</p>",
+                  },
+                },
+              ],
+              "start": 3,
+              "type": "TemplateLiteral",
+            },
+            "start": 0,
+            "tag": Node {
+              "end": 3,
+              "name": "tag",
+              "start": 0,
+              "type": "Identifier",
+            },
+            "type": "TaggedTemplateExpression",
+          }
+        `);
+    });
+});
+
+describe('templates', () => {
 
     beforeEach(async (context) => {
         const { expect } = context;
-        expect.extend(toMatchCode);
         context.templatize = code => {
-            const { expressions, quasis } = parseTemplate(code);
+            const { expressions, html, bindings, interpolators } = parseTemplate(code);
             return {
                 expressions,
-                quasis: quasis.map(q => q.value.raw)
+                html,
+                bindings,
+                interpolators,
             };
         };
     });
 
-    test('simple template with single {...} interpolator', ({ expect, templatize }) => {
-        const { expressions, quasis } = templatize(/*html*/`#\`<p>hello {name}!</p>\``);
+    test('static template', ({ expect, templatize }) => {
+        const template = templatize(/*html*/`#\`<p>hello</p>\``);
 
-        expect(expressions).toMatchInlineSnapshot(`
-          [
-            Node {
-              "end": 16,
-              "name": "name",
-              "start": 12,
-              "type": "Identifier",
-            },
-          ]
+        expect(template).toMatchInlineSnapshot(`
+          {
+            "bindings": [],
+            "expressions": [],
+            "html": "<p>hello</p>",
+            "interpolators": [],
+          }
         `);
-        
-        expect(quasis).toMatchInlineSnapshot(`
-          [
-            "<p>hello ",
-            "!</p>",
-          ]
+    });
+
+    test('simple template with single {...} interpolator', ({ expect, templatize }) => {
+        const template = templatize(/*html*/`#\`<p>hello {name}!</p>\``);
+
+        expect(template).toMatchInlineSnapshot(`
+          {
+            "bindings": [
+              {
+                "childIndex": 1,
+                "length": 3,
+                "name": "p",
+                "queryIndex": 0,
+                "type": "ChildBinding",
+              },
+            ],
+            "expressions": [
+              Node {
+                "end": 16,
+                "name": "name",
+                "start": 12,
+                "type": "Identifier",
+              },
+            ],
+            "html": "<p data-bind>hello <text-node></text-node>!</p>",
+            "interpolators": [
+              Node {
+                "end": 11,
+                "name": "{",
+                "start": 11,
+                "type": "TemplateInterpolator",
+              },
+            ],
+          }
         `);
     });
 
     test('template with ${...}, {...}, and #{...} interpolators', ({ expect, templatize }) => {
-        const { expressions, quasis } = templatize(/*html*/`
+        const template = templatize(/*html*/`
             #\`
                 <p>hello \${name}!</p>
                 <p>count: <span>{count}</span></p>
@@ -56,256 +179,453 @@ describe('expressions', () => {
             \`
         `);
 
-        expect(expressions).toMatchInlineSnapshot(`
-          [
-            Node {
-              "end": 47,
-              "name": "name",
-              "start": 43,
-              "type": "Identifier",
-            },
-            Node {
-              "end": 92,
-              "name": "count",
-              "start": 87,
-              "type": "Identifier",
-            },
-            Node {
-              "end": 132,
-              "name": "block",
-              "start": 127,
-              "type": "Identifier",
-            },
-          ]
-        `);
-        
-        expect(quasis).toMatchInlineSnapshot(`
-          [
-            "
-                          <p>hello ",
-            "!</p>
-                          <p>count: <span>",
-            "</span></p>
-                          <p>",
-            "</p>
-                      ",
-          ]
+        expect(template).toMatchInlineSnapshot(`
+          {
+            "bindings": [
+              {
+                "childIndex": 1,
+                "length": 3,
+                "name": "p",
+                "queryIndex": 0,
+                "type": "ChildBinding",
+              },
+              {
+                "childIndex": 0,
+                "length": 1,
+                "name": "span",
+                "queryIndex": 1,
+                "type": "ChildBinding",
+              },
+              {
+                "childIndex": 0,
+                "length": 1,
+                "name": "p",
+                "queryIndex": 2,
+                "type": "ChildBinding",
+              },
+            ],
+            "expressions": [
+              Node {
+                "end": 47,
+                "name": "name",
+                "start": 43,
+                "type": "Identifier",
+              },
+              Node {
+                "end": 92,
+                "name": "count",
+                "start": 87,
+                "type": "Identifier",
+              },
+              Node {
+                "end": 132,
+                "name": "block",
+                "start": 127,
+                "type": "Identifier",
+              },
+            ],
+            "html": "<p data-bind>hello <text-node></text-node>!</p>
+                          <p>count: <span data-bind><text-node></text-node></span></p>
+                          <p data-bind><text-node></text-node></p>",
+            "interpolators": [
+              Node {
+                "end": 41,
+                "name": "\${",
+                "start": 41,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 86,
+                "name": "{",
+                "start": 86,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 124,
+                "name": "#{",
+                "start": 124,
+                "type": "TemplateInterpolator",
+              },
+            ],
+          }
         `);
     });
 
     test('template with complex expression in interpolator', ({ expect, templatize }) => {
-        const { expressions, quasis } = templatize(/*html*/`
+        const template = templatize(/*html*/`
             #\`<p>{x} + {y} = {x + y}</p>\`
         `);
 
-        expect(expressions).toMatchInlineSnapshot(`
-          [
-            Node {
-              "end": 20,
-              "name": "x",
-              "start": 19,
-              "type": "Identifier",
-            },
-            Node {
-              "end": 26,
-              "name": "y",
-              "start": 25,
-              "type": "Identifier",
-            },
-            Node {
-              "end": 36,
-              "left": Node {
-                "end": 32,
+        expect(template).toMatchInlineSnapshot(`
+          {
+            "bindings": [
+              {
+                "childIndex": 0,
+                "length": 5,
+                "name": "p",
+                "queryIndex": 0,
+                "type": "ChildBinding",
+              },
+              {
+                "childIndex": 2,
+                "length": 5,
+                "name": "p",
+                "queryIndex": 0,
+                "type": "ChildBinding",
+              },
+              {
+                "childIndex": 4,
+                "length": 5,
+                "name": "p",
+                "queryIndex": 0,
+                "type": "ChildBinding",
+              },
+            ],
+            "expressions": [
+              Node {
+                "end": 20,
                 "name": "x",
-                "start": 31,
+                "start": 19,
                 "type": "Identifier",
               },
-              "operator": "+",
-              "right": Node {
-                "end": 36,
+              Node {
+                "end": 26,
                 "name": "y",
-                "start": 35,
+                "start": 25,
                 "type": "Identifier",
               },
-              "start": 31,
-              "type": "BinaryExpression",
-            },
-          ]
-        `);
-        
-        expect(quasis).toMatchInlineSnapshot(`
-          [
-            "<p>",
-            " + ",
-            " = ",
-            "</p>",
-          ]
+              Node {
+                "end": 36,
+                "left": Node {
+                  "end": 32,
+                  "name": "x",
+                  "start": 31,
+                  "type": "Identifier",
+                },
+                "operator": "+",
+                "right": Node {
+                  "end": 36,
+                  "name": "y",
+                  "start": 35,
+                  "type": "Identifier",
+                },
+                "start": 31,
+                "type": "BinaryExpression",
+              },
+            ],
+            "html": "<p data-bind><text-node></text-node> + <text-node></text-node> = <text-node></text-node></p>",
+            "interpolators": [
+              Node {
+                "end": 18,
+                "name": "{",
+                "start": 18,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 24,
+                "name": "{",
+                "start": 24,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 30,
+                "name": "{",
+                "start": 30,
+                "type": "TemplateInterpolator",
+              },
+            ],
+          }
         `);
     });
 
-    test.skip('property binders 1', ({ expect }) => {
-        // addSerializers(expect, { 
-        //     excludeKeys: ['type', 'start', 'end', 'quasis'] 
-        // });
+    test('property binders', ({ expect, templatize }) => {
         
-        const code = `
-            _\`
+        const template = templatize(`
+            #\`
                 <p class={type}>hello!</p>
                 <input required={isRequired} name="title">
                 <div style="color: red" class={sectionType}></div>
+            \`;        
+        `);
+        
+        expect(template).toMatchInlineSnapshot(`
+          {
+            "bindings": [
+              {
+                "name": "p",
+                "property": "className",
+                "queryIndex": 0,
+                "type": "PropertyBinding",
+              },
+              {
+                "name": "input",
+                "property": "required",
+                "queryIndex": 1,
+                "type": "PropertyBinding",
+              },
+              {
+                "name": "div",
+                "property": "className",
+                "queryIndex": 2,
+                "type": "PropertyBinding",
+              },
+            ],
+            "expressions": [
+              Node {
+                "end": 46,
+                "name": "type",
+                "start": 42,
+                "type": "Identifier",
+              },
+              Node {
+                "end": 102,
+                "name": "isRequired",
+                "start": 92,
+                "type": "Identifier",
+              },
+              Node {
+                "end": 176,
+                "name": "sectionType",
+                "start": 165,
+                "type": "Identifier",
+              },
+            ],
+            "html": "<p data-bind>hello!</p>
+                          <input name="title" data-bind>
+                          <div style="color: red" data-bind></div>",
+            "interpolators": [
+              Node {
+                "end": 41,
+                "name": "{",
+                "start": 41,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 91,
+                "name": "{",
+                "start": 91,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 164,
+                "name": "{",
+                "start": 164,
+                "type": "TemplateInterpolator",
+              },
+            ],
+          }
+        `);
+    });
+
+    test('property and child binders', ({ expect, templatize }) => {
+        
+        const template = templatize(`
+            #\`
+            <section>
+                <h2 class="item-header">{title}
+                <p class={category}>
+                    <span class={type}>Hello</span> {name}!
+                    {description}
+                </p>
+            </section>
             \`;
-        `;
+        `);
         
-        const ast = parseTemplate(code);
-        
-        expect(ast).toMatchInlineSnapshot(`
-          Node {
-            "end": 198,
-            "start": 13,
-            "template": Node {
-              "bindings": [
-                Node {
-                  "binder": "{",
-                  "element": {
-                    "childrenLength": 1,
-                    "name": "p",
-                  },
-                  "end": 47,
-                  "expression": Node {
-                    "end": 46,
-                    "name": "type",
-                    "start": 42,
-                    "type": "Identifier",
-                  },
-                  "queryIndex": 0,
-                  "start": 41,
-                  "type": "AzothBinding",
-                },
-                Node {
-                  "binder": "{",
-                  "element": {
-                    "childrenLength": 1,
-                    "name": "p",
-                  },
-                  "end": 103,
-                  "expression": Node {
-                    "end": 102,
-                    "name": "isRequired",
-                    "start": 92,
-                    "type": "Identifier",
-                  },
-                  "propertyKey": "class",
-                  "queryIndex": 0,
-                  "start": 91,
-                  "type": "AzothBinding",
-                },
-                Node {
-                  "binder": "{",
-                  "element": {
-                    "childrenLength": 0,
-                    "name": "div",
-                  },
-                  "end": 177,
-                  "expression": Node {
-                    "end": 176,
-                    "name": "sectionType",
-                    "start": 165,
-                    "type": "Identifier",
-                  },
-                  "queryIndex": 1,
-                  "start": 164,
-                  "type": "AzothBinding",
-                },
-              ],
-              "end": 198,
-              "quasis": [
-                "<p class=null<p null data-bind name="title"",
-                ">
-                          /<div style="color: red" data-bind",
-                "/",
-              ],
-              "start": 13,
-              "type": "TemplateLiteral",
-            },
-            "type": "AzothTemplate",
+        expect(template).toMatchInlineSnapshot(`
+          {
+            "bindings": [
+              {
+                "childIndex": 0,
+                "length": 4,
+                "name": "h2",
+                "queryIndex": 0,
+                "type": "ChildBinding",
+              },
+              {
+                "name": "p",
+                "property": "className",
+                "queryIndex": 1,
+                "type": "PropertyBinding",
+              },
+              {
+                "name": "span",
+                "property": "className",
+                "queryIndex": 2,
+                "type": "PropertyBinding",
+              },
+              {
+                "childIndex": 3,
+                "length": 7,
+                "name": "p",
+                "queryIndex": 1,
+                "type": "ChildBinding",
+              },
+              {
+                "childIndex": 5,
+                "length": 7,
+                "name": "p",
+                "queryIndex": 1,
+                "type": "ChildBinding",
+              },
+            ],
+            "expressions": [
+              Node {
+                "end": 84,
+                "name": "title",
+                "start": 79,
+                "type": "Identifier",
+              },
+              Node {
+                "end": 120,
+                "name": "category",
+                "start": 112,
+                "type": "Identifier",
+              },
+              Node {
+                "end": 160,
+                "name": "type",
+                "start": 156,
+                "type": "Identifier",
+              },
+              Node {
+                "end": 180,
+                "name": "name",
+                "start": 176,
+                "type": "Identifier",
+              },
+              Node {
+                "end": 215,
+                "name": "description",
+                "start": 204,
+                "type": "Identifier",
+              },
+            ],
+            "html": "<section>
+                          <h2 class="item-header" data-bind><text-node></text-node>
+                          <p data-bind>
+                              <span data-bind>Hello</span> <text-node></text-node>!
+                              <text-node></text-node>
+                          </p>
+                      </h2></section>",
+            "interpolators": [
+              Node {
+                "end": 78,
+                "name": "{",
+                "start": 78,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 111,
+                "name": "{",
+                "start": 111,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 155,
+                "name": "{",
+                "start": 155,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 175,
+                "name": "{",
+                "start": 175,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 203,
+                "name": "{",
+                "start": 203,
+                "type": "TemplateInterpolator",
+              },
+            ],
           }
         `);
     });
 
-    test.skip('property binders 2', ({ expect }) => {
-        // addSerializers(expect, { 
-        //     excludeKeys: ['type', 'start', 'end', 'quasis'] 
-        // });
+    test('nested template', ({ expect, templatize }) => {
         
-        const code = `
-            _\`<div style="color: red" class="{sectionType}"></div>\`;
-        `;
+        const template = templatize(`
+            #\`<p>#{ isVip ? #\`<span>VIP</span>\` : #\`guest\` }</p>\`;
+        `);
         
-        const ast = parseTemplate(code);
-        
-        expect(ast).toMatchInlineSnapshot(`
-          Node {
-            "end": 68,
-            "start": 13,
-            "template": Node {
-              "bindings": [
-                Node {
-                  "binder": "{",
-                  "element": {
-                    "childrenLength": 0,
-                    "name": "div",
-                  },
+        expect(template).toMatchInlineSnapshot(`
+          {
+            "bindings": [
+              {
+                "childIndex": 0,
+                "length": 1,
+                "name": "p",
+                "queryIndex": 0,
+                "type": "ChildBinding",
+              },
+            ],
+            "expressions": [
+              Node {
+                "alternate": Node {
+                  "bindings": [],
                   "end": 59,
-                  "expression": Node {
-                    "end": 58,
-                    "name": "sectionType",
-                    "start": 47,
-                    "type": "Identifier",
-                  },
-                  "propertyKey": "class",
-                  "queryIndex": 0,
-                  "start": 46,
-                  "type": "AzothBinding",
+                  "expressions": [],
+                  "html": "guest",
+                  "interpolators": [],
+                  "quasis": [
+                    Node {
+                      "end": 58,
+                      "start": 53,
+                      "tail": true,
+                      "type": "TemplateElement",
+                      "value": {
+                        "cooked": "guest",
+                        "raw": "guest",
+                      },
+                    },
+                  ],
+                  "start": 51,
+                  "type": "DomTemplateLiteral",
                 },
-              ],
-              "end": 68,
-              "quasis": [
-                "<div style="color: red" class="<div style=" color: red" data-bind",
-                "></div>",
-              ],
-              "start": 13,
-              "type": "TemplateLiteral",
-            },
-            "type": "AzothTemplate",
+                "consequent": Node {
+                  "bindings": [],
+                  "end": 48,
+                  "expressions": [],
+                  "html": "<span>VIP</span>",
+                  "interpolators": [],
+                  "quasis": [
+                    Node {
+                      "end": 47,
+                      "start": 31,
+                      "tail": true,
+                      "type": "TemplateElement",
+                      "value": {
+                        "cooked": "<span>VIP</span>",
+                        "raw": "<span>VIP</span>",
+                      },
+                    },
+                  ],
+                  "start": 29,
+                  "type": "DomTemplateLiteral",
+                },
+                "end": 59,
+                "start": 21,
+                "test": Node {
+                  "end": 26,
+                  "name": "isVip",
+                  "start": 21,
+                  "type": "Identifier",
+                },
+                "type": "ConditionalExpression",
+              },
+            ],
+            "html": "<p data-bind><text-node></text-node></p>",
+            "interpolators": [
+              Node {
+                "end": 18,
+                "name": "#{",
+                "start": 18,
+                "type": "TemplateInterpolator",
+              },
+            ],
           }
         `);
-    });
-
-    test.skip('nested template', ({ expect }) => {
-        // addSerializers(expect, { 
-        //     excludeKeys: ['type', 'start', 'end', 'quasis'] 
-        // });
-        
-        const code = `
-            _\`<p>#{ isVip ? _\`<span>VIP</span>\` : _\`guest\` }</p>\`;
-        `;
-        
-        const ast = parseTemplate(code);
-        
-        expect(ast).toMatchInlineSnapshot(`
-                    AzothTemplate
-                      template:   TemplateLiteral
-                        bindings: [
-                          AzothBinding
-                            binder: '{'
-                            queryIndex: 0
-                            propertyKey: 'class'
-                            expression: 'sectionType'
-                            element:         
-                              name: 'div'
-                              childrenLength: 0
-                        ]
-                  `);
     });
 
 });

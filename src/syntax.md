@@ -3,7 +3,7 @@ Azoth
 
 ## Syntax
 
-Type:                | TemplateLiteral        | TemplateDomLiteral      | AzothTaggedTemplate
+Type:                | TemplateLiteral        | DomTemplateLiteral      | AzothTaggedTemplate
 ---                  |---:                    |---:                     |--:
 template syntax      | <code>\`</code>        | <code>#\`</code>        | `_#`
 interpolator syntax  | `${...}`               | `{...}`, `#{...}`       | `~identity`
@@ -59,7 +59,7 @@ AzothExpression:
 ```js
 AzothTemplateExpression (vs TaggedTemplateExpression)
     tag
-    quasi TemplateDOMLiteral
+    quasi DomTemplateLiteral
     ???
     
 ```

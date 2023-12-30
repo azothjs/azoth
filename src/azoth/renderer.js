@@ -11,7 +11,7 @@ export default function renderer(fragment) {
         const clone = fragment.cloneNode(true);
         return { 
             __root: clone, 
-            __nodes: clone.querySelectorAll('[data-bind]') 
+            __targets: clone.querySelectorAll('[data-bind]') 
         };
     };
 }
