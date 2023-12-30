@@ -16,13 +16,12 @@ const parse = code => {
 
 const compile = input => {
     const ast = parse(input);
-    const code = generate(ast);
+    const code = generate(ast, { indent: '    ' });
     return code;
 };
 
-describe('generator', () => {
-
-    test('generates from normal ast', ({ expect }) => {
+describe('regression', () => {
+    test('template literal', ({ expect }) => {
         const input = `\`hello \${place}\``;
         expect(compile(input)).toMatchInlineSnapshot(`
           "\`hello \${place}\`;
@@ -30,79 +29,91 @@ describe('generator', () => {
         `);
     });
 
-    test('generates static azoth template', ({ expect }) => {
+    test('tagged template literal', ({ expect }) => {
+        const input = `const t = tag\`hello \${place}\``;
+        expect(compile(input)).toMatchInlineSnapshot(`
+          "const t = tag\`hello \${place}\`;
+          "
+        `);
+    });
+});
+
+describe('DomLiteral', () => {
+    test('static no bindings', ({ expect }) => {
         const input = `#\`<p>azoth</p>\``;
         expect(compile(input)).toMatchInlineSnapshot(`
           "(() => {
-            return __makeRenderer(\`<p>azoth</p>\`)().__root;
+              return __makeRenderer(\`<p>azoth</p>\`)().__root;
           })();
           "
         `);
     });
 
-    test('generates template with bindings', ({ expect }) => {
+    test('property and child text bindings', ({ expect }) => {
         const input = `#\`<p class={category}>{text}</p>\``;    
         expect(compile(input)).toMatchInlineSnapshot(`
           "(() => {
-            const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
-            const { __root, __targets } = __renderer();
-            __targets[0].className = category;
-            __targets[0].childNodes[0].textContent = text;
-            return __root;
+              const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
+              const { __root, __targets } = __renderer();
+              __targets[0].className = category;
+              __targets[0].childNodes[0].textContent = text;
+              return __root;
+          })();
+          "
+        `);
+    });
+});
+
+
+
+describe('surrounding code integration mode', () => {
+    test('MODE_IIFE (default)', ({ expect }) => {
+        const input = `
+            const template = #\`<p>{text}</p>\`
+        `;
+        expect(compile(input)).toMatchInlineSnapshot(`
+          "const template = (() => {
+              const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
+              const { __root, __targets } = __renderer();
+              __targets[0].childNodes[0].textContent = text;
+              return __root;
           })();
           "
         `);
     });
 
-    describe('surrounding code integration mode', () => {
-        test('MODE_IIFE (default)', ({ expect }) => {
-            const input = `
-                const template = #\`<p>{text}</p>\`
-            `;
-            expect(compile(input)).toMatchInlineSnapshot(`
-              "const template = (() => {
-                const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
-                const { __root, __targets } = __renderer();
-                __targets[0].childNodes[0].textContent = text;
-                return __root;
-              })();
-              "
-            `);
-        });
+    test('MODE_BLOCK: arrow function implicit return', ({ expect }) => {
+        const input = `
+            const template = (text) => #\`<p>{text}</p>\`
+        `;
+        expect(compile(input)).toMatchInlineSnapshot(`
+          "const template = text => {
+              const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
+              const { __root, __targets } = __renderer();
+              __targets[0].childNodes[0].textContent = text;
+              return __root;
+          };
+          "
+        `);
+    });
 
-        test('MODE_BLOCK: arrow function implicit return', ({ expect }) => {
-            const input = `
-                const template = (text) => #\`<p>{text}</p>\`
-            `;
-            expect(compile(input)).toMatchInlineSnapshot(`
-              "const template = text => {
-                const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
-                const { __root, __targets } = __renderer();
-                __targets[0].childNodes[0].textContent = text;
-                return __root;
-              };
-              "
-            `);
-        });
-
-        test('MODE_INLINE: (replace return statement)', ({ expect }) => {
-            const input = `
-                function template(text) {
-                    const format = 'text' + '!';
-                    return #\`<p>{text}</p>\`;
-                }
-            `;
-            expect(compile(input)).toMatchInlineSnapshot(`
-              "function template(text) {
+    test('MODE_INLINE: (replace return statement)', ({ expect }) => {
+        const input = `
+            function template(text) {
                 const format = 'text' + '!';
-                
-                const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
-                const { __root, __targets } = __renderer();
-                __targets[0].childNodes[0].textContent = text;
-                return __root;  
-              }
-              "
-            `);
-        });
+                return #\`<p>{text}</p>\`;
+            }
+        `;
+        expect(compile(input)).toMatchInlineSnapshot(`
+          "function template(text) {
+              const format = 'text' + '!';
+              
+              const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
+              const { __root, __targets } = __renderer();
+              __targets[0].childNodes[0].textContent = text;
+              return __root;    
+          }
+          "
+        `);
     });
 });
