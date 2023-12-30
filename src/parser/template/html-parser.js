@@ -222,7 +222,15 @@ class Binding {
 }
 
 class PropertyBinding extends Binding {
-    property = '';
+    #property = '';
+
+    get property() { 
+        return this.#property;
+    }
+    set property(value) {
+        // TODO: use 'property-information' package
+        this.#property = value === 'class' ? 'className' : value;
+    }
 }
 
 class ChildBinding extends Binding {

@@ -197,7 +197,7 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<p data-bind></p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "type": "PropertyBinding", "queryIndex": 0, "name": "p", "property": "class" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "p", "property": "className" },
               ]
             `);
         });
@@ -209,7 +209,7 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<input required data-bind>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "class" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "className" },
               ]
             `);
         });
@@ -221,7 +221,7 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<p data-bind></p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "type": "PropertyBinding", "queryIndex": 0, "name": "p", "property": "class" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "p", "property": "className" },
               ]
             `);
         });
@@ -233,7 +233,7 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<p data-bind></p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "type": "PropertyBinding", "queryIndex": 0, "name": "p", "property": "class" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "p", "property": "className" },
               ]
             `);
         });
@@ -248,7 +248,7 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<input required type="text" data-bind><p></p>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "class" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "className" },
                 { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "name" },
                 { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "maxLength" },
                 { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "disabled" },
@@ -265,7 +265,7 @@ describe('bindings', () => {
             expect(html).toMatchInlineSnapshot(`"<input required data-bind>"`);
             expect(bindings).toMatchInlineSnapshot(`
               [
-                { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "class" },
+                { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "className" },
                 { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "name" },
                 { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "type" },
               ]
@@ -315,7 +315,7 @@ describe('attribute quote handling', () => {
         expect(html).toMatchInlineSnapshot(`"<input required data-bind>"`);
         expect(bindings).toMatchInlineSnapshot(`
           [
-            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "class" },
+            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "className" },
             { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "type" },
           ]
         `);
@@ -332,7 +332,7 @@ describe('attribute quote handling', () => {
         expect(html).toMatchInlineSnapshot(`"<input data-bind>"`);
         expect(bindings).toMatchInlineSnapshot(`
           [
-            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "class" },
+            { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "className" },
             { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "name" },
             { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "maxLength" },
             { "type": "PropertyBinding", "queryIndex": 0, "name": "input", "property": "type" },

@@ -1,6 +1,5 @@
 import './style.css';
 import { __makeRenderer } from '../azoth/index.js';
-// import './lab.js';
 
 const template = ({ title, category, description }) => #`
     <main>
@@ -9,10 +8,12 @@ const template = ({ title, category, description }) => #`
     </main>
 `;
 
-const dom = template({ 
+const footer = #`<footer>&copy; 2023 Azoth JS</footer>`;
+
+document.body.append(template({ 
     title: 'azoth', 
     category: 'ftw', 
     description: 'hello template',
-});
-const d2 = dom()
-document.body.append(d2);
+}), footer);
+
+console.log(footer)

@@ -306,7 +306,7 @@ describe('templates', () => {
             "bindings": [
               {
                 "name": "p",
-                "property": "class",
+                "property": "className",
                 "queryIndex": 0,
                 "type": "PropertyBinding",
               },
@@ -318,7 +318,7 @@ describe('templates', () => {
               },
               {
                 "name": "div",
-                "property": "class",
+                "property": "className",
                 "queryIndex": 2,
                 "type": "PropertyBinding",
               },
@@ -376,13 +376,13 @@ describe('templates', () => {
               },
               {
                 "name": "p",
-                "property": "class",
+                "property": "className",
                 "queryIndex": 1,
                 "type": "PropertyBinding",
               },
               {
                 "name": "span",
-                "property": "class",
+                "property": "className",
                 "queryIndex": 2,
                 "type": "PropertyBinding",
               },

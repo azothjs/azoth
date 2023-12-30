@@ -23,6 +23,7 @@
         "jest-diff": "^29.7.0",
         "jest-serializer-html": "^7.1.0",
         "pretty-format-ast": "^1.0.1",
+        "property-information": "^6.4.0",
         "rev-hash": "^4.1.0",
         "source-map": "^0.7.4",
         "vite": "^5.0.0",
