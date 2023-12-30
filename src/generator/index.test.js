@@ -35,8 +35,7 @@ describe('generator', () => {
         const input = `#\`<p>azoth</p>\``;
         expect(compile(input)).toMatchInlineSnapshot(`
           "(() => {
-            const __renderer = __makeRenderer(\`<p>azoth</p>\`);
-            return __renderer().__root;
+            return __makeRenderer(\`<p>azoth</p>\`)().__root;
           })();
           "
         `);
@@ -56,8 +55,8 @@ describe('generator', () => {
         `);
     });
 
-    describe('surrounding code integration', () => {
-        test('default is iife', ({ expect }) => {
+    describe('surrounding code integration mode', () => {
+        test('MODE_IIFE (default)', ({ expect }) => {
             const input = `
                 const template = #\`<p>{text}</p>\`
             `;
@@ -72,7 +71,7 @@ describe('generator', () => {
             `);
         });
 
-        test('adopts arrow function implicit return', ({ expect }) => {
+        test('MODE_BLOCK: arrow function implicit return', ({ expect }) => {
             const input = `
                 const template = (text) => #\`<p>{text}</p>\`
             `;
@@ -82,12 +81,12 @@ describe('generator', () => {
                 const { __root, __targets } = __renderer();
                 __targets[0].childNodes[0].textContent = text;
                 return __root;
-                };
+              };
               "
             `);
         });
 
-        test('adopts return statement', ({ expect }) => {
+        test('MODE_INLINE: (replace return statement)', ({ expect }) => {
             const input = `
                 function template(text) {
                     const format = 'text' + '!';
@@ -97,12 +96,11 @@ describe('generator', () => {
             expect(compile(input)).toMatchInlineSnapshot(`
               "function template(text) {
                 const format = 'text' + '!';
-                return (() => {
-                  const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
-                  const { __root, __targets } = __renderer();
-                  __targets[0].childNodes[0].textContent = text;
-                  return __root;
-                })();
+                
+                const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
+                const { __root, __targets } = __renderer();
+                __targets[0].childNodes[0].textContent = text;
+                return __root;  
               }
               "
             `);
