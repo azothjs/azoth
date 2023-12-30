@@ -1,10 +1,8 @@
 import { beforeEach, describe, test, } from 'vitest';
 import { parse } from './index.js';
-import { toMatchCode } from '../utils/code-matchers.js';
 
 const options = { ecmaVersion: 'latest' };
 const parseToAst = (code) => {
-    if(code.toBody) code = code.toBody();
     return parse(code, options);
 };
 const parseTemplate = (code) => {
@@ -113,13 +111,13 @@ describe('templates', () => {
 
     beforeEach(async (context) => {
         const { expect } = context;
-        expect.extend(toMatchCode);
         context.templatize = code => {
-            const { expressions, html, bindings } = parseTemplate(code);
+            const { expressions, html, bindings, interpolators } = parseTemplate(code);
             return {
                 expressions,
                 html,
-                bindings
+                bindings,
+                interpolators,
             };
         };
     });
@@ -132,6 +130,7 @@ describe('templates', () => {
             "bindings": [],
             "expressions": [],
             "html": "<p>hello</p>",
+            "interpolators": [],
           }
         `);
     });
@@ -159,6 +158,14 @@ describe('templates', () => {
               },
             ],
             "html": "<p data-bind>hello <text-node></text-node>!</p>",
+            "interpolators": [
+              Node {
+                "end": 11,
+                "name": "{",
+                "start": 11,
+                "type": "TemplateInterpolator",
+              },
+            ],
           }
         `);
     });
@@ -220,6 +227,26 @@ describe('templates', () => {
             "html": "<p data-bind>hello <text-node></text-node>!</p>
                           <p>count: <span data-bind><text-node></text-node></span></p>
                           <p data-bind><text-node></text-node></p>",
+            "interpolators": [
+              Node {
+                "end": 41,
+                "name": "\${",
+                "start": 41,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 86,
+                "name": "{",
+                "start": 86,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 124,
+                "name": "#{",
+                "start": 124,
+                "type": "TemplateInterpolator",
+              },
+            ],
           }
         `);
     });
@@ -287,6 +314,26 @@ describe('templates', () => {
               },
             ],
             "html": "<p data-bind><text-node></text-node> + <text-node></text-node> = <text-node></text-node></p>",
+            "interpolators": [
+              Node {
+                "end": 18,
+                "name": "{",
+                "start": 18,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 24,
+                "name": "{",
+                "start": 24,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 30,
+                "name": "{",
+                "start": 30,
+                "type": "TemplateInterpolator",
+              },
+            ],
           }
         `);
     });
@@ -346,6 +393,26 @@ describe('templates', () => {
             "html": "<p data-bind>hello!</p>
                           <input name="title" data-bind>
                           <div style="color: red" data-bind></div>",
+            "interpolators": [
+              Node {
+                "end": 41,
+                "name": "{",
+                "start": 41,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 91,
+                "name": "{",
+                "start": 91,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 164,
+                "name": "{",
+                "start": 164,
+                "type": "TemplateInterpolator",
+              },
+            ],
           }
         `);
     });
@@ -440,6 +507,38 @@ describe('templates', () => {
                               <text-node></text-node>
                           </p>
                       </h2></section>",
+            "interpolators": [
+              Node {
+                "end": 78,
+                "name": "{",
+                "start": 78,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 111,
+                "name": "{",
+                "start": 111,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 155,
+                "name": "{",
+                "start": 155,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 175,
+                "name": "{",
+                "start": 175,
+                "type": "TemplateInterpolator",
+              },
+              Node {
+                "end": 203,
+                "name": "{",
+                "start": 203,
+                "type": "TemplateInterpolator",
+              },
+            ],
           }
         `);
     });
@@ -468,6 +567,7 @@ describe('templates', () => {
                   "end": 59,
                   "expressions": [],
                   "html": "guest",
+                  "interpolators": [],
                   "quasis": [
                     Node {
                       "end": 58,
@@ -488,6 +588,7 @@ describe('templates', () => {
                   "end": 48,
                   "expressions": [],
                   "html": "<span>VIP</span>",
+                  "interpolators": [],
                   "quasis": [
                     Node {
                       "end": 47,
@@ -515,6 +616,14 @@ describe('templates', () => {
               },
             ],
             "html": "<p data-bind><text-node></text-node></p>",
+            "interpolators": [
+              Node {
+                "end": 18,
+                "name": "#{",
+                "start": 18,
+                "type": "TemplateInterpolator",
+              },
+            ],
           }
         `);
     });

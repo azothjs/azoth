@@ -209,6 +209,7 @@ export function extend(Parser, azTokens) {
             let curElt = this.parseTemplateElement({ isTagged : false }); // isTagged controls invalid escape sequences            
             node.quasis = [curElt];
             node.expressions = [];
+            node.interpolators = [];
             if(curElt.tail) {
                 parser.end(curElt.value.raw);
             }
@@ -217,6 +218,10 @@ export function extend(Parser, azTokens) {
                 if(this.type === tt.eof) this.raise(this.pos, 'Unterminated template literal');
                 // expect ${, #{, or {
                 if(!lBraces.has(this.type)) this.unexpected();
+
+                const interpolator = this.startNode();
+                interpolator.name = this.type.label;
+                node.interpolators.push(this.finishNode(interpolator, 'TemplateInterpolator'));
 
                 // TODO: Reactive expressions
                 // const azothExpr = this.startNode();

@@ -92,7 +92,7 @@ const azothGenerator = {
             for(let i = 0; i < length; i++) {
                 const binding = bindings[i];
                 const expression = expressions[i];
-                        // const interpolator = node.interpolators[i];
+                // const interpolator = node.interpolators[i];
                 state.write(indent);
                 this[binding.type](binding, state);
                 state.write(` = `);
