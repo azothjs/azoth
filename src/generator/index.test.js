@@ -2,7 +2,6 @@
 import { Parser } from 'acorn';
 import acornAz from '../parser';
 import { azothGenerate as generate } from './index.js';
-import '../utils/code-matchers.js';
 import { describe, test } from 'vitest';
 import { SourceMapGenerator } from 'source-map';
 
