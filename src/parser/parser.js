@@ -207,8 +207,8 @@ export function extend(Parser, azTokens) {
 
             // start with template elements read as always +1 in length vs expressions
             let curElt = this.parseTemplateElement({ isTagged : false }); // isTagged controls invalid escape sequences            
-            node.quasis = [curElt];
-            node.expressions = [];
+            // node.quasis = [curElt];
+            // node.expressions = [];
             node.interpolators = [];
             if(curElt.tail) {
                 parser.end(curElt.value.raw);
@@ -220,32 +220,26 @@ export function extend(Parser, azTokens) {
                 if(!lBraces.has(this.type)) this.unexpected();
 
                 const interpolator = this.startNode();
+                node.interpolators.push(interpolator);
                 interpolator.name = this.type.label;
-                node.interpolators.push(this.finishNode(interpolator, 'TemplateInterpolator'));
-
-                // TODO: Reactive expressions
-                // const azothExpr = this.startNode();
-                // node.expressions.push(azothExpr);
 
                 // ...expression...
                 this.next();
-                const expr = this.parseExpression();
-                node.expressions.push(expr);
+                interpolator.expression = this.parseExpression();
                 
                 // closing }
                 this.expect(tt.braceR);
 
-                // this.finishNode(azothExpr, 'AzothExpression');
-                
-                parser.write(curElt.value.raw);
+                interpolator.binding = parser.write(curElt.value.raw);
 
+                this.finishNode(interpolator, 'TemplateInterpolator');
+                
                 // next template element
-                node.quasis.push(curElt = this.parseTemplateElement({ isTagged : true }));
+                curElt = this.parseTemplateElement({ isTagged : true });
 
                 if(curElt.tail) parser.end(curElt.value.raw);
             }
             node.html = parser.html;
-            node.bindings = parser.bindings;
 
             this.next();
             return this.finishNode(node, 'DomTemplateLiteral');

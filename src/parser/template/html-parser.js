@@ -46,6 +46,8 @@ export class TemplateParser {
         else {
             // TODO: edge case like <input{...} should throw
         }
+
+        return mapBinding(binding);
     }
 
     writeText(text) {
@@ -74,16 +76,7 @@ export class TemplateParser {
         this.writeText(text);
         this.parser.end();
             
-        this.bindings = this.template.bindings.map(({ 
-            type,
-            element: { name, queryIndex, length }, 
-            property, 
-            index: childIndex 
-        }) => {
-            return property ? 
-                { type, queryIndex, name, property } : 
-                { type, queryIndex, name, childIndex, length };
-        });
+        this.bindings = this.template.bindings.map(mapBinding);
         this.html = this.template.html
             .flat()
             .join('')
@@ -136,6 +129,7 @@ class TemplateContext {
             element.length++;
         }
         this.bindings.push(binding);
+        return binding;
     }
 
 
@@ -189,6 +183,17 @@ class TemplateContext {
         this.element.length++;
         this.html.push(`<!--${comment}-->`);
     } 
+}
+
+function mapBinding({ 
+    type,
+    element: { name, queryIndex, length }, 
+    property, 
+    index: childIndex 
+}) {
+    return property ? 
+        { type, queryIndex, name, property } : 
+        { type, queryIndex, name, childIndex, length };
 }
 
 class ElementContext {
