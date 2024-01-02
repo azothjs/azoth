@@ -1,8 +1,8 @@
 
-export function addSerializers(expect) {
+export function addSerializers(expect, types) {
     expect.addSnapshotSerializer({
         test(val) {
-            return !Array.isArray(val) && typeof val === 'object';
+            return !Array.isArray(val) && typeof val === 'object' && types?.includes(val?.type);
         },
         serialize(object, config, indent, deps, refs, printer) {
             const serialized = JSON

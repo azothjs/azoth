@@ -25,6 +25,12 @@ export function extend(Parser, azTokens) {
         '123': tt.braceL,
         '35': hashBraceL,
     };
+
+    const INTERPOLATOR_DESCRIPTION = {
+        '{': 'value',
+        '#{': 'block',
+        '${': 'string'
+    };
     
     return class extends Parser {
         // Expose azoth `tokTypes` and `tokContexts` to other plugins.
@@ -208,8 +214,10 @@ export function extend(Parser, azTokens) {
             // start with template elements read as always +1 in length vs expressions
             let curElt = this.parseTemplateElement({ isTagged : false }); // isTagged controls invalid escape sequences            
             // node.quasis = [curElt];
-            // node.expressions = [];
+            node.expressions = [];
             node.interpolators = [];
+            node.bindings = [];
+
             if(curElt.tail) {
                 parser.end(curElt.value.raw);
             }
@@ -221,16 +229,18 @@ export function extend(Parser, azTokens) {
 
                 const interpolator = this.startNode();
                 node.interpolators.push(interpolator);
-                interpolator.name = this.type.label;
+                const { label } = this.type;
+                interpolator.name = label;
+                interpolator.description = INTERPOLATOR_DESCRIPTION[label];
 
                 // ...expression...
                 this.next();
-                interpolator.expression = this.parseExpression();
+                node.expressions.push(this.parseExpression());
                 
                 // closing }
                 this.expect(tt.braceR);
 
-                interpolator.binding = parser.write(curElt.value.raw);
+                parser.write(curElt.value.raw);
 
                 this.finishNode(interpolator, 'TemplateInterpolator');
                 
@@ -240,6 +250,9 @@ export function extend(Parser, azTokens) {
                 if(curElt.tail) parser.end(curElt.value.raw);
             }
             node.html = parser.html;
+            node.bindings = parser.bindings;
+            node.elements = parser.elements;
+            node.rootType = parser.rootType;
 
             this.next();
             return this.finishNode(node, 'DomTemplateLiteral');

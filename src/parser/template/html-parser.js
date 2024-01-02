@@ -1,14 +1,16 @@
 import { Parser as HtmlParser } from 'htmlparser2';
 import voidElements from '../void-elements.js';
 import { LAST_QUOTE, NEXT_QUOTE, DEV_TRIM } from './regex.js';
+import { html, find } from 'property-information';
 
 export class TemplateParser {
     // final state after .end()
     html = '';
     bindings = []; 
+    boundElements = null;
+    rootType = 'fragment';
 
-    // template context state,
-    // implements handler for htmlparser2
+    // template context state, implements handler for htmlparser2
     template = null;
     parser = null;
     // carry-over quote information for attr=${interpolator}
@@ -46,8 +48,6 @@ export class TemplateParser {
         else {
             // TODO: edge case like <input{...} should throw
         }
-
-        return mapBinding(binding);
     }
 
     writeText(text) {
@@ -70,32 +70,65 @@ export class TemplateParser {
             if(text) {
                 throw new Error('Cannot call parser.end with text if parser.end has already been called.');
             }
-            return { bindings: this.bindings, html: this.html };
+        }
+        else {
+            this.writeText(text);
+            this.parser.end();
+
+            const { hasElements, boundElements, root } = this.template;
+            const bound = [...boundElements].sort((a, b) => a.order - b.order);
+            const { length } = bound;
+            for(let i = 0; i < length; i++) {
+                bound[i].queryIndex = i;
+            }
+
+            this.elements = bound
+                .map(e => e.toNode());
+            
+            this.bindings = this.template.bindings
+                .map(b => b.toNode());
+
+            this.html = this.template.html
+                .flat()
+                .join('')
+                .replace(DEV_TRIM, '');
+
+            // default is "fragment"
+            if(root.length === 1) {
+                if(!hasElements) {
+                    this.rootType = 'text';
+                }
+                else if(!root.isBound) {
+                    this.rootType = 'element';
+                }
+            }
         }
 
-        this.writeText(text);
-        this.parser.end();
-            
-        this.bindings = this.template.bindings.map(mapBinding);
-        this.html = this.template.html
-            .flat()
-            .join('')
-            .replace(DEV_TRIM, '');
-
-        return { bindings: this.bindings, html: this.html };
+        const { bindings, html, elements, rootType } = this;
+        return { bindings, html, elements, rootType };
     }   
 }
 
-
 class TemplateContext {
+    // accumulated html array of strings and arrays
     html = [];
-    stack = [];
-    bindings = [];
-    targets = [];
-    root = null;
+    // Does this html contain _any_ elements?
+    hasElements = false;
     
+    // template bindings
+    bindings = [];
+    // unique set of bound elements of the template
+    boundElements = new Set();
+    // context stack for current element
+    stack = [];
+    // fragment "root" of stack
+    root = null;
     // current element context
     element = null;
+    // element count used to track element order
+    elementCount = 0;
+    
+    
     // carry-over binding that comes before its own attribute
     nextAttributeBinding = null;
 
@@ -106,17 +139,13 @@ class TemplateContext {
     }
 
     push(name) {
-        const context = new ElementContext(name);
+        const context = new ElementContext(name, this.elementCount++);
         this.stack.push(this.element = context);
+        if(name !== '<>') this.hasElements = true;
     }
 
     createBinding() {
-        const { targets, element, root } = this;
-         // queryIndex is the index of element in querySelectorAll bound els
-        // let queryIndex = targets.lastIndexOf(element);
-        if(element.queryIndex === -1 && element !== root) {
-            element.queryIndex = targets.push(element) - 1;
-        }
+        const { element, root } = this;
 
         let binding = null;
         if(element.inTagOpen) {
@@ -150,7 +179,8 @@ class TemplateContext {
         this.nextAttributeBinding = null;
 
         if(binding) {
-            binding.property = name;
+            // TODO: source map location
+            binding.setProperty(name);
         }
         else {
             value ??= '';
@@ -173,49 +203,51 @@ class TemplateContext {
     onclosetag(name, isImplied) {
         // void, self-closing, tags
         if(!voidElements.has(name)) this.html.push(`</${name}>`);
-        if(this.element.isBound) {
-            this.onattribute(Binding.attributeName);
+        const { element, root, boundElements } = this;
+        if(element.isBound) {
+            this.onattribute(Binding.queryAttributeName);
+            if(!boundElements.has(element)) {
+                boundElements.add(element);
+            }
         }
+
         this.pop();
     }
         
     oncomment(comment) {
         this.element.length++;
         this.html.push(`<!--${comment}-->`);
-    } 
-}
-
-function mapBinding({ 
-    type,
-    element: { name, queryIndex, length }, 
-    property, 
-    index: childIndex 
-}) {
-    return property ? 
-        { type, queryIndex, name, property } : 
-        { type, queryIndex, name, childIndex, length };
+    }
 }
 
 class ElementContext {
+    type = 'DomTemplateElement';
     attributes = [];
     inTagOpen = true;
     name = '';
-    keys = 0;
     length = 0;
     queryIndex = -1;
     isBound = false;
+    order = -1;
 
-    constructor(name) {
+    constructor(name, order) {
         this.name = name;
+        this.order = order;
     }
 
     addAttribute(attr) {
         this.attributes.push(attr);
     }
+
+    toNode() {
+        const { type, name, length } = this;
+        // TODO: source map location
+        return { type, name, length };
+    }
 }
 
 class Binding {
-    static attributeName = 'data-bind';
+    static queryAttributeName = 'data-bind';
     element = null;
     type = '';
 
@@ -227,14 +259,27 @@ class Binding {
 }
 
 class PropertyBinding extends Binding {
-    #property = '';
+    property = '';
+    attribute = '';
+    raw = '';
 
-    get property() { 
-        return this.#property;
+    setProperty(value) {
+        const { property, attribute } = find(html, value);
+        this.raw = value;
+        this.property = property;
+        this.attribute = attribute;
     }
-    set property(value) {
-        // TODO: use 'property-information' package
-        this.#property = value === 'class' ? 'className' : value;
+
+    toNode() {
+        const { type, element: { queryIndex }, property, attribute, raw } = this;
+        return { 
+            type,
+            queryIndex,
+            // TODO: identity node with location
+            name: raw, 
+            property, 
+            attribute,
+        };
     }
 }
 
@@ -246,5 +291,17 @@ class ChildBinding extends Binding {
         this.index = element.length;
         // this.replacement = `<!--child[${this.index}]-->`;
         this.replacement = `<text-node></text-node>`;
+    }
+
+    toNode() {
+        const { type, element, index, replacement } = this;
+        const { queryIndex, length } = element;
+        return { 
+            type,
+            index,
+            queryIndex,
+            length,
+            replacement
+        };
     }
 }

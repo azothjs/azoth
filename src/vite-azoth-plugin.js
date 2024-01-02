@@ -13,7 +13,7 @@ export default function AzothPlugin() {
     const parse = code => AzParser.parse(code, {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        // locations: true,
+        locations: true,
     });
     
     const transpile = (input) => {
