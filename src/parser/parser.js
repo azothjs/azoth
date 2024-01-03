@@ -146,7 +146,7 @@ export function extend(Parser, azTokens) {
                 } else if(isNewLine(ch)) { 
                     out += this.input.slice(chunkStart, this.pos);
                     ++this.pos;
-                    switch (ch) {
+                    switch(ch) {
                         case 13:
                             if(this.input.charCodeAt(this.pos) === 10) ++this.pos;
                         case 10:
@@ -170,7 +170,7 @@ export function extend(Parser, azTokens) {
         readInvalidTemplateToken = function() {
             for(; this.pos < this.input.length; this.pos++) {
                 const code = this.input[this.pos];
-                switch (code) {
+                switch(code) {
                     case '\\':
                         ++this.pos;
                         break;
@@ -213,9 +213,8 @@ export function extend(Parser, azTokens) {
 
             // start with template elements read as always +1 in length vs expressions
             let curElt = this.parseTemplateElement({ isTagged : false }); // isTagged controls invalid escape sequences            
-            // node.quasis = [curElt];
             node.expressions = [];
-            node.interpolators = [];
+            node.elements = [];
             node.bindings = [];
 
             if(curElt.tail) {
@@ -228,21 +227,19 @@ export function extend(Parser, azTokens) {
                 if(!lBraces.has(this.type)) this.unexpected();
 
                 const interpolator = this.startNode();
-                node.interpolators.push(interpolator);
                 const { label } = this.type;
+                this.next();
                 interpolator.name = label;
-                interpolator.description = INTERPOLATOR_DESCRIPTION[label];
+                this.finishNode(interpolator, 'TemplateInterpolator');
+                parser.write(curElt.value.raw, interpolator);
 
                 // ...expression...
-                this.next();
                 node.expressions.push(this.parseExpression());
                 
                 // closing }
                 this.expect(tt.braceR);
 
-                parser.write(curElt.value.raw);
 
-                this.finishNode(interpolator, 'TemplateInterpolator');
                 
                 // next template element
                 curElt = this.parseTemplateElement({ isTagged : true });
@@ -250,9 +247,9 @@ export function extend(Parser, azTokens) {
                 if(curElt.tail) parser.end(curElt.value.raw);
             }
             node.html = parser.html;
+            node.rootType = parser.rootType;
             node.bindings = parser.bindings;
             node.elements = parser.elements;
-            node.rootType = parser.rootType;
 
             this.next();
             return this.finishNode(node, 'DomTemplateLiteral');

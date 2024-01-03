@@ -86,6 +86,9 @@
                     },
                     "while": {
                         "after": false
+                    },
+                    "switch": {
+                        "after": false
                     }
                 }
             }

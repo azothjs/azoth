@@ -25,13 +25,13 @@ export class TemplateParser {
         });
     }
     
-    write(text) {
+    write(text, interpolator) {
         if(this.parser.ended) {
             throw new Error('Cannot call parser.write() after parser.end()');
         }
 
         this.writeText(text);
-        const binding = this.template.createBinding();
+        const binding = this.template.createBinding(interpolator);
         if(this.template.nextAttributeBinding) { 
             // finish attribute via quote(s): match ='{, ="{, ={ no match means attr...{
             const match = text.match(LAST_QUOTE);
@@ -144,16 +144,16 @@ class TemplateContext {
         if(name !== '<>') this.hasElements = true;
     }
 
-    createBinding() {
+    createBinding(interpolator) {
         const { element, root } = this;
 
         let binding = null;
         if(element.inTagOpen) {
-            binding = new PropertyBinding(element);
+            binding = new PropertyBinding(element, interpolator);
             this.nextAttributeBinding = binding;
         }
         else {
-            binding = new ChildBinding(element);
+            binding = new ChildBinding(element, interpolator);
             this.html.push(binding.replacement);
             element.length++;
         }
@@ -240,21 +240,23 @@ class ElementContext {
     }
 
     toNode() {
-        const { type, name, length } = this;
+        const { type, name, length, queryIndex } = this;
         // TODO: source map location
-        return { type, name, length };
+        return { type, name, length, queryIndex };
     }
 }
 
 class Binding {
     static queryAttributeName = 'data-bind';
     element = null;
+    interpolator = null;
     type = '';
 
-    constructor(element) {
+    constructor(element, interpolator) {
         this.element = element;
         this.element.isBound = true;
         this.type = this.constructor.name;
+        this.interpolator = interpolator;
     }
 }
 
@@ -271,10 +273,11 @@ class PropertyBinding extends Binding {
     }
 
     toNode() {
-        const { type, element: { queryIndex }, property, attribute, raw } = this;
+        const { type, element: { queryIndex }, interpolator, property, attribute, raw } = this;
         return { 
             type,
             queryIndex,
+            interpolator,
             // TODO: identity node with location
             name: raw, 
             property, 
@@ -286,20 +289,21 @@ class PropertyBinding extends Binding {
 class ChildBinding extends Binding {
     index = -1;
     replacement = '';
-    constructor(element) {
-        super(element);
+    constructor(element, interpolator) {
+        super(element, interpolator);
         this.index = element.length;
         // this.replacement = `<!--child[${this.index}]-->`;
         this.replacement = `<text-node></text-node>`;
     }
 
     toNode() {
-        const { type, element, index, replacement } = this;
+        const { type, element, interpolator, index, replacement } = this;
         const { queryIndex, length } = element;
         return { 
             type,
-            index,
             queryIndex,
+            interpolator,
+            index,
             length,
             replacement
         };
