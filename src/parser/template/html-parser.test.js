@@ -42,7 +42,7 @@ describe('static html', () => {
           {
             "bindings": [],
             "elements": [],
-            "html": "<input name="cat" required class="cool" type="text">",
+            "html": "<input-0 name="cat" required class="cool" type="text">",
             "rootType": "element",
           }
         `);
@@ -54,7 +54,7 @@ describe('static html', () => {
           {
             "bindings": [],
             "elements": [],
-            "html": "<span class="greeting">hello world</span>",
+            "html": "<span-0 class="greeting">hello world</span>",
             "rootType": "element",
           }
         `);
@@ -66,7 +66,7 @@ describe('static html', () => {
           {
             "bindings": [],
             "elements": [],
-            "html": "<self-closing></self-closing>",
+            "html": "<self-closing-0></self-closing>",
             "rootType": "element",
           }
         `);
@@ -86,12 +86,12 @@ describe('static html', () => {
           {
             "bindings": [],
             "elements": [],
-            "html": "<br>
-                      <br>
-                      <self-closing></self-closing>text
-                      <custom-element></custom-element>
-                      <div></div>
-                      <div>text</div>",
+            "html": "<br-13>
+                      <br-30>
+                      <self-closing-48></self-closing>text
+                      <custom-element-80></custom-element>
+                      <div-126></div>
+                      <div-150>text</div>",
             "rootType": "fragment",
           }
         `);
@@ -103,7 +103,7 @@ describe('static html', () => {
           {
             "bindings": [],
             "elements": [],
-            "html": "<div><div><div><div><div></div></div></div></div></div>",
+            "html": "<div-0><div-5><div-10><div-15><div-20></div></div></div></div></div>",
             "rootType": "element",
           }
         `);
@@ -115,7 +115,7 @@ describe('static html', () => {
           {
             "bindings": [],
             "elements": [],
-            "html": "<span class="greeting"><!--hello--> world</span>",
+            "html": "<span-0 class="greeting"><!--hello--> world</span>",
             "rootType": "element",
           }
         `);
@@ -135,7 +135,7 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "ChildBinding", "queryIndex": -1, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinding", "queryIndex": -1, "interpolator": null, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
                 ],
                 "elements": [],
                 "html": "<text-node></text-node>",
@@ -152,8 +152,8 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "ChildBinding", "queryIndex": -1, "index": 0, "length": 2, "replacement": "<text-node></text-node>" },
-                  { "type": "ChildBinding", "queryIndex": -1, "index": 1, "length": 2, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinding", "queryIndex": -1, "interpolator": null, "index": 0, "length": 2, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinding", "queryIndex": -1, "interpolator": null, "index": 1, "length": 2, "replacement": "<text-node></text-node>" },
                 ],
                 "elements": [],
                 "html": "<text-node></text-node><text-node></text-node>",
@@ -169,12 +169,12 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "ChildBinding", "queryIndex": 0, "index": 1, "length": 3, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinding", "queryIndex": 0, "interpolator": null, "index": 1, "length": 3, "replacement": "<text-node></text-node>" },
                 ],
                 "elements": [
-                  { "type": "DomTemplateElement", "name": "p", "length": 3, "queryIndex": 0 },
+                  { "type": "DomTemplateElement", "name": "p", "length": 3, "queryIndex": 0, "start": 1, "end": 2 },
                 ],
-                "html": "<p data-bind>hello <text-node></text-node>!</p>",
+                "html": "<p-0 data-bind>hello <text-node></text-node>!</p>",
                 "rootType": "element",
               }
             `);
@@ -186,12 +186,12 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "ChildBinding", "queryIndex": 0, "index": 2, "length": 5, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinding", "queryIndex": 0, "interpolator": null, "index": 2, "length": 5, "replacement": "<text-node></text-node>" },
                 ],
                 "elements": [
-                  { "type": "DomTemplateElement", "name": "p", "length": 5, "queryIndex": 0 },
+                  { "type": "DomTemplateElement", "name": "p", "length": 5, "queryIndex": 0, "start": 1, "end": 2 },
                 ],
-                "html": "<p data-bind>hello <!--comment 1--><text-node></text-node><!--comment 2--> and welcome!</p>",
+                "html": "<p-0 data-bind>hello <!--comment 1--><text-node></text-node><!--comment 2--> and welcome!</p>",
                 "rootType": "element",
               }
             `);
@@ -208,19 +208,19 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "ChildBinding", "queryIndex": 0, "index": 1, "length": 3, "replacement": "<text-node></text-node>" },
-                  { "type": "ChildBinding", "queryIndex": 1, "index": 1, "length": 6, "replacement": "<text-node></text-node>" },
-                  { "type": "ChildBinding", "queryIndex": 1, "index": 3, "length": 6, "replacement": "<text-node></text-node>" },
-                  { "type": "ChildBinding", "queryIndex": 2, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
-                  { "type": "ChildBinding", "queryIndex": 3, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinding", "queryIndex": 0, "interpolator": null, "index": 1, "length": 3, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinding", "queryIndex": 1, "interpolator": null, "index": 1, "length": 6, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinding", "queryIndex": 1, "interpolator": null, "index": 3, "length": 6, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinding", "queryIndex": 2, "interpolator": null, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinding", "queryIndex": 3, "interpolator": null, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
                 ],
                 "elements": [
-                  { "type": "DomTemplateElement", "name": "section", "length": 3, "queryIndex": 0 },
-                  { "type": "DomTemplateElement", "name": "p", "length": 6, "queryIndex": 1 },
-                  { "type": "DomTemplateElement", "name": "span", "length": 1, "queryIndex": 2 },
-                  { "type": "DomTemplateElement", "name": "div", "length": 1, "queryIndex": 3 },
+                  { "type": "DomTemplateElement", "name": "section", "length": 3, "queryIndex": 0, "start": 1, "end": 8 },
+                  { "type": "DomTemplateElement", "name": "p", "length": 6, "queryIndex": 1, "start": 28, "end": 29 },
+                  { "type": "DomTemplateElement", "name": "span", "length": 1, "queryIndex": 2, "start": 51, "end": 55 },
+                  { "type": "DomTemplateElement", "name": "div", "length": 1, "queryIndex": 3, "start": 69, "end": 72 },
                 ],
-                "html": "<section data-bind>hello <text-node></text-node>!</section> <p data-bind>sum of <text-node></text-node> and <text-node></text-node> equals <span data-bind><text-node></text-node></span></p> <div data-bind><text-node></text-node></div>",
+                "html": "<section-0 data-bind>hello <text-node></text-node>!</section> <p-27 data-bind>sum of <text-node></text-node> and <text-node></text-node> equals <span-50 data-bind><text-node></text-node></span></p> <div-68 data-bind><text-node></text-node></div>",
                 "rootType": "fragment",
               }
             `);
@@ -234,14 +234,14 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "ChildBinding", "queryIndex": 1, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
-                  { "type": "ChildBinding", "queryIndex": 0, "index": 2, "length": 3, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinding", "queryIndex": 1, "interpolator": null, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinding", "queryIndex": 0, "interpolator": null, "index": 2, "length": 3, "replacement": "<text-node></text-node>" },
                 ],
                 "elements": [
-                  { "type": "DomTemplateElement", "name": "div", "length": 3, "queryIndex": 0 },
-                  { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 1 },
+                  { "type": "DomTemplateElement", "name": "div", "length": 3, "queryIndex": 0, "start": 1, "end": 4 },
+                  { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 1, "start": 16, "end": 17 },
                 ],
-                "html": "<div data-bind><p>one</p><p data-bind><text-node></text-node></p><text-node></text-node></div>",
+                "html": "<div-0 data-bind><p-5>one</p><p-15 data-bind><text-node></text-node></p><text-node></text-node></div>",
                 "rootType": "element",
               }
             `);
@@ -323,12 +323,12 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "class", "property": "className", "attribute": "class" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
                 ],
                 "elements": [
-                  { "type": "DomTemplateElement", "name": "p", "length": 0, "queryIndex": 0 },
+                  { "type": "DomTemplateElement", "name": "p", "length": 0, "queryIndex": 0, "start": 1, "end": 2 },
                 ],
-                "html": "<p data-bind></p>",
+                "html": "<p-0 data-bind></p>",
                 "rootType": "element",
               }
             `);
@@ -341,12 +341,12 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "class", "property": "className", "attribute": "class" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
                 ],
                 "elements": [
-                  { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0 },
+                  { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
                 ],
-                "html": "<input required data-bind>",
+                "html": "<input-0 required data-bind>",
                 "rootType": "element",
               }
             `);
@@ -359,12 +359,12 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "class", "property": "className", "attribute": "class" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
                 ],
                 "elements": [
-                  { "type": "DomTemplateElement", "name": "p", "length": 0, "queryIndex": 0 },
+                  { "type": "DomTemplateElement", "name": "p", "length": 0, "queryIndex": 0, "start": 1, "end": 2 },
                 ],
-                "html": "<p data-bind></p>",
+                "html": "<p-0 data-bind></p>",
                 "rootType": "element",
               }
             `);
@@ -377,12 +377,12 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "class", "property": "className", "attribute": "class" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
                 ],
                 "elements": [
-                  { "type": "DomTemplateElement", "name": "p", "length": 0, "queryIndex": 0 },
+                  { "type": "DomTemplateElement", "name": "p", "length": 0, "queryIndex": 0, "start": 1, "end": 2 },
                 ],
-                "html": "<p data-bind></p>",
+                "html": "<p-0 data-bind></p>",
                 "rootType": "element",
               }
             `);
@@ -393,21 +393,21 @@ describe('bindings', () => {
             parser.write(` required name="`);
             parser.write(`" maxLength='`);
             parser.write(`' type='text' disabled=`);
-            const template = parser.end(`></p>`);
+            const template = parser.end(`>`);
 
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "class", "property": "className", "attribute": "class" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "name", "property": "name", "attribute": "name" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "maxLength", "property": "maxLength", "attribute": "maxlength" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "disabled", "property": "disabled", "attribute": "disabled" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "maxLength", "property": "maxLength", "attribute": "maxlength" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "disabled", "property": "disabled", "attribute": "disabled" },
                 ],
                 "elements": [
-                  { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0 },
+                  { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
                 ],
-                "html": "<input required type="text" data-bind><p></p>",
-                "rootType": "fragment",
+                "html": "<input-0 required type="text" data-bind>",
+                "rootType": "element",
               }
             `);
         });
@@ -421,14 +421,14 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "class", "property": "className", "attribute": "class" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "name", "property": "name", "attribute": "name" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "type", "property": "type", "attribute": "type" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
                 ],
                 "elements": [
-                  { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0 },
+                  { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
                 ],
-                "html": "<input required data-bind>",
+                "html": "<input-0 required data-bind>",
                 "rootType": "element",
               }
             `);
@@ -446,13 +446,13 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "name", "property": "name", "attribute": "name" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "type", "property": "type", "attribute": "type" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
                 ],
                 "elements": [
-                  { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0 },
+                  { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
                 ],
-                "html": "<input data-bind>",
+                "html": "<input-0 data-bind>",
                 "rootType": "element",
               }
             `);
@@ -466,13 +466,13 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "name", "property": "name", "attribute": "name" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "type", "property": "type", "attribute": "type" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
                 ],
                 "elements": [
-                  { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0 },
+                  { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
                 ],
-                "html": "<input data-bind>",
+                "html": "<input-0 data-bind>",
                 "rootType": "element",
               }
             `);
@@ -486,13 +486,13 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "class", "property": "className", "attribute": "class" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "type", "property": "type", "attribute": "type" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
                 ],
                 "elements": [
-                  { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0 },
+                  { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
                 ],
-                "html": "<input required data-bind>",
+                "html": "<input-0 required data-bind>",
                 "rootType": "element",
               }
             `);
@@ -509,16 +509,16 @@ describe('bindings', () => {
             expect(template).toMatchInlineSnapshot(`
               {
                 "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "class", "property": "className", "attribute": "class" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "name", "property": "name", "attribute": "name" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "maxLength", "property": "maxLength", "attribute": "maxlength" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "type", "property": "type", "attribute": "type" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "name": "style", "property": "style", "attribute": "style" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "maxLength", "property": "maxLength", "attribute": "maxlength" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
+                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "style", "property": "style", "attribute": "style" },
                 ],
                 "elements": [
-                  { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0 },
+                  { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
                 ],
-                "html": "<input data-bind>",
+                "html": "<input-0 data-bind>",
                 "rootType": "element",
               }
             `);

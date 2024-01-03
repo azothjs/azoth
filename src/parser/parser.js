@@ -218,7 +218,7 @@ export function extend(Parser, azTokens) {
             node.bindings = [];
 
             if(curElt.tail) {
-                parser.end(curElt.value.raw);
+                parser.endTemplate(curElt);
             }
 
             while(!curElt.tail) {
@@ -231,7 +231,7 @@ export function extend(Parser, azTokens) {
                 this.next();
                 interpolator.name = label;
                 this.finishNode(interpolator, 'TemplateInterpolator');
-                parser.write(curElt.value.raw, interpolator);
+                parser.writeTemplatePart(curElt, interpolator);
 
                 // ...expression...
                 node.expressions.push(this.parseExpression());
@@ -244,7 +244,7 @@ export function extend(Parser, azTokens) {
                 // next template element
                 curElt = this.parseTemplateElement({ isTagged : true });
 
-                if(curElt.tail) parser.end(curElt.value.raw);
+                if(curElt.tail) parser.endTemplate(curElt);
             }
             node.html = parser.html;
             node.rootType = parser.rootType;

@@ -2,6 +2,7 @@ import { Parser as HtmlParser } from 'htmlparser2';
 import voidElements from '../void-elements.js';
 import { LAST_QUOTE, NEXT_QUOTE, DEV_TRIM } from './regex.js';
 import { html, find } from 'property-information';
+import { getLineInfo } from 'acorn';
 
 export class TemplateParser {
     // final state after .end()
@@ -12,7 +13,12 @@ export class TemplateParser {
 
     // template context state, implements handler for htmlparser2
     template = null;
+    // htmlparser2 instance
     parser = null;
+    // current TemplateElement AST Node
+    templateElement = null;
+    // current interpolator
+    interpolator = null;
     // carry-over quote information for attr=${interpolator}
     eatQuote = '';
 
@@ -23,15 +29,21 @@ export class TemplateParser {
             lowerCaseAttributeNames: false,
             recognizeSelfClosing: true 
         });
+        this.template.parser = this.parser;
+    }
+
+    writeTemplatePart(templateElement, interpolator) {
+        this.templateElement = templateElement;
+        this.interpolator = interpolator;
+        return this.write(templateElement.value.raw);
     }
     
-    write(text, interpolator) {
+    write(text) {
         if(this.parser.ended) {
             throw new Error('Cannot call parser.write() after parser.end()');
         }
-
         this.writeText(text);
-        const binding = this.template.createBinding(interpolator);
+        const binding = this.template.createBinding(this.interpolator, this.templateElement);
         if(this.template.nextAttributeBinding) { 
             // finish attribute via quote(s): match ='{, ="{, ={ no match means attr...{
             const match = text.match(LAST_QUOTE);
@@ -52,6 +64,8 @@ export class TemplateParser {
 
     writeText(text) {
         if(text) {
+            // console.log('before write', this.parser.startIndex, this.parser.openTagStart);
+
             // remove equivalent quotation marks added by prior parser.write()
             if(this.eatQuote) {
                 const match = text.match(NEXT_QUOTE);
@@ -61,8 +75,19 @@ export class TemplateParser {
                 }
             }
             this.parser.write(text);
+            // console.log('after write', this.parser.startIndex);
         }
         this.eatQuote = '';
+    }
+
+    endTemplate(templateElement) {
+        if(!templateElement.tail) {
+            throw new Error(`Cannot call endTemplate with non-tail TemplateElement`);
+        }
+        // tail cannot be bound
+        this.templateElement = null;
+        this.interpolator = null;
+        this.end(templateElement.value.raw);
     }
 
     end(text) {
@@ -138,8 +163,8 @@ class TemplateContext {
         this.root.inTagOpen = false;
     }
 
-    push(name) {
-        const context = new ElementContext(name, this.elementCount++);
+    push(name, tagStart) {
+        const context = new ElementContext(name, this.elementCount++, tagStart);
         this.stack.push(this.element = context);
         if(name !== '<>') this.hasElements = true;
     }
@@ -170,8 +195,11 @@ class TemplateContext {
     onopentagname(name) {
         const parent = this.element;
         parent.length++;
-        this.push(name); // new open tag now this.element
-        this.html.push(`<${name}`);
+
+        // makes this open tag new this.element context
+        this.push(name, this.parser.openTagStart); 
+        this.html.push(`<${name}-${this.parser.openTagStart}`);
+        // console.log(this.parser);
     }
         
     onattribute(name, value, quote) {
@@ -203,6 +231,7 @@ class TemplateContext {
     onclosetag(name, isImplied) {
         // void, self-closing, tags
         if(!voidElements.has(name)) this.html.push(`</${name}>`);
+
         const { element, root, boundElements } = this;
         if(element.isBound) {
             this.onattribute(Binding.queryAttributeName);
@@ -229,10 +258,14 @@ class ElementContext {
     queryIndex = -1;
     isBound = false;
     order = -1;
+    position = null;
 
-    constructor(name, order) {
+    constructor(name, order, tagStart, position) {
         this.name = name;
         this.order = order;
+        this.start = tagStart + 1;
+        this.end = this.start + this.name.length;
+        this.position = position ?? null;
     }
 
     addAttribute(attr) {
@@ -240,9 +273,9 @@ class ElementContext {
     }
 
     toNode() {
-        const { type, name, length, queryIndex } = this;
+        const { type, name, length, queryIndex, start, end } = this;
         // TODO: source map location
-        return { type, name, length, queryIndex };
+        return { type, name, length, queryIndex, start, end };
     }
 }
 

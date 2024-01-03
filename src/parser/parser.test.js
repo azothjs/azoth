@@ -73,7 +73,7 @@ describe('templates', () => {
             "elements": [],
             "end": 15,
             "expressions": [],
-            "html": "<p>hello</p>",
+            "html": "<p-0>hello</p>",
             "rootType": "element",
             "start": 0,
             "type": "DomTemplateLiteral",
@@ -97,13 +97,13 @@ describe('templates', () => {
               },
             ],
             "elements": [
-              { "type": "DomTemplateElement", "name": "p", "length": 3, "queryIndex": 0 },
+              { "type": "DomTemplateElement", "name": "p", "length": 3, "queryIndex": 0, "start": 1, "end": 2 },
             ],
             "end": 23,
             "expressions": [
               { "type": "Identifier", "start": 12, "end": 16, "name": "name" },
             ],
-            "html": "<p data-bind>hello <text-node></text-node>!</p>",
+            "html": "<p-0 data-bind>hello <text-node></text-node>!</p>",
             "rootType": "element",
             "start": 0,
             "type": "DomTemplateLiteral",
@@ -149,9 +149,9 @@ describe('templates', () => {
               },
             ],
             "elements": [
-              { "type": "DomTemplateElement", "name": "p", "length": 3, "queryIndex": 0 },
-              { "type": "DomTemplateElement", "name": "span", "length": 1, "queryIndex": 1 },
-              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 2 },
+              { "type": "DomTemplateElement", "name": "p", "length": 3, "queryIndex": 0, "start": 18, "end": 19 },
+              { "type": "DomTemplateElement", "name": "span", "length": 1, "queryIndex": 1, "start": 59, "end": 63 },
+              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 2, "start": 93, "end": 94 },
             ],
             "end": 152,
             "expressions": [
@@ -159,9 +159,9 @@ describe('templates', () => {
               { "type": "Identifier", "start": 87, "end": 92, "name": "count" },
               { "type": "Identifier", "start": 127, "end": 132, "name": "block" },
             ],
-            "html": "<p data-bind>hello <text-node></text-node>!</p>
-                          <p>count: <span data-bind><text-node></text-node></span></p>
-                          <p data-bind><text-node></text-node></p>",
+            "html": "<p-17 data-bind>hello <text-node></text-node>!</p>
+                          <p-48>count: <span-58 data-bind><text-node></text-node></span></p>
+                          <p-92 data-bind><text-node></text-node></p>",
             "rootType": "fragment",
             "start": 13,
             "type": "DomTemplateLiteral",
@@ -203,7 +203,7 @@ describe('templates', () => {
               },
             ],
             "elements": [
-              { "type": "DomTemplateElement", "name": "p", "length": 5, "queryIndex": 0 },
+              { "type": "DomTemplateElement", "name": "p", "length": 5, "queryIndex": 0, "start": 1, "end": 2 },
             ],
             "end": 42,
             "expressions": [
@@ -218,7 +218,7 @@ describe('templates', () => {
                 "type": "BinaryExpression",
               },
             ],
-            "html": "<p data-bind><text-node></text-node> + <text-node></text-node> = <text-node></text-node></p>",
+            "html": "<p-0 data-bind><text-node></text-node> + <text-node></text-node> = <text-node></text-node></p>",
             "rootType": "element",
             "start": 13,
             "type": "DomTemplateLiteral",
@@ -265,9 +265,9 @@ describe('templates', () => {
               },
             ],
             "elements": [
-              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 0 },
-              { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 1 },
-              { "type": "DomTemplateElement", "name": "div", "length": 0, "queryIndex": 2 },
+              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 0, "start": 18, "end": 19 },
+              { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 1, "start": 57, "end": 62 },
+              { "type": "DomTemplateElement", "name": "div", "length": 0, "queryIndex": 2, "start": 106, "end": 109 },
             ],
             "end": 198,
             "expressions": [
@@ -275,9 +275,9 @@ describe('templates', () => {
               { "type": "Identifier", "start": 92, "end": 102, "name": "isRequired" },
               { "type": "Identifier", "start": 165, "end": 176, "name": "sectionType" },
             ],
-            "html": "<p data-bind>hello!</p>
-                          <input name="title" data-bind>
-                          <div style="color: red" data-bind></div>",
+            "html": "<p-17 data-bind>hello!</p>
+                          <input-56 name="title" data-bind>
+                          <div-105 style="color: red" data-bind></div>",
             "rootType": "fragment",
             "start": 13,
             "type": "DomTemplateLiteral",
@@ -344,9 +344,9 @@ describe('templates', () => {
               },
             ],
             "elements": [
-              { "type": "DomTemplateElement", "name": "h2", "length": 1, "queryIndex": 0 },
-              { "type": "DomTemplateElement", "name": "p", "length": 7, "queryIndex": 1 },
-              { "type": "DomTemplateElement", "name": "span", "length": 1, "queryIndex": 2 },
+              { "type": "DomTemplateElement", "name": "h2", "length": 1, "queryIndex": 0, "start": 40, "end": 42 },
+              { "type": "DomTemplateElement", "name": "p", "length": 7, "queryIndex": 1, "start": 86, "end": 87 },
+              { "type": "DomTemplateElement", "name": "span", "length": 1, "queryIndex": 2, "start": 119, "end": 123 },
             ],
             "end": 279,
             "expressions": [
@@ -356,10 +356,10 @@ describe('templates', () => {
               { "type": "Identifier", "start": 181, "end": 185, "name": "name" },
               { "type": "Identifier", "start": 209, "end": 220, "name": "description" },
             ],
-            "html": "<section>
-                          <h2 class="item-header" data-bind><text-node></text-node></h2>
-                          <p data-bind>
-                              <span data-bind>Hello</span> <text-node></text-node>!
+            "html": "<section-13>
+                          <h2-39 class="item-header" data-bind><text-node></text-node></h2>
+                          <p-85 data-bind>
+                              <span-118 data-bind>Hello</span> <text-node></text-node>!
                               <text-node></text-node>
                           </p>
                       </section>",
@@ -389,7 +389,7 @@ describe('templates', () => {
               },
             ],
             "elements": [
-              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 0 },
+              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 0, "start": 1, "end": 2 },
             ],
             "end": 66,
             "expressions": [
@@ -409,7 +409,7 @@ describe('templates', () => {
                   "elements": [],
                   "end": 48,
                   "expressions": [],
-                  "html": "<span>VIP</span>",
+                  "html": "<span-0>VIP</span>",
                   "rootType": "element",
                   "start": 29,
                   "type": "DomTemplateLiteral",
@@ -420,12 +420,54 @@ describe('templates', () => {
                 "type": "ConditionalExpression",
               },
             ],
-            "html": "<p data-bind><text-node></text-node></p>",
+            "html": "<p-0 data-bind><text-node></text-node></p>",
             "rootType": "element",
             "start": 13,
             "type": "DomTemplateLiteral",
           }
         `);
     });
+});
 
+describe('source locations', () => {
+
+    test('elements', ({ expect, parser }) => {
+        const template = parseTemplate(/*html*/`#\`<p>{text1}</p><p>{text2}</p>\``);
+
+        expect(template).toMatchInlineSnapshot(`
+          Node {
+            "bindings": [
+              {
+                "index": 0,
+                "interpolator": { "type": "TemplateInterpolator", "start": 5, "end": 6, "name": "{ " },
+                "length": 1,
+                "queryIndex": 0,
+                "replacement": "<text-node></text-node>",
+                "type": "ChildBinding",
+              },
+              {
+                "index": 0,
+                "interpolator": { "type": "TemplateInterpolator", "start": 19, "end": 20, "name": "{ " },
+                "length": 1,
+                "queryIndex": 1,
+                "replacement": "<text-node></text-node>",
+                "type": "ChildBinding",
+              },
+            ],
+            "elements": [
+              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 0, "start": 1, "end": 2 },
+              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 1, "start": 8, "end": 9 },
+            ],
+            "end": 31,
+            "expressions": [
+              { "type": "Identifier", "start": 6, "end": 11, "name": "text1" },
+              { "type": "Identifier", "start": 20, "end": 25, "name": "text2" },
+            ],
+            "html": "<p-0 data-bind><text-node></text-node></p><p-7 data-bind><text-node></text-node></p>",
+            "rootType": "fragment",
+            "start": 0,
+            "type": "DomTemplateLiteral",
+          }
+        `);
+    });
 });
