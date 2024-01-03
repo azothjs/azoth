@@ -68,7 +68,8 @@ const azothGenerator = {
                 
                 state.write(indent);
 
-                if(binding.interpolator.name === '#{') {
+                const isBlock = binding.interpolator.name === '#{';
+                if(isBlock) {
                     state.write(`new DomBlock(`);
                     this[element.type](element, state);
                     this[binding.type](binding, state);
@@ -81,13 +82,10 @@ const azothGenerator = {
                     this[binding.type](binding, state);
                     this[expression.type](expression, state);
                 }
-
                 state.write(`;${lE}`);
-
             }
             state.write(`${indent}return __root;`);
         }
-
     },
 
     DomTemplateElement({ queryIndex }, state) {
