@@ -1,8 +1,13 @@
 
-export function addSerializers(expect, types) {
+export function addSerializers(expect, options) {
+    const types = options?.types;
+    const InstanceOf = options?.InstanceOf;
     expect.addSnapshotSerializer({
         test(val) {
-            return !Array.isArray(val) && typeof val === 'object' && types?.includes(val?.type);
+            return !Array.isArray(val) && typeof val === 'object' && (
+                (!types || types?.includes(val?.type)) &&
+                (!InstanceOf || val instanceof InstanceOf)
+            );
         },
         serialize(object, config, indent, deps, refs, printer) {
             const serialized = JSON
@@ -11,6 +16,7 @@ export function addSerializers(expect, types) {
             return printer(serialized, config, indent, deps, refs);
         }
     });
+
     expect.addSnapshotSerializer({
         test(val) {
             return typeof val === 'string' && val.startsWith('{ ');
@@ -19,6 +25,7 @@ export function addSerializers(expect, types) {
             return val;
         }
     });
+
     expect.addSnapshotSerializer({
         test(val) {
             return Array.isArray(val) && val.length && typeof val[0] === 'string';

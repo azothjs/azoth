@@ -3,6 +3,7 @@ import voidElements from '../void-elements.js';
 import { LAST_QUOTE, NEXT_QUOTE, DEV_TRIM } from './regex.js';
 import { html, find } from 'property-information';
 import { getLineInfo } from 'acorn';
+import { findInfo } from './find-info.js';
 
 export class TemplateParser {
     // final state after .end()
@@ -301,7 +302,7 @@ class PropertyBinder extends Binder {
     raw = '';
 
     setProperty(value) {
-        const { property, attribute } = find(html, value);
+        const { property, attribute } = findInfo(value);
         this.raw = value;
         this.property = property;
         this.attribute = attribute;

@@ -9,14 +9,9 @@ const parseTemplate = (code, options) => {
     return ast.body[0].expression; // remove preamble nodes
 };
 
-beforeEach(({ expect }) => addSerializers(expect, [
-    'DomTemplateElement', 
-    'TemplateInterpolator',
-    // 'ChildBinder', 
-    // 'PropertyBinder', 
-    'Identifier', 
-    'TemplateElement',
-]));
+beforeEach(({ expect }) => addSerializers(expect, { 
+    types: ['DomTemplateElement', 'TemplateInterpolator', 'Identifier', 'TemplateElement',] 
+}));
 
 describe('normal templates (no transformation)', () => {
     test('template literal', ({ expect }) => {

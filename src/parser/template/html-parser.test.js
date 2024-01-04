@@ -1,5 +1,5 @@
 import { beforeEach, describe, test, } from 'vitest';
-import { TemplateParser } from './html-parser.js';
+import { TemplateParser, findInfo } from './html-parser.js';
 import { addSerializers } from '../serializers.js';
 import { html, find } from 'property-information';
 
@@ -125,7 +125,9 @@ describe('static html', () => {
 
 describe('binders', () => {
 
-    beforeEach(({ expect }) => addSerializers(expect, ['ChildBinder', 'PropertyBinder', 'DomTemplateElement']));
+    beforeEach(({ expect }) => addSerializers(expect, {
+        types: ['ChildBinder', 'PropertyBinder', 'DomTemplateElement']
+    }));
     
     describe('child nodes', () => {
         test('empty root with binder', ({ expect, parser }) => {
@@ -251,71 +253,6 @@ describe('binders', () => {
 
     describe('properties', () => {
       
-        describe('property-information pinned behavior', () => {
-            test('find attribute or property', ({ expect }) => {
-                expect(find(html, 'class')).toMatchInlineSnapshot(`
-                  DefinedInfo {
-                    "attribute": "class",
-                    "property": "className",
-                    "space": "html",
-                    "spaceSeparated": true,
-                  }
-                `);
-                expect(find(html, 'CLASS')).toMatchInlineSnapshot(`
-                  DefinedInfo {
-                    "attribute": "class",
-                    "property": "className",
-                    "space": "html",
-                    "spaceSeparated": true,
-                  }
-                `);
-                expect(find(html, 'Class')).toMatchInlineSnapshot(`
-                  DefinedInfo {
-                    "attribute": "class",
-                    "property": "className",
-                    "space": "html",
-                    "spaceSeparated": true,
-                  }
-                `);
-                expect(find(html, 'className')).toMatchInlineSnapshot(`
-                  DefinedInfo {
-                    "attribute": "class",
-                    "property": "className",
-                    "space": "html",
-                    "spaceSeparated": true,
-                  }
-                `);
-                expect(find(html, 'classname')).toMatchInlineSnapshot(`
-                  DefinedInfo {
-                    "attribute": "class",
-                    "property": "className",
-                    "space": "html",
-                    "spaceSeparated": true,
-                  }
-                `);
-                expect(find(html, 'class-name')).toMatchInlineSnapshot(`
-                  Info {
-                    "attribute": "class-name",
-                    "property": "class-name",
-                  }
-                `);
-                expect(find(html, 'for')).toMatchInlineSnapshot(`
-                  DefinedInfo {
-                    "attribute": "for",
-                    "property": "htmlFor",
-                    "space": "html",
-                    "spaceSeparated": true,
-                  }
-                `);
-                expect(find(html, 'html-for')).toMatchInlineSnapshot(`
-                  Info {
-                    "attribute": "html-for",
-                    "property": "html-for",
-                  }
-                `);
-            });
-        });
-
         test('single unquoted attribute', ({ expect, parser }) => {
             parser.write(`<p class=`);
             const template = parser.end(`></p>`);
