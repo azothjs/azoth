@@ -2,28 +2,29 @@ import { __makeRenderer } from '../azoth/index.js';
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+async function * getOperator(operator) {
+    let handler = yield;
+    yield* operator(handler);
+}
 
-async function * operator() {
-    let request = yield await { text: 'enter search to get started loading...' };
+async function * operator(handler) {
+    let request = yield await { handler, text: 'enter search to get started loading...' };
     while(true) {
         sleep(2000);
-        request = yield await { text: `<${request} rabbits>` };
+        request = yield await { handler, text: `<${request} rabbits>` };
     }
 }
 
-// console.log('1 start');
-const it = operator('option');
-// async generator, so ring ring ring ...
-const { value: v1 } = await it.next();
+const it = getOperator(operator);
+await it.next();
+const handler = async query => (await it.next(query))?.value;
+const { value: v1 } = await it.next(handler);
 console.log(v1);
-// const handler = (v) => it.next(v);
-// const { value: v2 } = await it.next({ handler, initRequest: true });
-// console.log(v2);
 
 export async function searchHandler(e) {
     e.preventDefault();
     const query = new FormData(this).get('query');
-    const { value } = await it.next(query);
+    const value = await handler(query);
     console.log(value);
 }
 
