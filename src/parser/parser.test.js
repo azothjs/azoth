@@ -2,8 +2,9 @@ import { beforeEach, describe, test, } from 'vitest';
 import { parse } from './index.js';
 import { addSerializers } from './serializers.js';
 
-const options = { ecmaVersion: 'latest' };
-const parseTemplate = (code) => {
+const defaultOptions = { ecmaVersion: 'latest' };
+const parseTemplate = (code, options) => {
+    options = options ? { ...defaultOptions, ...options } : defaultOptions;
     const ast = parse(code, options);
     return ast.body[0].expression; // remove preamble nodes
 };
@@ -431,15 +432,20 @@ describe('templates', () => {
 
 describe('source locations', () => {
 
-    test('elements', ({ expect, parser }) => {
-        const template = parseTemplate(/*html*/`#\`<p>{text1}</p><p>{text2}</p>\``);
+    test.only('elements', ({ expect, parser }) => {
+        const template = parseTemplate(
+            /*html*/`#\`
+                <p>{text1}</p>
+                <p>{text2}</p>\`
+            `,
+            { locations: true });
 
         expect(template).toMatchInlineSnapshot(`
           Node {
             "bindings": [
               {
                 "index": 0,
-                "interpolator": { "type": "TemplateInterpolator", "start": 5, "end": 6, "name": "{ " },
+                "interpolator": { "type": "TemplateInterpolator", "start": 22, "end": 23, "loc": { "start": { "line": 2, "column": 19 }, "end": { "line": 2, "column": 20 } }, "name": "{ " },
                 "length": 1,
                 "queryIndex": 0,
                 "replacement": "<text-node></text-node>",
@@ -447,7 +453,7 @@ describe('source locations', () => {
               },
               {
                 "index": 0,
-                "interpolator": { "type": "TemplateInterpolator", "start": 19, "end": 20, "name": "{ " },
+                "interpolator": { "type": "TemplateInterpolator", "start": 53, "end": 54, "loc": { "start": { "line": 3, "column": 19 }, "end": { "line": 3, "column": 20 } }, "name": "{ " },
                 "length": 1,
                 "queryIndex": 1,
                 "replacement": "<text-node></text-node>",
@@ -455,15 +461,26 @@ describe('source locations', () => {
               },
             ],
             "elements": [
-              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 0, "start": 1, "end": 2 },
-              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 1, "start": 8, "end": 9 },
+              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 0, "start": 18, "end": 19 },
+              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 1, "start": 42, "end": 43 },
             ],
-            "end": 31,
+            "end": 65,
             "expressions": [
-              { "type": "Identifier", "start": 6, "end": 11, "name": "text1" },
-              { "type": "Identifier", "start": 20, "end": 25, "name": "text2" },
+              { "type": "Identifier", "start": 23, "end": 28, "loc": { "start": { "line": 2, "column": 20 }, "end": { "line": 2, "column": 25 } }, "name": "text1" },
+              { "type": "Identifier", "start": 54, "end": 59, "loc": { "start": { "line": 3, "column": 20 }, "end": { "line": 3, "column": 25 } }, "name": "text2" },
             ],
-            "html": "<p-0 data-bind><text-node></text-node></p><p-7 data-bind><text-node></text-node></p>",
+            "html": "<p data-bind><text-node></text-node></p>
+                          <p data-bind><text-node></text-node></p>",
+            "loc": SourceLocation {
+              "end": Position {
+                "column": 31,
+                "line": 3,
+              },
+              "start": Position {
+                "column": 0,
+                "line": 1,
+              },
+            },
             "rootType": "fragment",
             "start": 0,
             "type": "DomTemplateLiteral",

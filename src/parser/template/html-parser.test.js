@@ -42,7 +42,7 @@ describe('static html', () => {
           {
             "bindings": [],
             "elements": [],
-            "html": "<input-0 name="cat" required class="cool" type="text">",
+            "html": "<input name="cat" required class="cool" type="text">",
             "rootType": "element",
           }
         `);
@@ -54,7 +54,7 @@ describe('static html', () => {
           {
             "bindings": [],
             "elements": [],
-            "html": "<span-0 class="greeting">hello world</span>",
+            "html": "<span class="greeting">hello world</span>",
             "rootType": "element",
           }
         `);
@@ -66,7 +66,7 @@ describe('static html', () => {
           {
             "bindings": [],
             "elements": [],
-            "html": "<self-closing-0></self-closing>",
+            "html": "<self-closing></self-closing>",
             "rootType": "element",
           }
         `);
@@ -86,12 +86,12 @@ describe('static html', () => {
           {
             "bindings": [],
             "elements": [],
-            "html": "<br-13>
-                      <br-30>
-                      <self-closing-48></self-closing>text
-                      <custom-element-80></custom-element>
-                      <div-126></div>
-                      <div-150>text</div>",
+            "html": "<br>
+                      <br>
+                      <self-closing></self-closing>text
+                      <custom-element></custom-element>
+                      <div></div>
+                      <div>text</div>",
             "rootType": "fragment",
           }
         `);
@@ -103,7 +103,7 @@ describe('static html', () => {
           {
             "bindings": [],
             "elements": [],
-            "html": "<div-0><div-5><div-10><div-15><div-20></div></div></div></div></div>",
+            "html": "<div><div><div><div><div></div></div></div></div></div>",
             "rootType": "element",
           }
         `);
@@ -115,7 +115,7 @@ describe('static html', () => {
           {
             "bindings": [],
             "elements": [],
-            "html": "<span-0 class="greeting"><!--hello--> world</span>",
+            "html": "<span class="greeting"><!--hello--> world</span>",
             "rootType": "element",
           }
         `);
@@ -174,7 +174,7 @@ describe('bindings', () => {
                 "elements": [
                   { "type": "DomTemplateElement", "name": "p", "length": 3, "queryIndex": 0, "start": 1, "end": 2 },
                 ],
-                "html": "<p-0 data-bind>hello <text-node></text-node>!</p>",
+                "html": "<p data-bind>hello <text-node></text-node>!</p>",
                 "rootType": "element",
               }
             `);
@@ -191,7 +191,7 @@ describe('bindings', () => {
                 "elements": [
                   { "type": "DomTemplateElement", "name": "p", "length": 5, "queryIndex": 0, "start": 1, "end": 2 },
                 ],
-                "html": "<p-0 data-bind>hello <!--comment 1--><text-node></text-node><!--comment 2--> and welcome!</p>",
+                "html": "<p data-bind>hello <!--comment 1--><text-node></text-node><!--comment 2--> and welcome!</p>",
                 "rootType": "element",
               }
             `);
@@ -220,7 +220,7 @@ describe('bindings', () => {
                   { "type": "DomTemplateElement", "name": "span", "length": 1, "queryIndex": 2, "start": 51, "end": 55 },
                   { "type": "DomTemplateElement", "name": "div", "length": 1, "queryIndex": 3, "start": 69, "end": 72 },
                 ],
-                "html": "<section-0 data-bind>hello <text-node></text-node>!</section> <p-27 data-bind>sum of <text-node></text-node> and <text-node></text-node> equals <span-50 data-bind><text-node></text-node></span></p> <div-68 data-bind><text-node></text-node></div>",
+                "html": "<section data-bind>hello <text-node></text-node>!</section> <p data-bind>sum of <text-node></text-node> and <text-node></text-node> equals <span data-bind><text-node></text-node></span></p> <div data-bind><text-node></text-node></div>",
                 "rootType": "fragment",
               }
             `);
@@ -241,7 +241,7 @@ describe('bindings', () => {
                   { "type": "DomTemplateElement", "name": "div", "length": 3, "queryIndex": 0, "start": 1, "end": 4 },
                   { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 1, "start": 16, "end": 17 },
                 ],
-                "html": "<div-0 data-bind><p-5>one</p><p-15 data-bind><text-node></text-node></p><text-node></text-node></div>",
+                "html": "<div data-bind><p>one</p><p data-bind><text-node></text-node></p><text-node></text-node></div>",
                 "rootType": "element",
               }
             `);
@@ -328,7 +328,7 @@ describe('bindings', () => {
                 "elements": [
                   { "type": "DomTemplateElement", "name": "p", "length": 0, "queryIndex": 0, "start": 1, "end": 2 },
                 ],
-                "html": "<p-0 data-bind></p>",
+                "html": "<p data-bind></p>",
                 "rootType": "element",
               }
             `);
@@ -346,7 +346,7 @@ describe('bindings', () => {
                 "elements": [
                   { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
                 ],
-                "html": "<input-0 required data-bind>",
+                "html": "<input required data-bind>",
                 "rootType": "element",
               }
             `);
@@ -364,7 +364,7 @@ describe('bindings', () => {
                 "elements": [
                   { "type": "DomTemplateElement", "name": "p", "length": 0, "queryIndex": 0, "start": 1, "end": 2 },
                 ],
-                "html": "<p-0 data-bind></p>",
+                "html": "<p data-bind></p>",
                 "rootType": "element",
               }
             `);
@@ -382,7 +382,7 @@ describe('bindings', () => {
                 "elements": [
                   { "type": "DomTemplateElement", "name": "p", "length": 0, "queryIndex": 0, "start": 1, "end": 2 },
                 ],
-                "html": "<p-0 data-bind></p>",
+                "html": "<p data-bind></p>",
                 "rootType": "element",
               }
             `);
@@ -406,7 +406,7 @@ describe('bindings', () => {
                 "elements": [
                   { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
                 ],
-                "html": "<input-0 required type="text" data-bind>",
+                "html": "<input required type="text" data-bind>",
                 "rootType": "element",
               }
             `);
@@ -428,7 +428,7 @@ describe('bindings', () => {
                 "elements": [
                   { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
                 ],
-                "html": "<input-0 required data-bind>",
+                "html": "<input required data-bind>",
                 "rootType": "element",
               }
             `);
@@ -452,7 +452,7 @@ describe('bindings', () => {
                 "elements": [
                   { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
                 ],
-                "html": "<input-0 data-bind>",
+                "html": "<input data-bind>",
                 "rootType": "element",
               }
             `);
@@ -472,7 +472,7 @@ describe('bindings', () => {
                 "elements": [
                   { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
                 ],
-                "html": "<input-0 data-bind>",
+                "html": "<input data-bind>",
                 "rootType": "element",
               }
             `);
@@ -492,7 +492,7 @@ describe('bindings', () => {
                 "elements": [
                   { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
                 ],
-                "html": "<input-0 required data-bind>",
+                "html": "<input required data-bind>",
                 "rootType": "element",
               }
             `);
@@ -518,7 +518,7 @@ describe('bindings', () => {
                 "elements": [
                   { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
                 ],
-                "html": "<input-0 data-bind>",
+                "html": "<input data-bind>",
                 "rootType": "element",
               }
             `);

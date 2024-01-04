@@ -43,7 +43,7 @@ export class TemplateParser {
             throw new Error('Cannot call parser.write() after parser.end()');
         }
         this.writeText(text);
-        const binding = this.template.createBinding(this.interpolator, this.templateElement);
+        const binding = this.template.createBinding(this.templateElement, this.interpolator);
         if(this.template.nextAttributeBinding) { 
             // finish attribute via quote(s): match ='{, ="{, ={ no match means attr...{
             const match = text.match(LAST_QUOTE);
@@ -169,8 +169,12 @@ class TemplateContext {
         if(name !== '<>') this.hasElements = true;
     }
 
-    createBinding(interpolator) {
+    createBinding(templateElement, interpolator) {
         const { element, root } = this;
+        if(templateElement?.loc) {
+            // console.log(templateElement.type, templateElement?.loc, templateElement?.start, templateElement?.end);
+            // console.log(interpolator.type, interpolator?.loc);
+        }
 
         let binding = null;
         if(element.inTagOpen) {
@@ -186,7 +190,6 @@ class TemplateContext {
         return binding;
     }
 
-
     pop(){
         this.stack.pop();
         this.element = this.stack.at(-1);
@@ -198,8 +201,7 @@ class TemplateContext {
 
         // makes this open tag new this.element context
         this.push(name, this.parser.openTagStart); 
-        this.html.push(`<${name}-${this.parser.openTagStart}`);
-        // console.log(this.parser);
+        this.html.push(`<${name}`);
     }
         
     onattribute(name, value, quote) {

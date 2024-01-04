@@ -43,7 +43,7 @@ describe('DomLiteral', () => {
         const input = `#\`<p>azoth</p>\``;
         expect(compile(input)).toMatchInlineSnapshot(`
           "(() => {
-              return __makeRenderer(\`<p-0>azoth</p>\`)().__root;
+              return __makeRenderer(\`<p>azoth</p>\`)().__root;
           })();
           "
         `);
@@ -53,7 +53,7 @@ describe('DomLiteral', () => {
         const input = `#\`<p class={category}>{text}</p>\``;    
         expect(compile(input)).toMatchInlineSnapshot(`
           "(() => {
-              const __renderer = __makeRenderer(\`<p-0 data-bind><text-node></text-node></p>\`);
+              const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
               const { __root, __targets } = __renderer();
               __targets[0].className = category;
               __targets[0].textContent = text;
@@ -67,7 +67,7 @@ describe('DomLiteral', () => {
         const input = `#\`<div>#{block}</div>\``;    
         expect(compile(input)).toMatchInlineSnapshot(`
           "(() => {
-              const __renderer = __makeRenderer(\`<div-0 data-bind><text-node></text-node></div>\`);
+              const __renderer = __makeRenderer(\`<div data-bind><text-node></text-node></div>\`);
               const { __root, __targets } = __renderer();
               new DomBlock(__targets[0], (block));
               return __root;
@@ -86,7 +86,7 @@ describe('surrounding code integration mode', () => {
         `;
         expect(compile(input)).toMatchInlineSnapshot(`
           "const template = (() => {
-              const __renderer = __makeRenderer(\`<p-0 data-bind><text-node></text-node></p>\`);
+              const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
               const { __root, __targets } = __renderer();
               __targets[0].textContent = text;
               return __root;
@@ -101,7 +101,7 @@ describe('surrounding code integration mode', () => {
         `;
         expect(compile(input)).toMatchInlineSnapshot(`
           "const template = text => {
-              const __renderer = __makeRenderer(\`<p-0 data-bind><text-node></text-node></p>\`);
+              const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
               const { __root, __targets } = __renderer();
               __targets[0].textContent = text;
               return __root;
@@ -122,7 +122,7 @@ describe('surrounding code integration mode', () => {
           "function template(text) {
               const format = 'text' + '!';
               
-              const __renderer = __makeRenderer(\`<p-0 data-bind><text-node></text-node></p>\`);
+              const __renderer = __makeRenderer(\`<p data-bind><text-node></text-node></p>\`);
               const { __root, __targets } = __renderer();
               __targets[0].textContent = text;
               return __root;    
