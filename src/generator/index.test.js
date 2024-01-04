@@ -39,7 +39,7 @@ describe('regression', () => {
 });
 
 describe('DomLiteral', () => {
-    test('static no bindings', ({ expect }) => {
+    test('static no binders', ({ expect }) => {
         const input = `#\`<p>azoth</p>\``;
         expect(compile(input)).toMatchInlineSnapshot(`
           "(() => {
@@ -49,7 +49,7 @@ describe('DomLiteral', () => {
         `);
     });
 
-    test('property and child text bindings', ({ expect }) => {
+    test('property and child text binders', ({ expect }) => {
         const input = `#\`<p class={category}>{text}</p>\``;    
         expect(compile(input)).toMatchInlineSnapshot(`
           "(() => {
@@ -63,7 +63,7 @@ describe('DomLiteral', () => {
         `);
     });
 
-    test('block binding', ({ expect }) => {
+    test('block binder', ({ expect }) => {
         const input = `#\`<div>#{block}</div>\``;    
         expect(compile(input)).toMatchInlineSnapshot(`
           "(() => {

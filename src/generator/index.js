@@ -45,8 +45,8 @@ const azothGenerator = {
     },
 
     writeTemplate(node, state) {
-        const { html, rootType, elements, bindings, interpolators, expressions } = node;
-        const { length } = bindings;
+        const { html, rootType, elements, binders, interpolators, expressions } = node;
+        const { length } = binders;
         const { lineEnd: lE, indent: indentUnit, indentLevel } = state;
         const indent = indentUnit.repeat(indentLevel);
 
@@ -60,26 +60,26 @@ const azothGenerator = {
         else {
             state.write(`;${lE}`);
             state.write(`${indent}const { __root, __targets } = __renderer();${lE}`);
-            for(let i = 0; i < bindings.length; i++) {
+            for(let i = 0; i < binders.length; i++) {
                     
-                const binding = bindings[i];
+                const binder = binders[i];
                 const expression = expressions [i];
-                const element = elements[binding.queryIndex];
+                const element = elements[binder.queryIndex];
                 
                 state.write(indent);
 
-                const isBlock = binding.interpolator.name === '#{';
+                const isBlock = binder.interpolator.name === '#{';
                 if(isBlock) {
                     state.write(`new DomBlock(`);
                     this[element.type](element, state);
-                    this[binding.type](binding, state);
+                    this[binder.type](binder, state);
                     state.write(`, (`);
                     this[expression.type](expression, state);
                     state.write(`))`);
                 }
                 else {
                     this[element.type](element, state);
-                    this[binding.type](binding, state);
+                    this[binder.type](binder, state);
                     this[expression.type](expression, state);
                 }
                 state.write(`;${lE}`);
@@ -92,12 +92,12 @@ const azothGenerator = {
         state.write(`__targets[${queryIndex}]`);
     },
 
-    PropertyBinding({ queryIndex, interpolator, property }, state) {
+    PropertyBinder({ queryIndex, interpolator, property }, state) {
         // TODO: add "computed" to node so we know if [] required
         state.write(`.${property} = `);
     },
 
-    ChildBinding({ queryIndex, interpolator, index, length }, state) {
+    ChildBinder({ queryIndex, interpolator, index, length }, state) {
         // short-circuit childNodes if only 1 bound text 
         if(index !== 0 || length !== 1 && interpolator.name === '{') {
             state.write(`.childNodes[${index}]`);

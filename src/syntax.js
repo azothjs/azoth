@@ -85,7 +85,7 @@ const iconMode = 'stylish', version = '2.0';
         
         const bind0 = bind[0];
         const bind2 = bind[2];
-        // 1 signal used in multiple bindings
+        // 1 signal used in multiple binders
         register(emoji.subscribe(emoji => {
             bind0(emoji.name), bind2(emoji.text);
         }));   
@@ -119,7 +119,7 @@ const iconMode = 'stylish', version = '2.0';
         
         const bind0 = bind[0];
         const bind2 = bind[2];
-        // 1 signal used in multiple bindings
+        // 1 signal used in multiple binders
         register(emoji.subscribe(emoji => {
             bind0(emoji.name), bind2(emoji.text);
         }));   

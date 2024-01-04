@@ -132,9 +132,9 @@ class Template1 {
     
     const fn = () => {
         const { root, targets } = renderDom();
-        const bindings = bind(targets);
-        const u1 = emoji.subscribe(bindings[0])
-        const u2 = emoji.subscribe(bindings[1])
+        const binders = bind(targets);
+        const u1 = emoji.subscribe(binders[0])
+        const u2 = emoji.subscribe(binders[1])
 
         const unsubscribe = () => {
             u1();
@@ -166,7 +166,7 @@ class Template1 {
 
     const fn = () => {
         const { root, targets } = renderDom();
-        const bindings = bind(targets);
+        const binders = bind(targets);
         return root;
     }
 

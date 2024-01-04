@@ -215,7 +215,7 @@ export function extend(Parser, azTokens) {
             let curElt = this.parseTemplateElement({ isTagged : false }); // isTagged controls invalid escape sequences            
             node.expressions = [];
             node.elements = [];
-            node.bindings = [];
+            node.binders = [];
 
             if(curElt.tail) {
                 parser.endTemplate(curElt);
@@ -248,7 +248,7 @@ export function extend(Parser, azTokens) {
             }
             node.html = parser.html;
             node.rootType = parser.rootType;
-            node.bindings = parser.bindings;
+            node.binders = parser.binders;
             node.elements = parser.elements;
 
             this.next();

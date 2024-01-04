@@ -7,7 +7,7 @@ import { getLineInfo } from 'acorn';
 export class TemplateParser {
     // final state after .end()
     html = '';
-    bindings = []; 
+    binders = []; 
     boundElements = null;
     rootType = 'fragment';
 
@@ -43,8 +43,8 @@ export class TemplateParser {
             throw new Error('Cannot call parser.write() after parser.end()');
         }
         this.writeText(text);
-        const binding = this.template.createBinding(this.templateElement, this.interpolator);
-        if(this.template.nextAttributeBinding) { 
+        const binder = this.template.createBinder(this.templateElement, this.interpolator);
+        if(this.template.nextAttributeBinder) { 
             // finish attribute via quote(s): match ='{, ="{, ={ no match means attr...{
             const match = text.match(LAST_QUOTE);
             if(match) {
@@ -110,7 +110,7 @@ export class TemplateParser {
             this.elements = bound
                 .map(e => e.toNode());
             
-            this.bindings = this.template.bindings
+            this.binders = this.template.binders
                 .map(b => b.toNode());
 
             this.html = this.template.html
@@ -129,8 +129,8 @@ export class TemplateParser {
             }
         }
 
-        const { bindings, html, elements, rootType } = this;
-        return { bindings, html, elements, rootType };
+        const { binders, html, elements, rootType } = this;
+        return { binders, html, elements, rootType };
     }   
 }
 
@@ -140,8 +140,8 @@ class TemplateContext {
     // Does this html contain _any_ elements?
     hasElements = false;
     
-    // template bindings
-    bindings = [];
+    // template binders
+    binders = [];
     // unique set of bound elements of the template
     boundElements = new Set();
     // context stack for current element
@@ -154,8 +154,8 @@ class TemplateContext {
     elementCount = 0;
     
     
-    // carry-over binding that comes before its own attribute
-    nextAttributeBinding = null;
+    // carry-over binder that comes before its own attribute
+    nextAttributeBinder = null;
 
     constructor() {
         this.push('<>');
@@ -169,25 +169,25 @@ class TemplateContext {
         if(name !== '<>') this.hasElements = true;
     }
 
-    createBinding(templateElement, interpolator) {
+    createBinder(templateElement, interpolator) {
         const { element, root } = this;
-        if(templateElement?.loc) {
-            // console.log(templateElement.type, templateElement?.loc, templateElement?.start, templateElement?.end);
-            // console.log(interpolator.type, interpolator?.loc);
-        }
+        // if(templateElement?.loc) {
+        //     // console.log(templateElement.type, templateElement?.loc, templateElement?.start, templateElement?.end);
+        //     // console.log(interpolator.type, interpolator?.loc);
+        // }
 
-        let binding = null;
+        let binder = null;
         if(element.inTagOpen) {
-            binding = new PropertyBinding(element, interpolator);
-            this.nextAttributeBinding = binding;
+            binder = new PropertyBinder(element, interpolator);
+            this.nextAttributeBinder = binder;
         }
         else {
-            binding = new ChildBinding(element, interpolator);
-            this.html.push(binding.replacement);
+            binder = new ChildBinder(element, interpolator);
+            this.html.push(binder.replacement);
             element.length++;
         }
-        this.bindings.push(binding);
-        return binding;
+        this.binders.push(binder);
+        return binder;
     }
 
     pop(){
@@ -205,12 +205,12 @@ class TemplateContext {
     }
         
     onattribute(name, value, quote) {
-        const binding = this.nextAttributeBinding;
-        this.nextAttributeBinding = null;
+        const binder = this.nextAttributeBinder;
+        this.nextAttributeBinder = null;
 
-        if(binding) {
+        if(binder) {
             // TODO: source map location
-            binding.setProperty(name);
+            binder.setProperty(name);
         }
         else {
             value ??= '';
@@ -236,7 +236,7 @@ class TemplateContext {
 
         const { element, root, boundElements } = this;
         if(element.isBound) {
-            this.onattribute(Binding.queryAttributeName);
+            this.onattribute(Binder.queryAttributeName);
             if(!boundElements.has(element)) {
                 boundElements.add(element);
             }
@@ -281,7 +281,7 @@ class ElementContext {
     }
 }
 
-class Binding {
+class Binder {
     static queryAttributeName = 'data-bind';
     element = null;
     interpolator = null;
@@ -295,7 +295,7 @@ class Binding {
     }
 }
 
-class PropertyBinding extends Binding {
+class PropertyBinder extends Binder {
     property = '';
     attribute = '';
     raw = '';
@@ -321,7 +321,7 @@ class PropertyBinding extends Binding {
     }
 }
 
-class ChildBinding extends Binding {
+class ChildBinder extends Binder {
     index = -1;
     replacement = '';
     constructor(element, interpolator) {

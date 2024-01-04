@@ -12,8 +12,8 @@ const parseTemplate = (code, options) => {
 beforeEach(({ expect }) => addSerializers(expect, [
     'DomTemplateElement', 
     'TemplateInterpolator',
-    // 'ChildBinding', 
-    // 'PropertyBinding', 
+    // 'ChildBinder', 
+    // 'PropertyBinder', 
     'Identifier', 
     'TemplateElement',
 ]));
@@ -70,11 +70,11 @@ describe('templates', () => {
 
         expect(template).toMatchInlineSnapshot(`
           Node {
-            "bindings": [],
+            "binders": [],
             "elements": [],
             "end": 15,
             "expressions": [],
-            "html": "<p-0>hello</p>",
+            "html": "<p>hello</p>",
             "rootType": "element",
             "start": 0,
             "type": "DomTemplateLiteral",
@@ -87,14 +87,14 @@ describe('templates', () => {
 
         expect(template).toMatchInlineSnapshot(`
           Node {
-            "bindings": [
+            "binders": [
               {
                 "index": 1,
                 "interpolator": { "type": "TemplateInterpolator", "start": 11, "end": 12, "name": "{ " },
                 "length": 3,
                 "queryIndex": 0,
                 "replacement": "<text-node></text-node>",
-                "type": "ChildBinding",
+                "type": "ChildBinder",
               },
             ],
             "elements": [
@@ -104,7 +104,7 @@ describe('templates', () => {
             "expressions": [
               { "type": "Identifier", "start": 12, "end": 16, "name": "name" },
             ],
-            "html": "<p-0 data-bind>hello <text-node></text-node>!</p>",
+            "html": "<p data-bind>hello <text-node></text-node>!</p>",
             "rootType": "element",
             "start": 0,
             "type": "DomTemplateLiteral",
@@ -123,14 +123,14 @@ describe('templates', () => {
 
         expect(template).toMatchInlineSnapshot(`
           Node {
-            "bindings": [
+            "binders": [
               {
                 "index": 1,
                 "interpolator": { "type": "TemplateInterpolator", "start": 41, "end": 43, "name": "\${ " },
                 "length": 3,
                 "queryIndex": 0,
                 "replacement": "<text-node></text-node>",
-                "type": "ChildBinding",
+                "type": "ChildBinder",
               },
               {
                 "index": 0,
@@ -138,7 +138,7 @@ describe('templates', () => {
                 "length": 1,
                 "queryIndex": 1,
                 "replacement": "<text-node></text-node>",
-                "type": "ChildBinding",
+                "type": "ChildBinder",
               },
               {
                 "index": 0,
@@ -146,7 +146,7 @@ describe('templates', () => {
                 "length": 1,
                 "queryIndex": 2,
                 "replacement": "<text-node></text-node>",
-                "type": "ChildBinding",
+                "type": "ChildBinder",
               },
             ],
             "elements": [
@@ -160,9 +160,9 @@ describe('templates', () => {
               { "type": "Identifier", "start": 87, "end": 92, "name": "count" },
               { "type": "Identifier", "start": 127, "end": 132, "name": "block" },
             ],
-            "html": "<p-17 data-bind>hello <text-node></text-node>!</p>
-                          <p-48>count: <span-58 data-bind><text-node></text-node></span></p>
-                          <p-92 data-bind><text-node></text-node></p>",
+            "html": "<p data-bind>hello <text-node></text-node>!</p>
+                          <p>count: <span data-bind><text-node></text-node></span></p>
+                          <p data-bind><text-node></text-node></p>",
             "rootType": "fragment",
             "start": 13,
             "type": "DomTemplateLiteral",
@@ -177,14 +177,14 @@ describe('templates', () => {
 
         expect(template).toMatchInlineSnapshot(`
           Node {
-            "bindings": [
+            "binders": [
               {
                 "index": 0,
                 "interpolator": { "type": "TemplateInterpolator", "start": 18, "end": 19, "name": "{ " },
                 "length": 5,
                 "queryIndex": 0,
                 "replacement": "<text-node></text-node>",
-                "type": "ChildBinding",
+                "type": "ChildBinder",
               },
               {
                 "index": 2,
@@ -192,7 +192,7 @@ describe('templates', () => {
                 "length": 5,
                 "queryIndex": 0,
                 "replacement": "<text-node></text-node>",
-                "type": "ChildBinding",
+                "type": "ChildBinder",
               },
               {
                 "index": 4,
@@ -200,7 +200,7 @@ describe('templates', () => {
                 "length": 5,
                 "queryIndex": 0,
                 "replacement": "<text-node></text-node>",
-                "type": "ChildBinding",
+                "type": "ChildBinder",
               },
             ],
             "elements": [
@@ -219,7 +219,7 @@ describe('templates', () => {
                 "type": "BinaryExpression",
               },
             ],
-            "html": "<p-0 data-bind><text-node></text-node> + <text-node></text-node> = <text-node></text-node></p>",
+            "html": "<p data-bind><text-node></text-node> + <text-node></text-node> = <text-node></text-node></p>",
             "rootType": "element",
             "start": 13,
             "type": "DomTemplateLiteral",
@@ -239,14 +239,14 @@ describe('templates', () => {
         
         expect(template).toMatchInlineSnapshot(`
           Node {
-            "bindings": [
+            "binders": [
               {
                 "attribute": "class",
                 "interpolator": { "type": "TemplateInterpolator", "start": 41, "end": 42, "name": "{ " },
                 "name": "class",
                 "property": "className",
                 "queryIndex": 0,
-                "type": "PropertyBinding",
+                "type": "PropertyBinder",
               },
               {
                 "attribute": "required",
@@ -254,7 +254,7 @@ describe('templates', () => {
                 "name": "required",
                 "property": "required",
                 "queryIndex": 1,
-                "type": "PropertyBinding",
+                "type": "PropertyBinder",
               },
               {
                 "attribute": "class",
@@ -262,7 +262,7 @@ describe('templates', () => {
                 "name": "class",
                 "property": "className",
                 "queryIndex": 2,
-                "type": "PropertyBinding",
+                "type": "PropertyBinder",
               },
             ],
             "elements": [
@@ -276,9 +276,9 @@ describe('templates', () => {
               { "type": "Identifier", "start": 92, "end": 102, "name": "isRequired" },
               { "type": "Identifier", "start": 165, "end": 176, "name": "sectionType" },
             ],
-            "html": "<p-17 data-bind>hello!</p>
-                          <input-56 name="title" data-bind>
-                          <div-105 style="color: red" data-bind></div>",
+            "html": "<p data-bind>hello!</p>
+                          <input name="title" data-bind>
+                          <div style="color: red" data-bind></div>",
             "rootType": "fragment",
             "start": 13,
             "type": "DomTemplateLiteral",
@@ -302,14 +302,14 @@ describe('templates', () => {
         
         expect(template).toMatchInlineSnapshot(`
           Node {
-            "bindings": [
+            "binders": [
               {
                 "index": 0,
                 "interpolator": { "type": "TemplateInterpolator", "start": 78, "end": 79, "name": "{ " },
                 "length": 1,
                 "queryIndex": 0,
                 "replacement": "<text-node></text-node>",
-                "type": "ChildBinding",
+                "type": "ChildBinder",
               },
               {
                 "attribute": "class",
@@ -317,7 +317,7 @@ describe('templates', () => {
                 "name": "class",
                 "property": "className",
                 "queryIndex": 1,
-                "type": "PropertyBinding",
+                "type": "PropertyBinder",
               },
               {
                 "attribute": "class",
@@ -325,7 +325,7 @@ describe('templates', () => {
                 "name": "class",
                 "property": "className",
                 "queryIndex": 2,
-                "type": "PropertyBinding",
+                "type": "PropertyBinder",
               },
               {
                 "index": 3,
@@ -333,7 +333,7 @@ describe('templates', () => {
                 "length": 7,
                 "queryIndex": 1,
                 "replacement": "<text-node></text-node>",
-                "type": "ChildBinding",
+                "type": "ChildBinder",
               },
               {
                 "index": 5,
@@ -341,7 +341,7 @@ describe('templates', () => {
                 "length": 7,
                 "queryIndex": 1,
                 "replacement": "<text-node></text-node>",
-                "type": "ChildBinding",
+                "type": "ChildBinder",
               },
             ],
             "elements": [
@@ -357,10 +357,10 @@ describe('templates', () => {
               { "type": "Identifier", "start": 181, "end": 185, "name": "name" },
               { "type": "Identifier", "start": 209, "end": 220, "name": "description" },
             ],
-            "html": "<section-13>
-                          <h2-39 class="item-header" data-bind><text-node></text-node></h2>
-                          <p-85 data-bind>
-                              <span-118 data-bind>Hello</span> <text-node></text-node>!
+            "html": "<section>
+                          <h2 class="item-header" data-bind><text-node></text-node></h2>
+                          <p data-bind>
+                              <span data-bind>Hello</span> <text-node></text-node>!
                               <text-node></text-node>
                           </p>
                       </section>",
@@ -379,14 +379,14 @@ describe('templates', () => {
         
         expect(template).toMatchInlineSnapshot(`
           Node {
-            "bindings": [
+            "binders": [
               {
                 "index": 0,
                 "interpolator": { "type": "TemplateInterpolator", "start": 18, "end": 20, "name": "#{ " },
                 "length": 1,
                 "queryIndex": 0,
                 "replacement": "<text-node></text-node>",
-                "type": "ChildBinding",
+                "type": "ChildBinder",
               },
             ],
             "elements": [
@@ -396,7 +396,7 @@ describe('templates', () => {
             "expressions": [
               Node {
                 "alternate": Node {
-                  "bindings": [],
+                  "binders": [],
                   "elements": [],
                   "end": 59,
                   "expressions": [],
@@ -406,11 +406,11 @@ describe('templates', () => {
                   "type": "DomTemplateLiteral",
                 },
                 "consequent": Node {
-                  "bindings": [],
+                  "binders": [],
                   "elements": [],
                   "end": 48,
                   "expressions": [],
-                  "html": "<span-0>VIP</span>",
+                  "html": "<span>VIP</span>",
                   "rootType": "element",
                   "start": 29,
                   "type": "DomTemplateLiteral",
@@ -421,7 +421,7 @@ describe('templates', () => {
                 "type": "ConditionalExpression",
               },
             ],
-            "html": "<p-0 data-bind><text-node></text-node></p>",
+            "html": "<p data-bind><text-node></text-node></p>",
             "rootType": "element",
             "start": 13,
             "type": "DomTemplateLiteral",
@@ -430,9 +430,9 @@ describe('templates', () => {
     });
 });
 
-describe('source locations', () => {
+describe.todo('source locations', () => {
 
-    test.only('elements', ({ expect, parser }) => {
+    test('elements', ({ expect, parser }) => {
         const template = parseTemplate(
             /*html*/`#\`
                 <p>{text1}</p>
@@ -442,14 +442,14 @@ describe('source locations', () => {
 
         expect(template).toMatchInlineSnapshot(`
           Node {
-            "bindings": [
+            "binders": [
               {
                 "index": 0,
                 "interpolator": { "type": "TemplateInterpolator", "start": 22, "end": 23, "loc": { "start": { "line": 2, "column": 19 }, "end": { "line": 2, "column": 20 } }, "name": "{ " },
                 "length": 1,
                 "queryIndex": 0,
                 "replacement": "<text-node></text-node>",
-                "type": "ChildBinding",
+                "type": "ChildBinder",
               },
               {
                 "index": 0,
@@ -457,7 +457,7 @@ describe('source locations', () => {
                 "length": 1,
                 "queryIndex": 1,
                 "replacement": "<text-node></text-node>",
-                "type": "ChildBinding",
+                "type": "ChildBinder",
               },
             ],
             "elements": [

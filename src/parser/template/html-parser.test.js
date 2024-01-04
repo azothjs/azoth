@@ -13,12 +13,12 @@ describe('parser operations', () => {
         parser.write();
     });
 
-    test('same html and bindings on repeated end call or parser props', ({ expect, parser }) => {
+    test('same html and binders on repeated end call or parser props', ({ expect, parser }) => {
         parser.write();
-        const { html, bindings, elements } = parser.end();
-        const { html: h2, bindings: b2, elements: e2 } = parser.end();
+        const { html, binders, elements } = parser.end();
+        const { html: h2, binders: b2, elements: e2 } = parser.end();
         expect(html).toBe(h2).toBe(parser.html);
-        expect(bindings).toBe(b2).toBe(parser.bindings);
+        expect(binders).toBe(b2).toBe(parser.binders);
         expect(elements).toBe(e2).toBe(parser.elements);
     });
 });
@@ -28,7 +28,7 @@ describe('static html', () => {
         const template = parser.end('hi');
         expect(template).toMatchInlineSnapshot(`
           {
-            "bindings": [],
+            "binders": [],
             "elements": [],
             "html": "hi",
             "rootType": "text",
@@ -40,7 +40,7 @@ describe('static html', () => {
         const template = parser.end(`<input name="cat" required class=cool type='text'>`);
         expect(template).toMatchInlineSnapshot(`
           {
-            "bindings": [],
+            "binders": [],
             "elements": [],
             "html": "<input name="cat" required class="cool" type="text">",
             "rootType": "element",
@@ -52,7 +52,7 @@ describe('static html', () => {
         const template = parser.end(`<span class="greeting">hello world</span>`);
         expect(template).toMatchInlineSnapshot(`
           {
-            "bindings": [],
+            "binders": [],
             "elements": [],
             "html": "<span class="greeting">hello world</span>",
             "rootType": "element",
@@ -64,7 +64,7 @@ describe('static html', () => {
         const template = parser.end(`<self-closing/>`);
         expect(template).toMatchInlineSnapshot(`
           {
-            "bindings": [],
+            "binders": [],
             "elements": [],
             "html": "<self-closing></self-closing>",
             "rootType": "element",
@@ -84,7 +84,7 @@ describe('static html', () => {
 
         expect(template).toMatchInlineSnapshot(`
           {
-            "bindings": [],
+            "binders": [],
             "elements": [],
             "html": "<br>
                       <br>
@@ -101,7 +101,7 @@ describe('static html', () => {
         const template = parser.end(`<div><div><div><div><div></div></div></div></div></div>`);
         expect(template).toMatchInlineSnapshot(`
           {
-            "bindings": [],
+            "binders": [],
             "elements": [],
             "html": "<div><div><div><div><div></div></div></div></div></div>",
             "rootType": "element",
@@ -113,7 +113,7 @@ describe('static html', () => {
         const template = parser.end(`<span class="greeting"><!--hello--> world</span>`);
         expect(template).toMatchInlineSnapshot(`
           {
-            "bindings": [],
+            "binders": [],
             "elements": [],
             "html": "<span class="greeting"><!--hello--> world</span>",
             "rootType": "element",
@@ -123,19 +123,19 @@ describe('static html', () => {
     });
 });
 
-describe('bindings', () => {
+describe('binders', () => {
 
-    beforeEach(({ expect }) => addSerializers(expect, ['ChildBinding', 'PropertyBinding', 'DomTemplateElement']));
+    beforeEach(({ expect }) => addSerializers(expect, ['ChildBinder', 'PropertyBinder', 'DomTemplateElement']));
     
     describe('child nodes', () => {
-        test('empty root with binding', ({ expect, parser }) => {
+        test('empty root with binder', ({ expect, parser }) => {
             parser.write(``);
             const template = parser.end(``);
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "ChildBinding", "queryIndex": -1, "interpolator": null, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
+                "binders": [
+                  { "type": "ChildBinder", "queryIndex": -1, "interpolator": null, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
                 ],
                 "elements": [],
                 "html": "<text-node></text-node>",
@@ -144,16 +144,16 @@ describe('bindings', () => {
             `);
         });
 
-        test('two bindings at root', ({ expect, parser }) => {
+        test('two binders at root', ({ expect, parser }) => {
             parser.write(``);
             parser.write(``);
             const template = parser.end(``);
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "ChildBinding", "queryIndex": -1, "interpolator": null, "index": 0, "length": 2, "replacement": "<text-node></text-node>" },
-                  { "type": "ChildBinding", "queryIndex": -1, "interpolator": null, "index": 1, "length": 2, "replacement": "<text-node></text-node>" },
+                "binders": [
+                  { "type": "ChildBinder", "queryIndex": -1, "interpolator": null, "index": 0, "length": 2, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinder", "queryIndex": -1, "interpolator": null, "index": 1, "length": 2, "replacement": "<text-node></text-node>" },
                 ],
                 "elements": [],
                 "html": "<text-node></text-node><text-node></text-node>",
@@ -168,8 +168,8 @@ describe('bindings', () => {
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "ChildBinding", "queryIndex": 0, "interpolator": null, "index": 1, "length": 3, "replacement": "<text-node></text-node>" },
+                "binders": [
+                  { "type": "ChildBinder", "queryIndex": 0, "interpolator": null, "index": 1, "length": 3, "replacement": "<text-node></text-node>" },
                 ],
                 "elements": [
                   { "type": "DomTemplateElement", "name": "p", "length": 3, "queryIndex": 0, "start": 1, "end": 2 },
@@ -185,8 +185,8 @@ describe('bindings', () => {
             const template = parser.end(`<!--comment 2--> and welcome!</p>`);
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "ChildBinding", "queryIndex": 0, "interpolator": null, "index": 2, "length": 5, "replacement": "<text-node></text-node>" },
+                "binders": [
+                  { "type": "ChildBinder", "queryIndex": 0, "interpolator": null, "index": 2, "length": 5, "replacement": "<text-node></text-node>" },
                 ],
                 "elements": [
                   { "type": "DomTemplateElement", "name": "p", "length": 5, "queryIndex": 0, "start": 1, "end": 2 },
@@ -207,12 +207,12 @@ describe('bindings', () => {
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "ChildBinding", "queryIndex": 0, "interpolator": null, "index": 1, "length": 3, "replacement": "<text-node></text-node>" },
-                  { "type": "ChildBinding", "queryIndex": 1, "interpolator": null, "index": 1, "length": 6, "replacement": "<text-node></text-node>" },
-                  { "type": "ChildBinding", "queryIndex": 1, "interpolator": null, "index": 3, "length": 6, "replacement": "<text-node></text-node>" },
-                  { "type": "ChildBinding", "queryIndex": 2, "interpolator": null, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
-                  { "type": "ChildBinding", "queryIndex": 3, "interpolator": null, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
+                "binders": [
+                  { "type": "ChildBinder", "queryIndex": 0, "interpolator": null, "index": 1, "length": 3, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinder", "queryIndex": 1, "interpolator": null, "index": 1, "length": 6, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinder", "queryIndex": 1, "interpolator": null, "index": 3, "length": 6, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinder", "queryIndex": 2, "interpolator": null, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinder", "queryIndex": 3, "interpolator": null, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
                 ],
                 "elements": [
                   { "type": "DomTemplateElement", "name": "section", "length": 3, "queryIndex": 0, "start": 1, "end": 8 },
@@ -233,9 +233,9 @@ describe('bindings', () => {
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "ChildBinding", "queryIndex": 1, "interpolator": null, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
-                  { "type": "ChildBinding", "queryIndex": 0, "interpolator": null, "index": 2, "length": 3, "replacement": "<text-node></text-node>" },
+                "binders": [
+                  { "type": "ChildBinder", "queryIndex": 1, "interpolator": null, "index": 0, "length": 1, "replacement": "<text-node></text-node>" },
+                  { "type": "ChildBinder", "queryIndex": 0, "interpolator": null, "index": 2, "length": 3, "replacement": "<text-node></text-node>" },
                 ],
                 "elements": [
                   { "type": "DomTemplateElement", "name": "div", "length": 3, "queryIndex": 0, "start": 1, "end": 4 },
@@ -322,8 +322,8 @@ describe('bindings', () => {
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
+                "binders": [
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
                 ],
                 "elements": [
                   { "type": "DomTemplateElement", "name": "p", "length": 0, "queryIndex": 0, "start": 1, "end": 2 },
@@ -340,8 +340,8 @@ describe('bindings', () => {
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
+                "binders": [
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
                 ],
                 "elements": [
                   { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
@@ -358,8 +358,8 @@ describe('bindings', () => {
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
+                "binders": [
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
                 ],
                 "elements": [
                   { "type": "DomTemplateElement", "name": "p", "length": 0, "queryIndex": 0, "start": 1, "end": 2 },
@@ -376,8 +376,8 @@ describe('bindings', () => {
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
+                "binders": [
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
                 ],
                 "elements": [
                   { "type": "DomTemplateElement", "name": "p", "length": 0, "queryIndex": 0, "start": 1, "end": 2 },
@@ -397,11 +397,11 @@ describe('bindings', () => {
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "maxLength", "property": "maxLength", "attribute": "maxlength" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "disabled", "property": "disabled", "attribute": "disabled" },
+                "binders": [
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "maxLength", "property": "maxLength", "attribute": "maxlength" },
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "disabled", "property": "disabled", "attribute": "disabled" },
                 ],
                 "elements": [
                   { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
@@ -420,10 +420,10 @@ describe('bindings', () => {
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
+                "binders": [
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
                 ],
                 "elements": [
                   { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
@@ -445,9 +445,9 @@ describe('bindings', () => {
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
+                "binders": [
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
                 ],
                 "elements": [
                   { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
@@ -465,9 +465,9 @@ describe('bindings', () => {
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
+                "binders": [
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
                 ],
                 "elements": [
                   { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
@@ -485,9 +485,9 @@ describe('bindings', () => {
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
+                "binders": [
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
                 ],
                 "elements": [
                   { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
@@ -508,12 +508,12 @@ describe('bindings', () => {
 
             expect(template).toMatchInlineSnapshot(`
               {
-                "bindings": [
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "maxLength", "property": "maxLength", "attribute": "maxlength" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
-                  { "type": "PropertyBinding", "queryIndex": 0, "interpolator": null, "name": "style", "property": "style", "attribute": "style" },
+                "binders": [
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "class", "property": "className", "attribute": "class" },
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "name", "property": "name", "attribute": "name" },
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "maxLength", "property": "maxLength", "attribute": "maxlength" },
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "type", "property": "type", "attribute": "type" },
+                  { "type": "PropertyBinder", "queryIndex": 0, "interpolator": null, "name": "style", "property": "style", "attribute": "style" },
                 ],
                 "elements": [
                   { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 0, "start": 1, "end": 6 },
