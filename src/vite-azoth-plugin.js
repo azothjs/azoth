@@ -14,6 +14,8 @@ export default function AzothPlugin() {
         ecmaVersion: 'latest',
         sourceType: 'module',
         locations: true,
+        ranges: true,
+        comments: true,
     });
     
     const transpile = (input) => {
@@ -27,6 +29,7 @@ export default function AzothPlugin() {
         name: 'rollup-azoth-plugin',
         enforce: 'pre',
         transform(source, id) {
+            console.log('testing...', id);
             if(!jsFile.test(id) || !id.includes('src/www/')) return;
 
             const path = normalizePath(id);

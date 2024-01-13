@@ -2,11 +2,13 @@
 export function addSerializers(expect, options) {
     const types = options?.types;
     const InstanceOf = options?.InstanceOf;
+    const constructors = options?.constructors;
     expect.addSnapshotSerializer({
         test(val) {
             return !Array.isArray(val) && typeof val === 'object' && (
-                (!types || types?.includes(val?.type)) &&
-                (!InstanceOf || val instanceof InstanceOf)
+                (types?.includes(val?.type)) ||
+                (InstanceOf && val instanceof InstanceOf) ||
+                (constructors?.includes(val?.constructor?.name))
             );
         },
         serialize(object, config, indent, deps, refs, printer) {

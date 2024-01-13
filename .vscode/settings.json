@@ -2,6 +2,7 @@
     "cSpell.words": [
         "astring",
         "backquote",
+        "espree",
         "IIFE",
         "onattribute",
         "onclosetag",
@@ -17,4 +18,5 @@
     "javascript.format.enable": true,
     "javascript.suggestionActions.enabled": true,
     "javascript.validate.enable": false,
+    "eslint.experimental.useFlatConfig": true,
 }

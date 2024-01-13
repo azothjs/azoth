@@ -268,6 +268,7 @@ class ElementContext {
         this.order = order;
         this.start = tagStart + 1;
         this.end = this.start + this.name.length;
+        this.range = [this.start, this.end];
         this.position = position ?? null;
     }
 
@@ -276,9 +277,9 @@ class ElementContext {
     }
 
     toNode() {
-        const { type, name, length, queryIndex, start, end } = this;
+        const { type, name, length, queryIndex, start, end, range } = this;
         // TODO: source map location
-        return { type, name, length, queryIndex, start, end };
+        return { type, name, length, queryIndex, start, end, range };
     }
 }
 
@@ -287,12 +288,21 @@ class Binder {
     element = null;
     interpolator = null;
     type = '';
+    start = -1;
+    end = -1;
+    range = null;
 
     constructor(element, interpolator) {
         this.element = element;
         this.element.isBound = true;
         this.type = this.constructor.name;
-        this.interpolator = interpolator;
+        if(interpolator) {
+            this.interpolator = interpolator;
+            const { start, end, range } = interpolator;
+            this.start = start;
+            this.end = end;
+            this.range = range ?? [start, end];
+        }
     }
 }
 
@@ -309,7 +319,7 @@ class PropertyBinder extends Binder {
     }
 
     toNode() {
-        const { type, element: { queryIndex }, interpolator, property, attribute, raw } = this;
+        const { type, element: { queryIndex }, interpolator, property, attribute, raw, start, end, range } = this;
         return { 
             type,
             queryIndex,
@@ -318,6 +328,7 @@ class PropertyBinder extends Binder {
             name: raw, 
             property, 
             attribute,
+            start, end, range,
         };
     }
 }
@@ -333,7 +344,7 @@ class ChildBinder extends Binder {
     }
 
     toNode() {
-        const { type, element, interpolator, index, replacement } = this;
+        const { type, element, interpolator, index, replacement, start, end, range } = this;
         const { queryIndex, length } = element;
         return { 
             type,
@@ -341,7 +352,8 @@ class ChildBinder extends Binder {
             interpolator,
             index,
             length,
-            replacement
+            replacement, 
+            start, end, range
         };
     }
 }

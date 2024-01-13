@@ -1,5 +1,6 @@
 import { beforeEach, describe, test, } from 'vitest';
 import { findInfo } from './find-info.js';
+import { addSerializers } from '../serializers.js';
 
 test('fix for event properties', ({ expect }) => {
     // bug in property-information so we use wrapper
@@ -65,7 +66,7 @@ test('pin class/className behavior for "property-information" package ', ({ expe
         "spaceSeparated": true,
       }
     `);
-    
+    // this doesn't count!
     expect(findInfo('class-name')).toMatchInlineSnapshot(`
       Info {
         "attribute": "class-name",

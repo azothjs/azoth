@@ -84,16 +84,22 @@ describe('templates', () => {
           Node {
             "binders": [
               {
+                "end": 12,
                 "index": 1,
                 "interpolator": { "type": "TemplateInterpolator", "start": 11, "end": 12, "name": "{ " },
                 "length": 3,
                 "queryIndex": 0,
+                "range": [
+                  11,
+                  12,
+                ],
                 "replacement": "<text-node></text-node>",
+                "start": 11,
                 "type": "ChildBinder",
               },
             ],
             "elements": [
-              { "type": "DomTemplateElement", "name": "p", "length": 3, "queryIndex": 0, "start": 1, "end": 2 },
+              { "type": "DomTemplateElement", "name": "p", "length": 3, "queryIndex": 0, "start": 1, "end": 2, "range": [1, 2] },
             ],
             "end": 23,
             "expressions": [
@@ -120,34 +126,52 @@ describe('templates', () => {
           Node {
             "binders": [
               {
+                "end": 43,
                 "index": 1,
                 "interpolator": { "type": "TemplateInterpolator", "start": 41, "end": 43, "name": "\${ " },
                 "length": 3,
                 "queryIndex": 0,
+                "range": [
+                  41,
+                  43,
+                ],
                 "replacement": "<text-node></text-node>",
+                "start": 41,
                 "type": "ChildBinder",
               },
               {
+                "end": 87,
                 "index": 0,
                 "interpolator": { "type": "TemplateInterpolator", "start": 86, "end": 87, "name": "{ " },
                 "length": 1,
                 "queryIndex": 1,
+                "range": [
+                  86,
+                  87,
+                ],
                 "replacement": "<text-node></text-node>",
+                "start": 86,
                 "type": "ChildBinder",
               },
               {
+                "end": 126,
                 "index": 0,
                 "interpolator": { "type": "TemplateInterpolator", "start": 124, "end": 126, "name": "#{ " },
                 "length": 1,
                 "queryIndex": 2,
+                "range": [
+                  124,
+                  126,
+                ],
                 "replacement": "<text-node></text-node>",
+                "start": 124,
                 "type": "ChildBinder",
               },
             ],
             "elements": [
-              { "type": "DomTemplateElement", "name": "p", "length": 3, "queryIndex": 0, "start": 18, "end": 19 },
-              { "type": "DomTemplateElement", "name": "span", "length": 1, "queryIndex": 1, "start": 59, "end": 63 },
-              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 2, "start": 93, "end": 94 },
+              { "type": "DomTemplateElement", "name": "p", "length": 3, "queryIndex": 0, "start": 18, "end": 19, "range": [18, 19] },
+              { "type": "DomTemplateElement", "name": "span", "length": 1, "queryIndex": 1, "start": 59, "end": 63, "range": [59, 63] },
+              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 2, "start": 93, "end": 94, "range": [93, 94] },
             ],
             "end": 152,
             "expressions": [
@@ -174,32 +198,50 @@ describe('templates', () => {
           Node {
             "binders": [
               {
+                "end": 19,
                 "index": 0,
                 "interpolator": { "type": "TemplateInterpolator", "start": 18, "end": 19, "name": "{ " },
                 "length": 5,
                 "queryIndex": 0,
+                "range": [
+                  18,
+                  19,
+                ],
                 "replacement": "<text-node></text-node>",
+                "start": 18,
                 "type": "ChildBinder",
               },
               {
+                "end": 25,
                 "index": 2,
                 "interpolator": { "type": "TemplateInterpolator", "start": 24, "end": 25, "name": "{ " },
                 "length": 5,
                 "queryIndex": 0,
+                "range": [
+                  24,
+                  25,
+                ],
                 "replacement": "<text-node></text-node>",
+                "start": 24,
                 "type": "ChildBinder",
               },
               {
+                "end": 31,
                 "index": 4,
                 "interpolator": { "type": "TemplateInterpolator", "start": 30, "end": 31, "name": "{ " },
                 "length": 5,
                 "queryIndex": 0,
+                "range": [
+                  30,
+                  31,
+                ],
                 "replacement": "<text-node></text-node>",
+                "start": 30,
                 "type": "ChildBinder",
               },
             ],
             "elements": [
-              { "type": "DomTemplateElement", "name": "p", "length": 5, "queryIndex": 0, "start": 1, "end": 2 },
+              { "type": "DomTemplateElement", "name": "p", "length": 5, "queryIndex": 0, "start": 1, "end": 2, "range": [1, 2] },
             ],
             "end": 42,
             "expressions": [
@@ -237,33 +279,51 @@ describe('templates', () => {
             "binders": [
               {
                 "attribute": "class",
+                "end": 42,
                 "interpolator": { "type": "TemplateInterpolator", "start": 41, "end": 42, "name": "{ " },
                 "name": "class",
                 "property": "className",
                 "queryIndex": 0,
+                "range": [
+                  41,
+                  42,
+                ],
+                "start": 41,
                 "type": "PropertyBinder",
               },
               {
                 "attribute": "required",
+                "end": 92,
                 "interpolator": { "type": "TemplateInterpolator", "start": 91, "end": 92, "name": "{ " },
                 "name": "required",
                 "property": "required",
                 "queryIndex": 1,
+                "range": [
+                  91,
+                  92,
+                ],
+                "start": 91,
                 "type": "PropertyBinder",
               },
               {
                 "attribute": "class",
+                "end": 165,
                 "interpolator": { "type": "TemplateInterpolator", "start": 164, "end": 165, "name": "{ " },
                 "name": "class",
                 "property": "className",
                 "queryIndex": 2,
+                "range": [
+                  164,
+                  165,
+                ],
+                "start": 164,
                 "type": "PropertyBinder",
               },
             ],
             "elements": [
-              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 0, "start": 18, "end": 19 },
-              { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 1, "start": 57, "end": 62 },
-              { "type": "DomTemplateElement", "name": "div", "length": 0, "queryIndex": 2, "start": 106, "end": 109 },
+              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 0, "start": 18, "end": 19, "range": [18, 19] },
+              { "type": "DomTemplateElement", "name": "input", "length": 0, "queryIndex": 1, "start": 57, "end": 62, "range": [57, 62] },
+              { "type": "DomTemplateElement", "name": "div", "length": 0, "queryIndex": 2, "start": 106, "end": 109, "range": [106, 109] },
             ],
             "end": 198,
             "expressions": [
@@ -299,50 +359,80 @@ describe('templates', () => {
           Node {
             "binders": [
               {
+                "end": 79,
                 "index": 0,
                 "interpolator": { "type": "TemplateInterpolator", "start": 78, "end": 79, "name": "{ " },
                 "length": 1,
                 "queryIndex": 0,
+                "range": [
+                  78,
+                  79,
+                ],
                 "replacement": "<text-node></text-node>",
+                "start": 78,
                 "type": "ChildBinder",
               },
               {
                 "attribute": "class",
+                "end": 117,
                 "interpolator": { "type": "TemplateInterpolator", "start": 116, "end": 117, "name": "{ " },
                 "name": "class",
                 "property": "className",
                 "queryIndex": 1,
+                "range": [
+                  116,
+                  117,
+                ],
+                "start": 116,
                 "type": "PropertyBinder",
               },
               {
                 "attribute": "class",
+                "end": 161,
                 "interpolator": { "type": "TemplateInterpolator", "start": 160, "end": 161, "name": "{ " },
                 "name": "class",
                 "property": "className",
                 "queryIndex": 2,
+                "range": [
+                  160,
+                  161,
+                ],
+                "start": 160,
                 "type": "PropertyBinder",
               },
               {
+                "end": 181,
                 "index": 3,
                 "interpolator": { "type": "TemplateInterpolator", "start": 180, "end": 181, "name": "{ " },
                 "length": 7,
                 "queryIndex": 1,
+                "range": [
+                  180,
+                  181,
+                ],
                 "replacement": "<text-node></text-node>",
+                "start": 180,
                 "type": "ChildBinder",
               },
               {
+                "end": 209,
                 "index": 5,
                 "interpolator": { "type": "TemplateInterpolator", "start": 208, "end": 209, "name": "{ " },
                 "length": 7,
                 "queryIndex": 1,
+                "range": [
+                  208,
+                  209,
+                ],
                 "replacement": "<text-node></text-node>",
+                "start": 208,
                 "type": "ChildBinder",
               },
             ],
             "elements": [
-              { "type": "DomTemplateElement", "name": "h2", "length": 1, "queryIndex": 0, "start": 40, "end": 42 },
-              { "type": "DomTemplateElement", "name": "p", "length": 7, "queryIndex": 1, "start": 86, "end": 87 },
-              { "type": "DomTemplateElement", "name": "span", "length": 1, "queryIndex": 2, "start": 119, "end": 123 },
+              { "type": "DomTemplateElement", "name": "h2", "length": 1, "queryIndex": 0, "start": 40, "end": 42, "range": [40, 42] },
+              { "type": "DomTemplateElement", "name": "p", "length": 7, "queryIndex": 1, "start": 86, "end": 87, "range": [86, 87] },
+              { "type": "DomTemplateElement", "name": "span", "length": 1, "queryIndex": 2, "start": 119, "end": 123, "range": [119, 123] },
             ],
             "end": 279,
             "expressions": [
@@ -376,16 +466,22 @@ describe('templates', () => {
           Node {
             "binders": [
               {
+                "end": 20,
                 "index": 0,
                 "interpolator": { "type": "TemplateInterpolator", "start": 18, "end": 20, "name": "#{ " },
                 "length": 1,
                 "queryIndex": 0,
+                "range": [
+                  18,
+                  20,
+                ],
                 "replacement": "<text-node></text-node>",
+                "start": 18,
                 "type": "ChildBinder",
               },
             ],
             "elements": [
-              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 0, "start": 1, "end": 2 },
+              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 0, "start": 1, "end": 2, "range": [1, 2] },
             ],
             "end": 66,
             "expressions": [
@@ -425,7 +521,7 @@ describe('templates', () => {
     });
 });
 
-describe.todo('source locations', () => {
+describe('source locations, ranges', () => {
 
     test('elements', ({ expect, parser }) => {
         const template = parseTemplate(
@@ -433,36 +529,48 @@ describe.todo('source locations', () => {
                 <p>{text1}</p>
                 <p>{text2}</p>\`
             `,
-            { locations: true });
+            { locations: true, ranges: true });
 
         expect(template).toMatchInlineSnapshot(`
           Node {
             "binders": [
               {
+                "end": 23,
                 "index": 0,
-                "interpolator": { "type": "TemplateInterpolator", "start": 22, "end": 23, "loc": { "start": { "line": 2, "column": 19 }, "end": { "line": 2, "column": 20 } }, "name": "{ " },
+                "interpolator": { "type": "TemplateInterpolator", "start": 22, "end": 23, "loc": { "start": { "line": 2, "column": 19 }, "end": { "line": 2, "column": 20 } }, "range": [22, 23], "name": "{ " },
                 "length": 1,
                 "queryIndex": 0,
+                "range": [
+                  22,
+                  23,
+                ],
                 "replacement": "<text-node></text-node>",
+                "start": 22,
                 "type": "ChildBinder",
               },
               {
+                "end": 54,
                 "index": 0,
-                "interpolator": { "type": "TemplateInterpolator", "start": 53, "end": 54, "loc": { "start": { "line": 3, "column": 19 }, "end": { "line": 3, "column": 20 } }, "name": "{ " },
+                "interpolator": { "type": "TemplateInterpolator", "start": 53, "end": 54, "loc": { "start": { "line": 3, "column": 19 }, "end": { "line": 3, "column": 20 } }, "range": [53, 54], "name": "{ " },
                 "length": 1,
                 "queryIndex": 1,
+                "range": [
+                  53,
+                  54,
+                ],
                 "replacement": "<text-node></text-node>",
+                "start": 53,
                 "type": "ChildBinder",
               },
             ],
             "elements": [
-              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 0, "start": 18, "end": 19 },
-              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 1, "start": 42, "end": 43 },
+              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 0, "start": 18, "end": 19, "range": [18, 19] },
+              { "type": "DomTemplateElement", "name": "p", "length": 1, "queryIndex": 1, "start": 42, "end": 43, "range": [42, 43] },
             ],
             "end": 65,
             "expressions": [
-              { "type": "Identifier", "start": 23, "end": 28, "loc": { "start": { "line": 2, "column": 20 }, "end": { "line": 2, "column": 25 } }, "name": "text1" },
-              { "type": "Identifier", "start": 54, "end": 59, "loc": { "start": { "line": 3, "column": 20 }, "end": { "line": 3, "column": 25 } }, "name": "text2" },
+              { "type": "Identifier", "start": 23, "end": 28, "loc": { "start": { "line": 2, "column": 20 }, "end": { "line": 2, "column": 25 } }, "range": [23, 28], "name": "text1" },
+              { "type": "Identifier", "start": 54, "end": 59, "loc": { "start": { "line": 3, "column": 20 }, "end": { "line": 3, "column": 25 } }, "range": [54, 59], "name": "text2" },
             ],
             "html": "<p data-bind><text-node></text-node></p>
                           <p data-bind><text-node></text-node></p>",
@@ -476,6 +584,10 @@ describe.todo('source locations', () => {
                 "line": 1,
               },
             },
+            "range": [
+              0,
+              65,
+            ],
             "rootType": "fragment",
             "start": 0,
             "type": "DomTemplateLiteral",
