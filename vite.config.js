@@ -8,8 +8,8 @@ export default defineConfig({
         // timeout: 30_000,
     },
     plugins: [
-        AzothPlugin(),
-        Inspect()       
+        // AzothPlugin(),
+        Inspect()
     ],
 });
 
