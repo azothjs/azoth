@@ -5,7 +5,7 @@ import azoth from './src/parser/index.js';
 import espree from 'espree/lib/espree.js';
 import { VisitorKeys } from 'espree';
 
-const acornOptions = { 
+const acornOptions = {
     ecmaVersion: 'latest',
     sourceType: 'module',
     locations: true,
@@ -135,6 +135,9 @@ export default [
                             after: false
                         },
                         switch: {
+                            after: false
+                        },
+                        catch: {
                             after: false
                         }
                     }
