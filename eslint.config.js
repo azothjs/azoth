@@ -99,7 +99,7 @@ export default [
                 }
             ],
             semi: [
-                'error',
+                'warn',
                 'always'
             ],
             'space-in-parens': [

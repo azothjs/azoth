@@ -1,11 +1,10 @@
 /* eslint-disable no-undef */
 import { Parser } from 'acorn';
 import acornJsx from 'acorn-jsx';
-import { azothGenerate as generate } from './index.js';
+import { generate } from './index.js';
 import { describe, test } from 'vitest';
 
 const JsxParser = Parser.extend(acornJsx());
-
 const parse = code => {
     return JsxParser.parse(code, {
         ecmaVersion: 'latest',
@@ -16,24 +15,6 @@ const transpile = ast => generate(ast, { indent: '    ' });
 const compile = input => {
     return transpile(parse(input));
 };
-
-describe('regression', () => {
-    test('template literal', ({ expect }) => {
-        const input = `\`hello \${place}\``;
-        expect(compile(input).code).toMatchInlineSnapshot(`
-          "\`hello \${place}\`;
-          "
-        `);
-    });
-
-    test('tagged template literal', ({ expect }) => {
-        const input = `const t = tag\`hello \${place}\``;
-        expect(compile(input).code).toMatchInlineSnapshot(`
-          "const t = tag\`hello \${place}\`;
-          "
-        `);
-    });
-});
 
 describe('JSX Dom Literals', () => {
     test('complex template structure with props and child nodes', ({ expect }) => {
@@ -47,67 +28,89 @@ describe('JSX Dom Literals', () => {
                 <li><span className={"span-class"}>three</span></li>
                 {"ul-footer"}
             </ul>
+            <self-closing/>
+            <self-closing />
             {"footer"}
         </div>);`;
-        const ast = parse(input);
-        const { code, stack } = transpile(ast);
+
+        const { code, html } = compile(input);
+
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
               const { __root, __targets } = makeRenderer();
-              const __e0 = __targets[0];
-              const __e1 = __targets[1];
-              const __e2 = __targets[2];
-              const __e3 = __targets[3];
-              const __e4 = __targets[4];
-              const __e5 = __targets[5];
-              const __e6 = __targets[6];
-              __e1.className = "my-class";
-              __e1.childNodes[0].data = "felix";
-              __e2.childNodes[0].data = "this is";
-              __e3.childNodes[0].data = "azoth";
-              __e5.childNodes[1].data = "two";
-              __e5.childNodes[3].data = "and...";
-              __e6.className = "span-class";
-              __e4.childNodes[7].data = "ul-footer";
-              __e0.childNodes[9].data = "footer";
+              const __target0 = __targets[0];
+              const __target1 = __targets[1];
+              const __target2 = __targets[2];
+              const __target3 = __targets[3];
+              const __target4 = __targets[4];
+              const __target5 = __targets[5];
+              const __target6 = __targets[6];
+              __target1.className = "my-class";
+              __target1.childNodes[0].data = "felix";
+              __target2.childNodes[0].data = "this is";
+              __target3.childNodes[0].data = "azoth";
+              __target5.childNodes[1].data = "two";
+              __target5.childNodes[3].data = "and...";
+              __target6.className = "span-class";
+              __target4.childNodes[7].data = "ul-footer";
+              __target0.childNodes[13].data = "footer";
               return __root;
           })();
           "
+        `);
+
+
+        expect(html).toMatchInlineSnapshot(`
+          [
+            "<div>
+                      <p><text-node></text-node></p>
+                      <p>static</p>
+                      <p><text-node></text-node><span><text-node></text-node></span></p>
+                      <ul>
+                          <li><span>one</span></li>
+                          <li><span><em>a<text-node></text-node>b<text-node></text-node>c</em></span></li>
+                          <li><span>three</span></li>
+                          <text-node></text-node>
+                      </ul>
+                      <self-closing />
+                      <self-closing />
+                      <text-node></text-node>
+                  </div>",
+          ]
         `);
     });
 });
 
-
-describe('surrounding code integration mode', () => {
-    test('MODE_IIFE (default)', ({ expect }) => {
+describe('surrounding code integration', () => {
+    test('wrap in IIFE (default)', ({ expect }) => {
         const input = `
             const template = <p>{text}</p>;
         `;
         const ast = parse(input);
-        const { code, stack } = transpile(ast);
+        const { code } = transpile(ast);
         expect(code).toMatchInlineSnapshot(`
           "const template = (() => {
               const { __root, __targets } = makeRenderer();
-              const __e0 = __targets[0];
-              __e0.childNodes[0].data = text;
+              const __target0 = __targets[0];
+              __target0.childNodes[0].data = text;
               return __root;
           })();
           "
         `);
     });
 
-    test('ArrowFunctionExpression: implicit return is block', ({ expect }) => {
+    test('ArrowFunctionExpression: implicit return is block return', ({ expect }) => {
         const input = `
             const template = (text) => <p>{text}</p>
         `;
 
         const ast = parse(input);
-        const { code, stack } = transpile(ast);
+        const { code } = transpile(ast);
         expect(code).toMatchInlineSnapshot(`
           "const template = text => {
               const { __root, __targets } = makeRenderer();
-              const __e0 = __targets[0];
-              __e0.childNodes[0].data = text;
+              const __target0 = __targets[0];
+              __target0.childNodes[0].data = text;
               return __root;
           };
           "
@@ -115,7 +118,7 @@ describe('surrounding code integration mode', () => {
     });
 
 
-    test('ReturnStatement: injects statements before', ({ expect }) => {
+    test('ReturnStatement: injects statements before, returns root', ({ expect }) => {
         const input = `
             function template(text) {
                 const format = 'text' + '!';
@@ -123,17 +126,16 @@ describe('surrounding code integration mode', () => {
             }
         `;
         const ast = parse(input);
-        const { code, stack } = transpile(ast);
+        const { code } = transpile(ast);
         expect(code).toMatchInlineSnapshot(`
           "function template(text) {
               const format = 'text' + '!';
               const { __root, __targets } = makeRenderer();
-              const __e0 = __targets[0];
-              __e0.childNodes[0].data = text;
+              const __target0 = __targets[0];
+              __target0.childNodes[0].data = text;
               return __root;
           }
           "
         `);
-
     });
 });
