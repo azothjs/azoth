@@ -33,5 +33,8 @@
         "vite": "^5.0.11",
         "vite-plugin-inspect": "^0.8.1",
         "vitest": "^1.2.1"
+    },
+    "dependencies": {
+        "normalize-html-whitespace": "^1.0.0"
     }
 }

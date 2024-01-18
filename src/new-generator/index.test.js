@@ -33,11 +33,11 @@ describe('JSX Dom Literals', () => {
             {"footer"}
         </div>);`;
 
-        const { code, html } = compile(input);
+        const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
-              const { __root, __targets } = makeRenderer();
+              const { __root: td8d151bb16, __targets }= __renderById('d8d151bb16');
               const __target0 = __targets[0];
               const __target1 = __targets[1];
               const __target2 = __targets[2];
@@ -54,22 +54,22 @@ describe('JSX Dom Literals', () => {
               __target6.className = "span-class";
               __target4.childNodes[7].data = "ul-footer";
               __target0.childNodes[13].data = "footer";
-              return __root;
+              return td8d151bb16;
           })();
           "
         `);
 
 
-        expect(html).toMatchInlineSnapshot(`
+        expect(templates.map(t => t.html)).toMatchInlineSnapshot(`
           [
-            "<div>
-                      <p><text-node></text-node></p>
+            "<div data-bind>
+                      <p data-bind><text-node></text-node></p>
                       <p>static</p>
-                      <p><text-node></text-node><span><text-node></text-node></span></p>
-                      <ul>
+                      <p data-bind><text-node></text-node><span data-bind><text-node></text-node></span></p>
+                      <ul data-bind>
                           <li><span>one</span></li>
-                          <li><span><em>a<text-node></text-node>b<text-node></text-node>c</em></span></li>
-                          <li><span>three</span></li>
+                          <li><span><em data-bind>a<text-node></text-node>b<text-node></text-node>c</em></span></li>
+                          <li><span data-bind>three</span></li>
                           <text-node></text-node>
                       </ul>
                       <self-closing />
@@ -90,10 +90,10 @@ describe('surrounding code integration', () => {
         const { code } = transpile(ast);
         expect(code).toMatchInlineSnapshot(`
           "const template = (() => {
-              const { __root, __targets } = makeRenderer();
+              const { __root: t5f1933b83a, __targets }= __renderById('5f1933b83a');
               const __target0 = __targets[0];
               __target0.childNodes[0].data = text;
-              return __root;
+              return t5f1933b83a;
           })();
           "
         `);
@@ -108,10 +108,10 @@ describe('surrounding code integration', () => {
         const { code } = transpile(ast);
         expect(code).toMatchInlineSnapshot(`
           "const template = text => {
-              const { __root, __targets } = makeRenderer();
+              const { __root: t5f1933b83a, __targets }= __renderById('5f1933b83a');
               const __target0 = __targets[0];
               __target0.childNodes[0].data = text;
-              return __root;
+              return t5f1933b83a;
           };
           "
         `);
@@ -130,10 +130,10 @@ describe('surrounding code integration', () => {
         expect(code).toMatchInlineSnapshot(`
           "function template(text) {
               const format = 'text' + '!';
-              const { __root, __targets } = makeRenderer();
+              const { __root: t5f1933b83a, __targets }= __renderById('5f1933b83a');
               const __target0 = __targets[0];
               __target0.childNodes[0].data = text;
-              return __root;
+              return t5f1933b83a;
           }
           "
         `);

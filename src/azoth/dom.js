@@ -13,6 +13,11 @@ export const makeRenderer = html => {
     return renderer(fragment);
 };
 
+export function renderById(id) {
+    const template = getRenderer(id);
+    return template();
+}
+
 const templates = new Map();
 
 export const getRenderer = id => {

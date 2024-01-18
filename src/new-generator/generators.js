@@ -1,4 +1,4 @@
-import { GENERATOR } from 'astring';
+import { GENERATOR, generate } from 'astring';
 import { TemplateContext } from './template-context.js';
 import { ContextStack } from './context-stack.js';
 
@@ -12,9 +12,11 @@ function getNextLine(state) {
 }
 
 const DEFAULT_NAMES = {
+    renderer: `__renderById`,
     targets: `__targets`,
     target: `__target`,
     root: `__root`,
+    rootAliasPrefix: `t`,
 };
 
 export class AzothGenerator extends Generator {
@@ -22,12 +24,21 @@ export class AzothGenerator extends Generator {
     constructor(config) {
         super();
         this.names = config?.names ?? DEFAULT_NAMES;
+        const generator = new HtmlGenerator();
+        this.generateHtml = node => generate(node, {
+            // TODO: ...config.html 
+            generator,
+        });
+
     }
 
     // (module) template context
     context = new ContextStack();
     get current() {
         return this.context.current;
+    }
+    get last() {
+        return this.context.current || this.context;
     }
     get templates() {
         return this.context.all;
@@ -54,7 +65,7 @@ export class AzothGenerator extends Generator {
             this.JSXElement(node.argument, state);
             node.argument = {
                 type: 'Identifier',
-                name: this.names.root,
+                name: `${this.names.rootAliasPrefix}${this.context.prior.id}`,
             };
         }
         super.ReturnStatement(node, state);
@@ -67,7 +78,7 @@ export class AzothGenerator extends Generator {
         - Generates JavaScript from template context instance
     */
     JSXTemplate(node, state) {
-        const template = new TemplateContext(node);
+        const template = new TemplateContext(node, this.generateHtml);
         this.context.push(template);
 
         let nextLine = getNextLine(state);
@@ -81,14 +92,17 @@ export class AzothGenerator extends Generator {
         }
 
         // Feed the root element back to JSXElement
-        // for analysis of jsx by template context:
+        // method for recursive analysis of jsx
         this[node.type](node, state);
+
+        // generate the html
+        template.generateHtml();
 
         /* Generate JavaScript */
         this.generateJavaScript(template, state);
 
         if(useWrapper) {
-            state.write(`${nextLine}return ${this.names.root};`);
+            state.write(`${nextLine}return ${this.names.rootAliasPrefix}${template.id};`);
             state.indentLevel--;
             nextLine = getNextLine(state);
             state.write(`${nextLine}})()`);
@@ -100,15 +114,17 @@ export class AzothGenerator extends Generator {
         this.context.pop();
     }
 
-    generateJavaScript({ targets, bindings }, state) {
+    generateJavaScript({ id, targets, bindings }, state) {
         const { indent, lineEnd, } = state;
         let indentation = indent.repeat(state.indentLevel);
         let nextLine = `${lineEnd}${indentation}`;
 
         // render and target references
         const { names } = this;
+
+        state.write(`const { ${names.root}: ${names.rootAliasPrefix}${id}, ${names.targets} }`);
         // TODO: template service ftw!!!
-        state.write(`const { ${names.root}, ${names.targets} } = makeRenderer();`);
+        state.write(`= ${names.renderer}('${id}');`);
         for(let i = 0; i < targets.length; i++) {
             state.write(`${nextLine}const ${names.target}${i} = ${names.targets}[${i}];`);
         }
@@ -180,6 +196,10 @@ export class HtmlGenerator extends Generator {
     JSXElement(node, state) {
         state.write('<');
         this[node.openingElement.type](node.openingElement, state);
+        if(node.isBound) {
+            state.write(' data-bind');
+        }
+
         if(node.closingElement) {
             state.write('>');
             for(var i = 0; i < node.children.length; i++) {
@@ -235,7 +255,11 @@ export class HtmlGenerator extends Generator {
         state.write(this.childReplace);
     }
 
-    JSXText(node, state) {
-        state.write(node.value);
+    JSXText({ value }, state) {
+        // const normalized = value.replace(NORMALIZE_PATTERN, ' ');
+        state.write(value);
     }
 }
+
+// https://github.com/stevenvachon/normalize-html-whitespace/blob/master/index.js
+// const NORMALIZE_PATTERN = /[\f\n\r\t\v ]{2,}/g;

@@ -1,6 +1,6 @@
-import { rawHtml, makeRenderer, getRenderer } from './dom';
+import { renderById } from './dom';
 
-export const _ = () => {};
+export const _ = () => { };
 
 // injected by compiler:
-export { makeRenderer as __makeRenderer };
+export { renderById as __renderById };

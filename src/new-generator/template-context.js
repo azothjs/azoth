@@ -1,4 +1,5 @@
 import { ContextStack } from './context-stack.js';
+import revHash from 'rev-hash';
 
 class Context {
     static is(context) {
@@ -23,12 +24,22 @@ export class TemplateContext extends Context {
     #targetEls = new Set();
     bindings = [];
 
+    constructor(node, generator) {
+        super(node);
+        this.generator = generator;
+    }
+
     get targets() {
         const targets = [...this.#targetEls].sort(byOrder);
         for(let i = 0; i < targets.length; i++) {
             targets[i].queryIndex = i;
         }
         return targets;
+    }
+
+    generateHtml() {
+        this.html = this.generator(this.node);
+        this.id = revHash(this.html);
     }
 
     pushElement(node) {
@@ -42,6 +53,7 @@ export class TemplateContext extends Context {
 
     bind(type, node, expr, index) {
         const element = this.#elements.current;
+        element.isBound = true;
         this.#targetEls.add(element);
 
         this.bindings.push({

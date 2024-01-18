@@ -1,29 +1,28 @@
 import { Parser } from 'acorn';
-import acornAzothPlugin from './parser';
-import { azothGenerate as generate } from './generator';
-import { SourceMapGenerator } from 'source-map';
-import { normalizePath } from 'vite';
+import acornJsx from 'acorn-jsx';
+import { generate } from './new-generator';
+// import { normalizePath } from 'vite';
 
-const jsFile = /\.js$/;
+const jsFile = /\.jsx$/;
 
 export default function AzothPlugin() {
 
-    const AzParser = Parser.extend(acornAzothPlugin());
+    const JsxParser = Parser.extend(acornJsx());
 
-    const parse = code => AzParser.parse(code, {
+    const parse = code => JsxParser.parse(code, {
         ecmaVersion: 'latest',
-        sourceType: 'module',
-        locations: true,
-        ranges: true,
-        comments: true,
+        sourceType: 'module'
+        // locations: true,
+        // ranges: true,
+        // comments: true,
     });
-    
+
     const transpile = (input) => {
         const ast = parse(input);
-        const code = generate(ast);
-        return code;
+        return generate(ast);
     };
 
+    const allTemplates = new Map();
 
     const transform = {
         name: 'rollup-azoth-plugin',
@@ -32,29 +31,34 @@ export default function AzothPlugin() {
             console.log('testing...', id);
             if(!jsFile.test(id) || !id.includes('src/www/')) return;
 
-            const path = normalizePath(id);
+            // const path = normalizePath(id);
             // const sourceMap = new SourceMapGenerator({ 
             //     file: path.split('/').at(-1)
             // });
 
-            return transpile(source /*, sourceMap*/);
+            const { code, templates } = transpile(source);
+            templates.forEach(({ id, html }) => {
+                if(allTemplates.has(id)) return;
+                allTemplates.set(id, html);
+            });
+
+            return code;
         },
 
     };
 
-    return transform;
+    const injectHtml = {
+        name: 'inject-html-plugin',
+        enforce: 'post',
+        transformIndexHtml(html) {
+            return html.replace(
+                '<!-- templates -->',
+                [...allTemplates.entries()].map(([id, html]) => {
+                    return `\n<template id="${id}">${html}</template>`;
+                })
+            );
+        },
+    };
 
-    // // TODO: inline templates into index.html
-    // const injectHtml = {
-    //     name: 'inject-html-plugin',
-    //     enforce: 'post',
-    //     transformIndexHtml(html) {
-    //         return html.replace(
-    //             '<!-- templates -->',
-    //             items.map(item => `<li>${item}</li>`).join('\n')
-    //         );
-    //     },
-
-    // };
-    // return [transform, injectHtml];
+    return [transform, injectHtml];
 }
