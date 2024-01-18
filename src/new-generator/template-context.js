@@ -16,6 +16,17 @@ class ExpressionContext extends Context {
     type = 'expression';
 }
 
+function getBindingAttr() {
+    return {
+        type: 'JSXAttribute',
+        name: {
+            type: 'JSXIdentifier',
+            name: 'data-bind'
+        },
+        value: null,
+    };
+}
+
 const byOrder = (a, b) => a.order - b.order;
 
 export class TemplateContext extends Context {
@@ -53,8 +64,10 @@ export class TemplateContext extends Context {
 
     bind(type, node, expr, index) {
         const element = this.#elements.current;
-        element.isBound = true;
-        this.#targetEls.add(element);
+        if(!this.#targetEls.has(element)) {
+            element.openingElement.attributes.push(getBindingAttr());
+            this.#targetEls.add(element);
+        }
 
         this.bindings.push({
             element,

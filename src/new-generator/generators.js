@@ -37,9 +37,6 @@ export class AzothGenerator extends Generator {
     get current() {
         return this.context.current;
     }
-    get last() {
-        return this.context.current || this.context;
-    }
     get templates() {
         return this.context.all;
     }
@@ -158,8 +155,8 @@ export class AzothGenerator extends Generator {
         }
 
         this.current.pushElement(node); // open
-        const { openingElement } = node;
         // attributes:
+        const { openingElement } = node;
         this[openingElement.type](openingElement, state);
         // children:
         for(let i = 0; i < node.children.length; i++) {
@@ -179,7 +176,7 @@ export class AzothGenerator extends Generator {
     JSXOpeningElement(node) {
         for(var i = 0; i < node.attributes.length; i++) {
             const attr = node.attributes[i];
-            if(attr.value.type !== 'JSXExpressionContainer') continue;
+            if(attr.value?.type !== 'JSXExpressionContainer') continue;
             this.current.bind('prop', attr, attr.value.expression, i);
         }
     }
@@ -196,9 +193,6 @@ export class HtmlGenerator extends Generator {
     JSXElement(node, state) {
         state.write('<');
         this[node.openingElement.type](node.openingElement, state);
-        if(node.isBound) {
-            state.write(' data-bind');
-        }
 
         if(node.closingElement) {
             state.write('>');
@@ -237,12 +231,13 @@ export class HtmlGenerator extends Generator {
     }
     // attr="something"
     JSXAttribute(node, state) {
-        if(node.value.type === 'JSXExpressionContainer') return;
-
+        if(node.value?.type === 'JSXExpressionContainer') return;
         state.write(' ');
         this[node.name.type](node.name, state);
-        state.write('=');
-        this[node.value.type](node.value, state);
+        if(node.value) {
+            state.write('=');
+            this[node.value.type](node.value, state);
+        }
     }
     // namespaced:attr="something"
     JSXNamespacedName(node, state) {
