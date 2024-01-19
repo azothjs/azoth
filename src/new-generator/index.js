@@ -9,5 +9,9 @@ export function generate(ast, config) {
         generator,
     });
 
-    return { code, templates: generator.templates };
+    const templates = generator.templates.map(({ id, html }) => {
+        return { id, html };
+    });
+
+    return { code, templates };
 }

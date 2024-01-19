@@ -35,9 +35,15 @@ export class TemplateContext extends Context {
     #targetEls = new Set();
     bindings = [];
 
-    constructor(node, generator) {
+    constructor(node, generator, isFragment) {
         super(node);
         this.generator = generator;
+        this.isFragment = isFragment;
+    }
+
+    generateHtml() {
+        this.html = this.generator(this.node);
+        this.id = revHash(this.html);
     }
 
     get targets() {
@@ -46,11 +52,6 @@ export class TemplateContext extends Context {
             targets[i].queryIndex = i;
         }
         return targets;
-    }
-
-    generateHtml() {
-        this.html = this.generator(this.node);
-        this.id = revHash(this.html);
     }
 
     pushElement(node) {
@@ -64,10 +65,6 @@ export class TemplateContext extends Context {
 
     bind(type, node, expr, index) {
         const element = this.#elements.current;
-        if(!this.#targetEls.has(element)) {
-            element.openingElement.attributes.push(getBindingAttr());
-            this.#targetEls.add(element);
-        }
 
         this.bindings.push({
             element,
@@ -76,5 +73,15 @@ export class TemplateContext extends Context {
             expr,
             index,
         });
+
+        if(this.isFragment) {
+            if(element === this.node && type === 'child' && element.queryIndex !== -1) {
+                element.queryIndex = -1;
+            }
+        }
+        else if(!this.#targetEls.has(element)) {
+            element.openingElement?.attributes.push(getBindingAttr());
+            this.#targetEls.add(element);
+        }
     }
 }

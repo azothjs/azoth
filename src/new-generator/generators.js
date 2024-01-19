@@ -25,7 +25,7 @@ export class AzothGenerator extends Generator {
         super();
         this.names = config?.names ?? DEFAULT_NAMES;
         const generator = new HtmlGenerator();
-        this.generateHtml = node => generate(node, {
+        this.htmlGenerator = node => generate(node, {
             // TODO: ...config.html 
             generator,
         });
@@ -74,8 +74,8 @@ export class AzothGenerator extends Generator {
         - Injects default IIFE wrapper if needed
         - Generates JavaScript from template context instance
     */
-    JSXTemplate(node, state) {
-        const template = new TemplateContext(node, this.generateHtml);
+    JSXTemplate(node, state, isFragment) {
+        const template = new TemplateContext(node, this.htmlGenerator, isFragment);
         this.context.push(template);
 
         let nextLine = getNextLine(state);
@@ -96,7 +96,7 @@ export class AzothGenerator extends Generator {
         template.generateHtml();
 
         /* Generate JavaScript */
-        this.generateJavaScript(template, state);
+        this.AzothDomLiteral(template, state);
 
         if(useWrapper) {
             state.write(`${nextLine}return ${this.names.rootAliasPrefix}${template.id};`);
@@ -111,17 +111,22 @@ export class AzothGenerator extends Generator {
         this.context.pop();
     }
 
-    generateJavaScript({ id, targets, bindings }, state) {
+    AzothDomLiteral({ id, targets, bindings, node, isFragment }, state) {
         const { indent, lineEnd, } = state;
         let indentation = indent.repeat(state.indentLevel);
         let nextLine = `${lineEnd}${indentation}`;
 
         // render and target references
         const { names } = this;
+        const rootVarName = `${names.rootAliasPrefix}${id}`;
+        state.write(`const { ${names.root}: ${rootVarName}, ${names.targets} }`);
+        state.write(` = ${names.renderer}(`);
+        state.write(`'${id}'`);
+        if(isFragment && node.children.length > 1) {
+            state.write(`, { fragment: true }`);
+        }
+        state.write(`);`);
 
-        state.write(`const { ${names.root}: ${names.rootAliasPrefix}${id}, ${names.targets} }`);
-        // TODO: template service ftw!!!
-        state.write(`= ${names.renderer}('${id}');`);
         for(let i = 0; i < targets.length; i++) {
             state.write(`${nextLine}const ${names.target}${i} = ${names.targets}[${i}];`);
         }
@@ -129,7 +134,15 @@ export class AzothGenerator extends Generator {
         // bindings
         for(let i = 0; i < bindings.length; i++) {
             const { element: { queryIndex }, type, node, expr, index } = bindings[i];
-            state.write(`${nextLine}${names.target}${queryIndex}`);
+            state.write(`${nextLine}`);
+
+            if(queryIndex === -1) {
+                state.write(rootVarName);
+            }
+            else {
+                state.write(`${names.target}${queryIndex}`);
+            }
+
             switch(type) {
                 case 'child':
                     state.write(`.childNodes[${index}]`);
@@ -148,23 +161,78 @@ export class AzothGenerator extends Generator {
         }
     }
 
+    JSXFragment(node, state) {
+        if(!TemplateContext.is(this.current)) {
+            this.JSXTemplate(node, state, true);
+            return;
+        }
+        if(this.current.node === node) {
+            this.current.pushElement(node);
+            this.JSXOpenFragment(node);
+            this.JSXChildren(node);
+            this.current.popElement();
+        }
+        else {
+            this.JSXChildren(node);
+        }
+    }
+
     JSXElement(node, state) {
         if(!TemplateContext.is(this.current)) {
             this.JSXTemplate(node, state);
             return;
         }
 
-        this.current.pushElement(node); // open
-        // attributes:
-        const { openingElement } = node;
-        this[openingElement.type](openingElement, state);
-        // children:
-        for(let i = 0; i < node.children.length; i++) {
-            let child = node.children[i];
-            child.parentIndex = i;
-            this[child.type](child, i);
+        this.current.pushElement(node);
+        this.JSXOpenElement(node);
+        this.JSXChildren(node);
+        this.current.popElement();
+    }
+
+    JSXOpenFragment({ openingFragment }) {
+        this[openingFragment.type](openingFragment);
+    }
+
+    JSXOpenElement({ openingElement }) {
+        this[openingElement.type](openingElement);
+    }
+
+    JSXOpeningFragment({ attributes }) {
+        this.JSXAttributes(attributes);
+    }
+
+    JSXOpeningElement({ attributes }) {
+        this.JSXAttributes(attributes);
+    }
+
+    JSXAttributes(attributes) {
+        for(var i = 0; i < attributes.length; i++) {
+            const attr = attributes[i];
+            if(attr.value?.type !== 'JSXExpressionContainer') continue;
+            this.current.bind('prop', attr, attr.value.expression, i);
         }
-        this.current.popElement(); // close
+    }
+
+    JSXChildren({ children }, adj = 0) {
+        for(let i = 0; i < children.length; i++) {
+            let child = children[i];
+            if(child.type === 'JSXFragment') {
+                // recursively add this fragments children
+                // but continue the parent node's child count
+                // as the fragment's child nodes will be inlined
+                this.JSXChildren(child, i + adj);
+                const length = child.children.length || 0;
+                if(length) {
+                    adj += length - 1; // expected one for child node
+                }
+                else {
+                    adj--; // no child node was generated
+                }
+            }
+            else {
+                this[child.type](child, i + adj);
+            }
+        }
     }
 
     JSXExpressionContainer(node, index) {
@@ -172,14 +240,6 @@ export class AzothGenerator extends Generator {
     }
 
     JSXText() { /* no-op */ }
-
-    JSXOpeningElement(node) {
-        for(var i = 0; i < node.attributes.length; i++) {
-            const attr = node.attributes[i];
-            if(attr.value?.type !== 'JSXExpressionContainer') continue;
-            this.current.bind('prop', attr, attr.value.expression, i);
-        }
-    }
 }
 
 export class HtmlGenerator extends Generator {
@@ -190,16 +250,24 @@ export class HtmlGenerator extends Generator {
     }
 
     // <div></div>
+    JSXFragment(node, state) {
+        this.JSXChildren(node, state);
+    }
+    // >.......</
+    JSXChildren({ children }, state) {
+        for(var i = 0; i < children.length; i++) {
+            var child = children[i];
+            this[child.type](child, state);
+        }
+    }
+    // <div></div>
     JSXElement(node, state) {
         state.write('<');
         this[node.openingElement.type](node.openingElement, state);
 
         if(node.closingElement) {
             state.write('>');
-            for(var i = 0; i < node.children.length; i++) {
-                var child = node.children[i];
-                this[child.type](child, state);
-            }
+            this.JSXChildren(node, state);
             state.write('</');
             this[node.closingElement.type](node.closingElement, state);
             state.write('>');
