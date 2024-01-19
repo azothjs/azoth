@@ -80,7 +80,8 @@ export class TemplateContext extends Context {
             }
         }
         else {
-            element.bindCount = (element.bindCount || 0) + 1;
+            const prop = `${type}BoundCount`;
+            element[prop] = (element[prop] || 0) + 1;
             if(!this.#targetEls.has(element)) {
                 element.openingElement?.attributes.push(getBindingAttr());
                 this.#targetEls.add(element);

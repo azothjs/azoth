@@ -1,6 +1,7 @@
 import { GENERATOR, generate } from 'astring';
 import { TemplateContext } from './template-context.js';
 import { ContextStack } from './context-stack.js';
+import isValidName from 'is-valid-var-name';
 
 function Generator() { }
 Generator.prototype = GENERATOR;
@@ -15,6 +16,7 @@ const DEFAULT_NAMES = {
     renderer: `__rendererById`,
     targets: `__targets`,
     target: `__target`,
+    child: `__child`,
     root: `__root`,
     rootAliasPrefix: `t`,
 };
@@ -116,7 +118,7 @@ export class AzothGenerator extends Generator {
         let indentation = indent.repeat(state.indentLevel);
         let nextLine = `${lineEnd}${indentation}`;
 
-        // render and target references
+        // template service renderer call
         const { names } = this;
         const rootVarName = `${names.rootAliasPrefix}${id}`;
         state.write(`const { ${names.root}: ${rootVarName}, ${names.targets} }`);
@@ -129,43 +131,48 @@ export class AzothGenerator extends Generator {
 
         // target variables
         for(let i = 0; i < targets.length; i++) {
-            const target = targets[i];
-            // if(target.bindCount === 1) continue;
             state.write(`${nextLine}const ${names.target}${i} = ${names.targets}[${i}];`);
+        }
+
+        // childNode variables prevent binding mutations from changing 
+        // .childNode[1] returned value as it is a live list)
+        for(let i = 0; i < bindings.length; i++) {
+            const { element: { queryIndex }, type, index } = bindings[i];
+            if(type !== 'child') continue;
+
+            state.write(`${nextLine}const ${names.child}${i} = `);
+            const varName = queryIndex === -1 ? rootVarName : `${names.target}${queryIndex}`;
+            state.write(`${varName}.childNodes[${index}];`);
         }
 
         // bindings
         for(let i = 0; i < bindings.length; i++) {
-            const { element: { queryIndex, bindCount }, type, node, expr, index } = bindings[i];
+            const { element: { queryIndex }, type, node, expr } = bindings[i];
             state.write(`${nextLine}`);
 
-            let varName = '';
-
-            if(queryIndex === -1) {
-                varName = rootVarName;
+            if(type === 'child') {
+                state.write(`__compose(`);
+                this[expr.type](expr, state);
+                state.write(`, ${names.child}${i});`);
             }
-            // else if(bindCount === 1) {
-            //     varName = `${names.targets}[${queryIndex}]`;
-            // }
-            else {
-                varName = `${names.target}${queryIndex}`;
-            }
-
-            switch(type) {
-                case 'child':
-                    state.write(`__compose(`);
-                    this[expr.type](expr, state);
-                    state.write(`, ${varName}.childNodes[${index}]);`);
-                    break;
-                case 'prop':
-                    state.write(`${varName}.${node.name.name} = (`);
-                    this[expr.type](expr, state);
-                    state.write(`);`);
-                    break;
-                default: {
-                    const message = `Unexpected binding type "${type}", expected "child" or "prop"`;
-                    throw new Error(message);
+            else if(type === 'prop') {
+                const varName = queryIndex === -1 ? rootVarName : `${names.target}${queryIndex}`;
+                state.write(`${varName}`);
+                // TODO: more property validation
+                const propName = node.name.name;
+                if(isValidName(propName)) {
+                    state.write(`.${propName}`);
                 }
+                else {
+                    state.write(`["${propName}"]`);
+                }
+                state.write(` = (`);
+                this[expr.type](expr, state);
+                state.write(`);`);
+            }
+            else {
+                const message = `Unexpected binding type "${type}", expected "child" or "prop"`;
+                throw new Error(message);
             }
         }
     }
