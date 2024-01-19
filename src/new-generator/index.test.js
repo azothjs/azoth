@@ -59,10 +59,10 @@ describe('JSX Dom Literals', () => {
           "
         `);
 
-
-        expect(templates.map(t => t.html)).toMatchInlineSnapshot(`
+        expect(templates).toMatchInlineSnapshot(`
           [
-            "<div data-bind>
+            {
+              "html": "<div data-bind>
                       <p data-bind><text-node></text-node></p>
                       <p>static</p>
                       <p data-bind><text-node></text-node><span data-bind><text-node></text-node></span></p>
@@ -76,6 +76,8 @@ describe('JSX Dom Literals', () => {
                       <self-closing />
                       <text-node></text-node>
                   </div>",
+              "id": "d8d151bb16",
+            },
           ]
         `);
     });
@@ -86,9 +88,8 @@ describe('surrounding code integration', () => {
         const input = `
             const template = <p>{text}</p>;
         `;
-        const ast = parse(input);
-        const { code } = transpile(ast);
-        expect(code).toMatchInlineSnapshot(`
+
+        expect(compile(input).code).toMatchInlineSnapshot(`
           "const template = (() => {
               const { __root: t5f1933b83a, __targets } = __renderById('5f1933b83a');
               const __target0 = __targets[0];
@@ -104,9 +105,7 @@ describe('surrounding code integration', () => {
             const template = (text) => <p>{text}</p>
         `;
 
-        const ast = parse(input);
-        const { code } = transpile(ast);
-        expect(code).toMatchInlineSnapshot(`
+        expect(compile(input).code).toMatchInlineSnapshot(`
           "const template = text => {
               const { __root: t5f1933b83a, __targets } = __renderById('5f1933b83a');
               const __target0 = __targets[0];
@@ -125,9 +124,8 @@ describe('surrounding code integration', () => {
                 return <p>{text}</p>;
             }
         `;
-        const ast = parse(input);
-        const { code } = transpile(ast);
-        expect(code).toMatchInlineSnapshot(`
+
+        expect(compile(input).code).toMatchInlineSnapshot(`
           "function template(text) {
               const format = 'text' + '!';
               const { __root: t5f1933b83a, __targets } = __renderById('5f1933b83a');
@@ -147,8 +145,8 @@ describe('Fragments', () => {
             const fragment = <><hr/><hr/></>;
             const empty = <></>;
         `;
-        const ast = parse(input);
-        const { code, templates } = transpile(ast);
+        const { code, templates } = compile(input);
+
         expect(code).toMatchInlineSnapshot(`
           "const fragment = (() => {
               const { __root: t7c9daff739, __targets } = __renderById('7c9daff739', { fragment: true });
@@ -161,7 +159,7 @@ describe('Fragments', () => {
           "
         `);
 
-        expect(templates.map(({ id, html }) => ({ id, html }))).toMatchInlineSnapshot(`
+        expect(templates).toMatchInlineSnapshot(`
           [
             {
               "html": "<hr /><hr />",
@@ -177,9 +175,11 @@ describe('Fragments', () => {
     });
 
     test('text in fragment', ({ expect }) => {
-        const input = `const fragment = <>one{"two"}three</>;`;
-        const ast = parse(input);
-        const { code, templates } = transpile(ast);
+        const input = `
+            const fragment = <>one{"two"}three</>;
+        `;
+        const { code, templates } = compile(input);
+
         expect(code).toMatchInlineSnapshot(`
           "const fragment = (() => {
               const { __root: tda6de0389d, __targets } = __renderById('da6de0389d', { fragment: true });
@@ -189,7 +189,7 @@ describe('Fragments', () => {
           "
         `);
 
-        expect(templates.map(({ id, html }) => ({ id, html }))).toMatchInlineSnapshot(`
+        expect(templates).toMatchInlineSnapshot(`
           [
             {
               "html": "one<text-node></text-node>three",
@@ -210,8 +210,8 @@ describe('Fragments', () => {
                 <p></p>
             </div>;
         `;
-        const ast = parse(input);
-        const { code, templates } = transpile(ast);
+        const { code, templates } = compile(input);
+
         expect(code).toMatchInlineSnapshot(`
           "const extraneous = (() => {
               const { __root: t0f05699ae4, __targets } = __renderById('0f05699ae4');
