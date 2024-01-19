@@ -12,7 +12,7 @@ function getNextLine(state) {
 }
 
 const DEFAULT_NAMES = {
-    renderer: `__renderById`,
+    renderer: `__rendererById`,
     targets: `__targets`,
     target: `__target`,
     root: `__root`,
@@ -127,37 +127,48 @@ export class AzothGenerator extends Generator {
         }
         state.write(`);`);
 
+        // target variables
         for(let i = 0; i < targets.length; i++) {
+            const target = targets[i];
+            if(target.bindCount === 1) continue;
             state.write(`${nextLine}const ${names.target}${i} = ${names.targets}[${i}];`);
         }
 
         // bindings
         for(let i = 0; i < bindings.length; i++) {
-            const { element: { queryIndex }, type, node, expr, index } = bindings[i];
+            const { element: { queryIndex, bindCount }, type, node, expr, index } = bindings[i];
             state.write(`${nextLine}`);
 
+            let varName = '';
+
             if(queryIndex === -1) {
-                state.write(rootVarName);
+                varName = rootVarName;
+            }
+            else if(bindCount === 1) {
+                varName = `${names.targets}[${queryIndex}]`;
             }
             else {
-                state.write(`${names.target}${queryIndex}`);
+                varName = `${names.target}${queryIndex}`;
             }
+
 
             switch(type) {
                 case 'child':
-                    state.write(`.childNodes[${index}]`);
-                    state.write(`.data = `);
+                    state.write(`__compose(${varName}.childNodes[${index}], `);
+                    this[expr.type](expr, state);
+                    state.write(`);`);
                     break;
                 case 'prop':
+                    state.write(varName);
                     state.write(`.${node.name.name} = `);
+                    this[expr.type](expr, state);
+                    state.write(';');
                     break;
                 default: {
                     const message = `Unexpected binding type "${type}", expected "child" or "prop"`;
                     throw new Error(message);
                 }
             }
-            this[expr.type](expr, state);
-            state.write(';');
         }
     }
 

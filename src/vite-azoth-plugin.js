@@ -51,11 +51,13 @@ export default function AzothPlugin() {
         name: 'inject-html-plugin',
         enforce: 'post',
         transformIndexHtml(html) {
+            const templateHtml = [...allTemplates.entries()].map(([id, html]) => {
+                return `\n<template id="${id}">${html}</template>`;
+            });
+
             return html.replace(
                 '<!-- templates -->',
-                [...allTemplates.entries()].map(([id, html]) => {
-                    return `\n<template id="${id}">${html}</template>`;
-                })
+                templateHtml
             );
         },
     };

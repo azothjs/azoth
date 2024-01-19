@@ -1,5 +1,5 @@
 import './style.css';
-import { __renderById } from '../azoth/index.js';
+import { __rendererById, __compose } from '../azoth/index.js';
 // import { searchHandler } from './lab.js';
 
 const $form = ({ value, label = '' }) => (

@@ -79,9 +79,12 @@ export class TemplateContext extends Context {
                 element.queryIndex = -1;
             }
         }
-        else if(!this.#targetEls.has(element)) {
-            element.openingElement?.attributes.push(getBindingAttr());
-            this.#targetEls.add(element);
+        else {
+            element.bindCount = (element.bindCount || 0) + 1;
+            if(!this.#targetEls.has(element)) {
+                element.openingElement?.attributes.push(getBindingAttr());
+                this.#targetEls.add(element);
+            }
         }
     }
 }

@@ -6,14 +6,12 @@ const htmlToFragment = html => {
     return template.content;
 };
 
-export const rawHtml = htmlToFragment;
-
 export const makeRenderer = html => {
     const fragment = htmlToFragment(html);
     return renderer(fragment);
 };
 
-export function renderById(id) {
+export function rendererById(id) {
     const template = getRenderer(id);
     return template();
 }

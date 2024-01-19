@@ -37,23 +37,18 @@ describe('JSX Dom Literals', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
-              const { __root: td8d151bb16, __targets } = __renderById('d8d151bb16');
-              const __target0 = __targets[0];
+              const { __root: td8d151bb16, __targets } = __rendererById('d8d151bb16');
               const __target1 = __targets[1];
-              const __target2 = __targets[2];
-              const __target3 = __targets[3];
-              const __target4 = __targets[4];
               const __target5 = __targets[5];
-              const __target6 = __targets[6];
               __target1.className = "my-class";
-              __target1.childNodes[0].data = "felix";
-              __target2.childNodes[0].data = "this is";
-              __target3.childNodes[0].data = "azoth";
-              __target5.childNodes[1].data = "two";
-              __target5.childNodes[3].data = "and...";
-              __target6.className = "span-class";
-              __target4.childNodes[7].data = "ul-footer";
-              __target0.childNodes[13].data = "footer";
+              __compose(__target1.childNodes[0], "felix");
+              __compose(__targets[2].childNodes[0], "this is");
+              __compose(__targets[3].childNodes[0], "azoth");
+              __compose(__target5.childNodes[1], "two");
+              __compose(__target5.childNodes[3], "and...");
+              __targets[6].className = "span-class";
+              __compose(__targets[4].childNodes[7], "ul-footer");
+              __compose(__targets[0].childNodes[13], "footer");
               return td8d151bb16;
           })();
           "
@@ -91,9 +86,8 @@ describe('surrounding code integration', () => {
 
         expect(compile(input).code).toMatchInlineSnapshot(`
           "const template = (() => {
-              const { __root: t5f1933b83a, __targets } = __renderById('5f1933b83a');
-              const __target0 = __targets[0];
-              __target0.childNodes[0].data = text;
+              const { __root: t5f1933b83a, __targets } = __rendererById('5f1933b83a');
+              __compose(__targets[0].childNodes[0], text);
               return t5f1933b83a;
           })();
           "
@@ -107,9 +101,8 @@ describe('surrounding code integration', () => {
 
         expect(compile(input).code).toMatchInlineSnapshot(`
           "const template = text => {
-              const { __root: t5f1933b83a, __targets } = __renderById('5f1933b83a');
-              const __target0 = __targets[0];
-              __target0.childNodes[0].data = text;
+              const { __root: t5f1933b83a, __targets } = __rendererById('5f1933b83a');
+              __compose(__targets[0].childNodes[0], text);
               return t5f1933b83a;
           };
           "
@@ -128,9 +121,8 @@ describe('surrounding code integration', () => {
         expect(compile(input).code).toMatchInlineSnapshot(`
           "function template(text) {
               const format = 'text' + '!';
-              const { __root: t5f1933b83a, __targets } = __renderById('5f1933b83a');
-              const __target0 = __targets[0];
-              __target0.childNodes[0].data = text;
+              const { __root: t5f1933b83a, __targets } = __rendererById('5f1933b83a');
+              __compose(__targets[0].childNodes[0], text);
               return t5f1933b83a;
           }
           "
@@ -149,11 +141,11 @@ describe('Fragments', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const fragment = (() => {
-              const { __root: t7c9daff739, __targets } = __renderById('7c9daff739', { fragment: true });
+              const { __root: t7c9daff739, __targets } = __rendererById('7c9daff739', { fragment: true });
               return t7c9daff739;
           })();
           const empty = (() => {
-              const { __root: td41d8cd98f, __targets } = __renderById('d41d8cd98f');
+              const { __root: td41d8cd98f, __targets } = __rendererById('d41d8cd98f');
               return td41d8cd98f;
           })();
           "
@@ -182,8 +174,8 @@ describe('Fragments', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const fragment = (() => {
-              const { __root: tda6de0389d, __targets } = __renderById('da6de0389d', { fragment: true });
-              tda6de0389d.childNodes[1].data = "two";
+              const { __root: tda6de0389d, __targets } = __rendererById('da6de0389d', { fragment: true });
+              __compose(tda6de0389d.childNodes[1], "two");
               return tda6de0389d;
           })();
           "
@@ -214,13 +206,12 @@ describe('Fragments', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const extraneous = (() => {
-              const { __root: t0f05699ae4, __targets } = __renderById('0f05699ae4');
+              const { __root: t0f05699ae4, __targets } = __rendererById('0f05699ae4');
               return t0f05699ae4;
           })();
           const childNodeIndex = (() => {
-              const { __root: tc0259af968, __targets } = __renderById('c0259af968');
-              const __target0 = __targets[0];
-              __target0.childNodes[3].data = "expect index 3";
+              const { __root: tc0259af968, __targets } = __rendererById('c0259af968');
+              __compose(__targets[0].childNodes[3], "expect index 3");
               return tc0259af968;
           })();
           "
