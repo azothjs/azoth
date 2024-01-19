@@ -130,7 +130,7 @@ export class AzothGenerator extends Generator {
         // target variables
         for(let i = 0; i < targets.length; i++) {
             const target = targets[i];
-            if(target.bindCount === 1) continue;
+            // if(target.bindCount === 1) continue;
             state.write(`${nextLine}const ${names.target}${i} = ${names.targets}[${i}];`);
         }
 
@@ -144,25 +144,23 @@ export class AzothGenerator extends Generator {
             if(queryIndex === -1) {
                 varName = rootVarName;
             }
-            else if(bindCount === 1) {
-                varName = `${names.targets}[${queryIndex}]`;
-            }
+            // else if(bindCount === 1) {
+            //     varName = `${names.targets}[${queryIndex}]`;
+            // }
             else {
                 varName = `${names.target}${queryIndex}`;
             }
 
-
             switch(type) {
                 case 'child':
-                    state.write(`__compose(${varName}.childNodes[${index}], `);
+                    state.write(`__compose(`);
                     this[expr.type](expr, state);
-                    state.write(`);`);
+                    state.write(`, ${varName}.childNodes[${index}]);`);
                     break;
                 case 'prop':
-                    state.write(varName);
-                    state.write(`.${node.name.name} = `);
+                    state.write(`${varName}.${node.name.name} = (`);
                     this[expr.type](expr, state);
-                    state.write(';');
+                    state.write(`);`);
                     break;
                 default: {
                     const message = `Unexpected binding type "${type}", expected "child" or "prop"`;

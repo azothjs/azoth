@@ -38,17 +38,22 @@ describe('JSX Dom Literals', () => {
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
               const { __root: td8d151bb16, __targets } = __rendererById('d8d151bb16');
+              const __target0 = __targets[0];
               const __target1 = __targets[1];
+              const __target2 = __targets[2];
+              const __target3 = __targets[3];
+              const __target4 = __targets[4];
               const __target5 = __targets[5];
-              __target1.className = "my-class";
-              __compose(__target1.childNodes[0], "felix");
-              __compose(__targets[2].childNodes[0], "this is");
-              __compose(__targets[3].childNodes[0], "azoth");
-              __compose(__target5.childNodes[1], "two");
-              __compose(__target5.childNodes[3], "and...");
-              __targets[6].className = "span-class";
-              __compose(__targets[4].childNodes[7], "ul-footer");
-              __compose(__targets[0].childNodes[13], "footer");
+              const __target6 = __targets[6];
+              __target1.className = ("my-class");
+              __compose("felix", __target1.childNodes[0]);
+              __compose("this is", __target2.childNodes[0]);
+              __compose("azoth", __target3.childNodes[0]);
+              __compose("two", __target5.childNodes[1]);
+              __compose("and...", __target5.childNodes[3]);
+              __target6.className = ("span-class");
+              __compose("ul-footer", __target4.childNodes[7]);
+              __compose("footer", __target0.childNodes[13]);
               return td8d151bb16;
           })();
           "
@@ -87,7 +92,8 @@ describe('surrounding code integration', () => {
         expect(compile(input).code).toMatchInlineSnapshot(`
           "const template = (() => {
               const { __root: t5f1933b83a, __targets } = __rendererById('5f1933b83a');
-              __compose(__targets[0].childNodes[0], text);
+              const __target0 = __targets[0];
+              __compose(text, __target0.childNodes[0]);
               return t5f1933b83a;
           })();
           "
@@ -102,7 +108,8 @@ describe('surrounding code integration', () => {
         expect(compile(input).code).toMatchInlineSnapshot(`
           "const template = text => {
               const { __root: t5f1933b83a, __targets } = __rendererById('5f1933b83a');
-              __compose(__targets[0].childNodes[0], text);
+              const __target0 = __targets[0];
+              __compose(text, __target0.childNodes[0]);
               return t5f1933b83a;
           };
           "
@@ -122,7 +129,8 @@ describe('surrounding code integration', () => {
           "function template(text) {
               const format = 'text' + '!';
               const { __root: t5f1933b83a, __targets } = __rendererById('5f1933b83a');
-              __compose(__targets[0].childNodes[0], text);
+              const __target0 = __targets[0];
+              __compose(text, __target0.childNodes[0]);
               return t5f1933b83a;
           }
           "
@@ -175,7 +183,7 @@ describe('Fragments', () => {
         expect(code).toMatchInlineSnapshot(`
           "const fragment = (() => {
               const { __root: tda6de0389d, __targets } = __rendererById('da6de0389d', { fragment: true });
-              __compose(tda6de0389d.childNodes[1], "two");
+              __compose("two", tda6de0389d.childNodes[1]);
               return tda6de0389d;
           })();
           "
@@ -211,7 +219,8 @@ describe('Fragments', () => {
           })();
           const childNodeIndex = (() => {
               const { __root: tc0259af968, __targets } = __rendererById('c0259af968');
-              __compose(__targets[0].childNodes[3], "expect index 3");
+              const __target0 = __targets[0];
+              __compose("expect index 3", __target0.childNodes[3]);
               return tc0259af968;
           })();
           "

@@ -53,7 +53,7 @@ export default function AzothPlugin() {
         transformIndexHtml(html) {
             const templateHtml = [...allTemplates.entries()].map(([id, html]) => {
                 return `\n<template id="${id}">${html}</template>`;
-            });
+            }).join('');
 
             return html.replace(
                 '<!-- templates -->',
