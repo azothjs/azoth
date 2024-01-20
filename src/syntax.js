@@ -182,22 +182,26 @@ const map = (bindings) => {
 
 })();
 
-function bind(callback, b0, b2, b4, b5) {
-    template(
-        // values
-        iconMode,
-        version,
-        // observables
-        emoji, x, y, z,
-        // expressions
-        emoji => (emoji.name),
-        emoji => (emoji.text),
-        (x, y) => (x / y),
-        (x, z) => (x < z),
-        // identity omitted: {~x}
-    )
-}
+(({ emoji, x, y, z }) => {
 
-function template(v1, v3, s0, s1, s2, s3, ae0, ae2) {
+    domService(`c88ejjsd`, `c1d46e`, function bind(bindings) {
+        bindings(
+            // values
+            iconMode,
+            version,
+            // observables
+            emoji, x, y, z,
+            // expressions
+            emoji => (emoji.name),
+            emoji => (emoji.text),
+            (x, y) => (x / y),
+            (x, z) => (x < z),
+            // identity omitted: {~x}
+        )
+    });
+
+})();
+
+function bindings(v1, v3, s0, s1, s2, s3, ae0, ae2) {
 
 }
