@@ -6,9 +6,12 @@ const htmlToFragment = html => {
     return template.content;
 };
 
-export const makeRenderer = html => {
+export const makeRenderer = (id, html) => {
+    if(templates.has(id)) return templates.get(id);
     const fragment = htmlToFragment(html);
-    return renderer(fragment);
+    const template = renderer(fragment);
+    templates.set(id, template);
+    return template;
 };
 
 export function rendererById(id) {

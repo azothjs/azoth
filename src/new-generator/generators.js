@@ -262,7 +262,7 @@ export class HtmlGenerator extends Generator {
 
     constructor(config) {
         super();
-        this.childReplace = config?.childReplace ?? `<text-node></text-node>`;
+        this.childReplace = config?.childReplace ?? `<!--child-->`;
     }
 
     // <div></div>

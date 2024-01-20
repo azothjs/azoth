@@ -167,25 +167,37 @@ const map = (bindings) => {
 
 (({ emoji, x, y, z }) => {
 
-    function bind(b0, b1, b2, b3, b4, b5) {
-        // initial render
-        b1(iconMode);
-        b3(version);
-        // expressions with more than one signal
-        let __x, __y, __z;
-        const b4 = binders[4], b5 = binders[5]
-        const b_4 = (x, y) => b4(x / y);
-        const b_5 = (x, z) => b5(x < z);
-
-        return [
+    function bind(callback, b0, b2, b4, b5) {
+        callback(
+            iconMode, version,
             // signal used in multiple binders
-            (emoji.subscribe ?? emoji.on)(emoji => { b0(emoji.name); b2(emoji.text); }),
-            (x.subscribe ?? x.on)(v => { b_4(__x = v, __y); b_5(__x, __z); b6(__x); }),
-            (y.subscribe ?? x.on)(v => { b_4(x, __y = v); }),
-            (z.subscribe ?? x.on)(v => { b_4(x, __z = v); }),
-        ];
+            emoji, x, y, z,
+            emoji => { b0(emoji.name); b2(emoji.text); },
+            (x, y) => b4(x / y),
+            (x, z) => b5(x < z),
+        )
     }
 
     return domService(`c1d46e`, map, bind);
 
 })();
+
+function bind(callback, b0, b2, b4, b5) {
+    template(
+        // values
+        iconMode,
+        version,
+        // observables
+        emoji, x, y, z,
+        // expressions
+        emoji => (emoji.name),
+        emoji => (emoji.text),
+        (x, y) => (x / y),
+        (x, z) => (x < z),
+        // identity omitted: {~x}
+    )
+}
+
+function template(v1, v3, s0, s1, s2, s3, ae0, ae2) {
+
+}

@@ -24,11 +24,34 @@ export default function AzothPlugin() {
 
     const allTemplates = new Map();
 
+    const templateServiceModule = `/templates:`;
+
     const transform = {
         name: 'rollup-azoth-plugin',
         enforce: 'pre',
+        resolveId(id) {
+            const [name, ids] = id.split('?', 2);
+            if(name !== templateServiceModule) return;
+            return id;
+        },
+        load(id) {
+            const [name, ids] = id.split('?', 2);
+            if(name !== templateServiceModule) return;
+
+            const renderer = `import { makeRenderer } from '/src/azoth/dom';\n`;
+            const exports = new URLSearchParams(ids)
+                .getAll('id')
+                .map(id => {
+                    const html = allTemplates.get(id);
+                    return `\nlet t${id} = makeRenderer('${id}', \`${html}\`);\n`
+                        + `export { t${id} };\n`;
+                })
+                .join('');
+
+            return renderer + exports;
+        },
         transform(source, id) {
-            console.log('testing...', id);
+
             if(!jsFile.test(id) || !id.includes('src/www/')) return;
 
             // const path = normalizePath(id);
@@ -37,15 +60,35 @@ export default function AzothPlugin() {
             // });
 
             const { code, templates } = transpile(source);
-            templates.forEach(({ id, html }) => {
-                if(allTemplates.has(id)) return;
+
+            const unique = new Set();
+            for(let { id, html } of templates) {
+                if(unique.has(id)) continue;
+                unique.add(id, html);
+                if(allTemplates.has(id)) continue;
                 allTemplates.set(id, html);
-            });
+            }
 
-            return code;
+            const uniqueIds = [...unique];
+            const params = new URLSearchParams(uniqueIds.map(id => ['id', id]));
+            const names = uniqueIds.map(id => `t${id}`).join(', ');
+
+            const imports = [
+                `\nimport { __rendererById, __compose } from '/src/azoth/index.js';`,
+                `\nimport { ${names} } from '${templateServiceModule}?${params.toString()}';`,
+                `\n`,
+            ];
+
+            return imports.join('') + code;
         },
-
     };
+
+    // const handleHMR = {
+    //     name: 'handle-hmr',
+    //     handleHotUpdates(context) {
+    //         console.log(context);
+    //     }
+    // };
 
     const injectHtml = {
         name: 'inject-html-plugin',
@@ -54,10 +97,11 @@ export default function AzothPlugin() {
             const templateHtml = [...allTemplates.entries()].map(([id, html]) => {
                 return `\n<template id="${id}">${html}</template>`;
             }).join('');
-
+            console.log('transform index html');
             return html.replace(
                 '<!-- templates -->',
-                templateHtml
+                `<!-- Azoth templates! -->
+                ${templateHtml}`,
             );
         },
     };
