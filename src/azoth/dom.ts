@@ -1,12 +1,12 @@
 import renderer from './renderer';
 
-const htmlToFragment = html => {
+const htmlToFragment = (html: string) => {
     const template = document.createElement('template');
     template.innerHTML = html;
     return template.content;
 };
 
-export const makeRenderer = (id, html) => {
+export const makeRenderer = (id: string, html: string) => {
     if(templates.has(id)) return templates.get(id);
     const fragment = htmlToFragment(html);
     const template = renderer(fragment);
@@ -14,7 +14,7 @@ export const makeRenderer = (id, html) => {
     return template;
 };
 
-export function rendererById(id) {
+export function rendererById(id: string) {
     const renderer = getRenderer(id);;
     const { fragment, targets } = renderer();
 
@@ -28,7 +28,7 @@ export function rendererById(id) {
 
 const templates = new Map();
 
-export function getRenderer(id:string) {
+export function getRenderer(id: string) {
     if(templates.has(id)) return templates.get(id);
 
     // TODO: could fail on bad id...

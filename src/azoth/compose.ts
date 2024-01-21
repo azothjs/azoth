@@ -1,5 +1,5 @@
 
-export function compose(input: any, anchor: Comment) {
+export function compose(input: any, anchor: Comment, keepLast: boolean = false) {
     const type = typeof input;
     switch(true) {
         case input === undefined:
@@ -7,38 +7,46 @@ export function compose(input: any, anchor: Comment) {
         case input === true:
         case input === false:
         case input === '':
-            const count = +anchor.data;
-            if(count > 0 && trimPrior(anchor)) anchor.data = `${count - 1}`;
+            if(!keepLast) removePrior(anchor);
             break;
         case type === 'string':
         case type === 'number':
         case input instanceof Node: {
-            let count = +anchor.data;
-            if(count > 0 && trimPrior(anchor)) count--; 
-            anchor.before(input);
-            anchor.data = `${count + 1}`
-            return true;
+            inject(input, anchor, keepLast);
+            break;
         }
+        case input instanceof Promise:
+            input.then(v => compose(v, anchor, keepLast));
+            break;
         case Array.isArray(input):
-            return composeArray(input, anchor);
+            composeArray(input, anchor, keepLast);
+            break;
+
         default:
             throw new Error(`Invalid block type ${type}, ${input}`);
     }
 }
 
-const trimPrior = ({ previousSibling }: Comment) => {
-    return previousSibling ? (previousSibling.remove(), true) : false;
+function removePrior(anchor: Comment) {
+    const count = +anchor.data;
+    if(count > 0 && tryRemovePrior(anchor)) anchor.data = `${count - 1}`;
 }
 
-function composeArray(array: any[], anchor: Comment) {
-    let any = false;
+
+function inject(input: any, anchor: Comment, keepLast: boolean) {
+    let count = +anchor.data;
+    if(!keepLast && count > 0 && tryRemovePrior(anchor)) count--;
+    anchor.before(input);
+    anchor.data = `${count + 1}`
+}
+
+// TODO: array in array with replace param
+function composeArray(array: any[], anchor: Comment, replace: boolean) {
     for(let i = 0; i < array.length; i++) {
-        const input = array[i];
-        if(input instanceof Node) {
-            anchor.before(input);
-            any = true;
-        }
-        any = compose(input, anchor) || any;
+        compose(array[i], anchor, false);
     }
-    return any;
+}
+
+function tryRemovePrior({ previousSibling }: Comment) {
+    return previousSibling ? (previousSibling.remove(), true) : false;
 }
