@@ -3,8 +3,11 @@ import Inspect from 'vite-plugin-inspect';
 import AzothPlugin from './src/vite-azoth-plugin.js';
 
 export default defineConfig({
+    esbuild: {
+        jsx: 'preserve',
+    },
     test: {
-        update: true,
+        // update: true,
         // timeout: 30_000,
     },
     plugins: [

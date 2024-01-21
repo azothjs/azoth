@@ -15,19 +15,25 @@ export const makeRenderer = (id, html) => {
 };
 
 export function rendererById(id) {
-    const template = getRenderer(id);
-    return template();
+    const renderer = getRenderer(id);;
+    const { fragment, targets } = renderer();
+
+    const { childElementCount, childNodes } = fragment;
+    const node = childElementCount === 1 && childNodes.length === 1
+        ? fragment.firstElementChild
+        : fragment;
+
+    return { node, targets };
 }
 
 const templates = new Map();
 
-export const getRenderer = id => {
+export function getRenderer(id:string) {
     if(templates.has(id)) return templates.get(id);
 
     // TODO: could fail on bad id...
-    const templateEl = document.getElementById(id);
-    const template = renderer(templateEl.content);
-
-    templates.set(id, template);
-    return template;
+    const templateEl = document.getElementById(id) as HTMLTemplateElement;
+    const render = renderer(templateEl.content);
+    templates.set(id, render);
+    return render;
 };

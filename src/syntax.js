@@ -196,7 +196,7 @@ const map = (bindings) => {
             emoji => (emoji.text),
             (x, y) => (x / y),
             (x, z) => (x < z),
-            // identity omitted: {~x}
+            // identity omitted, e.g. {~x}
         )
     });
 

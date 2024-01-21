@@ -1,9 +1,8 @@
-import { rendererById } from './dom';
-import { compose } from './compose.js';
+import { rendererById } from './dom.ts';
+import { compose } from './compose.ts';
 
 export const _ = () => { };
 
-// injected by compiler:
 export {
     rendererById as __rendererById,
     compose as __compose

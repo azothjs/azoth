@@ -14,10 +14,11 @@ function getNextLine(state) {
 
 const DEFAULT_NAMES = {
     renderer: `__rendererById`,
-    targets: `__targets`,
+    targets: `targets`,
+    targetsAlias: `__targets`,
     target: `__target`,
     child: `__child`,
-    root: `__root`,
+    root: `node`,
     rootAliasPrefix: `t`,
 };
 
@@ -121,7 +122,7 @@ export class AzothGenerator extends Generator {
         // template service renderer call
         const { names } = this;
         const rootVarName = `${names.rootAliasPrefix}${id}`;
-        state.write(`const { ${names.root}: ${rootVarName}, ${names.targets} }`);
+        state.write(`const { ${names.root}: ${rootVarName}, ${names.targets}: ${names.targetsAlias} }`);
         state.write(` = ${names.renderer}(`);
         state.write(`'${id}'`);
         if(isFragment && node.children.length > 1) {
@@ -131,7 +132,7 @@ export class AzothGenerator extends Generator {
 
         // target variables
         for(let i = 0; i < targets.length; i++) {
-            state.write(`${nextLine}const ${names.target}${i} = ${names.targets}[${i}];`);
+            state.write(`${nextLine}const ${names.target}${i} = ${names.targetsAlias}[${i}];`);
         }
 
         // childNode variables prevent binding mutations from changing 
@@ -262,7 +263,7 @@ export class HtmlGenerator extends Generator {
 
     constructor(config) {
         super();
-        this.childReplace = config?.childReplace ?? `<!--child-->`;
+        this.childReplace = config?.childReplace ?? `<!--0-->`;
     }
 
     // <div></div>

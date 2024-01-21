@@ -11,7 +11,7 @@ class CatCard extends HTMLElement {
         return this.#name;
     }
     connectedCallback() {
-        this.append(<li>{~this.name}</li>);
+        this.append(<li>{this.name}</li>);
     }
     attributeChangedCallback(name, old, value) {
         this[name] = value;

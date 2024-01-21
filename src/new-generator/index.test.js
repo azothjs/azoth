@@ -37,7 +37,7 @@ describe('JSX dom literals', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
-              const { __root: td8d151bb16, __targets } = __rendererById('d8d151bb16');
+              const { node: t090c4b5012, targets: __targets } = __rendererById('090c4b5012');
               const __target0 = __targets[0];
               const __target1 = __targets[1];
               const __target2 = __targets[2];
@@ -61,7 +61,7 @@ describe('JSX dom literals', () => {
               __target6.className = ("span-class");
               __compose("ul-footer", __child7);
               __compose("footer", __child8);
-              return td8d151bb16;
+              return t090c4b5012;
           })();
           "
         `);
@@ -70,20 +70,20 @@ describe('JSX dom literals', () => {
           [
             {
               "html": "<div data-bind>
-                      <p data-bind><text-node></text-node></p>
+                      <p data-bind><!--0--></p>
                       <p>static</p>
-                      <p data-bind><text-node></text-node><span data-bind><text-node></text-node></span></p>
+                      <p data-bind><!--0--><span data-bind><!--0--></span></p>
                       <ul data-bind>
                           <li><span>one</span></li>
-                          <li><span><em data-bind>a<text-node></text-node>b<text-node></text-node>c</em></span></li>
+                          <li><span><em data-bind>a<!--0-->b<!--0-->c</em></span></li>
                           <li><span data-bind>three</span></li>
-                          <text-node></text-node>
+                          <!--0-->
                       </ul>
                       <self-closing />
                       <self-closing />
-                      <text-node></text-node>
+                      <!--0-->
                   </div>",
-              "id": "d8d151bb16",
+              "id": "090c4b5012",
             },
           ]
         `);
@@ -102,7 +102,7 @@ describe('JSX dom literals', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
-              const { __root: t24a912889d, __targets } = __rendererById('24a912889d');
+              const { node: t24a912889d, targets: __targets } = __rendererById('24a912889d');
               const __target0 = __targets[0];
               __target0.className = ("className");
               __target0.name = ("name");
@@ -132,11 +132,11 @@ describe('surrounding code integration', () => {
 
         expect(compile(input).code).toMatchInlineSnapshot(`
           "const template = (() => {
-              const { __root: t5f1933b83a, __targets } = __rendererById('5f1933b83a');
+              const { node: t666c3103ad, targets: __targets } = __rendererById('666c3103ad');
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               __compose(text, __child0);
-              return t5f1933b83a;
+              return t666c3103ad;
           })();
           "
         `);
@@ -149,11 +149,11 @@ describe('surrounding code integration', () => {
 
         expect(compile(input).code).toMatchInlineSnapshot(`
           "const template = text => {
-              const { __root: t5f1933b83a, __targets } = __rendererById('5f1933b83a');
+              const { node: t666c3103ad, targets: __targets } = __rendererById('666c3103ad');
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               __compose(text, __child0);
-              return t5f1933b83a;
+              return t666c3103ad;
           };
           "
         `);
@@ -171,11 +171,11 @@ describe('surrounding code integration', () => {
         expect(compile(input).code).toMatchInlineSnapshot(`
           "function template(text) {
               const format = 'text' + '!';
-              const { __root: t5f1933b83a, __targets } = __rendererById('5f1933b83a');
+              const { node: t666c3103ad, targets: __targets } = __rendererById('666c3103ad');
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               __compose(text, __child0);
-              return t5f1933b83a;
+              return t666c3103ad;
           }
           "
         `);
@@ -192,11 +192,11 @@ describe('fragments', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const fragment = (() => {
-              const { __root: t7c9daff739, __targets } = __rendererById('7c9daff739', { fragment: true });
+              const { node: t7c9daff739, targets: __targets } = __rendererById('7c9daff739', { fragment: true });
               return t7c9daff739;
           })();
           const empty = (() => {
-              const { __root: td41d8cd98f, __targets } = __rendererById('d41d8cd98f');
+              const { node: td41d8cd98f, targets: __targets } = __rendererById('d41d8cd98f');
               return td41d8cd98f;
           })();
           "
@@ -225,10 +225,10 @@ describe('fragments', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const fragment = (() => {
-              const { __root: tda6de0389d, __targets } = __rendererById('da6de0389d', { fragment: true });
-              const __child0 = tda6de0389d.childNodes[1];
+              const { node: tfaf808e6cc, targets: __targets } = __rendererById('faf808e6cc', { fragment: true });
+              const __child0 = tfaf808e6cc.childNodes[1];
               __compose("two", __child0);
-              return tda6de0389d;
+              return tfaf808e6cc;
           })();
           "
         `);
@@ -236,8 +236,8 @@ describe('fragments', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "one<text-node></text-node>three",
-              "id": "da6de0389d",
+              "html": "one<!--0-->three",
+              "id": "faf808e6cc",
             },
           ]
         `);
@@ -258,15 +258,15 @@ describe('fragments', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const extraneous = (() => {
-              const { __root: t0f05699ae4, __targets } = __rendererById('0f05699ae4');
+              const { node: t0f05699ae4, targets: __targets } = __rendererById('0f05699ae4');
               return t0f05699ae4;
           })();
           const childNodeIndex = (() => {
-              const { __root: tc0259af968, __targets } = __rendererById('c0259af968');
+              const { node: t09771bea6d, targets: __targets } = __rendererById('09771bea6d');
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[3];
               __compose("expect index 3", __child0);
-              return tc0259af968;
+              return t09771bea6d;
           })();
           "
         `);
@@ -280,10 +280,10 @@ describe('fragments', () => {
             {
               "html": "<div data-bind>
                           <p></p>
-                          <text-node></text-node><p></p>
+                          <!--0--><p></p>
                           <p></p>
                       </div>",
-              "id": "c0259af968",
+              "id": "09771bea6d",
             },
           ]
         `);
@@ -302,20 +302,20 @@ describe('child node composition changes', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const $item = name => {
-              const { __root: t073725243d, __targets } = __rendererById('073725243d');
+              const { node: tf00e886942, targets: __targets } = __rendererById('f00e886942');
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               __compose(name, __child0);
-              return t073725243d;
+              return tf00e886942;
           };
           const $template = () => {
-              const { __root: t5abe7ebc84, __targets } = __rendererById('5abe7ebc84');
+              const { node: t3bee4f3a47, targets: __targets } = __rendererById('3bee4f3a47');
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               const __child1 = __target0.childNodes[1];
               __compose([2, 4, 7].map($item), __child0);
               __compose("text", __child1);
-              return t5abe7ebc84;
+              return t3bee4f3a47;
           };
           "
         `);
@@ -323,12 +323,12 @@ describe('child node composition changes', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<li data-bind><text-node></text-node></li>",
-              "id": "073725243d",
+              "html": "<li data-bind><!--0--></li>",
+              "id": "f00e886942",
             },
             {
-              "html": "<div data-bind><text-node></text-node><text-node></text-node></div>",
-              "id": "5abe7ebc84",
+              "html": "<div data-bind><!--0--><!--0--></div>",
+              "id": "3bee4f3a47",
             },
           ]
         `);

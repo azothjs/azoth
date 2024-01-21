@@ -1,0 +1,9 @@
+  {
+    "compilerOptions": {
+        "jsx": "preserve",
+        "target": "ESNext",
+        "strictNullChecks": false,
+        "types": ["vite/client"],
+        "experimentalDecorators": true,
+    }
+  }

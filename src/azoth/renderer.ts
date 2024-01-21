@@ -1,4 +1,4 @@
-export default function renderer(fragment) {
+export default function renderer(fragment : DocumentFragment) {
 
     // const nodes = fragment.querySelectorAll('text-node');
     // let node = null;
@@ -8,10 +8,10 @@ export default function renderer(fragment) {
     // }
 
     return function render() {
-        const clone = fragment.cloneNode(true);
+        const clone = <DocumentFragment>fragment.cloneNode(true);
         return {
-            __root: clone,
-            __targets: clone.querySelectorAll('[data-bind]')
+            fragment: clone,
+            targets: clone.querySelectorAll('[data-bind]')
         };
     };
 }

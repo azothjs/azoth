@@ -3,7 +3,7 @@ import acornJsx from 'acorn-jsx';
 import { generate } from './new-generator';
 // import { normalizePath } from 'vite';
 
-const jsFile = /\.jsx$/;
+const JSX_TSX = /\.[j|t]sx$/;
 
 export default function AzothPlugin() {
 
@@ -28,7 +28,6 @@ export default function AzothPlugin() {
 
     const transform = {
         name: 'rollup-azoth-plugin',
-        enforce: 'pre',
         resolveId(id) {
             const [name, ids] = id.split('?', 2);
             if(name !== templateServiceModule) return;
@@ -52,7 +51,7 @@ export default function AzothPlugin() {
         },
         transform(source, id) {
 
-            if(!jsFile.test(id) || !id.includes('src/www/')) return;
+            if(!JSX_TSX.test(id) || !id.includes('src/www/')) return;
 
             // const path = normalizePath(id);
             // const sourceMap = new SourceMapGenerator({ 
