@@ -1,7 +1,7 @@
 import { beforeEach, describe, test, } from 'vitest';
-import { TemplateParser, findInfo } from './html-parser.js';
+import { TemplateParser } from './html-parser.js';
 import { addSerializers } from '../serializers.js';
-import { html, find } from 'property-information';
+// import { html, find } from 'property-information';
 
 beforeEach(context => {
     context.parser = new TemplateParser();
@@ -35,7 +35,7 @@ describe('static html', () => {
           }
         `);
     });
-        
+
     test('attributes', ({ expect, parser }) => {
         const template = parser.end(`<input name="cat" required class=cool type='text'>`);
         expect(template).toMatchInlineSnapshot(`
@@ -96,7 +96,7 @@ describe('static html', () => {
           }
         `);
     });
-    
+
     test('nested elements', ({ expect, parser }) => {
         const template = parser.end(`<div><div><div><div><div></div></div></div></div></div>`);
         expect(template).toMatchInlineSnapshot(`
@@ -128,7 +128,7 @@ describe('binders', () => {
     beforeEach(({ expect }) => addSerializers(expect, {
         types: ['ChildBinder', 'PropertyBinder', 'DomTemplateElement']
     }));
-    
+
     describe('child nodes', () => {
         test('empty root with binder', ({ expect, parser }) => {
             parser.write(``);
@@ -163,7 +163,7 @@ describe('binders', () => {
               }
             `);
         });
-      
+
         test('element with text and interpolator', ({ expect, parser }) => {
             parser.write(`<p>hello `);
             const template = parser.end(`!</p>`);
@@ -252,7 +252,7 @@ describe('binders', () => {
 
 
     describe('properties', () => {
-      
+
         test('single unquoted attribute', ({ expect, parser }) => {
             parser.write(`<p class=`);
             const template = parser.end(`></p>`);
@@ -465,7 +465,7 @@ describe('binders', () => {
             `<input required`,
             `<input required    `,
             `<input `,
-        // `<input`, TODO edge case
+            // `<input`, TODO edge case
         ])('invalid attribute binder', (template) => {
             test.fails(template, ({ parser }) => {
                 parser.write(template);

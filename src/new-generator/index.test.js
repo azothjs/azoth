@@ -334,4 +334,29 @@ describe('child node composition changes', () => {
         `);
 
     });
+
+    test('edge case: odd childnodes in li', ({ expect }) => {
+        const input = `const render = () => <li>Hello {'world'}?</li>`;
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "const render = () => {
+              const { node: t98bfbbc66f, targets: __targets } = __rendererById('98bfbbc66f');
+              const __target0 = __targets[0];
+              const __child0 = __target0.childNodes[1];
+              __compose('world', __child0);
+              return t98bfbbc66f;
+          };
+          "
+        `);
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<li data-bind>Hello <!--0-->?</li>",
+              "id": "98bfbbc66f",
+            },
+          ]
+        `);
+
+    });
 });

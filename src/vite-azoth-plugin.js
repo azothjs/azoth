@@ -28,12 +28,16 @@ export default function AzothPlugin() {
 
     const transform = {
         name: 'rollup-azoth-plugin',
+
         resolveId(id) {
+            // console.log('resolve id', id);
+
             const [name, ids] = id.split('?', 2);
             if(name !== templateServiceModule) return;
             return id;
         },
         load(id) {
+            // console.log('load id', id);
             const [name, ids] = id.split('?', 2);
             if(name !== templateServiceModule) return;
 
@@ -50,8 +54,8 @@ export default function AzothPlugin() {
             return renderer + exports;
         },
         transform(source, id) {
-
-            if(!JSX_TSX.test(id) || !id.includes('src/www/')) return;
+            if(!JSX_TSX.test(id)) return;
+            if(!id.includes('src/www/') && !id.includes('src/azoth/')) return;
 
             // const path = normalizePath(id);
             // const sourceMap = new SourceMapGenerator({ 
@@ -71,7 +75,8 @@ export default function AzothPlugin() {
             const uniqueIds = [...unique];
             const params = new URLSearchParams(uniqueIds.map(id => ['id', id]));
             const names = uniqueIds.map(id => `t${id}`).join(', ');
-
+            // console.log('********transform', id);
+            // console.log('ids', params.toString());
             const imports = [
                 `\nimport { __rendererById, __compose } from '/src/azoth/index.js';`,
                 `\nimport { ${names} } from '${templateServiceModule}?${params.toString()}';`,

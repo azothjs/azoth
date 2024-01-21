@@ -1,10 +1,12 @@
   {
     "compilerOptions": {
         "jsx": "preserve",
-        "target": "ESNext",
+        // "target": "ESNext",
         // "strictNullChecks": false,
         "noImplicitAny": true,
         "types": ["vite/client"],
         "experimentalDecorators": true,
+        // "module": "NodeNext",
+        // "moduleResolution": "NodeNext",
     }
   }
