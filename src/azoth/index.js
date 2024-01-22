@@ -1,5 +1,5 @@
-import { rendererById } from './dom.ts';
-import { compose } from './compose.ts';
+import { rendererById } from './dom.js';
+import { compose } from './compose.js';
 
 export const _ = () => { };
 

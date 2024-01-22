@@ -3,7 +3,7 @@ import acornJsx from 'acorn-jsx';
 import { generate } from './new-generator';
 // import { normalizePath } from 'vite';
 
-const JSX_TSX = /\.[j|t]sx$/;
+const JSX_EXT = /\.jsx$/;
 
 export default function AzothPlugin() {
 
@@ -54,7 +54,7 @@ export default function AzothPlugin() {
             return renderer + exports;
         },
         transform(source, id) {
-            if(!JSX_TSX.test(id)) return;
+            if(!JSX_EXT.test(id)) return;
             if(!id.includes('src/www/') && !id.includes('src/azoth/')) return;
 
             // const path = normalizePath(id);
@@ -62,7 +62,7 @@ export default function AzothPlugin() {
             //     file: path.split('/').at(-1)
             // });
 
-            const { code, templates } = transpile(source);
+            let { code, templates } = transpile(source);
 
             const unique = new Set();
             for(let { id, html } of templates) {
@@ -72,18 +72,20 @@ export default function AzothPlugin() {
                 allTemplates.set(id, html);
             }
 
+            if(!unique.size) return;
+
             const uniqueIds = [...unique];
             const params = new URLSearchParams(uniqueIds.map(id => ['id', id]));
             const names = uniqueIds.map(id => `t${id}`).join(', ');
-            // console.log('********transform', id);
-            // console.log('ids', params.toString());
-            const imports = [
+
+            code += [
                 `\nimport { __rendererById, __compose } from '/src/azoth/index.js';`,
                 `\nimport { ${names} } from '${templateServiceModule}?${params.toString()}';`,
                 `\n`,
-            ];
+            ].join('');
 
-            return imports.join('') + code;
+            return code;
+
         },
     };
 

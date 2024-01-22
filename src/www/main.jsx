@@ -1,31 +1,81 @@
+import { compose } from '../azoth/compose.js';
 import './style.css';
 
+class $ extends HTMLElement {
 
-class CatCard extends HTMLElement {
-    static observedAttributes = ['name'];
-    #name = '';
+}
+const category = 'category';
+const place = 'place';
+const render = () => <li className={"category"}>Hello {"place"}</li>;
+
+class Generated$ extends $ {
+    _anchor = null;
+
+    set anchor(node) {
+        this._anchor = node;
+        this.values = null;
+    }
+    get anchor() {
+        return this._anchor;
+    }
+
+    values = null;
     set name(value) {
-        this.#name = value;
+        if(this.anchor) compose(value, this.anchor);
+        else if(this.values) this.values.name = `${value}`;
+        else this.values = { name: `${value}` };
     }
     get name() {
-        return this.#name;
+        return this.anchor ? this.anchor.data : this.values?.name ?? '';
     }
+
+    render() {
+        throw new Error('must implement render');
+    }
+
     connectedCallback() {
-        this.append(<li>{this.name}</li>);
+        const li = this.render()
+        this.anchor = li.childNodes[1];
+        this.append(li);
+    }
+}
+
+
+class CatCard extends Generated$ {
+    static observedAttributes = ['name'];
+    render() {
+        return <li>{this.name}</li>;
     }
     attributeChangedCallback(name, old, value) {
+        // @ts-ignore
         this[name] = value;
     }
 }
 
+
 customElements.define('cat-card', CatCard);
-const name = 'Timmy';
 
 const felix = new CatCard();
 felix.name = 'felix';
 
+const name = 'Timmy';
+const promise = Promise.resolve('a future value');
+
 document.body.append(
     <h1>Hello Azoth {3}</h1>,
-    <cat-card name={name}/>,
+    render(),
+    <cat-card name={name} />,
+    <li>{promise}</li>,
     felix,
 );
+
+setTimeout(() => {
+    felix.name = 'Sir Felix';
+}, 500);
+
+setTimeout(() => {
+    felix.name = 'King Felix';
+}, 1500);
+
+
+

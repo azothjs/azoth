@@ -5,18 +5,20 @@ class $ extends HTMLElement {
 
 }
 
+const render = () => <li>Hello {'world'}?</li>
+
 class Generated$ extends $ {
-    #anchor: Comment = null;
+    _anchor: Comment | null = null;
 
     set anchor(node) {
-        this.#anchor = node;
+        this._anchor = node;
         this.values = null;
     }
     get anchor() {
-        return this.#anchor;
+        return this._anchor;
     }
 
-    values: { name: string } = null;
+    values: { name: string } | null = null;
     set name(value) {
         if(this.anchor) compose(value, this.anchor);
         else if(this.values) this.values.name = `${value}`;

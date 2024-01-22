@@ -1,5 +1,5 @@
 
-export function compose(input: any, anchor: Comment, keepLast: boolean = false) {
+export function compose(input, anchor, keepLast = false) {
     const type = typeof input;
     switch(true) {
         case input === undefined:
@@ -27,13 +27,13 @@ export function compose(input: any, anchor: Comment, keepLast: boolean = false) 
     }
 }
 
-function removePrior(anchor: Comment) {
+function removePrior(anchor) {
     const count = +anchor.data;
     if(count > 0 && tryRemovePrior(anchor)) anchor.data = `${count - 1}`;
 }
 
 
-function inject(input: any, anchor: Comment, keepLast: boolean) {
+function inject(input, anchor, keepLast) {
     let count = +anchor.data;
     if(!keepLast && count > 0 && tryRemovePrior(anchor)) count--;
     anchor.before(input);
@@ -41,12 +41,12 @@ function inject(input: any, anchor: Comment, keepLast: boolean) {
 }
 
 // TODO: array in array with replace param
-function composeArray(array: any[], anchor: Comment, replace: boolean) {
+function composeArray(array, anchor, replace) {
     for(let i = 0; i < array.length; i++) {
         compose(array[i], anchor, false);
     }
 }
 
-function tryRemovePrior({ previousSibling }: Comment) {
+function tryRemovePrior({ previousSibling }) {
     return previousSibling ? (previousSibling.remove(), true) : false;
 }
