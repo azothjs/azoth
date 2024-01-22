@@ -32,8 +32,8 @@ DomTemplateLiteral
             value: { raw, cooked }
             tail: false
     ]
-    bindings: DomBinding []
-        DomElementBinding
+    binders: DomBinder []
+        DomElementBinder
             name: 'tag' | '<>'
             queryIndex: 1
             property: 

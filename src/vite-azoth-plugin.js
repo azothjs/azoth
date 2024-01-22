@@ -1,57 +1,115 @@
 import { Parser } from 'acorn';
-import acornAzothPlugin from './parser';
-import { azothGenerate as generate } from './generator';
-import { SourceMapGenerator } from 'source-map';
-import { normalizePath } from 'vite';
+import acornJsx from 'acorn-jsx';
+import { generate } from './new-generator';
+// import { normalizePath } from 'vite';
 
-const jsFile = /\.js$/;
+const JSX_EXT = /\.jsx$/;
 
 export default function AzothPlugin() {
 
-    const AzParser = Parser.extend(acornAzothPlugin());
+    const JsxParser = Parser.extend(acornJsx());
 
-    const parse = code => AzParser.parse(code, {
+    const parse = code => JsxParser.parse(code, {
         ecmaVersion: 'latest',
-        sourceType: 'module',
+        sourceType: 'module'
         // locations: true,
+        // ranges: true,
+        // comments: true,
     });
-    
+
     const transpile = (input) => {
         const ast = parse(input);
-        const code = generate(ast);
-        return code;
+        return generate(ast);
     };
 
+    const allTemplates = new Map();
+
+    const templateServiceModule = `/templates:`;
 
     const transform = {
         name: 'rollup-azoth-plugin',
         enforce: 'pre',
-        transform(source, id) {
-            if(!jsFile.test(id) || !id.includes('src/www/')) return;
+        resolveId(id) {
+            // console.log('resolve id', id);
 
-            const path = normalizePath(id);
+            const [name, ids] = id.split('?', 2);
+            if(name !== templateServiceModule) return;
+            return id;
+        },
+        load(id) {
+            // console.log('load id', id);
+            const [name, ids] = id.split('?', 2);
+            if(name !== templateServiceModule) return;
+
+            const renderer = `import { makeRenderer } from '/src/azoth/dom';\n`;
+            const exports = new URLSearchParams(ids)
+                .getAll('id')
+                .map(id => {
+                    const html = allTemplates.get(id);
+                    return `\nlet t${id} = makeRenderer('${id}', \`${html}\`);\n`
+                        + `export { t${id} };\n`;
+                })
+                .join('');
+
+            return renderer + exports;
+        },
+        transform(source, id) {
+            if(!JSX_EXT.test(id)) return;
+            if(!id.includes('src/www/') && !id.includes('src/azoth/')) return;
+
+            // const path = normalizePath(id);
             // const sourceMap = new SourceMapGenerator({ 
             //     file: path.split('/').at(-1)
             // });
 
-            return transpile(source /*, sourceMap*/);
-        },
+            let { code, templates } = transpile(source);
 
+            const unique = new Set();
+            for(let { id, html } of templates) {
+                if(unique.has(id)) continue;
+                unique.add(id, html);
+                if(allTemplates.has(id)) continue;
+                allTemplates.set(id, html);
+            }
+
+            if(!unique.size) return;
+
+            const uniqueIds = [...unique];
+            const params = new URLSearchParams(uniqueIds.map(id => ['id', id]));
+            const names = uniqueIds.map(id => `t${id}`).join(', ');
+
+            const imports = [
+                `import { __rendererById, __compose } from '/src/azoth/index.js';\n`,
+                `import { ${names} } from '${templateServiceModule}?${params.toString()}';\n`,
+            ].join('');
+
+            return imports + code;
+
+        },
     };
 
-    return transform;
-
-    // // TODO: inline templates into index.html
-    // const injectHtml = {
-    //     name: 'inject-html-plugin',
-    //     enforce: 'post',
-    //     transformIndexHtml(html) {
-    //         return html.replace(
-    //             '<!-- templates -->',
-    //             items.map(item => `<li>${item}</li>`).join('\n')
-    //         );
-    //     },
-
+    // const handleHMR = {
+    //     name: 'handle-hmr',
+    //     handleHotUpdates(context) {
+    //         console.log(context);
+    //     }
     // };
-    // return [transform, injectHtml];
+
+    const injectHtml = {
+        name: 'inject-html-plugin',
+        enforce: 'post',
+        transformIndexHtml(html) {
+            const templateHtml = [...allTemplates.entries()].map(([id, html]) => {
+                return `\n<template id="${id}">${html}</template>`;
+            }).join('');
+            console.log('transform index html');
+            return html.replace(
+                '<!-- templates -->',
+                `<!-- Azoth templates! -->
+                ${templateHtml}`,
+            );
+        },
+    };
+
+    return [transform, injectHtml];
 }

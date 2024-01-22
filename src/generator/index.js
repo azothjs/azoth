@@ -44,13 +44,68 @@ const azothGenerator = {
         }
     },
 
-    PropertyBinding({ queryIndex, property }, state) {
-        // TODO: add "computed" to node so we know if [] required
-        state.write(`__targets[${queryIndex}].${property}`);
+    writeTemplate(node, state) {
+        const { html, rootType, elements, binders, interpolators, expressions } = node;
+        const { length } = binders;
+        const { lineEnd: lE, indent: indentUnit, indentLevel } = state;
+        const indent = indentUnit.repeat(indentLevel);
+
+        state.write(indent);
+        state.write(length > 0 ? `const __renderer = ` : `return `);
+        state.write(`__makeRenderer(\`${html}\`)`);
+
+        if(length === 0) {
+            state.write(`().__root;`);
+        }
+        else {
+            state.write(`;${lE}`);
+            state.write(`${indent}const { __root, __targets } = __renderer();${lE}`);
+            for(let i = 0; i < binders.length; i++) {
+                    
+                const binder = binders[i];
+                const expression = expressions [i];
+                const element = elements[binder.queryIndex];
+                
+                state.write(indent);
+
+                const isBlock = binder.interpolator.name === '#{';
+                if(isBlock) {
+                    state.write(`new DomBlock(`);
+                    this[element.type](element, state);
+                    this[binder.type](binder, state);
+                    state.write(`, (`);
+                    this[expression.type](expression, state);
+                    state.write(`))`);
+                }
+                else {
+                    this[element.type](element, state);
+                    this[binder.type](binder, state);
+                    this[expression.type](expression, state);
+                }
+                state.write(`;${lE}`);
+            }
+            state.write(`${indent}return __root;`);
+        }
     },
 
-    ChildBinding({ queryIndex, childIndex }, state) {
-        state.write(`__targets[${queryIndex}].childNodes[${childIndex}].textContent`);
+    DomTemplateElement({ queryIndex }, state) {
+        state.write(`__targets[${queryIndex}]`);
+    },
+
+    PropertyBinder({ queryIndex, interpolator, property }, state) {
+        // TODO: add "computed" to node so we know if [] required
+        state.write(`.${property} = `);
+    },
+
+    ChildBinder({ queryIndex, interpolator, index, length }, state) {
+        // short-circuit childNodes if only 1 bound text 
+        if(index !== 0 || length !== 1 && interpolator.name === '{') {
+            state.write(`.childNodes[${index}]`);
+        }
+
+        if(interpolator.name === '{') {
+            state.write(`.textContent = `);
+        }
     },
 
     ArrowFunctionExpression(node, state) {
@@ -70,37 +125,5 @@ const azothGenerator = {
         else {
             this.superReturnStatement(node, state);
         }
-    },
-
-    writeTemplate(node, state) {
-        const { html, bindings, expressions } = node;
-        const { lineEnd: lE, indent: indentUnit, indentLevel } = state;
-        const { length } = bindings;
-        const indent = indentUnit.repeat(indentLevel);
-        
-        state.write(indent);
-        state.write(length > 0 ? `const __renderer = ` : `return `);
-        state.write(`__makeRenderer(\`${html}\`)`);
-
-        if(length === 0) {
-            state.write(`().__root;`);
-        }
-        else {
-            state.write(`;${lE}`);
-            state.write(`${indent}const { __root, __targets } = __renderer();${lE}`);
-                    
-            for(let i = 0; i < length; i++) {
-                const binding = bindings[i];
-                const expression = expressions[i];
-                // const interpolator = node.interpolators[i];
-                state.write(indent);
-                this[binding.type](binding, state);
-                state.write(` = `);
-                this[expression.type](expression, state);
-                state.write(`;${lE}`);
-            }
-            state.write(`${indent}return __root;`);
-        }
-
     }
 };

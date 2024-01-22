@@ -11,20 +11,25 @@ export function extend(Parser, azTokens) {
     const SIGIL_CODE = '#'.charCodeAt(0);
     
     const acorn = Parser.acorn;
-    const { isNewLine, getLineInfo } = acorn;
+    const { isNewLine, getLineInfo, tokTypes: tt, tokContexts: tc } = acorn;
+    const { tokTypes, tokContexts } = azTokens;
+    tt.hashQuote = tokTypes.hashQuote;
+    tt.hashBraceL = tokTypes.hashBraceL;
+    tc.dom_tmpl = tokContexts.dom_tmpl;
 
-    const tt = acorn.tokTypes;
-    const { hashQuote, hashBraceL } = azTokens.tokTypes;
-    const { dom_tmpl } = azTokens.tokContexts;
-
-    const lBraces = new Set([hashBraceL, tt.dollarBraceL, tt.braceL]);
-    
+    const lBraces = new Set([tt.hashBraceL, tt.dollarBraceL, tt.braceL]);
     const TMPL_PUNCTUATION = {
         '96': tt.backQuote,
         '36': tt.dollarBraceL,
         '123': tt.braceL,
-        '35': hashBraceL,
+        '35': tt.hashBraceL,
     };
+
+    // const INTERPOLATOR_DESCRIPTION = {
+    //     '{': 'value',
+    //     '#{': 'block',
+    //     '${': 'string'
+    // };
     
     return class extends Parser {
         // Expose azoth `tokTypes` and `tokContexts` to other plugins.
@@ -54,7 +59,7 @@ export function extend(Parser, azTokens) {
 
                 if(charCode === 96) { // "`"
                     this.pos++;
-                    return this.finishToken(hashQuote);
+                    return this.finishToken(tt.hashQuote);
                 }
                 else {
                     this.raise(this.pos, `Expected "\`" after "#" but found character "${String.fromCharCode(charCode)}"`);
@@ -88,7 +93,7 @@ export function extend(Parser, azTokens) {
                 const isBraceL = ch === 123; // {
 
                 if(isBackQuote || isDollar || isHash || isBraceL) {
-                    const isAzTmpl = this.curContext() === dom_tmpl;
+                    const isAzTmpl = this.curContext() === tc.dom_tmpl;
                     const hasBraceLNext = (isHash || isDollar) && this.input.charCodeAt(this.pos + 1) === 123; // {
                     const isDollarBraceL = isDollar && hasBraceLNext; // ${
                     const isHashBraceL = isHash && hasBraceLNext; // #{
@@ -140,7 +145,7 @@ export function extend(Parser, azTokens) {
                 } else if(isNewLine(ch)) { 
                     out += this.input.slice(chunkStart, this.pos);
                     ++this.pos;
-                    switch (ch) {
+                    switch(ch) {
                         case 13:
                             if(this.input.charCodeAt(this.pos) === 10) ++this.pos;
                         case 10:
@@ -164,7 +169,7 @@ export function extend(Parser, azTokens) {
         readInvalidTemplateToken = function() {
             for(; this.pos < this.input.length; this.pos++) {
                 const code = this.input[this.pos];
-                switch (code) {
+                switch(code) {
                     case '\\':
                         ++this.pos;
                         break;
@@ -175,7 +180,7 @@ export function extend(Parser, azTokens) {
                         }
                         // fallthrough if #{ or ${
                     case '{':
-                        if(code !== '$' && this.curContext() !== dom_tmpl) {
+                        if(code !== '$' && this.curContext() !== tc.dom_tmpl) {
                             break;
                         }
                         // fallthrough if ${ or azoth template with #{ or {
@@ -191,7 +196,7 @@ export function extend(Parser, azTokens) {
 
         /* Parsing Methods */
         parseExprAtomDefault() {
-            if(this.type !== hashQuote) {
+            if(this.type !== tt.hashQuote) {
                 return super.parseExprAtomDefault();
             }
 
@@ -207,11 +212,12 @@ export function extend(Parser, azTokens) {
 
             // start with template elements read as always +1 in length vs expressions
             let curElt = this.parseTemplateElement({ isTagged : false }); // isTagged controls invalid escape sequences            
-            node.quasis = [curElt];
             node.expressions = [];
-            node.interpolators = [];
+            node.elements = [];
+            node.binders = [];
+
             if(curElt.tail) {
-                parser.end(curElt.value.raw);
+                parser.endTemplate(curElt);
             }
 
             while(!curElt.tail) {
@@ -220,32 +226,29 @@ export function extend(Parser, azTokens) {
                 if(!lBraces.has(this.type)) this.unexpected();
 
                 const interpolator = this.startNode();
-                interpolator.name = this.type.label;
-                node.interpolators.push(this.finishNode(interpolator, 'TemplateInterpolator'));
-
-                // TODO: Reactive expressions
-                // const azothExpr = this.startNode();
-                // node.expressions.push(azothExpr);
+                const { label } = this.type;
+                this.next();
+                interpolator.name = label;
+                this.finishNode(interpolator, 'TemplateInterpolator');
+                parser.writeTemplatePart(curElt, interpolator);
 
                 // ...expression...
-                this.next();
-                const expr = this.parseExpression();
-                node.expressions.push(expr);
+                node.expressions.push(this.parseExpression());
                 
                 // closing }
                 this.expect(tt.braceR);
 
-                // this.finishNode(azothExpr, 'AzothExpression');
+
                 
-                parser.write(curElt.value.raw);
-
                 // next template element
-                node.quasis.push(curElt = this.parseTemplateElement({ isTagged : true }));
+                curElt = this.parseTemplateElement({ isTagged : true });
 
-                if(curElt.tail) parser.end(curElt.value.raw);
+                if(curElt.tail) parser.endTemplate(curElt);
             }
             node.html = parser.html;
-            node.bindings = parser.bindings;
+            node.rootType = parser.rootType;
+            node.binders = parser.binders;
+            node.elements = parser.elements;
 
             this.next();
             return this.finishNode(node, 'DomTemplateLiteral');

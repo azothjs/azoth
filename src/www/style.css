@@ -17,6 +17,12 @@ body {
 
 }
 
+.ftw {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: steelblue;
+}
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;

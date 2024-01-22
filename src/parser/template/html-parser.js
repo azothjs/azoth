@@ -1,16 +1,25 @@
 import { Parser as HtmlParser } from 'htmlparser2';
 import voidElements from '../void-elements.js';
 import { LAST_QUOTE, NEXT_QUOTE, DEV_TRIM } from './regex.js';
+import { html, find } from 'property-information';
+import { getLineInfo } from 'acorn';
+import { findInfo } from './find-info.js';
 
 export class TemplateParser {
     // final state after .end()
     html = '';
-    bindings = []; 
+    binders = []; 
+    boundElements = null;
+    rootType = 'fragment';
 
-    // template context state,
-    // implements handler for htmlparser2
+    // template context state, implements handler for htmlparser2
     template = null;
+    // htmlparser2 instance
     parser = null;
+    // current TemplateElement AST Node
+    templateElement = null;
+    // current interpolator
+    interpolator = null;
     // carry-over quote information for attr=${interpolator}
     eatQuote = '';
 
@@ -21,16 +30,22 @@ export class TemplateParser {
             lowerCaseAttributeNames: false,
             recognizeSelfClosing: true 
         });
+        this.template.parser = this.parser;
+    }
+
+    writeTemplatePart(templateElement, interpolator) {
+        this.templateElement = templateElement;
+        this.interpolator = interpolator;
+        return this.write(templateElement.value.raw);
     }
     
     write(text) {
         if(this.parser.ended) {
             throw new Error('Cannot call parser.write() after parser.end()');
         }
-
         this.writeText(text);
-        const binding = this.template.createBinding();
-        if(this.template.nextAttributeBinding) { 
+        const binder = this.template.createBinder(this.templateElement, this.interpolator);
+        if(this.template.nextAttributeBinder) { 
             // finish attribute via quote(s): match ='{, ="{, ={ no match means attr...{
             const match = text.match(LAST_QUOTE);
             if(match) {
@@ -50,6 +65,8 @@ export class TemplateParser {
 
     writeText(text) {
         if(text) {
+            // console.log('before write', this.parser.startIndex, this.parser.openTagStart);
+
             // remove equivalent quotation marks added by prior parser.write()
             if(this.eatQuote) {
                 const match = text.match(NEXT_QUOTE);
@@ -59,8 +76,19 @@ export class TemplateParser {
                 }
             }
             this.parser.write(text);
+            // console.log('after write', this.parser.startIndex);
         }
         this.eatQuote = '';
+    }
+
+    endTemplate(templateElement) {
+        if(!templateElement.tail) {
+            throw new Error(`Cannot call endTemplate with non-tail TemplateElement`);
+        }
+        // tail cannot be bound
+        this.templateElement = null;
+        this.interpolator = null;
+        this.end(templateElement.value.raw);
     }
 
     end(text) {
@@ -68,43 +96,67 @@ export class TemplateParser {
             if(text) {
                 throw new Error('Cannot call parser.end with text if parser.end has already been called.');
             }
-            return { bindings: this.bindings, html: this.html };
+        }
+        else {
+            this.writeText(text);
+            this.parser.end();
+
+            const { hasElements, boundElements, root } = this.template;
+            const bound = [...boundElements].sort((a, b) => a.order - b.order);
+            const { length } = bound;
+            for(let i = 0; i < length; i++) {
+                bound[i].queryIndex = i;
+            }
+
+            this.elements = bound
+                .map(e => e.toNode());
+            
+            this.binders = this.template.binders
+                .map(b => b.toNode());
+
+            this.html = this.template.html
+                .flat()
+                .join('')
+                .replace(DEV_TRIM, '');
+
+            // default is "fragment"
+            if(root.length === 1) {
+                if(!hasElements) {
+                    this.rootType = 'text';
+                }
+                else if(!root.isBound) {
+                    this.rootType = 'element';
+                }
+            }
         }
 
-        this.writeText(text);
-        this.parser.end();
-            
-        this.bindings = this.template.bindings.map(({ 
-            type,
-            element: { name, queryIndex, length }, 
-            property, 
-            index: childIndex 
-        }) => {
-            return property ? 
-                { type, queryIndex, name, property } : 
-                { type, queryIndex, name, childIndex, length };
-        });
-        this.html = this.template.html
-            .flat()
-            .join('')
-            .replace(DEV_TRIM, '');
-
-        return { bindings: this.bindings, html: this.html };
+        const { binders, html, elements, rootType } = this;
+        return { binders, html, elements, rootType };
     }   
 }
 
-
 class TemplateContext {
+    // accumulated html array of strings and arrays
     html = [];
-    stack = [];
-    bindings = [];
-    targets = [];
-    root = null;
+    // Does this html contain _any_ elements?
+    hasElements = false;
     
+    // template binders
+    binders = [];
+    // unique set of bound elements of the template
+    boundElements = new Set();
+    // context stack for current element
+    stack = [];
+    // fragment "root" of stack
+    root = null;
     // current element context
     element = null;
-    // carry-over binding that comes before its own attribute
-    nextAttributeBinding = null;
+    // element count used to track element order
+    elementCount = 0;
+    
+    
+    // carry-over binder that comes before its own attribute
+    nextAttributeBinder = null;
 
     constructor() {
         this.push('<>');
@@ -112,32 +164,32 @@ class TemplateContext {
         this.root.inTagOpen = false;
     }
 
-    push(name) {
-        const context = new ElementContext(name);
+    push(name, tagStart) {
+        const context = new ElementContext(name, this.elementCount++, tagStart);
         this.stack.push(this.element = context);
+        if(name !== '<>') this.hasElements = true;
     }
 
-    createBinding() {
-        const { targets, element, root } = this;
-         // queryIndex is the index of element in querySelectorAll bound els
-        // let queryIndex = targets.lastIndexOf(element);
-        if(element.queryIndex === -1 && element !== root) {
-            element.queryIndex = targets.push(element) - 1;
-        }
+    createBinder(templateElement, interpolator) {
+        const { element, root } = this;
+        // if(templateElement?.loc) {
+        //     // console.log(templateElement.type, templateElement?.loc, templateElement?.start, templateElement?.end);
+        //     // console.log(interpolator.type, interpolator?.loc);
+        // }
 
-        let binding = null;
+        let binder = null;
         if(element.inTagOpen) {
-            binding = new PropertyBinding(element);
-            this.nextAttributeBinding = binding;
+            binder = new PropertyBinder(element, interpolator);
+            this.nextAttributeBinder = binder;
         }
         else {
-            binding = new ChildBinding(element);
-            this.html.push(binding.replacement);
+            binder = new ChildBinder(element, interpolator);
+            this.html.push(binder.replacement);
             element.length++;
         }
-        this.bindings.push(binding);
+        this.binders.push(binder);
+        return binder;
     }
-
 
     pop(){
         this.stack.pop();
@@ -147,16 +199,19 @@ class TemplateContext {
     onopentagname(name) {
         const parent = this.element;
         parent.length++;
-        this.push(name); // new open tag now this.element
+
+        // makes this open tag new this.element context
+        this.push(name, this.parser.openTagStart); 
         this.html.push(`<${name}`);
     }
         
     onattribute(name, value, quote) {
-        const binding = this.nextAttributeBinding;
-        this.nextAttributeBinding = null;
+        const binder = this.nextAttributeBinder;
+        this.nextAttributeBinder = null;
 
-        if(binding) {
-            binding.property = name;
+        if(binder) {
+            // TODO: source map location
+            binder.setProperty(name);
         }
         else {
             value ??= '';
@@ -179,67 +234,126 @@ class TemplateContext {
     onclosetag(name, isImplied) {
         // void, self-closing, tags
         if(!voidElements.has(name)) this.html.push(`</${name}>`);
-        if(this.element.isBound) {
-            this.onattribute(Binding.attributeName);
+
+        const { element, root, boundElements } = this;
+        if(element.isBound) {
+            this.onattribute(Binder.queryAttributeName);
+            if(!boundElements.has(element)) {
+                boundElements.add(element);
+            }
         }
+
         this.pop();
     }
         
     oncomment(comment) {
         this.element.length++;
         this.html.push(`<!--${comment}-->`);
-    } 
+    }
 }
 
 class ElementContext {
+    type = 'DomTemplateElement';
     attributes = [];
     inTagOpen = true;
     name = '';
-    keys = 0;
     length = 0;
     queryIndex = -1;
     isBound = false;
+    order = -1;
+    position = null;
 
-    constructor(name) {
+    constructor(name, order, tagStart, position) {
         this.name = name;
+        this.order = order;
+        this.start = tagStart + 1;
+        this.end = this.start + this.name.length;
+        this.range = [this.start, this.end];
+        this.position = position ?? null;
     }
 
     addAttribute(attr) {
         this.attributes.push(attr);
     }
+
+    toNode() {
+        const { type, name, length, queryIndex, start, end, range } = this;
+        // TODO: source map location
+        return { type, name, length, queryIndex, start, end, range };
+    }
 }
 
-class Binding {
-    static attributeName = 'data-bind';
+class Binder {
+    static queryAttributeName = 'data-bind';
     element = null;
+    interpolator = null;
     type = '';
+    start = -1;
+    end = -1;
+    range = null;
 
-    constructor(element) {
+    constructor(element, interpolator) {
         this.element = element;
         this.element.isBound = true;
         this.type = this.constructor.name;
+        if(interpolator) {
+            this.interpolator = interpolator;
+            const { start, end, range } = interpolator;
+            this.start = start;
+            this.end = end;
+            this.range = range ?? [start, end];
+        }
     }
 }
 
-class PropertyBinding extends Binding {
-    #property = '';
+class PropertyBinder extends Binder {
+    property = '';
+    attribute = '';
+    raw = '';
 
-    get property() { 
-        return this.#property;
+    setProperty(value) {
+        const { property, attribute } = findInfo(value);
+        this.raw = value;
+        this.property = property;
+        this.attribute = attribute;
     }
-    set property(value) {
-        // TODO: use 'property-information' package
-        this.#property = value === 'class' ? 'className' : value;
+
+    toNode() {
+        const { type, element: { queryIndex }, interpolator, property, attribute, raw, start, end, range } = this;
+        return { 
+            type,
+            queryIndex,
+            interpolator,
+            // TODO: identity node with location
+            name: raw, 
+            property, 
+            attribute,
+            start, end, range,
+        };
     }
 }
 
-class ChildBinding extends Binding {
+class ChildBinder extends Binder {
     index = -1;
     replacement = '';
-    constructor(element) {
-        super(element);
+    constructor(element, interpolator) {
+        super(element, interpolator);
         this.index = element.length;
         // this.replacement = `<!--child[${this.index}]-->`;
         this.replacement = `<text-node></text-node>`;
+    }
+
+    toNode() {
+        const { type, element, interpolator, index, replacement, start, end, range } = this;
+        const { queryIndex, length } = element;
+        return { 
+            type,
+            queryIndex,
+            interpolator,
+            index,
+            length,
+            replacement, 
+            start, end, range
+        };
     }
 }

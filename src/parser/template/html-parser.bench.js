@@ -7,5 +7,5 @@ bench('parse template attributes', () => {
     parser.write(` required name="`);
     parser.write(`" maxLength='`);
     parser.write(`' type='text' disabled=`);
-    const { html, bindings } = parser.end(`></p>`);
+    const { html, binders } = parser.end(`></p>`);
 });

@@ -1,6 +1,9 @@
-import { rawHtml, makeRenderer, getRenderer } from './dom';
+import { rendererById } from './dom.js';
+import { compose } from './compose.js';
 
-export const _ = () => {};
+export const _ = () => { };
 
-// injected by compiler:
-export { makeRenderer as __makeRenderer };
+export {
+    rendererById as __rendererById,
+    compose as __compose
+};
