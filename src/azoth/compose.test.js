@@ -9,10 +9,14 @@ const elements = [
     elementWithAnchorText,
 ];
    
-function run(value, create) {
+function runCompose(value, create) {
     const { dom, anchor } = create();
     compose(value, anchor);
-    return dom.outerHTML;
+    return dom;
+}
+
+function run(value, create) {
+    return runCompose(value, create).outerHTML;
 }
 
 const getKeyList = list => list.map(([key]) => key).join(', ');
@@ -133,7 +137,38 @@ describe(`accepted values appended`, () => {
 
 });
 
-describe('arrays appended', () => {
+describe('function called, result appended', () => {
+
+    test('return value composed', ({ expect }) => {
+
+        function testFunction(fn) {
+            return elements.map(create => {
+                return `${create.name.padEnd(25, ' ')}: ${run(fn, create)}`;
+            });
+        }
+
+        expect(testFunction($div)).toMatchInlineSnapshot(`
+          [
+            "elementWithTextAnchor    : <div>Hello<div></div><!--1--></div>",
+            "elementWithTextAnchorText: <div>Hello<div></div><!--1-->Hello</div>",
+            "elementWithAnchor        : <div><div></div><!--1--></div>",
+            "elementWithAnchorText    : <div><div></div><!--1-->Hello</div>",
+          ]
+        `);
+
+        expect(testFunction(() => 'function')).toMatchInlineSnapshot(`
+          [
+            "elementWithTextAnchor    : <div>Hellofunction<!--1--></div>",
+            "elementWithTextAnchorText: <div>Hellofunction<!--1-->Hello</div>",
+            "elementWithAnchor        : <div>function<!--1--></div>",
+            "elementWithAnchorText    : <div>function<!--1-->Hello</div>",
+          ]
+        `);
+
+    });
+});
+
+describe('array appended', () => {
     test('each child item', ({ expect }) => {
         const results = elements.map(create => {
             return `${create.name.padEnd(25, ' ')} ${run(['a', 'b', 'c'], create)}`;
@@ -146,6 +181,56 @@ describe('arrays appended', () => {
             "elementWithAnchorText     <div>abc<!--3-->Hello</div>",
           ]
         `);
+    });
+});
+
+describe('async resolved appended', () => {
+
+    test('promise', async ({ expect }) => {
+        const promises = [];
+        const getAsyncText = (text) => {
+            const promise = Promise.resolve(text);
+            promises.push(promise);
+            return promise;
+        };
+
+        async function testArray(value) {
+            return await Promise.all(
+                elements.map(async create => {
+                    const promise = getAsyncText(value);
+                    const dom = runCompose(promise, create);
+                    await promise;
+                    return `${create.name.padEnd(25, ' ')}: ${dom.outerHTML}`;
+                })
+            );
+        }
+
+        expect(await testArray('promise?')).toMatchInlineSnapshot(`
+          [
+            "elementWithTextAnchor    : <div>Hellopromise?<!--1--></div>",
+            "elementWithTextAnchorText: <div>Hellopromise?<!--1-->Hello</div>",
+            "elementWithAnchor        : <div>promise?<!--1--></div>",
+            "elementWithAnchorText    : <div>promise?<!--1-->Hello</div>",
+          ]
+        `);
+
+        expect(await testArray([42, 11, 7])).toMatchInlineSnapshot(`
+          [
+            "elementWithTextAnchor    : <div>Hello42117<!--3--></div>",
+            "elementWithTextAnchorText: <div>Hello42117<!--3-->Hello</div>",
+            "elementWithAnchor        : <div>42117<!--3--></div>",
+            "elementWithAnchorText    : <div>42117<!--3-->Hello</div>",
+          ]
+        `);
+
+    });
+});
+
+describe('invalid throww', () => {
+    test('object', () => {
+        expect(() => {
+            compose({});
+        }).toThrowErrorMatchingInlineSnapshot(`[TypeError: Invalid dom block compose input value type "object". Value was "[object Object]"]`);
     });
 });
 
@@ -178,9 +263,9 @@ function elementWithAnchorText() {
     return { dom, anchor: dom.firstChild };
 }
 
-describe('element creator helpers initial anchor and html', () => {
+describe('element helpers initial anchor and html', () => {
 
-    test('el: text anchor', ({ expect }) => {
+    test('text-anchor', ({ expect }) => {
         expect(elementWithTextAnchorText()).toMatchInlineSnapshot(`
       {
         "anchor": <!--0-->,
@@ -193,7 +278,7 @@ describe('element creator helpers initial anchor and html', () => {
     `);
     });
 
-    test('el: text anchor text', ({ expect }) => {
+    test('text-anchor-text', ({ expect }) => {
         expect(elementWithTextAnchorText()).toMatchInlineSnapshot(`
       {
         "anchor": <!--0-->,
@@ -206,7 +291,7 @@ describe('element creator helpers initial anchor and html', () => {
     `);
     });
 
-    test('el: anchor', ({ expect }) => {
+    test('anchor', ({ expect }) => {
         expect(elementWithAnchor()).toMatchInlineSnapshot(`
       {
         "anchor": <!--0-->,
@@ -217,7 +302,7 @@ describe('element creator helpers initial anchor and html', () => {
     `);
     });
 
-    test('el: anchor text', ({ expect }) => {
+    test('anchor-text', ({ expect }) => {
         expect(elementWithAnchorText()).toMatchInlineSnapshot(`
       {
         "anchor": <!--0-->,

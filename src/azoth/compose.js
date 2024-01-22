@@ -15,15 +15,17 @@ export function compose(input, anchor, keepLast = false) {
             inject(input, anchor, keepLast);
             break;
         }
+        case type === 'function':
+            compose(input(), anchor, keepLast);
+            break;
         case input instanceof Promise:
             input.then(v => compose(v, anchor, keepLast));
             break;
         case Array.isArray(input):
             composeArray(input, anchor, keepLast);
             break;
-
         default:
-            throw new Error(`Invalid block type ${type}, ${input}`);
+            throw new TypeError(`Invalid dom block compose input value type "${type}". Value was "${input}"`);
     }
 }
 
@@ -31,7 +33,6 @@ function removePrior(anchor) {
     const count = +anchor.data;
     if(count > 0 && tryRemovePrior(anchor)) anchor.data = `${count - 1}`;
 }
-
 
 function inject(input, anchor, keepLast) {
     let count = +anchor.data;
