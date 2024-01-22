@@ -1,4 +1,5 @@
 import './style.css';
+import { compose } from '../azoth/compose.js';
 
 // console.log(te19fd83eae)
 class $ extends HTMLElement {
@@ -6,7 +7,7 @@ class $ extends HTMLElement {
 }
 const category = 'category';
 const place = 'place';
-const render = () => <li className={"category"}>Hello {"place"}</li>;
+const render = () => <li className={'category'}>Hello {'place'}</li>;
 
 class Generated$ extends $ {
     _anchor = null;
@@ -21,7 +22,7 @@ class Generated$ extends $ {
 
     values = null;
     set name(value) {
-        if(this.anchor) __compose(value, this.anchor);
+        if(this.anchor) compose(value, this.anchor);
         else if(this.values) this.values.name = `${value}`;
         else this.values = { name: `${value}` };
     }
@@ -34,7 +35,7 @@ class Generated$ extends $ {
     }
 
     connectedCallback() {
-        const li = this.render()
+        const li = this.render();
         this.anchor = li.childNodes[1];
         this.append(li);
     }
