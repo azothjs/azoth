@@ -37,13 +37,13 @@ function inject(input, anchor, keepLast) {
     let count = +anchor.data;
     if(!keepLast && count > 0 && tryRemovePrior(anchor)) count--;
     anchor.before(input);
-    anchor.data = `${count + 1}`
+    anchor.data = `${count + 1}`;
 }
 
 // TODO: array in array with replace param
-function composeArray(array, anchor, replace) {
+function composeArray(array, anchor) {
     for(let i = 0; i < array.length; i++) {
-        compose(array[i], anchor, false);
+        compose(array[i], anchor, true);
     }
 }
 
