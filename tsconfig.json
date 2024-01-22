@@ -1,0 +1,17 @@
+  {
+    "compilerOptions": {
+        "jsx": "preserve",
+        "target": "ESNext",
+        // "strictNullChecks": false,
+        "noImplicitAny": true,
+        "types": ["vite/client"],
+        "experimentalDecorators": true,
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        // "allowImportingTsExtensions": true,
+        // "noEmit": true,
+        "isolatedModules": true,
+        // "emitDeclarationOnly": true,
+        // "composite": true
+    }
+  }

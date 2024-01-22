@@ -2,6 +2,8 @@
     "cSpell.words": [
         "astring",
         "backquote",
+        "espree",
+        "IIFE",
         "onattribute",
         "onclosetag",
         "oncomment",
@@ -10,10 +12,13 @@
         "ontext",
         "quasis",
         "templatize",
-        "tmpl"
+        "tmpl",
+        "donot",
+        "autohid",
+        "dbaeumer"
     ],
-    "typescript.format.enable": false,
-    "javascript.format.enable": true,
-    "javascript.suggestionActions.enabled": true,
-    "javascript.validate.enable": false,
+    "eslint.experimental.useFlatConfig": true,
+    "eslint.format.enable": true,
+    "eslint.enable": true,
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
 }

@@ -1,6 +1,6 @@
 
 
-function render(...p?) : Node {
+function render(...p?): Node {
     console.log('yo')
     return document.createElement('p')
 }
@@ -12,10 +12,10 @@ type emojiStream = (emoji: emoji) => void;
 
 type unsubscribe = () => void;
 interface Observable<T> {
-    subscribe: (subscriber : (value : T) => void) => unsubscribe
+    subscribe: (subscriber: (value: T) => void) => unsubscribe
 }
 
-function getCoolEmoji() : Observable<emoji> {
+function getCoolEmoji(): Observable<emoji> {
     return {
         subscribe(fn) {
             // handle fn
@@ -27,10 +27,10 @@ function getCoolEmoji() : Observable<emoji> {
 }
 
 type Root = HTMLElement | DocumentFragment;
-type Rendered = { root : Root, targets : NodeList } 
+type Rendered = { root: Root, targets: NodeList }
 
 function templateService(id: string) {
-    return () : Rendered => {
+    return (): Rendered => {
         const root = document.getElementById(id);
         if(!root) throw new Error('Invalid id');
         const targets = root.querySelectorAll('[data-bind]');
@@ -48,23 +48,23 @@ const emoji = getCoolEmoji()
 // const t = _`<p>{~emoji.name}: {~emoji.text}</p>`;
 
 function elText(el: HTMLElement) {
-    return (content : string) => el.textContent = content;
+    return (content: string) => el.textContent = content;
 }
 
 function childText(el: HTMLElement, index: number) {
     const childNode = el.childNodes[index];
-    return (content : string) => childNode.textContent = content
+    return (content: string) => childNode.textContent = content
 
 }
 
 
 class Template1 {
     static template = dom(`c1d46e`);
-    
+
     constructor(targets) {
         const { root, targets } = template();
         this.root = root;
-        const t0 = targets[0];              
+        const t0 = targets[0];
         this.t0_0 = t0.childNodes[0];
         this.t0_2 = t0.childNodes[1];
         this.t2 = targets[2];
@@ -80,8 +80,8 @@ class Template1 {
     }
 
     u1(emoji) {
-        this.t0_0.textContent = emoji.name;                        
-        this.t0_2.textContent = emoji.text; 
+        this.t0_0.textContent = emoji.name;
+        this.t0_2.textContent = emoji.text;
     }
 }
 
@@ -90,22 +90,22 @@ class Template1 {
     return () => {
         const t1 = new Template1();
         t1.u2 = x + y;
-        subscription(root, emoji.subscribe((emoji : emoji) => t1.u1(emoji)));
+        subscription(root, emoji.subscribe((emoji: emoji) => t1.u1(emoji)));
         return root;
     }
 })();
 
 (() => {
     // _`<p>{~emoji.name}: {~emoji.text}</p>`;
-    const renderDom = templateService(`c1d46e`);                                      
+    const renderDom = templateService(`c1d46e`);
     return () => {
-        const { root, targets } = renderDom();        
-        const t0 = <HTMLParagraphElement>targets[0];              
+        const { root, targets } = renderDom();
+        const t0 = <HTMLParagraphElement>targets[0];
         const t0_0 = t0.childNodes[0];
         const t0_2 = t0.childNodes[1];
-        subscription(root, emoji.subscribe((emoji : emoji) => {
-            t0_0.textContent = emoji.name;                        
-            t0_2.textContent = emoji.text;   
+        subscription(root, emoji.subscribe((emoji: emoji) => {
+            t0_0.textContent = emoji.name;
+            t0_2.textContent = emoji.text;
         }))
         return root;
     }
@@ -117,24 +117,24 @@ class Template1 {
 
 (() => {
     // _`<p>{~emoji.name}: {~emoji.text}</p>`;
-    const renderDom = templateService(`c1d46e`);                    
-    const expr0 = (emoji) => emoji.name;                    
-    const expr1 = (emoji) => emoji.text; 
+    const renderDom = templateService(`c1d46e`);
+    const expr0 = (emoji) => emoji.name;
+    const expr1 = (emoji) => emoji.text;
 
-    const bind = nodes => {                                         
-        const node0 : HTMLParagraphElement = nodes[0];              
-        const text0_0 = childText(node0, 0);                        
-        const text0_2 = childText(node0, 2);   
-        const b1 = emoji => text0_0(expr0(emoji)); 
-        const b2 = emoji => text0_2(expr1(emoji)); 
+    const bind = nodes => {
+        const node0: HTMLParagraphElement = nodes[0];
+        const text0_0 = childText(node0, 0);
+        const text0_2 = childText(node0, 2);
+        const b1 = emoji => text0_0(expr0(emoji));
+        const b2 = emoji => text0_2(expr1(emoji));
         return [b1, b2];
-    }                     
-    
+    }
+
     const fn = () => {
         const { root, targets } = renderDom();
-        const bindings = bind(targets);
-        const u1 = emoji.subscribe(bindings[0])
-        const u2 = emoji.subscribe(bindings[1])
+        const binders = bind(targets);
+        const u1 = emoji.subscribe(binders[0])
+        const u2 = emoji.subscribe(binders[1])
 
         const unsubscribe = () => {
             u1();
@@ -152,11 +152,11 @@ class Template1 {
 (() => {
     const renderDom = templateService(`c1d46e`);                    // _
 
-    const expr0 = (emoji : emoji) => emoji.name;                    // {~emoji.name}
-    const expr1 = (emoji : emoji) => emoji.text;                    // {~emoji.type}
+    const expr0 = (emoji: emoji) => emoji.name;                    // {~emoji.name}
+    const expr1 = (emoji: emoji) => emoji.text;                    // {~emoji.type}
 
     const bind = nodes => {                                         // _
-        const node0 : HTMLParagraphElement = nodes[0];              // <p>
+        const node0: HTMLParagraphElement = nodes[0];              // <p>
         const text0_0 = childText(node0, 0);                        // {~emoji.name}
         const text0_2 = childText(node0, 2);                        // {~emoji.type}
         const b1 = emoji.subscribe(emoji => text0_0(expr0(emoji))); // {~emoji.name}
@@ -166,7 +166,7 @@ class Template1 {
 
     const fn = () => {
         const { root, targets } = renderDom();
-        const bindings = bind(targets);
+        const binders = bind(targets);
         return root;
     }
 
@@ -179,7 +179,7 @@ class Template1 {
 
 function () {
     const emoji = await getCoolEmoji();
-    const card = (emoji : any) => _`<p>${await emoji.name, await emoji.text}: {emoji.text}</p>`
+    const card = (emoji: any) => _`<p>${await emoji.name, await emoji.text}: {emoji.text}</p>`
     return card;
 }
 
@@ -193,15 +193,15 @@ const lives = 2;
 // `;
 // document.body.append(p);
 
-const p = document.createElement('p')
-p.innerHTML = /*html*/`
+const p2 = document.createElement('p')
+p2.innerHTML = /*html*/`
     <p class=${lives < 3 && 'warning'}>
         ${cat} <strong>loves</strong> <em>${favorite}</em>
     </p>
 `;
-document.body.append(p);
+document.body.append(p2);
 
-const _ = () : HTMLElement => { return document.createElement('p'); }
+const _ = (): HTMLElement => { return document.createElement('p'); }
 
 // Azoth
 const p = /*#*//*html*/`
