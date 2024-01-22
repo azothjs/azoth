@@ -1,55 +1,20 @@
 import js from '@eslint/js';
 import globals from 'globals';
-import { Parser as AcornParser } from 'acorn';
-import azoth from './src/parser/index.js';
-import espree from 'espree/lib/espree.js';
-import { VisitorKeys } from 'espree';
-
-const acornOptions = {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    locations: true,
-    ranges: true,
-    comments: true,
-};
-
-const espreeOptions = {
-    loc: true,
-    range: true,
-    tokens: true,
-    comment: true,
-};
-
-const AzothEspreeParser = AcornParser.extend(azoth(), espree());
-
-const parser = {
-    meta: {
-        name: 'eslint-parser-azoth',
-        version: '0.0.0'
-    },
-    visitorKeys: {
-        ...VisitorKeys,
-        DomTemplateLiteral: ['expressions', 'elements', 'binders'],
-        ChildBinder: ['interpolator'],
-        PropertyBinder: ['interpolator'],
-        TemplateInterpolator: [],
-        DomTemplateElement: [],
-    },
-    parseForESLint(code, options) {
-        const ast = AzothEspreeParser.parse(code, {
-            ...acornOptions,
-            ...options,
-        });
-        return {
-            ast,
-        };
-    }
-};
 
 export default [
     js.configs.recommended,
+    // {
+    //     files: ['src/www/*.jsx'],
+    //     plugins: {
+    //         react: reactPlugin,
+    //     },
+    //     languageOptions: {
+    //         parser
+    //     },
+    // },
     {
-        files: ['**/*.js'],
+        files: ['**/*.js', '**/*.jsx'],
+        // files: ['**/*.js'],
         // linterOptions: {
         //     reportUnusedDisableDirectives: 'warn'
         // },
@@ -57,6 +22,9 @@ export default [
             globals: {
                 ...globals.browser
             },
+            parserOptions: {
+                ecmaFeatures: { jsx: true }
+            }
         },
         rules: {
             eqeqeq: [
@@ -146,12 +114,6 @@ export default [
             'array-bracket-spacing': 'error',
             'no-unused-vars': 'off'
         }
-    },
-    {
-        files: ['src/www/*.js'],
-        languageOptions: {
-            parser
-        },
     }
 ];
 

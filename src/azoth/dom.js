@@ -1,4 +1,4 @@
-import renderer from './renderer';
+import renderer from './renderer.js';
 
 const htmlToFragment = (html) => {
     const template = document.createElement('template');
@@ -33,7 +33,7 @@ export function getRenderer(id) {
 
     // TODO: could fail on bad id...
     const templateEl = document.getElementById(id);
-    const render = renderer(templateEl.content);
-    templates.set(id, render);
-    return render;
+    const template = renderer(templateEl.content);
+    templates.set(id, template);
+    return template;
 }

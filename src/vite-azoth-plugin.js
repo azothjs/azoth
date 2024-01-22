@@ -28,7 +28,7 @@ export default function AzothPlugin() {
 
     const transform = {
         name: 'rollup-azoth-plugin',
-
+        enforce: 'pre',
         resolveId(id) {
             // console.log('resolve id', id);
 
@@ -78,13 +78,12 @@ export default function AzothPlugin() {
             const params = new URLSearchParams(uniqueIds.map(id => ['id', id]));
             const names = uniqueIds.map(id => `t${id}`).join(', ');
 
-            code += [
-                `\nimport { __rendererById, __compose } from '/src/azoth/index.js';`,
-                `\nimport { ${names} } from '${templateServiceModule}?${params.toString()}';`,
-                `\n`,
+            const imports = [
+                `import { __rendererById, __compose } from '/src/azoth/index.js';\n`,
+                `import { ${names} } from '${templateServiceModule}?${params.toString()}';\n`,
             ].join('');
 
-            return code;
+            return imports + code;
 
         },
     };

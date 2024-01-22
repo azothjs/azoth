@@ -12,7 +12,13 @@
         "ontext",
         "quasis",
         "templatize",
-        "tmpl"
+        "tmpl",
+        "donot",
+        "autohid",
+        "dbaeumer"
     ],
     "eslint.experimental.useFlatConfig": true,
+    "eslint.format.enable": true,
+    "eslint.enable": true,
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
 }

@@ -37,7 +37,7 @@ describe('JSX dom literals', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
-              const { node: t090c4b5012, targets: __targets } = __rendererById('090c4b5012');
+              const { fragment: __root_090c4b5012, targets: __targets } = t090c4b5012();
               const __target0 = __targets[0];
               const __target1 = __targets[1];
               const __target2 = __targets[2];
@@ -61,7 +61,7 @@ describe('JSX dom literals', () => {
               __target6.className = ("span-class");
               __compose("ul-footer", __child7);
               __compose("footer", __child8);
-              return t090c4b5012;
+              return __root_090c4b5012;
           })();
           "
         `);
@@ -102,13 +102,13 @@ describe('JSX dom literals', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
-              const { node: t24a912889d, targets: __targets } = __rendererById('24a912889d');
+              const { fragment: __root_24a912889d, targets: __targets } = t24a912889d();
               const __target0 = __targets[0];
               __target0.className = ("className");
               __target0.name = ("name");
               __target0["class"] = ("class");
               __target0["class-name"] = ("class-name");
-              return t24a912889d;
+              return __root_24a912889d;
           })();
           "
         `);
@@ -132,11 +132,11 @@ describe('surrounding code integration', () => {
 
         expect(compile(input).code).toMatchInlineSnapshot(`
           "const template = (() => {
-              const { node: t666c3103ad, targets: __targets } = __rendererById('666c3103ad');
+              const { fragment: __root_666c3103ad, targets: __targets } = t666c3103ad();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               __compose(text, __child0);
-              return t666c3103ad;
+              return __root_666c3103ad;
           })();
           "
         `);
@@ -149,11 +149,11 @@ describe('surrounding code integration', () => {
 
         expect(compile(input).code).toMatchInlineSnapshot(`
           "const template = text => {
-              const { node: t666c3103ad, targets: __targets } = __rendererById('666c3103ad');
+              const { fragment: __root_666c3103ad, targets: __targets } = t666c3103ad();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               __compose(text, __child0);
-              return t666c3103ad;
+              return __root_666c3103ad;
           };
           "
         `);
@@ -171,11 +171,11 @@ describe('surrounding code integration', () => {
         expect(compile(input).code).toMatchInlineSnapshot(`
           "function template(text) {
               const format = 'text' + '!';
-              const { node: t666c3103ad, targets: __targets } = __rendererById('666c3103ad');
+              const { fragment: __root_666c3103ad, targets: __targets } = t666c3103ad();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               __compose(text, __child0);
-              return t666c3103ad;
+              return __root_666c3103ad;
           }
           "
         `);
@@ -192,12 +192,12 @@ describe('fragments', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const fragment = (() => {
-              const { node: t7c9daff739, targets: __targets } = __rendererById('7c9daff739', { fragment: true });
-              return t7c9daff739;
+              const { fragment: __root_7c9daff739, targets: __targets } = t7c9daff739({ fragment: true });
+              return __root_7c9daff739;
           })();
           const empty = (() => {
-              const { node: td41d8cd98f, targets: __targets } = __rendererById('d41d8cd98f');
-              return td41d8cd98f;
+              const { fragment: __root_d41d8cd98f, targets: __targets } = td41d8cd98f();
+              return __root_d41d8cd98f;
           })();
           "
         `);
@@ -225,10 +225,10 @@ describe('fragments', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const fragment = (() => {
-              const { node: tfaf808e6cc, targets: __targets } = __rendererById('faf808e6cc', { fragment: true });
-              const __child0 = tfaf808e6cc.childNodes[1];
+              const { fragment: __root_faf808e6cc, targets: __targets } = tfaf808e6cc({ fragment: true });
+              const __child0 = __root_faf808e6cc.childNodes[1];
               __compose("two", __child0);
-              return tfaf808e6cc;
+              return __root_faf808e6cc;
           })();
           "
         `);
@@ -258,15 +258,15 @@ describe('fragments', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const extraneous = (() => {
-              const { node: t0f05699ae4, targets: __targets } = __rendererById('0f05699ae4');
-              return t0f05699ae4;
+              const { fragment: __root_0f05699ae4, targets: __targets } = t0f05699ae4();
+              return __root_0f05699ae4;
           })();
           const childNodeIndex = (() => {
-              const { node: t09771bea6d, targets: __targets } = __rendererById('09771bea6d');
+              const { fragment: __root_09771bea6d, targets: __targets } = t09771bea6d();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[3];
               __compose("expect index 3", __child0);
-              return t09771bea6d;
+              return __root_09771bea6d;
           })();
           "
         `);
@@ -302,20 +302,20 @@ describe('child node composition changes', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const $item = name => {
-              const { node: tf00e886942, targets: __targets } = __rendererById('f00e886942');
+              const { fragment: __root_f00e886942, targets: __targets } = tf00e886942();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               __compose(name, __child0);
-              return tf00e886942;
+              return __root_f00e886942;
           };
           const $template = () => {
-              const { node: t3bee4f3a47, targets: __targets } = __rendererById('3bee4f3a47');
+              const { fragment: __root_3bee4f3a47, targets: __targets } = t3bee4f3a47();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               const __child1 = __target0.childNodes[1];
               __compose([2, 4, 7].map($item), __child0);
               __compose("text", __child1);
-              return t3bee4f3a47;
+              return __root_3bee4f3a47;
           };
           "
         `);
@@ -335,18 +335,45 @@ describe('child node composition changes', () => {
 
     });
 
-    test('edge case: odd childnodes in li', ({ expect }) => {
+    test('edge case: broken esbuild jsx', ({ expect }) => {
         const input = `const render = () => <li className={category}>Hello {place}</li>`;
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
           "const render = () => {
-              const { node: te19fd83eae, targets: __targets } = __rendererById('e19fd83eae');
+              const { fragment: __root_e19fd83eae, targets: __targets } = te19fd83eae();
               const __target0 = __targets[0];
               const __child1 = __target0.childNodes[1];
               __target0.className = (category);
               __compose(place, __child1);
-              return te19fd83eae;
+              return __root_e19fd83eae;
+          };
+          "
+        `);
+
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<li data-bind>Hello <!--0--></li>",
+              "id": "e19fd83eae",
+            },
+          ]
+        `);
+
+    });
+
+    test('edge case: odd childNodes in li', ({ expect }) => {
+        const input = `const render = () => <li className={category}>Hello {place}</li>`;
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "const render = () => {
+              const { fragment: __root_e19fd83eae, targets: __targets } = te19fd83eae();
+              const __target0 = __targets[0];
+              const __child1 = __target0.childNodes[1];
+              __target0.className = (category);
+              __compose(place, __child1);
+              return __root_e19fd83eae;
           };
           "
         `);

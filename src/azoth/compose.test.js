@@ -11,6 +11,7 @@ beforeEach(async (context) => {
 
 });
 
+
 test('no-op types don\'t access anchor', ({ expect, dom }) => {
     expect(dom).toBeDefined();
     const anchor = dom.lastChild;

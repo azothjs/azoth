@@ -1,4 +1,4 @@
-export default function renderer(fragment : DocumentFragment) {
+export default function renderer(fragment) {
 
     // const nodes = fragment.querySelectorAll('text-node');
     // let node = null;
@@ -8,7 +8,7 @@ export default function renderer(fragment : DocumentFragment) {
     // }
 
     return function render() {
-        const clone = <DocumentFragment>fragment.cloneNode(true);
+        const clone = fragment.cloneNode(true);
         return {
             fragment: clone,
             targets: clone.querySelectorAll('[data-bind]')

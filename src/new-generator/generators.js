@@ -13,13 +13,13 @@ function getNextLine(state) {
 }
 
 const DEFAULT_NAMES = {
-    renderer: `__rendererById`,
+    renderer: `t`,
     targets: `targets`,
     targetsAlias: `__targets`,
     target: `__target`,
     child: `__child`,
-    root: `node`,
-    rootAliasPrefix: `t`,
+    root: `fragment`,
+    rootAliasPrefix: `__root_`,
 };
 
 export class AzothGenerator extends Generator {
@@ -123,10 +123,9 @@ export class AzothGenerator extends Generator {
         const { names } = this;
         const rootVarName = `${names.rootAliasPrefix}${id}`;
         state.write(`const { ${names.root}: ${rootVarName}, ${names.targets}: ${names.targetsAlias} }`);
-        state.write(` = ${names.renderer}(`);
-        state.write(`'${id}'`);
+        state.write(` = ${names.renderer}${id}(`);
         if(isFragment && node.children.length > 1) {
-            state.write(`, { fragment: true }`);
+            state.write(`{ fragment: true }`);
         }
         state.write(`);`);
 
