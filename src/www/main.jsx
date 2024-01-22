@@ -11,13 +11,10 @@ async function fetchEmojis() {
     return res.json();
 }
 
-const promise = fetchEmojis().then(emojis => <>{emojis.map($emoji)}</>);
-
-
+const promise = fetchEmojis().then(emojis => emojis.map($emoji));
 const $Emojis = <ul>{promise}</ul>;
 
 document.body.append(
-    $Header,
     $Emojis
 );
 

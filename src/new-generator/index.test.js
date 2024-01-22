@@ -291,7 +291,7 @@ describe('fragments', () => {
     });
 });
 
-describe('child node composition changes', () => {
+describe('render and composition cases', () => {
 
     test('map in block', ({ expect }) => {
         const input = `
@@ -362,26 +362,45 @@ describe('child node composition changes', () => {
 
     });
 
-    test('edge case: odd childNodes in li', ({ expect }) => {
-        const input = `const render = () => <li className={category}>Hello {place}</li>`;
+    test('List composition', ({ expect }) => {
+        const input = `        
+            const $emoji = ({ name }) => <li>{name}</li>;
+            const promise = fetchEmojis().then(emojis => emojis.map($emoji));
+            const $Emojis = <ul>{promise}</ul>;
+            document.body.append(
+                $Emojis
+            );
+        `;
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const render = () => {
-              const { fragment: __root_e19fd83eae, targets: __targets } = te19fd83eae();
+          "const $emoji = ({name}) => {
+              const { fragment: __root_f00e886942, targets: __targets } = tf00e886942();
               const __target0 = __targets[0];
-              const __child1 = __target0.childNodes[1];
-              __target0.className = (category);
-              __compose(place, __child1);
-              return __root_e19fd83eae;
+              const __child0 = __target0.childNodes[0];
+              __compose(name, __child0);
+              return __root_f00e886942;
           };
+          const promise = fetchEmojis().then(emojis => emojis.map($emoji));
+          const $Emojis = (() => {
+              const { fragment: __root_df87cbf024, targets: __targets } = tdf87cbf024();
+              const __target0 = __targets[0];
+              const __child0 = __target0.childNodes[0];
+              __compose(promise, __child0);
+              return __root_df87cbf024;
+          })();
+          document.body.append($Emojis);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<li data-bind>Hello <!--0--></li>",
-              "id": "e19fd83eae",
+              "html": "<li data-bind><!--0--></li>",
+              "id": "f00e886942",
+            },
+            {
+              "html": "<ul data-bind><!--0--></ul>",
+              "id": "df87cbf024",
             },
           ]
         `);

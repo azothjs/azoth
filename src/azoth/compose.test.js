@@ -1,39 +1,125 @@
 // @vitest-environment jsdom
-import { beforeEach, test } from 'vitest';
+import { beforeEach, describe, test } from 'vitest';
 import { compose } from './compose.js';
 
+const elements = [
+    elementWithTextAnchor,
+    elementWithTextAnchorText,
+    elementWithAnchor,
+    elementWithAnchorText,
+];
 
-beforeEach(async (context) => {
-    const li = document.createElement('li');
-    li.className = 'travel';
-    li.append(document.createTextNode('Hello'), document.createComment(0));
-    context.dom = li;
+describe('compose', () => {
+    describe.each(elements)('create %o', (create) => {
+        beforeEach(async (context) => {
+            const { expect } = context;
+            const { dom, anchor } = create();
+            expect(dom).toBeDefined();
+            expect(anchor).toBeInstanceOf(Comment);
+            context.anchor = anchor;
+            context.initial = dom.outerHTML;
+            context.getCurrent = () => dom.outerHTML;
+        });
 
+
+        [undefined, null, true, false, ''].forEach(value => {
+            test(`with "${value}" is no mutation`, ({ expect, getCurrent, initial, anchor }) => {
+                expect(getCurrent()).toBe(initial);
+                compose(value, anchor);
+                expect(getCurrent()).toBe(initial);
+            });
+        });
+    });
+});
+        
+function runForName(create) {
+    const name = create.name;
+
+    describe(`compose: ${name}`, () => {
+        
+
+        ['text'].forEach(value => {
+            test(`mutation: "${value}"`, ({ expect, getCurrent, initial, anchor }) => {
+                compose(value, anchor);
+                expect(getCurrent()).toBe(initial);
+            });
+        });
+
+
+    });
+
+}
+
+
+const $anchor = () => document.createComment(0);
+const $div = () => document.createElement('div');
+const $helloText = () => document.createTextNode('Hello');
+
+function elementWithTextAnchor() {
+    const dom = $div();
+    dom.append($helloText(), $anchor());
+    return { dom, anchor: dom.lastChild };
+}
+test('el: text anchor', ({ expect }) => {
+    expect(elementWithTextAnchorText()).toMatchInlineSnapshot(`
+      {
+        "anchor": <!--0-->,
+        "dom": <div>
+          Hello
+          <!--0-->
+          Hello
+        </div>,
+      }
+    `);
 });
 
+function elementWithTextAnchorText() {
+    const dom = $div();
+    dom.append($helloText(), $anchor(), $helloText());
+    return { dom, anchor: dom.firstChild.nextSibling };
+}
+test('el: text anchor text', ({ expect }) => {
+    expect(elementWithTextAnchorText()).toMatchInlineSnapshot(`
+      {
+        "anchor": <!--0-->,
+        "dom": <div>
+          Hello
+          <!--0-->
+          Hello
+        </div>,
+      }
+    `);
+});
 
-test('no-op types don\'t access anchor', ({ expect, dom }) => {
-    expect(dom).toBeDefined();
-    const anchor = dom.lastChild;
-    expect(anchor).toBeInstanceOf(Comment);
+function elementWithAnchor() {
+    const dom = $div();
+    dom.append($anchor());
+    return { dom, anchor: dom.firstChild };
+}
+test('el: anchor', ({ expect }) => {
+    expect(elementWithAnchor()).toMatchInlineSnapshot(`
+      {
+        "anchor": <!--0-->,
+        "dom": <div>
+          <!--0-->
+        </div>,
+      }
+    `);
+});
 
-    const outerHTML = dom.outerHTML;
-    expect(outerHTML).toMatchInlineSnapshot(
-        `"<li class="travel">Hello<!--0--></li>"`
-    );
-
-    compose(undefined, anchor);
-    expect(dom.outerHTML).toBe(outerHTML);
-
-    compose(null, anchor);
-    expect(dom.outerHTML).toBe(outerHTML);
-
-    compose(true, anchor);
-    expect(dom.outerHTML).toBe(outerHTML);
-
-    compose(false, anchor);
-    expect(dom.outerHTML).toBe(outerHTML);
-
-    compose('', anchor);
-    expect(dom.outerHTML).toBe(outerHTML);
+function elementWithAnchorText() {
+    const dom = $div();
+    dom.append($anchor(), $helloText());
+    return { dom, anchor: dom.firstChild };
+}
+test('el: anchor text', ({ expect }) => {
+    expect(elementWithAnchorText()).toMatchInlineSnapshot(`
+      {
+        "anchor": <!--0-->,
+        "dom": <div>
+          <!--0-->
+          Hello
+        </div>,
+      }
+    `);
 });
