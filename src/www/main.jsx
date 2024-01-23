@@ -1,27 +1,8 @@
+import { fetchEmojis } from './fetchEmojis.js';
 import { multiplex } from './multiplex.js';
+// import { click, mouseup } from 'delegates';
 import './style.css';
 
-const EMOJIS = 'EMOJIS';
-
-async function fetchEmojis() {
-    const json = localStorage.getItem(EMOJIS);
-    if(json) {
-        try {
-            return JSON.parse(json);
-        }
-        catch(ex) {
-            // failed parse
-            localStorage.removeItem(EMOJIS);
-        }
-    }
-    // await sleep(3000);
-    const res = await fetch('https://emojihub.yurace.pro/api/all');
-    const emojis = await res.json();
-
-    localStorage.setItem(EMOJIS, JSON.stringify(emojis, true, 4));
-    
-    return emojis;
-}
 const start = new Date();
 
 class RawHtml extends HTMLElement {
@@ -35,25 +16,44 @@ class RawHtml extends HTMLElement {
         }
     }
 }
+
 window.customElements.define('raw-html', RawHtml);
 
-const $emojiCount = ({ length }) => <span>{length}</span>;
-const $emoji = ({ name, unicode, htmlCode }) => {    
-    // const rawEmoji = <span class="emoji"></span>;
-    // rawEmoji.firstChild.innerHTML = htmlCode.join('');
-    return <li><span is="raw-html" html={htmlCode} /> {unicode} {name}</li>;
-};
-const $emojiList = emojis => <ul>{emojis.map($emoji)}</ul>;
+function InnerHtml({ html, className = '' }) {
+    const rawEmoji = <span className={className ?? ''}></span>;
+    rawEmoji.firstChild.innerHTML = html;
+    return rawEmoji;
+}
+
+// TEST: return <li><span is="raw-html" html={htmlCode} /> {unicode} {name}</li>;
+
+function EmojiList({ emojis }) {
+    return <ul>
+        {emojis.map(Emoji)}
+    </ul>;
+}
+
+function Emoji({ name, unicode, htmlCode }) {   
+    return <li>
+        {InnerHtml({ html: htmlCode.join('') })} 
+        {name}
+        {unicode} 
+    </li>;
+}
+
+function EmojiCount({ count }) {
+    return <span>{count}</span>;
+}
 
 const [Count, List] = multiplex(
     fetchEmojis(), 
-    $emojiCount, 
-    $emojiList,
+    ({ length }) => EmojiCount({ count: length }), 
+    emojis => EmojiList({ emojis }),
 );
 
 const App = <div>
     <header>
-        <h1>{Count} Emojis for all my friends</h1>
+        <h1>{Count} emojis for all my friends</h1>
     </header>
         
     <main>
