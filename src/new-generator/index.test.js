@@ -124,6 +124,41 @@ describe('JSX dom literals', () => {
     });
 });
 
+describe('nested context', () => {
+    test.only('static composed', ({ expect }) => {
+        const input = `<div>{<hr/>}</div>`;
+
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "(() => {
+              const { fragment: __root_969db86e55, targets: __targets } = t969db86e55();
+              const __target0 = __targets[0];
+              const __child0 = __target0.childNodes[0];
+              __compose((() => {
+                  const { fragment: __root_b19eb87e75, targets: __targets } = tb19eb87e75();
+                  return __root_b19eb87e75;
+              })(), __child0);
+              return __root_969db86e55;
+          })();
+          "
+        `);
+
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<div data-bind><!--0--></div>",
+              "id": "969db86e55",
+            },
+            {
+              "html": "<hr />",
+              "id": "b19eb87e75",
+            },
+          ]
+        `);
+    });
+});
+
 describe('surrounding code integration', () => {
     test('wrap in IIFE (default)', ({ expect }) => {
         const input = `
@@ -325,6 +360,14 @@ describe('fragments', () => {
     `, () => {
 
     });
+
+    test.todo(`
+    return <li>
+        <RawHtml html={htmlCode.join('')}/> 
+        {name}
+        {unicode} 
+    </li>;
+    `);
 
     test('property on custom element', ({ expect }) => {
         const input = `

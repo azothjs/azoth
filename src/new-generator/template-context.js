@@ -12,7 +12,7 @@ class Context {
     }
 }
 
-class ExpressionContext extends Context {
+export class ExpressionContext extends Context {
     type = 'expression';
 }
 

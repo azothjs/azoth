@@ -1,5 +1,5 @@
 import { GENERATOR, generate } from 'astring';
-import { TemplateContext } from './template-context.js';
+import { ExpressionContext, TemplateContext } from './template-context.js';
 import { ContextStack } from './context-stack.js';
 import isValidName from 'is-valid-var-name';
 
@@ -23,6 +23,7 @@ const DEFAULT_NAMES = {
 };
 
 export class AzothGenerator extends Generator {
+    templates = [];
 
     constructor(config) {
         super();
@@ -40,9 +41,7 @@ export class AzothGenerator extends Generator {
     get current() {
         return this.context.current;
     }
-    get templates() {
-        return this.context.all;
-    }
+
 
     /* Adopt implicit arrow as containing function */
     ArrowFunctionExpression(node, state) {
@@ -79,6 +78,7 @@ export class AzothGenerator extends Generator {
     */
     JSXTemplate(node, state, isFragment) {
         const template = new TemplateContext(node, this.htmlGenerator, isFragment);
+        this.templates.push(template);
         this.context.push(template);
 
         let nextLine = getNextLine(state);
@@ -155,7 +155,7 @@ export class AzothGenerator extends Generator {
 
             if(type === 'child') {
                 state.write(`__compose(`);
-                this[expr.type](expr, state);
+                this.JSXExpressionContext(expr, state);
                 state.write(`, ${names.child}${i});`);
             }
             else if(type === 'prop') {
@@ -169,9 +169,10 @@ export class AzothGenerator extends Generator {
                 else {
                     state.write(`["${propName}"]`);
                 }
+
                 /* expression */
-                state.write(` = (`);
-                this[expr.type](expr, state);
+                state.write(` = (`); // do we need (...)? 
+                this.JSXExpressionContext(expr, state);
                 state.write(`);`);
             }
             else {
@@ -179,6 +180,14 @@ export class AzothGenerator extends Generator {
                 throw new Error(message);
             }
         }
+    }
+
+    JSXExpressionContext(node, state) {
+        // Expression can have a nested template, 
+        // so we push a context entry for the expression 
+        this.context.push(new ExpressionContext(node));
+        this[node.type](node, state);
+        this.context.pop();
     }
 
     JSXFragment(node, state) {
