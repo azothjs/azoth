@@ -226,11 +226,21 @@ describe('async resolved appended', () => {
     });
 });
 
-describe('invalid throww', () => {
+describe('invalid throw', () => {
     test('object', () => {
         expect(() => {
-            compose({});
-        }).toThrowErrorMatchingInlineSnapshot(`[TypeError: Invalid dom block compose input value type "object". Value was "[object Object]"]`);
+            compose({ name: 'felix' });
+        }).toThrowErrorMatchingInlineSnapshot(`
+          [TypeError: Invalid dom-block compose input type "object", value [object Object].
+
+          Received as:
+
+          {
+            "name": "felix"
+          }
+
+          ]
+        `);
     });
 });
 
