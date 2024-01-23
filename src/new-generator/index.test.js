@@ -289,6 +289,36 @@ describe('fragments', () => {
         `);
 
     });
+
+    test('edge case: <>{...}<el>{...}</el></>', ({ expect }) => {
+        const input = `const $App = <>{'foo'}<main>{'bar'}</main>{'qux'}</>;`;
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "const $App = (() => {
+              const { fragment: __root_ef691fa27a, targets: __targets } = tef691fa27a({ fragment: true });
+              const __target0 = __targets[0];
+              const __child0 = __root_ef691fa27a.childNodes[0];
+              const __child1 = __target0.childNodes[0];
+              const __child2 = __root_ef691fa27a.childNodes[2];
+              __compose('foo', __child0);
+              __compose('bar', __child1);
+              __compose('qux', __child2);
+              return __root_ef691fa27a;
+          })();
+          "
+        `);
+
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<!--0--><main data-bind><!--0--></main><!--0-->",
+              "id": "ef691fa27a",
+            },
+          ]
+        `);
+
+    });
 });
 
 describe('render and composition cases', () => {
