@@ -4,22 +4,6 @@ import './RawHtml.jsx';
 // import { click, mouseup } from 'delegates';
 import './style.css';
 
-const start = new Date();
-
-class RawHtml extends HTMLElement {
-    static observedAttributes = ['html'];
-    render() {
-        return <li>{this.name}</li>;
-    }
-    attributeChangedCallback(name, old, value) {
-        if(name === 'html') {
-            this.innerHTML = value;
-        }
-    }
-}
-
-window.customElements.define('raw-html', RawHtml);
-
 function InnerHtml({ html, className = '' }) {
     const rawEmoji = <span className={className ?? ''}></span>;
     rawEmoji.firstChild.innerHTML = html;
