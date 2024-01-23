@@ -18,7 +18,7 @@ const compile = input => {
 
 describe('JSX dom literals', () => {
     test('complex template structure with props and child nodes', ({ expect }) => {
-        const input = `const t = (<div>
+        const input = /*jsx*/`const t = <div>
             <p className={"my-class"}>{"felix"}</p>
             <p>static</p>
             <p>{"this is"}<span>{"azoth"}</span></p>
@@ -31,11 +31,11 @@ describe('JSX dom literals', () => {
             <self-closing/>
             <self-closing />
             {"footer"}
-        </div>);`;
+        </div>;`;
 
         const { code, templates } = compile(input);
 
-        expect(code).toMatchInlineSnapshot(`
+        expect(code).toMatchInlineSnapshot(/*js*/`
           "const t = (() => {
               const { fragment: __root_090c4b5012, targets: __targets } = t090c4b5012();
               const __target0 = __targets[0];
@@ -66,7 +66,7 @@ describe('JSX dom literals', () => {
           "
         `);
 
-        expect(templates).toMatchInlineSnapshot(`
+        expect(templates).toMatchInlineSnapshot(/*html*/`
           [
             {
               "html": "<div data-bind>
@@ -90,7 +90,7 @@ describe('JSX dom literals', () => {
     });
 
     test('property names', ({ expect }) => {
-        const input = `const t = <input 
+        const input = /*jsx*/`const t = <input 
             required
             className={"className"}
             name={"name"}
@@ -100,7 +100,7 @@ describe('JSX dom literals', () => {
 
         const { code, templates } = compile(input);
 
-        expect(code).toMatchInlineSnapshot(`
+        expect(code).toMatchInlineSnapshot(/*js*/`
           "const t = (() => {
               const { fragment: __root_24a912889d, targets: __targets } = t24a912889d();
               const __target0 = __targets[0];
@@ -113,7 +113,7 @@ describe('JSX dom literals', () => {
           "
         `);
 
-        expect(templates).toMatchInlineSnapshot(`
+        expect(templates).toMatchInlineSnapshot(/*html*/`
           [
             {
               "html": "<input required data-bind />",
@@ -126,11 +126,11 @@ describe('JSX dom literals', () => {
 
 describe('surrounding code integration', () => {
     test('wrap in IIFE (default)', ({ expect }) => {
-        const input = `
+        const input = /*jsx*/`
             const template = <p>{text}</p>;
         `;
 
-        expect(compile(input).code).toMatchInlineSnapshot(`
+        expect(compile(input).code).toMatchInlineSnapshot(/*jsx*/`
           "const template = (() => {
               const { fragment: __root_666c3103ad, targets: __targets } = t666c3103ad();
               const __target0 = __targets[0];
@@ -143,11 +143,11 @@ describe('surrounding code integration', () => {
     });
 
     test('ArrowFunctionExpression: implicit return is block return', ({ expect }) => {
-        const input = `
+        const input = /*jsx*/`
             const template = (text) => <p>{text}</p>
         `;
 
-        expect(compile(input).code).toMatchInlineSnapshot(`
+        expect(compile(input).code).toMatchInlineSnapshot(/*jsx*/`
           "const template = text => {
               const { fragment: __root_666c3103ad, targets: __targets } = t666c3103ad();
               const __target0 = __targets[0];
@@ -161,14 +161,14 @@ describe('surrounding code integration', () => {
 
 
     test('ReturnStatement: injects statements before, returns root', ({ expect }) => {
-        const input = `
+        const input = /*jsx*/`
             function template(text) {
                 const format = 'text' + '!';
                 return <p>{text}</p>;
             }
         `;
 
-        expect(compile(input).code).toMatchInlineSnapshot(`
+        expect(compile(input).code).toMatchInlineSnapshot(/*jsx*/`
           "function template(text) {
               const format = 'text' + '!';
               const { fragment: __root_666c3103ad, targets: __targets } = t666c3103ad();
@@ -184,13 +184,13 @@ describe('surrounding code integration', () => {
 
 describe('fragments', () => {
     test('<> ... </> works', ({ expect }) => {
-        const input = `
+        const input = /*jsx*/`
             const fragment = <><hr/><hr/></>;
             const empty = <></>;
         `;
         const { code, templates } = compile(input);
 
-        expect(code).toMatchInlineSnapshot(`
+        expect(code).toMatchInlineSnapshot(/*js*/`
           "const fragment = (() => {
               const { fragment: __root_7c9daff739, targets: __targets } = t7c9daff739({ fragment: true });
               return __root_7c9daff739;
@@ -202,7 +202,7 @@ describe('fragments', () => {
           "
         `);
 
-        expect(templates).toMatchInlineSnapshot(`
+        expect(templates).toMatchInlineSnapshot(/*html*/`
           [
             {
               "html": "<hr /><hr />",
@@ -218,12 +218,12 @@ describe('fragments', () => {
     });
 
     test('text in fragment', ({ expect }) => {
-        const input = `
+        const input = /*jsx*/`
             const fragment = <>one{"two"}three</>;
         `;
         const { code, templates } = compile(input);
 
-        expect(code).toMatchInlineSnapshot(`
+        expect(code).toMatchInlineSnapshot(/*js*/`
           "const fragment = (() => {
               const { fragment: __root_faf808e6cc, targets: __targets } = tfaf808e6cc({ fragment: true });
               const __child0 = __root_faf808e6cc.childNodes[1];
@@ -233,7 +233,7 @@ describe('fragments', () => {
           "
         `);
 
-        expect(templates).toMatchInlineSnapshot(`
+        expect(templates).toMatchInlineSnapshot(/*html*/`
           [
             {
               "html": "one<!--0-->three",
@@ -245,7 +245,7 @@ describe('fragments', () => {
     });
 
     test('extraneous removed with correct child node indexes', ({ expect }) => {
-        const input = `
+        const input = /*jsx*/`
             const extraneous = <div><><hr/><hr/></><hr/></div>;
             
             const childNodeIndex = <div>
@@ -256,7 +256,7 @@ describe('fragments', () => {
         `;
         const { code, templates } = compile(input);
 
-        expect(code).toMatchInlineSnapshot(`
+        expect(code).toMatchInlineSnapshot(/*js*/`
           "const extraneous = (() => {
               const { fragment: __root_0f05699ae4, targets: __targets } = t0f05699ae4();
               return __root_0f05699ae4;
@@ -271,7 +271,7 @@ describe('fragments', () => {
           "
         `);
 
-        expect(templates.map(({ id, html }) => ({ id, html }))).toMatchInlineSnapshot(`
+        expect(templates.map(({ id, html }) => ({ id, html }))).toMatchInlineSnapshot(/*html*/`
           [
             {
               "html": "<div><hr /><hr /><hr /></div>",
@@ -291,10 +291,10 @@ describe('fragments', () => {
     });
 
     test('edge case: <>{...}<el>{...}</el></>', ({ expect }) => {
-        const input = `const $App = <>{'foo'}<main>{'bar'}</main>{'qux'}</>;`;
+        const input = /*jsx*/`const $App = <>{'foo'}<main>{'bar'}</main>{'qux'}</>;`;
         const { code, templates } = compile(input);
 
-        expect(code).toMatchInlineSnapshot(`
+        expect(code).toMatchInlineSnapshot(/*js*/`
           "const $App = (() => {
               const { fragment: __root_ef691fa27a, targets: __targets } = tef691fa27a({ fragment: true });
               const __target0 = __targets[0];
@@ -309,7 +309,7 @@ describe('fragments', () => {
           "
         `);
 
-        expect(templates).toMatchInlineSnapshot(`
+        expect(templates).toMatchInlineSnapshot(/*html*/`
           [
             {
               "html": "<!--0--><main data-bind><!--0--></main><!--0-->",
@@ -319,18 +319,24 @@ describe('fragments', () => {
         `);
 
     });
+
+    test.todo(/*jsx*/`
+        return <li><span is="raw-html" html={htmlCode} /> {unicode} {name}</li>;
+    `, () => {
+
+    });
 });
 
 describe('render and composition cases', () => {
 
     test('map in block', ({ expect }) => {
-        const input = `
+        const input = /*jsx*/`
             const $item = name => <li>{name}</li>;
             const $template = () => <div>{[2, 4, 7].map($item)}{"text"}</div>
         `;
         const { code, templates } = compile(input);
 
-        expect(code).toMatchInlineSnapshot(`
+        expect(code).toMatchInlineSnapshot(/*js*/`
           "const $item = name => {
               const { fragment: __root_f00e886942, targets: __targets } = tf00e886942();
               const __target0 = __targets[0];
@@ -350,7 +356,7 @@ describe('render and composition cases', () => {
           "
         `);
 
-        expect(templates).toMatchInlineSnapshot(`
+        expect(templates).toMatchInlineSnapshot(/*html*/`
           [
             {
               "html": "<li data-bind><!--0--></li>",
@@ -366,10 +372,12 @@ describe('render and composition cases', () => {
     });
 
     test('edge case: broken esbuild jsx', ({ expect }) => {
-        const input = `const render = () => <li className={category}>Hello {place}</li>`;
+        const input = /*jsx*/`
+            const render = () => <li className={category}>Hello {place}</li>
+        `;
         const { code, templates } = compile(input);
 
-        expect(code).toMatchInlineSnapshot(`
+        expect(code).toMatchInlineSnapshot(/*js*/`
           "const render = () => {
               const { fragment: __root_e19fd83eae, targets: __targets } = te19fd83eae();
               const __target0 = __targets[0];
@@ -381,7 +389,7 @@ describe('render and composition cases', () => {
           "
         `);
 
-        expect(templates).toMatchInlineSnapshot(`
+        expect(templates).toMatchInlineSnapshot(/*html*/`
           [
             {
               "html": "<li data-bind>Hello <!--0--></li>",
@@ -393,7 +401,7 @@ describe('render and composition cases', () => {
     });
 
     test('List composition', ({ expect }) => {
-        const input = `        
+        const input = /*jsx*/`        
             const $emoji = ({ name }) => <li>{name}</li>;
             const promise = fetchEmojis().then(emojis => emojis.map($emoji));
             const $Emojis = <ul>{promise}</ul>;
@@ -403,7 +411,7 @@ describe('render and composition cases', () => {
         `;
         const { code, templates } = compile(input);
 
-        expect(code).toMatchInlineSnapshot(`
+        expect(code).toMatchInlineSnapshot(/*js*/`
           "const $emoji = ({name}) => {
               const { fragment: __root_f00e886942, targets: __targets } = tf00e886942();
               const __target0 = __targets[0];
@@ -422,7 +430,7 @@ describe('render and composition cases', () => {
           document.body.append($Emojis);
           "
         `);
-        expect(templates).toMatchInlineSnapshot(`
+        expect(templates).toMatchInlineSnapshot(/*html*/`
           [
             {
               "html": "<li data-bind><!--0--></li>",
