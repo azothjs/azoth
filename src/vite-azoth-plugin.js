@@ -111,5 +111,5 @@ export default function AzothPlugin() {
         },
     };
 
-    return [transform, injectHtml];
+    return [transform]; //, injectHtml];
 }

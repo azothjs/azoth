@@ -4,6 +4,7 @@
         "backquote",
         "espree",
         "IIFE",
+        "nsbsp",
         "onattribute",
         "onclosetag",
         "oncomment",
