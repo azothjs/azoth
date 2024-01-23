@@ -74,8 +74,8 @@ export class TemplateContext extends Context {
             index,
         });
 
-        if(this.isFragment) {
-            if(element === this.node && type === 'child' && element.queryIndex !== -1) {
+        if(element === this.node && this.isFragment) {
+            if(type === 'child' && element.queryIndex !== -1) {
                 element.queryIndex = -1;
             }
         }

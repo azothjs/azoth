@@ -18,7 +18,7 @@ const compile = input => {
 
 describe('JSX dom literals', () => {
     test('complex template structure with props and child nodes', ({ expect }) => {
-        const input = `const t = (<div>
+        const input = `const t = <div>
             <p className={"my-class"}>{"felix"}</p>
             <p>static</p>
             <p>{"this is"}<span>{"azoth"}</span></p>
@@ -31,7 +31,7 @@ describe('JSX dom literals', () => {
             <self-closing/>
             <self-closing />
             {"footer"}
-        </div>);`;
+        </div>;`;
 
         const { code, templates } = compile(input);
 
@@ -289,9 +289,73 @@ describe('fragments', () => {
         `);
 
     });
+
+    test('edge case: <>{...}<el>{...}</el></>', ({ expect }) => {
+        const input = `const $App = <>{'foo'}<main>{'bar'}</main>{'qux'}</>;`;
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "const $App = (() => {
+              const { fragment: __root_ef691fa27a, targets: __targets } = tef691fa27a({ fragment: true });
+              const __target0 = __targets[0];
+              const __child0 = __root_ef691fa27a.childNodes[0];
+              const __child1 = __target0.childNodes[0];
+              const __child2 = __root_ef691fa27a.childNodes[2];
+              __compose('foo', __child0);
+              __compose('bar', __child1);
+              __compose('qux', __child2);
+              return __root_ef691fa27a;
+          })();
+          "
+        `);
+
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<!--0--><main data-bind><!--0--></main><!--0-->",
+              "id": "ef691fa27a",
+            },
+          ]
+        `);
+
+    });
+
+    test.todo(`
+        return <li><span is="raw-html" html={htmlCode} /> {unicode} {name}</li>;
+    `, () => {
+
+    });
+
+    test('property on custom element', ({ expect }) => {
+        const input = `
+            const html = \`&nsbsp;<strong>Hello Raw</strong>\`;
+            document.body.append(<raw-html html={html}/>);
+        `;
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "const html = \`&nsbsp;<strong>Hello Raw</strong>\`;
+          document.body.append((() => {
+              const { fragment: __root_c120befcf8, targets: __targets } = tc120befcf8();
+              const __target0 = __targets[0];
+              __target0.html = (html);
+              return __root_c120befcf8;
+          })());
+          "
+        `);
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<raw-html data-bind />",
+              "id": "c120befcf8",
+            },
+          ]
+        `);
+
+    });
 });
 
-describe('child node composition changes', () => {
+describe('render and composition cases', () => {
 
     test('map in block', ({ expect }) => {
         const input = `
@@ -336,7 +400,9 @@ describe('child node composition changes', () => {
     });
 
     test('edge case: broken esbuild jsx', ({ expect }) => {
-        const input = `const render = () => <li className={category}>Hello {place}</li>`;
+        const input = `
+            const render = () => <li className={category}>Hello {place}</li>
+        `;
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
@@ -362,29 +428,49 @@ describe('child node composition changes', () => {
 
     });
 
-    test('edge case: odd childNodes in li', ({ expect }) => {
-        const input = `const render = () => <li className={category}>Hello {place}</li>`;
+    test('List composition', ({ expect }) => {
+        const input = `        
+            const $emoji = ({ name }) => <li>{name}</li>;
+            const promise = fetchEmojis().then(emojis => emojis.map($emoji));
+            const $Emojis = <ul>{promise}</ul>;
+            document.body.append(
+                $Emojis
+            );
+        `;
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const render = () => {
-              const { fragment: __root_e19fd83eae, targets: __targets } = te19fd83eae();
+          "const $emoji = ({name}) => {
+              const { fragment: __root_f00e886942, targets: __targets } = tf00e886942();
               const __target0 = __targets[0];
-              const __child1 = __target0.childNodes[1];
-              __target0.className = (category);
-              __compose(place, __child1);
-              return __root_e19fd83eae;
+              const __child0 = __target0.childNodes[0];
+              __compose(name, __child0);
+              return __root_f00e886942;
           };
+          const promise = fetchEmojis().then(emojis => emojis.map($emoji));
+          const $Emojis = (() => {
+              const { fragment: __root_df87cbf024, targets: __targets } = tdf87cbf024();
+              const __target0 = __targets[0];
+              const __child0 = __target0.childNodes[0];
+              __compose(promise, __child0);
+              return __root_df87cbf024;
+          })();
+          document.body.append($Emojis);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<li data-bind>Hello <!--0--></li>",
-              "id": "e19fd83eae",
+              "html": "<li data-bind><!--0--></li>",
+              "id": "f00e886942",
+            },
+            {
+              "html": "<ul data-bind><!--0--></ul>",
+              "id": "df87cbf024",
             },
           ]
         `);
+
 
     });
 });

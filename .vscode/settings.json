@@ -1,22 +1,23 @@
 {
     "cSpell.words": [
         "astring",
+        "autohid",
         "backquote",
+        "dbaeumer",
+        "donot",
         "espree",
         "IIFE",
         "nsbsp",
         "onattribute",
         "onclosetag",
         "oncomment",
+        "oninit",
         "onopentag",
         "onopentagname",
         "ontext",
         "quasis",
         "templatize",
-        "tmpl",
-        "donot",
-        "autohid",
-        "dbaeumer"
+        "tmpl"
     ],
     "eslint.experimental.useFlatConfig": true,
     "eslint.format.enable": true,

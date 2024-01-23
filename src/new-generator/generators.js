@@ -139,7 +139,6 @@ export class AzothGenerator extends Generator {
         for(let i = 0; i < bindings.length; i++) {
             const { element: { queryIndex }, type, index } = bindings[i];
             if(type !== 'child') continue;
-
             state.write(`${nextLine}const ${names.child}${i} = `);
             const varName = queryIndex === -1 ? rootVarName : `${names.target}${queryIndex}`;
             state.write(`${varName}.childNodes[${index}];`);
@@ -149,6 +148,10 @@ export class AzothGenerator extends Generator {
         for(let i = 0; i < bindings.length; i++) {
             const { element: { queryIndex }, type, node, expr } = bindings[i];
             state.write(`${nextLine}`);
+
+            if(!this[expr.type]) {
+                throw new TypeError(`Unexpected AST Type "${expr.type}"`);
+            }
 
             if(type === 'child') {
                 state.write(`__compose(`);
@@ -166,6 +169,7 @@ export class AzothGenerator extends Generator {
                 else {
                     state.write(`["${propName}"]`);
                 }
+                /* expression */
                 state.write(` = (`);
                 this[expr.type](expr, state);
                 state.write(`);`);
@@ -245,17 +249,30 @@ export class AzothGenerator extends Generator {
                     adj--; // no child node was generated
                 }
             }
+            else if(child.type === 'JSXExpressionContainer' && 
+                child.expression.type === 'JSXEmptyExpression') {
+                adj--; // skip this node
+            }
             else {
+                if(!this[child.type]) {
+                    throw new TypeError(`Unexpected AST Type "${child.type}"`);
+                }
                 this[child.type](child, i + adj);
             }
         }
     }
 
     JSXExpressionContainer(node, index) {
+        if(node.expression.type === 'JSXEmptyExpression') {
+            console.log('is empty!');
+            return;
+        }
         this.current.bind('child', node, node.expression, index);
     }
 
     JSXText() { /* no-op */ }
+
+    JSXEmptyExpression() { /* no-op */ }
 }
 
 export class HtmlGenerator extends Generator {
