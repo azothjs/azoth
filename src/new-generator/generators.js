@@ -2,6 +2,8 @@ import { GENERATOR, generate } from 'astring';
 import { ExpressionContext, TemplateContext } from './template-context.js';
 import { ContextStack } from './context-stack.js';
 import isValidName from 'is-valid-var-name';
+// import { SourceMapGenerator } from 'source-map';
+
 
 function Generator() { }
 Generator.prototype = GENERATOR;
@@ -12,28 +14,17 @@ function getNextLine(state) {
     return `${lineEnd}${indentation}`;
 }
 
-const DEFAULT_NAMES = {
-    renderer: `t`,
-    targets: `targets`,
-    targetsAlias: `__targets`,
-    target: `__target`,
-    child: `__child`,
-    root: `fragment`,
-    rootAliasPrefix: `__root_`,
-};
-
 export class AzothGenerator extends Generator {
     templates = [];
 
-    constructor(config) {
+    constructor() {
         super();
-        this.names = config?.names ?? DEFAULT_NAMES;
         const generator = new HtmlGenerator();
         this.htmlGenerator = node => generate(node, {
             // TODO: ...config.html 
             generator,
+            // sourceMap: new SourceMapGenerator()
         });
-
     }
 
     // (module) template context
@@ -41,7 +32,6 @@ export class AzothGenerator extends Generator {
     get current() {
         return this.context.current;
     }
-
 
     /* Adopt implicit arrow as containing function */
     ArrowFunctionExpression(node, state) {
@@ -60,12 +50,9 @@ export class AzothGenerator extends Generator {
     /* Inject template statements above and return root dom */
     ReturnStatement(node, state) {
         if(node.argument?.type === 'JSXElement') {
-            node.argument.noWrapper = true;
+            node.argument.isReturnArg = true;
             this.JSXElement(node.argument, state);
-            node.argument = {
-                type: 'Identifier',
-                name: `${this.names.rootAliasPrefix}${this.context.prior.id}`,
-            };
+            return;
         }
         super.ReturnStatement(node, state);
     }
@@ -81,57 +68,70 @@ export class AzothGenerator extends Generator {
         this.templates.push(template);
         this.context.push(template);
 
+        // Recursive analysis of jsx: feed root node to JSXElement 
+        this[node.type](node, state);
+        // generate html
+        template.generateHtml();
+        // generate javascript
+        this.InjectionWrapper(template, state);
+
+        this.context.pop();
+    }
+
+    InjectionWrapper(template, state) {
+        const { targets, node } = template;
+
+        if(!targets.length) {
+            this.TemplateRenderer(template, state);
+            state.write(`.root`);
+            return;
+        }
+
         let nextLine = getNextLine(state);
 
-        const useWrapper = !node.noWrapper;
-        if(useWrapper) {
+        const useIIFEWrapper = !node.isReturnArg;
+        if(useIIFEWrapper) {
             state.write(`(() => {`);
             state.indentLevel++;
             nextLine = getNextLine(state);
             state.write(nextLine);
         }
 
-        // Feed the root element back to JSXElement
-        // method for recursive analysis of jsx
-        this[node.type](node, state);
+        this.JSXDomLiteral(template, state);
 
-        // generate the html
-        template.generateHtml();
-
-        /* Generate JavaScript */
-        this.AzothDomLiteral(template, state);
-
-        if(useWrapper) {
-            state.write(`${nextLine}return ${this.names.rootAliasPrefix}${template.id};`);
+        state.write(`${nextLine}return __root_${template.id};`);
+        
+        if(useIIFEWrapper) {
             state.indentLevel--;
             nextLine = getNextLine(state);
             state.write(`${nextLine}})()`);
         }
-        else {
-            state.write(`${nextLine}`);
-        }
-
-        this.context.pop();
     }
 
-    AzothDomLiteral({ id, targets, bindings, node, isFragment }, state) {
+    TemplateRenderer({ id, isSingleElementRoot }, state) {
+        state.write(`t${id}(`);
+        if(!isSingleElementRoot) state.write('true'); // fragment
+        state.write(`)`);
+    }
+
+    JSXDomLiteral(template, state) {
+        const { id, targets, bindings } = template;
+        
         const { indent, lineEnd, } = state;
         let indentation = indent.repeat(state.indentLevel);
         let nextLine = `${lineEnd}${indentation}`;
 
         // template service renderer call
-        const { names } = this;
-        const rootVarName = `${names.rootAliasPrefix}${id}`;
-        state.write(`const { ${names.root}: ${rootVarName}, ${names.targets}: ${names.targetsAlias} }`);
-        state.write(` = ${names.renderer}${id}(`);
-        if(isFragment && node.children.length > 1) {
-            state.write(`{ fragment: true }`);
-        }
-        state.write(`);`);
+        const rootVarName = `__root_${id}`;
+        state.write(`const { root: ${rootVarName}, targets: __targets }`);
+        state.write(` = `);
+        
+        this.TemplateRenderer(template, state);
+        state.write(';');
 
         // target variables
         for(let i = 0; i < targets.length; i++) {
-            state.write(`${nextLine}const ${names.target}${i} = ${names.targetsAlias}[${i}];`);
+            state.write(`${nextLine}const __target${i} = __targets[${i}];`);
         }
 
         // childNode variables prevent binding mutations from changing 
@@ -139,8 +139,8 @@ export class AzothGenerator extends Generator {
         for(let i = 0; i < bindings.length; i++) {
             const { element: { queryIndex }, type, index } = bindings[i];
             if(type !== 'child') continue;
-            state.write(`${nextLine}const ${names.child}${i} = `);
-            const varName = queryIndex === -1 ? rootVarName : `${names.target}${queryIndex}`;
+            state.write(`${nextLine}const __child${i} = `);
+            const varName = queryIndex === -1 ? rootVarName : `__target${queryIndex}`;
             state.write(`${varName}.childNodes[${index}];`);
         }
 
@@ -156,10 +156,10 @@ export class AzothGenerator extends Generator {
             if(type === 'child') {
                 state.write(`__compose(`);
                 this.JSXExpressionContext(expr, state);
-                state.write(`, ${names.child}${i});`);
+                state.write(`, __child${i});`);
             }
             else if(type === 'prop') {
-                const varName = queryIndex === -1 ? rootVarName : `${names.target}${queryIndex}`;
+                const varName = queryIndex === -1 ? rootVarName : `__target${queryIndex}`;
                 state.write(`${varName}`);
                 // TODO: more property validation
                 const propName = node.name.name;
@@ -183,8 +183,7 @@ export class AzothGenerator extends Generator {
     }
 
     JSXExpressionContext(node, state) {
-        // Expression can have a nested template, 
-        // so we push a context entry for the expression 
+        // New context as expressions may have nested template
         this.context.push(new ExpressionContext(node));
         this[node.type](node, state);
         this.context.pop();

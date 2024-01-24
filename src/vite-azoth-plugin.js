@@ -46,8 +46,7 @@ export default function AzothPlugin() {
                 .getAll('id')
                 .map(id => {
                     const html = allTemplates.get(id);
-                    return `\nlet t${id} = makeRenderer('${id}', \`${html}\`);\n`
-                        + `export { t${id} };\n`;
+                    return `\nexport const t${id} = makeRenderer('${id}', \`${html}\`);\n`;
                 })
                 .join('');
 

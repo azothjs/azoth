@@ -6,15 +6,15 @@ class Context {
         return context && context instanceof this;
     }
 
+    type = '';
     node = null;
-    constructor(node) {
+    constructor(node, type) {
+        this.type = this.constructor.name;
         this.node = node;
     }
 }
 
-export class ExpressionContext extends Context {
-    type = 'expression';
-}
+export class ExpressionContext extends Context {}
 
 function getBindingAttr() {
     return {
@@ -39,6 +39,24 @@ export class TemplateContext extends Context {
         super(node);
         this.generator = generator;
         this.isFragment = isFragment;
+    }
+
+    get rootChildrenLength() {
+        return this.node.children.length;
+    }
+
+    get isSingleElementRoot() {
+        // used jsx <>...</> tags
+        if(this.isFragment) { 
+            // <>{...}</> - bound childNode(s): 
+            if(this.node.queryIndex === -1) return false;
+            // <><hr/><hr/></> - multiple root elements:
+            if(this.rootChildrenLength > 1) return false;
+            // <><div></div></>
+            return true;
+        }
+        // used an element: <div>...</div>
+        return true;
     }
 
     generateHtml() {
@@ -75,17 +93,19 @@ export class TemplateContext extends Context {
         });
 
         if(element === this.node && this.isFragment) {
-            if(type === 'child' && element.queryIndex !== -1) {
-                element.queryIndex = -1;
-            }
+            // fragments can't be "targets", so we give them
+            // -1 queryIndex to signal a bound fragment root
+            if(type === 'child') element.queryIndex = -1;
         }
         else {
             const prop = `${type}BoundCount`;
             element[prop] = (element[prop] || 0) + 1;
+
             if(!this.#targetEls.has(element)) {
                 element.openingElement?.attributes.push(getBindingAttr());
                 this.#targetEls.add(element);
             }
         }
     }
+
 }

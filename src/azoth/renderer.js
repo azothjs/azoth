@@ -10,7 +10,7 @@ export default function renderer(fragment) {
     return function render() {
         const clone = fragment.cloneNode(true);
         return {
-            fragment: clone,
+            root: clone,
             targets: clone.querySelectorAll('[data-bind]')
         };
     };

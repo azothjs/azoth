@@ -6,29 +6,24 @@ const htmlToFragment = (html) => {
     return template.content;
 };
 
-export const makeRenderer = (id, html) => {
+export const makeRenderer = (id, html, isFragment = false) => {
     if(templates.has(id)) return templates.get(id);
     const fragment = htmlToFragment(html);
-    const template = renderer(fragment);
+    const template = renderer(fragment, isFragment);
     templates.set(id, template);
     return template;
 };
 
-export function rendererById(id) {
+export function rendererById(id, isFragment = false) {
     const renderer = getRenderer(id);
-    const { fragment, targets } = renderer();
-
-    const { childElementCount, childNodes } = fragment;
-    const node = childElementCount === 1 && childNodes.length === 1
-        ? fragment.firstElementChild
-        : fragment;
-
-    return { node, targets };
+    let { root, targets } = renderer();
+    if(!isFragment) root = root.firstElementChild;
+    return { root, targets };
 }
 
 const templates = new Map();
 
-export function getRenderer(id) {
+function getRenderer(id) {
     if(templates.has(id)) return templates.get(id);
 
     // TODO: could fail on bad id...
