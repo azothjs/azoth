@@ -1,6 +1,6 @@
 import { Parser } from 'acorn';
 import acornJsx from 'acorn-jsx';
-import { generate } from '../../src/compile';
+import { generate } from '../../src/generator/index.js';
 // import { normalizePath } from 'vite';
 
 const JSX_EXT = /\.jsx$/;

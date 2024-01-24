@@ -3,6 +3,7 @@
         "astring",
         "autohid",
         "backquote",
+        "befcf",
         "dbaeumer",
         "donot",
         "espree",
@@ -17,6 +18,7 @@
         "ontext",
         "quasis",
         "templatize",
+        "tfaf",
         "tmpl"
     ],
     "eslint.experimental.useFlatConfig": true,

@@ -1,4 +1,4 @@
-import { Stack } from '../Stack.js';
+import { Stack } from './Stack.js';
 import revHash from 'rev-hash';
 import { Context } from './Context.js';
 

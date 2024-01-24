@@ -227,11 +227,11 @@ describe('async resolved appended', () => {
 });
 
 describe('invalid throw', () => {
-    test('object', () => {
+    test.only('object', () => {
         expect(() => {
             compose({ name: 'felix' });
         }).toThrowErrorMatchingInlineSnapshot(`
-          [TypeError: Invalid dom-block compose input type "object", value [object Object].
+          [TypeError: Invalid {...} compose input type "object", value [object Object].
 
           Received as:
 

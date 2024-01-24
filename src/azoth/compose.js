@@ -24,24 +24,33 @@ export function compose(input, anchor, keepLast = false) {
         case Array.isArray(input):
             composeArray(input, anchor, keepLast);
             break;
+        case type === 'object':
+            throwTypeErrorForObject(input, type);
+            break;
         default: {
-            throwInvalidType(input, type);
+            throwTypeError(input, type);
         }
-
     }
 }
 
-function throwInvalidType(input, type) {
+function throwTypeError(input, type, footer = '') {
+
+    throw new TypeError(`\
+Invalid {...} compose input type "${type}", \
+value ${input}.${footer}`
+    );
+}
+
+function throwTypeErrorForObject(obj, type) {
     let json = '';
     try {
-        if(type === 'object') json = JSON.stringify(input, null, 2);
+        json = JSON.stringify(obj, null, 2);
     }
-    finally { /* empty */ }
-
-    let message = `Invalid dom-block compose input type "${type}", value ${input}.`;
-    if(json) message += `\n\nReceived as:\n\n${json}\n\n`;
-
-    throw new TypeError(message);
+    catch(ex) {
+        throwTypeError(obj, type);
+    }
+    
+    throwTypeError(obj, type, `\n\nReceived as:\n\n${json}\n\n`);
 }
 
 function removePrior(anchor) {

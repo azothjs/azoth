@@ -1,9 +1,10 @@
 import { generate } from 'astring';
 import { ExpressionContext, TemplateContext } from './context/index.js';
-import { Stack } from './Stack.js';
-import isValidName from 'is-valid-var-name';
 import { HtmlGenerator } from './HtmlGenerator.js';
-import { Generator } from './Base.js';
+import { Generator } from './GeneratorBase.js';
+import { Stack } from './context/Stack.js';
+import isValidName from 'is-valid-var-name';
+import { ROOT_PROPERTY, TARGETS_PROPERTY } from '../azoth/renderer.js';
 
 function getNextLine(state) {
     const { indent, lineEnd, } = state;
@@ -54,33 +55,12 @@ export class AzothGenerator extends Generator {
         super.ReturnStatement(node, state);
     }
 
-    /*  Virtual method to create template context, represents
-        missing overall "template" syntax marker in jsx.
-        - Creates TemplateContext to track and analyze jsx chunk
-        - Injects default IIFE wrapper if needed
-        - Generates JavaScript from template context instance
-    */
-    JSXTemplate(node, state, isFragment) {
-        const template = new TemplateContext(node, this.htmlGenerator, isFragment);
-        this.templates.push(template);
-        this.context.push(template);
-
-        // Recursive analysis of jsx: feed root node to JSXElement 
-        this[node.type](node, state);
-        // generate html
-        template.generateHtml();
-        // generate javascript
-        this.InjectionWrapper(template, state);
-
-        this.context.pop();
-    }
-
     InjectionWrapper(template, state) {
         const { targets, node } = template;
 
         if(!targets.length) {
             this.TemplateRenderer(template, state);
-            state.write(`.root`);
+            state.write(`.${ROOT_PROPERTY}`);
             return;
         }
 
@@ -120,7 +100,7 @@ export class AzothGenerator extends Generator {
 
         // template service renderer call
         const rootVarName = `__root_${id}`;
-        state.write(`const { root: ${rootVarName}, targets: __targets }`);
+        state.write(`const { ${ROOT_PROPERTY}: ${rootVarName}, ${TARGETS_PROPERTY}: __targets }`);
         state.write(` = `);
         
         this.TemplateRenderer(template, state);
@@ -177,6 +157,30 @@ export class AzothGenerator extends Generator {
                 throw new Error(message);
             }
         }
+    }
+
+    /* Analyzer */
+
+
+    /*  Virtual method to create template context, represents
+        missing overall "template" syntax marker in jsx.
+        - Creates TemplateContext to track and analyze jsx chunk
+        - use the template to generate the html with binding replacements
+        - generate JavaScript to inject in place of the jsx
+    */
+    JSXTemplate(node, state, isFragment) {
+        const template = new TemplateContext(node, this.htmlGenerator, isFragment);
+        this.templates.push(template);
+        this.context.push(template);
+
+        // Recursive analysis of jsx: feed root node to JSXElement 
+        this[node.type](node, state);
+        // generate html
+        template.generateHtml();
+        // generate javascript
+        this.InjectionWrapper(template, state);
+
+        this.context.pop();
     }
 
     JSXExpressionContext(node, state) {

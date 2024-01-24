@@ -1,4 +1,4 @@
-import { Generator } from './Base.js';
+import { Generator } from './GeneratorBase.js';
 
 export class HtmlGenerator extends Generator {
 
