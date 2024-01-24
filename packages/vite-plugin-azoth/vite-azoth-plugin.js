@@ -1,6 +1,6 @@
 import { Parser } from 'acorn';
 import acornJsx from 'acorn-jsx';
-import { generate } from './new-generator';
+import { generate } from '../../src/compile';
 // import { normalizePath } from 'vite';
 
 const JSX_EXT = /\.jsx$/;
@@ -101,7 +101,6 @@ export default function AzothPlugin() {
             const templateHtml = [...allTemplates.entries()].map(([id, html]) => {
                 return `\n<template id="${id}">${html}</template>`;
             }).join('');
-            console.log('transform index html');
             return html.replace(
                 '<!-- templates -->',
                 `<!-- Azoth templates! -->

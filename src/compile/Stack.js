@@ -1,25 +1,25 @@
-export class ContextStack {
-    #stack = [];
+export class Stack {
     #current = null;
+    #stack = [];
     #all = new Set();
+    
+    get current() {
+        return this.#current;
+    }
+
+    get all() {
+        return [...this.#all];
+    }
 
     push(context) {
         this.#current = context;
-        this.#all.add(context);
         this.#stack.push(context);
+        this.#all.add(context);
     }
+
     pop() {
         const context = this.#stack.pop();
         this.#current = this.#stack.at(-1);
         return context;
-    }
-    get current() {
-        return this.#current;
-    }
-    get all() {
-        return [...this.#all];
-    }
-    get last() {
-        return this.all ?? this.#all.at(-1) ?? null;
     }
 }

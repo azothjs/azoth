@@ -1,12 +1,9 @@
-import { GENERATOR, generate } from 'astring';
-import { ExpressionContext, TemplateContext } from './template-context.js';
-import { ContextStack } from './context-stack.js';
+import { generate } from 'astring';
+import { ExpressionContext, TemplateContext } from './context/index.js';
+import { Stack } from './Stack.js';
 import isValidName from 'is-valid-var-name';
-// import { SourceMapGenerator } from 'source-map';
-
-
-function Generator() { }
-Generator.prototype = GENERATOR;
+import { HtmlGenerator } from './HtmlGenerator.js';
+import { Generator } from './Base.js';
 
 function getNextLine(state) {
     const { indent, lineEnd, } = state;
@@ -28,7 +25,7 @@ export class AzothGenerator extends Generator {
     }
 
     // (module) template context
-    context = new ContextStack();
+    context = new Stack();
     get current() {
         return this.context.current;
     }
@@ -272,7 +269,6 @@ export class AzothGenerator extends Generator {
 
     JSXExpressionContainer(node, index) {
         if(node.expression.type === 'JSXEmptyExpression') {
-            console.log('is empty!');
             return;
         }
         this.current.bind('child', node, node.expression, index);
@@ -283,87 +279,4 @@ export class AzothGenerator extends Generator {
     JSXEmptyExpression() { /* no-op */ }
 }
 
-export class HtmlGenerator extends Generator {
 
-    constructor(config) {
-        super();
-        this.childReplace = config?.childReplace ?? `<!--0-->`;
-    }
-
-    // <div></div>
-    JSXFragment(node, state) {
-        this.JSXChildren(node, state);
-    }
-    // >.......</
-    JSXChildren({ children }, state) {
-        for(var i = 0; i < children.length; i++) {
-            var child = children[i];
-            this[child.type](child, state);
-        }
-    }
-    // <div></div>
-    JSXElement(node, state) {
-        state.write('<');
-        this[node.openingElement.type](node.openingElement, state);
-
-        if(node.closingElement) {
-            state.write('>');
-            this.JSXChildren(node, state);
-            state.write('</');
-            this[node.closingElement.type](node.closingElement, state);
-            state.write('>');
-        } else {
-            state.write(' />');
-        }
-    }
-    // <div>
-    JSXOpeningElement(node, state) {
-        this[node.name.type](node.name, state);
-        for(var i = 0; i < node.attributes.length; i++) {
-            var attr = node.attributes[i];
-            this[attr.type](attr, state);
-        }
-    }
-    // </div>
-    JSXClosingElement(node, state) {
-        this[node.name.type](node.name, state);
-    }
-    // div
-    JSXIdentifier(node, state) {
-        state.write(node.name);
-    }
-    // Member.Expression
-    JSXMemberExpression(node, state) {
-        this[node.object.type](node.object, state);
-        state.write('.');
-        this[node.property.type](node.property, state);
-    }
-    // attr="something"
-    JSXAttribute(node, state) {
-        if(node.value?.type === 'JSXExpressionContainer') return;
-        state.write(' ');
-        this[node.name.type](node.name, state);
-        if(node.value) {
-            state.write('=');
-            this[node.value.type](node.value, state);
-        }
-    }
-    // namespaced:attr="something"
-    JSXNamespacedName(node, state) {
-        this[node.namespace.type](node.namespace, state);
-        state.write(':');
-        this[node.name.type](node.name, state);
-    }
-    // {expression}
-    JSXExpressionContainer(node, state) {
-        state.write(this.childReplace);
-    }
-
-    JSXText({ value }, state) {
-        // const normalized = value.replace(NORMALIZE_PATTERN, ' ');
-        state.write(value);
-    }
-}
-
-// https://github.com/stevenvachon/normalize-html-whitespace/blob/master/index.js
-// const NORMALIZE_PATTERN = /[\f\n\r\t\v ]{2,}/g;

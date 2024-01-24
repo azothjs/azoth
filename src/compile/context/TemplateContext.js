@@ -1,20 +1,6 @@
-import { ContextStack } from './context-stack.js';
+import { Stack } from '../Stack.js';
 import revHash from 'rev-hash';
-
-class Context {
-    static is(context) {
-        return context && context instanceof this;
-    }
-
-    type = '';
-    node = null;
-    constructor(node, type) {
-        this.type = this.constructor.name;
-        this.node = node;
-    }
-}
-
-export class ExpressionContext extends Context {}
+import { Context } from './Context.js';
 
 function getBindingAttr() {
     return {
@@ -30,7 +16,7 @@ function getBindingAttr() {
 const byOrder = (a, b) => a.order - b.order;
 
 export class TemplateContext extends Context {
-    #elements = new ContextStack();
+    #elements = new Stack();
     #elCount = 0;
     #targetEls = new Set();
     bindings = [];

@@ -1,5 +1,5 @@
 import { generate as astring } from 'astring';
-import { AzothGenerator } from './generators.js';
+import { AzothGenerator } from './AzothGenerator.js';
 
 export function generate(ast, config) {
     const generator = new AzothGenerator();
