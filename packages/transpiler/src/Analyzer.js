@@ -104,14 +104,6 @@ export class Analyzer {
         this.#popElement();
     }
 
-    // JSXOpeningFragment({ attributes }) {
-    //     this.JSXAttributes(attributes);
-    // }
-
-    // JSXOpeningElement({ attributes }) {
-    //     this.JSXAttributes(attributes);
-    // }
-
     JSXAttributes(attributes) {
         for(var i = 0; i < attributes.length; i++) {
             const attr = attributes[i];
