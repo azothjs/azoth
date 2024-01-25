@@ -1,10 +1,9 @@
 import { generate } from 'astring';
-import { ExpressionContext, TemplateContext } from './context/index.js';
 import { HtmlGenerator } from './HtmlGenerator.js';
 import { Generator } from './GeneratorBase.js';
-import { Stack } from './context/Stack.js';
 import isValidName from 'is-valid-var-name';
 import { ROOT_PROPERTY, TARGETS_PROPERTY } from '../azoth/renderer.js';
+import { Analyzer } from './Analyzer.js';
 
 function getNextLine(state) {
     const { indent, lineEnd, } = state;
@@ -12,7 +11,7 @@ function getNextLine(state) {
     return `${lineEnd}${indentation}`;
 }
 
-export class AzothGenerator extends Generator {
+export class TemplateGenerator extends Generator {
     templates = [];
 
     constructor() {
@@ -25,10 +24,22 @@ export class AzothGenerator extends Generator {
         });
     }
 
-    // (module) template context
-    context = new Stack();
-    get current() {
-        return this.context.current;
+    JSXFragment(node, state) {
+        this.JSXTemplate(node, state, true);
+    }
+
+    JSXElement(node, state) {
+        this.JSXTemplate(node, state);
+    }
+
+    //  virtual AST type for overall jsx template
+    JSXTemplate(node, state) {
+        const analyzer = new Analyzer(node);
+        const template = analyzer.generateTemplate(this.htmlGenerator);
+        this.templates.push(template);
+
+        // generate javascript
+        this.InjectionWrapper(template, state);
     }
 
     /* Adopt implicit arrow as containing function */
@@ -56,9 +67,9 @@ export class AzothGenerator extends Generator {
     }
 
     InjectionWrapper(template, state) {
-        const { targets, node } = template;
+        const { boundElements, node } = template;
 
-        if(!targets.length) {
+        if(!boundElements.length) {
             this.TemplateRenderer(template, state);
             state.write(`.${ROOT_PROPERTY}`);
             return;
@@ -85,14 +96,14 @@ export class AzothGenerator extends Generator {
         }
     }
 
-    TemplateRenderer({ id, isSingleElementRoot }, state) {
+    TemplateRenderer({ id, isDomFragment }, state) {
         state.write(`t${id}(`);
-        if(!isSingleElementRoot) state.write('true'); // fragment
+        if(isDomFragment) state.write('true'); // fragment
         state.write(`)`);
     }
 
     JSXDomLiteral(template, state) {
-        const { id, targets, bindings } = template;
+        const { id, boundElements, bindings } = template;
         
         const { indent, lineEnd, } = state;
         let indentation = indent.repeat(state.indentLevel);
@@ -102,12 +113,11 @@ export class AzothGenerator extends Generator {
         const rootVarName = `__root_${id}`;
         state.write(`const { ${ROOT_PROPERTY}: ${rootVarName}, ${TARGETS_PROPERTY}: __targets }`);
         state.write(` = `);
-        
         this.TemplateRenderer(template, state);
         state.write(';');
 
         // target variables
-        for(let i = 0; i < targets.length; i++) {
+        for(let i = 0; i < boundElements.length; i++) {
             state.write(`${nextLine}const __target${i} = __targets[${i}];`);
         }
 
@@ -159,128 +169,13 @@ export class AzothGenerator extends Generator {
         }
     }
 
-    /* Analyzer */
-
-
-    /*  Virtual method to create template context, represents
-        missing overall "template" syntax marker in jsx.
-        - Creates TemplateContext to track and analyze jsx chunk
-        - use the template to generate the html with binding replacements
-        - generate JavaScript to inject in place of the jsx
-    */
-    JSXTemplate(node, state, isFragment) {
-        const template = new TemplateContext(node, this.htmlGenerator, isFragment);
-        this.templates.push(template);
-        this.context.push(template);
-
-        // Recursive analysis of jsx: feed root node to JSXElement 
-        this[node.type](node, state);
-        // generate html
-        template.generateHtml();
-        // generate javascript
-        this.InjectionWrapper(template, state);
-
-        this.context.pop();
-    }
-
+    // process javascript in {...} exprs,
+    // stack context to support nested template,
+    // recursive template processing ftw!
     JSXExpressionContext(node, state) {
-        // New context as expressions may have nested template
-        this.context.push(new ExpressionContext(node));
         this[node.type](node, state);
-        this.context.pop();
     }
 
-    JSXFragment(node, state) {
-        if(!TemplateContext.is(this.current)) {
-            this.JSXTemplate(node, state, true);
-            return;
-        }
-        if(this.current.node === node) {
-            this.current.pushElement(node);
-            this.JSXOpenFragment(node);
-            this.JSXChildren(node);
-            this.current.popElement();
-        }
-        else {
-            this.JSXChildren(node);
-        }
-    }
-
-    JSXElement(node, state) {
-        if(!TemplateContext.is(this.current)) {
-            this.JSXTemplate(node, state);
-            return;
-        }
-
-        this.current.pushElement(node);
-        this.JSXOpenElement(node);
-        this.JSXChildren(node);
-        this.current.popElement();
-    }
-
-    JSXOpenFragment({ openingFragment }) {
-        this[openingFragment.type](openingFragment);
-    }
-
-    JSXOpenElement({ openingElement }) {
-        this[openingElement.type](openingElement);
-    }
-
-    JSXOpeningFragment({ attributes }) {
-        this.JSXAttributes(attributes);
-    }
-
-    JSXOpeningElement({ attributes }) {
-        this.JSXAttributes(attributes);
-    }
-
-    JSXAttributes(attributes) {
-        for(var i = 0; i < attributes.length; i++) {
-            const attr = attributes[i];
-            if(attr.value?.type !== 'JSXExpressionContainer') continue;
-            this.current.bind('prop', attr, attr.value.expression, i);
-        }
-    }
-
-    JSXChildren({ children }, adj = 0) {
-        for(let i = 0; i < children.length; i++) {
-            let child = children[i];
-            if(child.type === 'JSXFragment') {
-                // recursively add this fragments children
-                // but continue the parent node's child count
-                // as the fragment's child nodes will be inlined
-                this.JSXChildren(child, i + adj);
-                const length = child.children.length || 0;
-                if(length) {
-                    adj += length - 1; // expected one for child node
-                }
-                else {
-                    adj--; // no child node was generated
-                }
-            }
-            else if(child.type === 'JSXExpressionContainer' && 
-                child.expression.type === 'JSXEmptyExpression') {
-                adj--; // skip this node
-            }
-            else {
-                if(!this[child.type]) {
-                    throw new TypeError(`Unexpected AST Type "${child.type}"`);
-                }
-                this[child.type](child, i + adj);
-            }
-        }
-    }
-
-    JSXExpressionContainer(node, index) {
-        if(node.expression.type === 'JSXEmptyExpression') {
-            return;
-        }
-        this.current.bind('child', node, node.expression, index);
-    }
-
-    JSXText() { /* no-op */ }
-
-    JSXEmptyExpression() { /* no-op */ }
 }
 
 

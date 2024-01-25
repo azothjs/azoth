@@ -1,8 +1,8 @@
 import { generate as astring } from 'astring';
-import { AzothGenerator } from './AzothGenerator.js';
+import { TemplateGenerator } from './TemplateGenerator.js';
 
 export function generate(ast, config) {
-    const generator = new AzothGenerator();
+    const generator = new TemplateGenerator();
 
     const code = astring(ast, {
         ...config,

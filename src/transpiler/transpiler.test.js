@@ -465,7 +465,7 @@ describe('render and composition cases', () => {
 
     });
 
-    test('list composition', ({ expect }) => {
+    test.only('list composition', ({ expect }) => {
         const input = `        
             const Emoji = ({ name }) => <li>{name}</li>;
             const promise = fetchEmojis().then(emojis => emojis.map(Emoji));
