@@ -5,21 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "ESLint Debug",
-            "request": "launch",
-            "runtimeArgs": [
-                "run-script",
-                "lint",
-                "--",
-                "src/www/main.js",
-            ],
-            "runtimeExecutable": "npm",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "type": "node"
-        },
-        {
             "type": "node",
             "request": "launch",
             "name": "Debug Current Test File",
@@ -53,6 +38,21 @@
             ],
             "smartStep": true,
             "console": "integratedTerminal"
-        }
+        },
+        {
+            "name": "ESLint Debug",
+            "request": "launch",
+            "runtimeArgs": [
+                "run-script",
+                "lint",
+                "--",
+                "src/www/main.js",
+            ],
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
     ]
 }

@@ -19,9 +19,11 @@ export class Analyzer {
     #bindings = [];
     #isJSXFragment = false;
     #template = null;
+    #root = null;
 
     constructor(node) {
-        this.#analyze(node);
+        this.#root = node
+        this.#analyze();
 
         const boundElements = [...this.#boundElements].sort(byOrder);
         for(let i = 0; i < boundElements.length; i++) {
@@ -41,9 +43,10 @@ export class Analyzer {
         return template;
     }
 
-    #analyze(node) {
-        // JSXElement or JSXFragment
-        this[node.type](node);
+    #analyze() {
+        const root = this.#root;
+        if(root.type === 'JSXFragment') this.JSXRootFragment(root);
+        else this.JSXElement(root);
     }
 
     #pushElement(node) {
@@ -66,7 +69,7 @@ export class Analyzer {
             index,
         });
 
-        if(element === this.node && this.#isJSXFragment) {
+        if(element === this.#root && this.#isJSXFragment) {
             // fragments can't be "targets", so we give them
             // -1 queryIndex to signal a bound fragment at root
             if(type === 'child') element.queryIndex = -1;
@@ -77,34 +80,37 @@ export class Analyzer {
         }
     }
 
-    JSXFragment(node) {
-        if(this.node === node) {
-            this.#isJSXFragment = true;
-            this.#pushElement(node);
-            this[node.openingFragment.type](node.openingFragment); // JSXOpeningFragment
-            this.JSXChildren(node);
-            this.#popElement();
-        }
-        else { 
-            // extraneous fragment in fragment: inline children
-            this.JSXChildren(node);
-        }
-    }
-
-    JSXElement(node) {
+    JSXRootFragment(node) {
+        this.#isJSXFragment = true;
         this.#pushElement(node);
-        this[node.openingElement.type](node.openingElement); // JSXOpeningElement
+        // short-cut JSXOpeningFragment > JSXAttributes
+        // this[node.openingFragment.type](node.openingFragment); 
+        this.JSXAttributes(node.openingFragment.attributes);
         this.JSXChildren(node);
         this.#popElement();
     }
 
-    JSXOpeningFragment({ attributes }) {
-        this.JSXAttributes(attributes);
+    JSXFragment(node) {
+        // extraneous fragment in fragment: inline children
+        this.JSXChildren(node);
     }
 
-    JSXOpeningElement({ attributes }) {
-        this.JSXAttributes(attributes);
+    JSXElement(node) {
+        this.#pushElement(node);
+        // short-cut JSXOpeningElement > JSXAttributes
+        // this[node.openingElement.type](node.openingElement);
+        this.JSXAttributes(node.openingElement.attributes);
+        this.JSXChildren(node);
+        this.#popElement();
     }
+
+    // JSXOpeningFragment({ attributes }) {
+    //     this.JSXAttributes(attributes);
+    // }
+
+    // JSXOpeningElement({ attributes }) {
+    //     this.JSXAttributes(attributes);
+    // }
 
     JSXAttributes(attributes) {
         for(var i = 0; i < attributes.length; i++) {

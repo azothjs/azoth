@@ -2,7 +2,7 @@ import { generate } from 'astring';
 import { HtmlGenerator } from './HtmlGenerator.js';
 import { Generator } from './GeneratorBase.js';
 import isValidName from 'is-valid-var-name';
-import { ROOT_PROPERTY, TARGETS_PROPERTY } from '../azoth/renderer.js';
+import { ROOT_PROPERTY, TARGETS_PROPERTY } from '../../../src/azoth/renderer.js';
 import { Analyzer } from './Analyzer.js';
 
 function getNextLine(state) {
@@ -67,11 +67,11 @@ export class TemplateGenerator extends Generator {
     }
 
     InjectionWrapper(template, state) {
-        const { boundElements, node } = template;
+        const { isEmpty, boundElements, node } = template;
 
-        if(!boundElements.length) {
+        if(isEmpty || !boundElements.length) {
             this.TemplateRenderer(template, state);
-            state.write(`.${ROOT_PROPERTY}`);
+            if(!isEmpty) state.write(`.${ROOT_PROPERTY}`);
             return;
         }
 
@@ -96,7 +96,12 @@ export class TemplateGenerator extends Generator {
         }
     }
 
-    TemplateRenderer({ id, isDomFragment }, state) {
+    TemplateRenderer({ id, isEmpty, isDomFragment }, state) {
+        if(isEmpty) {
+            state.write('null');
+            return;
+        }
+
         state.write(`t${id}(`);
         if(isDomFragment) state.write('true'); // fragment
         state.write(`)`);

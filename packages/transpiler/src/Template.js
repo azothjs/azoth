@@ -2,6 +2,7 @@ import revHash from 'rev-hash';
 
 export class Template {
     isDomFragment = false;
+    isEmpty = false;
     #html = '';
     #id = '';
 
@@ -27,10 +28,15 @@ export class Template {
             const { queryIndex, children } = node;
             // <>{...}</> - bound childNode(s): 
             const isBound = queryIndex === -1;
+            // <></>
+            const noChildren = children.length === 0;
+            // <><div></div></>
+            const oneChild = children.length === 1;
             // <><div></div><hr/>text</> - multiple jsx children
-            const multipleChildren = children.length > 1;
-
-            this.isDomFragment = isBound || multipleChildren;
+            // multiple: children.length > 1;
+            
+            this.isEmpty = noChildren;
+            this.isDomFragment = isBound || !oneChild;
         }
     }
 }

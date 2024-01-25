@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import Inspect from 'vite-plugin-inspect';
-import AzothPlugin from './packages/vite-plugin-azoth/vite-azoth-plugin.js';
+// import AzothPlugin from './packages/vite-plugin-azoth/vite-azoth-plugin.js';
 
 export default defineConfig({
     // optimizeDeps: {
@@ -17,7 +17,7 @@ export default defineConfig({
         // environment: 'jsdom',
     },
     plugins: [
-        AzothPlugin(),
+        // AzothPlugin(),
         Inspect()
     ],
 });
