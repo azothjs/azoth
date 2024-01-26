@@ -1,4 +1,4 @@
-import { compose } from '../azoth/compose.js';
+import { compose } from '../../packages/azoth/compose.js';
 import './style.css';
 
 class $ extends HTMLElement {

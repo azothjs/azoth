@@ -2,7 +2,7 @@ import { generate } from 'astring';
 import { HtmlGenerator } from './HtmlGenerator.js';
 import { Generator } from './GeneratorBase.js';
 import isValidName from 'is-valid-var-name';
-import { ROOT_PROPERTY, TARGETS_PROPERTY } from '../../../src/azoth/renderer.js';
+import { ROOT_PROPERTY, TARGETS_PROPERTY } from '../../azoth/renderer.js';
 import { Analyzer } from './Analyzer.js';
 
 function getNextLine(state) {
