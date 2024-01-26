@@ -21,38 +21,5 @@
             "smartStep": true,
             "console": "integratedTerminal"
         },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Azoth DEBUG",
-            "autoAttachChildProcesses": true,
-            "skipFiles": [
-                "<node_internals>/**",
-                "off/node_modules/**"
-            ],
-            "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
-            "args": [
-                "run",
-                "-t",
-                "normal template literal"
-            ],
-            "smartStep": true,
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "ESLint Debug",
-            "request": "launch",
-            "runtimeArgs": [
-                "run-script",
-                "lint",
-                "--",
-                "src/www/main.js",
-            ],
-            "runtimeExecutable": "npm",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "type": "node"
-        },
     ]
 }
