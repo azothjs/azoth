@@ -1,5 +1,5 @@
-import { rendererById } from './dom.js';
-import { compose } from './compose.js';
+import { rendererById } from './src/dom.js';
+import { compose } from './src/compose.js';
 
 export const _ = () => { };
 
