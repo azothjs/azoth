@@ -1,7 +1,5 @@
 import { fetchEmojis } from './fetchEmojis.js';
-import { multiplex } from './multiplex.js';
-import './RawHtml.jsx';
-import './style.css';
+import { multiplex } from 'azoth/promises';
 
 function InnerHtml({ html, className = '' }) {
     const rawEmoji = <span className={className ?? ''}></span>;

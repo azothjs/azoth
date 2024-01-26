@@ -5,17 +5,17 @@
     "type": "module",
     "main": "index.js",
     "scripts": {
-        "start": "vite",
-        "test": "exit 0",
-        "wtf": "echo sandbox"
+        "start": "vite"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "plugin": "workspace:*"
+        "azoth": "workspace:*",
+        "vite-plugin-azoth": "workspace:*"
     },
     "devDependencies": {
-        "vite": "^5.0.12"
+        "vite": "^5.0.12",
+        "vite-plugin-inspect": "^0.8.3"
     }
 }
