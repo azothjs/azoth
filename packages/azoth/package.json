@@ -4,6 +4,12 @@
     "description": "",
     "type": "module",
     "main": "index.js",
+    "exports": {
+        ".": "./index.js",
+        "./promises": "./src/promises.js",
+        "./dom": "./src/dom.js",
+        "./renderer": "./src/renderer.js"
+    },
     "scripts": {
         "test": "vitest"
     },

@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+dependencies:
+  plugin:
+    specifier: workspace:*
+    version: link:../plugin
+
 devDependencies:
   vite:
     specifier: ^5.0.12

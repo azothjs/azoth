@@ -1,7 +1,6 @@
 import { fetchEmojis } from './fetchEmojis.js';
 import { multiplex } from './multiplex.js';
 import './RawHtml.jsx';
-// import { click, mouseup } from 'delegates';
 import './style.css';
 
 function InnerHtml({ html, className = '' }) {
@@ -34,7 +33,7 @@ const [Count, List] = multiplex(
     emojis => EmojiList({ emojis }),
 );
 
-const App = <div>
+const $App = <div>
     <header>
         <h1>{Count} emojis for all my friends</h1>
     </header>
@@ -46,7 +45,7 @@ const App = <div>
 
 </div>;
 
-document.body.append(App);
+document.body.append($App);
 
 
 

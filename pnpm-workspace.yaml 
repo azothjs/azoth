@@ -1,4 +1,3 @@
-# pnpm-monrepo/pnpm-workspace.yaml
+# azoth/pnpm-workspace.yaml
 packages:
   - "./packages/*"
-  - "./sandbox"

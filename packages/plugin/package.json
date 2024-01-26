@@ -1,0 +1,40 @@
+{
+    "name": "plugin",
+    "version": "1.0.0",
+    "description": "Vite plugin for compiling azoth jsx",
+    "keywords": [
+        "vite-plugin",
+        "vite plugin",
+        "vite",
+        "azoth"
+    ],
+    "license": "MIT",
+    "author": "Marty Nelson",
+    "engines": {
+        "node": "^18.0.0 || >=20"
+    },
+    "type": "module",
+    "scripts": {
+        "test": "vitest",
+        "build": "vite build -c ./test/vite.config.js"
+    },
+    "files": [
+        "index.js"
+    ],
+    "exports": {
+        ".": {
+            "import": {
+                "default": "./index.js"
+            }
+        }
+    },
+    "dependencies": {
+        "compiler": "workspace:*",
+        "azoth": "workspace:*"
+    },
+    "devDependencies": {
+        "@rollup/pluginutils": "^5.1.0",
+        "vite": "^5.0.12",
+        "vitest": "^1.2.2"
+    }
+}

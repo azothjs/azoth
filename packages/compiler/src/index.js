@@ -1,13 +1,12 @@
 import { Parser } from 'acorn';
 import acornJsx from 'acorn-jsx';
-import { generate } from './index.js';
 import { generate as astring } from 'astring';
 import { TemplateGenerator } from './TemplateGenerator.js';
 
 // compile = parse + generate
 export function compile(code, options) {
-    const parseOptions = options?.parser 
-    const generateOptions = options?.generator 
+    const parseOptions = options?.parser
+    const generateOptions = options?.generator
     const ast = parse(code, parseOptions)
     return generate(ast, generateOptions);
 };

@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import Inspect from 'vite-plugin-inspect';
+import inspect from 'vite-plugin-inspect';
 // import AzothPlugin from './packages/vite-plugin-azoth/vite-azoth-plugin.js';
 
 export default defineConfig({
@@ -17,8 +17,7 @@ export default defineConfig({
         // environment: 'jsdom',
     },
     plugins: [
-        // AzothPlugin(),
-        Inspect()
+        inspect()
     ],
 });
 

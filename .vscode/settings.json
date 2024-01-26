@@ -18,6 +18,7 @@
         "onopentag",
         "onopentagname",
         "ontext",
+        "pluginutils",
         "quasis",
         "templatize",
         "tfaf",
@@ -31,7 +32,7 @@
         "editor.defaultFormatter": "vscode.json-language-features"
     },
     "files.exclude": {
-        "**/dist": true,
+        "**/distx": true,
         "**/xnode_modules": true
     },
     "[jsonc]": {
