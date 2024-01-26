@@ -4,7 +4,9 @@
     "description": "",
     "type": "module",
     "main": "index.js",
-    "scripts": {},
+    "scripts": {
+        "test": "CI=true vitest"
+    },
     "keywords": [],
     "author": "",
     "license": "ISC",
