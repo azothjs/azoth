@@ -1,16 +1,18 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'path'
+import { resolve } from 'node:path'
 import azothPlugin from '../index.js';
 
 console.log('****************', __dirname)
 
 export default defineConfig({
+    root: './test',
     plugins: [
         azothPlugin(),
     ],
     build: {
         target: 'ESNext',
         minify: false,
+        outDir: './out',
         lib: {
             // Could also be a dictionary or array of multiple entry points
             entry: resolve(__dirname, './src/main.jsx'),

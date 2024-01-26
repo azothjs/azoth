@@ -1,4 +1,7 @@
-import { __compose } from "azoth";
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`plugin output produces same snapshot 2`] = `
+"import { __compose } from "azoth";
 function renderer(fragment) {
   return function render() {
     const clone = fragment.cloneNode(true);
@@ -22,17 +25,17 @@ const makeRenderer = (id, html, isFragment = false) => {
   return template;
 };
 const templates = /* @__PURE__ */ new Map();
-const t92280c0caa = makeRenderer("92280c0caa", `<span data-bind></span>`);
-const t03038e2f88 = makeRenderer("03038e2f88", `<ul data-bind>
+const t92280c0caa = makeRenderer("92280c0caa", \`<span data-bind></span>\`);
+const t03038e2f88 = makeRenderer("03038e2f88", \`<ul data-bind>
         <!--0-->
-    </ul>`);
-const te208a2df9b = makeRenderer("e208a2df9b", `<li data-bind>
+    </ul>\`);
+const te208a2df9b = makeRenderer("e208a2df9b", \`<li data-bind>
         <!--0--> 
         <!--0-->
         <!--0--> 
-    </li>`);
-const t209e6208e8 = makeRenderer("209e6208e8", `<span data-bind><!--0--></span>`);
-const te323ac00ac = makeRenderer("e323ac00ac", `<div>
+    </li>\`);
+const t209e6208e8 = makeRenderer("209e6208e8", \`<span data-bind><!--0--></span>\`);
+const te323ac00ac = makeRenderer("e323ac00ac", \`<div>
     <header>
         <h1 data-bind><!--0--> emojis for all my friends</h1>
     </header>
@@ -42,7 +45,7 @@ const te323ac00ac = makeRenderer("e323ac00ac", `<div>
         <!--0-->
     </main>
 
-</div>`);
+</div>\`);
 const EMOJIS = "EMOJIS";
 async function fetchEmojis() {
   const json = localStorage.getItem(EMOJIS);
@@ -126,3 +129,5 @@ const $App = (() => {
   return __root_e323ac00ac;
 })();
 document.body.append($App);
+"
+`;
