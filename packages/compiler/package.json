@@ -1,15 +1,16 @@
 {
     "name": "compiler",
     "version": "1.0.0",
-    "description": "",
+    "description": "Azoth JSX to JavaScript + HTML compiler",
+    "keywords": [],
+    "author": "Marty Nelson",
+    "private": "true",
+    "license": "UNLICENSED",
     "type": "module",
-    "main": "index.js",
+    "main": "./src/index.js",
     "scripts": {
         "test": "vitest"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
     "dependencies": {
         "acorn": "^8.11.3",
         "acorn-jsx": "^5.3.2",

@@ -1,19 +1,11 @@
 /* eslint-disable no-undef */
-import { Parser } from 'acorn';
-import acornJsx from 'acorn-jsx';
-import { generate } from './index.js';
+import { compile as _compile } from './index.js';
 import { describe, test } from 'vitest';
 
-const JsxParser = Parser.extend(acornJsx());
-const parse = code => {
-    return JsxParser.parse(code, {
-        ecmaVersion: 'latest',
-        sourceType: 'module'
-    });
-};
-const transpile = ast => generate(ast, { indent: '    ' });
 const compile = input => {
-    return transpile(parse(input));
+    return _compile(input, {
+        generator: { indent: '    ' }
+    });
 };
 
 describe('JSX dom literals', () => {
@@ -178,7 +170,6 @@ describe('template optimizations', () => {
         `);
     });
 });
-
 
 describe('surrounding code integration', () => {
     

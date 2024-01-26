@@ -227,7 +227,7 @@ describe('async resolved appended', () => {
 });
 
 describe('invalid throw', () => {
-    test.only('object', () => {
+    test('object', () => {
         expect(() => {
             compose({ name: 'felix' });
         }).toThrowErrorMatchingInlineSnapshot(`
