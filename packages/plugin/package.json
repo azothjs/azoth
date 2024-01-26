@@ -15,7 +15,7 @@
     },
     "type": "module",
     "scripts": {
-        "test": "vitest",
+        "test": "pnpm run build && vitest -w false ",
         "build": "vite build -c ./test/vite.config.js"
     },
     "files": [
