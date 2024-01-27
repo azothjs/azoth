@@ -5,14 +5,16 @@
     "type": "module",
     "main": "index.js",
     "scripts": {
-        "start": "vite"
+        "start": "vite",
+        "test": "vitest"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "dependencies": {
         "azoth": "workspace:*",
-        "vite-plugin-azoth": "workspace:*"
+        "vite-plugin-azoth": "workspace:*",
+        "vitest": "^1.2.2"
     },
     "devDependencies": {
         "vite": "^5.0.12",

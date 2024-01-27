@@ -12,6 +12,7 @@ export default defineConfig({
     //     jsx: 'preserve',
     // },
     test: {
+        includeSource: ['src/**/*.{js,ts}']
         // update: true,
         // timeout: 30_000,
         // environment: 'jsdom',
