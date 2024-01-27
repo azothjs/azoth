@@ -25,9 +25,9 @@ const [$apple, , ...$rest] = $someFruits.querySelectorAll('li'); //as HTMLUListE
 const $vipFruits = [$apple, ...$rest];
 document.body.append(<ol>{$vipFruits}</ol>);
 
-for(const child of $vipFruits) {
-    console.log(child);
-}
+// for(const child of $vipFruits) {
+//     console.log(child);
+// }
 
 
 export default <>
