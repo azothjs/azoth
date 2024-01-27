@@ -1,26 +1,14 @@
-import { beforeEach, describe, test, expect } from 'vitest';
+import { describe, test, expect } from 'vitest';
 import { compose } from './compose.js';
-
-const elements = [
-    elementWithTextAnchor,
-    elementWithTextAnchorText,
-    elementWithAnchor,
-    elementWithAnchorText,
-];
-
-function runCompose(value, create) {
-    const { dom, anchor } = create();
-    compose(value, anchor);
-    return dom;
-}
+import { runCompose, elements, $text, $div } from './compose.test.elements.test.js';
 
 function run(value, create) {
     return runCompose(value, create).outerHTML;
 }
 
-const getKeyList = list => list.map(([key]) => key).join(', ');
 
 describe('no-op values not appended', () => {
+
 
     const noValues = () => Object.entries({
         undefined: undefined,
@@ -29,6 +17,8 @@ describe('no-op values not appended', () => {
         false: false,
         empty: '',
     });
+
+    const getKeyList = list => list.map(([key]) => key).join(', ');
 
     test(getKeyList(noValues()), () => {
         const results = elements.flatMap(create => {
@@ -183,50 +173,6 @@ describe('array appended', () => {
     });
 });
 
-describe('async', () => {
-    describe('Promise', () => {
-
-        test('promise', async ({ expect }) => {
-            const promises = [];
-            const getAsyncText = (text) => {
-                const promise = Promise.resolve(text);
-                promises.push(promise);
-                return promise;
-            };
-
-            async function testArray(value) {
-                return await Promise.all(
-                    elements.map(async create => {
-                        const promise = getAsyncText(value);
-                        const dom = runCompose(promise, create);
-                        await promise;
-                        return `${create.name.padEnd(25, ' ')}: ${dom.outerHTML}`;
-                    })
-                );
-            }
-
-            expect(await testArray('promise?')).toMatchInlineSnapshot(`
-          [
-            "elementWithTextAnchor    : <div>Hellopromise?<!--1--></div>",
-            "elementWithTextAnchorText: <div>Hellopromise?<!--1-->Hello</div>",
-            "elementWithAnchor        : <div>promise?<!--1--></div>",
-            "elementWithAnchorText    : <div>promise?<!--1-->Hello</div>",
-          ]
-        `);
-
-            expect(await testArray([42, 11, 7])).toMatchInlineSnapshot(`
-          [
-            "elementWithTextAnchor    : <div>Hello42117<!--3--></div>",
-            "elementWithTextAnchorText: <div>Hello42117<!--3-->Hello</div>",
-            "elementWithAnchor        : <div>42117<!--3--></div>",
-            "elementWithAnchorText    : <div>42117<!--3-->Hello</div>",
-          ]
-        `);
-
-        });
-    });
-});
-
 describe('invalid throw', () => {
     test('object', () => {
         expect(() => {
@@ -242,86 +188,5 @@ describe('invalid throw', () => {
 
           ]
         `);
-    });
-});
-
-const $anchor = () => document.createComment(0);
-const $div = () => document.createElement('div');
-const $text = (text) => document.createTextNode(text);
-const $helloText = () => $text('Hello');
-
-function elementWithTextAnchor() {
-    const dom = $div();
-    dom.append($helloText(), $anchor());
-    return { dom, anchor: dom.lastChild };
-}
-
-function elementWithTextAnchorText() {
-    const dom = $div();
-    dom.append($helloText(), $anchor(), $helloText());
-    return { dom, anchor: dom.firstChild.nextSibling };
-}
-
-function elementWithAnchor() {
-    const dom = $div();
-    dom.append($anchor());
-    return { dom, anchor: dom.firstChild };
-}
-
-function elementWithAnchorText() {
-    const dom = $div();
-    dom.append($anchor(), $helloText());
-    return { dom, anchor: dom.firstChild };
-}
-
-describe('element helpers initial anchor and html', () => {
-
-    test('text-anchor', ({ expect }) => {
-        expect(elementWithTextAnchorText()).toMatchInlineSnapshot(`
-      {
-        "anchor": <!--0-->,
-        "dom": <div>
-          Hello
-          <!--0-->
-          Hello
-        </div>,
-      }
-    `);
-    });
-
-    test('text-anchor-text', ({ expect }) => {
-        expect(elementWithTextAnchorText()).toMatchInlineSnapshot(`
-      {
-        "anchor": <!--0-->,
-        "dom": <div>
-          Hello
-          <!--0-->
-          Hello
-        </div>,
-      }
-    `);
-    });
-
-    test('anchor', ({ expect }) => {
-        expect(elementWithAnchor()).toMatchInlineSnapshot(`
-      {
-        "anchor": <!--0-->,
-        "dom": <div>
-          <!--0-->
-        </div>,
-      }
-    `);
-    });
-
-    test('anchor-text', ({ expect }) => {
-        expect(elementWithAnchorText()).toMatchInlineSnapshot(`
-      {
-        "anchor": <!--0-->,
-        "dom": <div>
-          <!--0-->
-          Hello
-        </div>,
-      }
-    `);
     });
 });

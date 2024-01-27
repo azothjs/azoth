@@ -1,20 +1,8 @@
-import { beforeEach, describe, test, expect, vi } from 'vitest';
+import { elementWithTextAnchor, elements, runCompose } from './compose.test.elements.test.js';
+import { describe, test, expect, vi } from 'vitest';
 import { compose } from './compose.js';
 import { sleep } from './promises.js';
 import './with-resolvers-polyfill.js';
-
-const elements = [
-    elementWithTextAnchor,
-    elementWithTextAnchorText,
-    elementWithAnchor,
-    elementWithAnchorText,
-];
-
-function runCompose(value, create) {
-    const { dom, anchor } = create();
-    compose(value, anchor);
-    return dom;
-}
 
 describe('async', () => {
 
@@ -57,16 +45,21 @@ describe('async', () => {
 
     });
 
-    test.only('generators (async)', async ({ expect }) => {
-        let resolve = null;
-        let promise = null;
+    test('generators (async)', async ({ expect }) => {
+        let tickTock = null;
         const doAsync = async (value) => {
-            const { promise: p, resolve: r } = Promise.withResolvers();
-            resolve = () => {
-                r(value);
+            const { promise, resolve } = Promise.withResolvers();
+            // it takes two event loops for the value to get through
+            tickTock = async () => {
+                resolve(value);
+                // this is the async activity the generator is waiting on
+                await promise.then((value) => {
+                    // wait for the async generator to yield 
+                    // the value asynchronously itself!
+                    return Promise.resolve();
+                });
             };
-            promise = p;
-            return p;
+            return promise;
         };
 
         async function* numbers() {
@@ -76,6 +69,7 @@ describe('async', () => {
         }
 
         const numbersDom = runCompose(numbers, elementWithTextAnchor);
+        // initial render
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
             Hello
@@ -83,8 +77,7 @@ describe('async', () => {
           </div>
         `);
 
-        resolve();
-        await sleep(50);
+        await tickTock();
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
             Hello
@@ -93,8 +86,7 @@ describe('async', () => {
           </div>
         `);
 
-        resolve();
-        await sleep(50);
+        await tickTock();
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
             Hello
@@ -103,8 +95,7 @@ describe('async', () => {
           </div>
         `);
 
-        resolve();
-        await sleep(50);
+        await tickTock();
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
             Hello
@@ -113,8 +104,7 @@ describe('async', () => {
           </div>
         `);
 
-        resolve();
-        await sleep(50);
+        await tickTock();
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
             Hello
@@ -122,104 +112,5 @@ describe('async', () => {
             <!--1-->
           </div>
         `);
-    });
-});
-
-describe('invalid throw', () => {
-    test('object', () => {
-        expect(() => {
-            compose({ name: 'felix' });
-        }).toThrowErrorMatchingInlineSnapshot(`
-          [TypeError: Invalid {...} compose input type "object", value [object Object].
-
-          Received as:
-
-          {
-            "name": "felix"
-          }
-
-          ]
-        `);
-    });
-});
-
-const $anchor = () => document.createComment('0');
-const $div = () => document.createElement('div');
-const $text = (text) => document.createTextNode(text);
-const $helloText = () => $text('Hello');
-
-function elementWithTextAnchor() {
-    const dom = $div();
-    dom.append($helloText(), $anchor());
-    return { dom, anchor: dom.lastChild };
-}
-
-function elementWithTextAnchorText() {
-    const dom = $div();
-    dom.append($helloText(), $anchor(), $helloText());
-    return { dom, anchor: dom.firstChild.nextSibling };
-}
-
-function elementWithAnchor() {
-    const dom = $div();
-    dom.append($anchor());
-    return { dom, anchor: dom.firstChild };
-}
-
-function elementWithAnchorText() {
-    const dom = $div();
-    dom.append($anchor(), $helloText());
-    return { dom, anchor: dom.firstChild };
-}
-
-describe('element helpers initial anchor and html', () => {
-
-    test('text-anchor', ({ expect }) => {
-        expect(elementWithTextAnchorText()).toMatchInlineSnapshot(`
-      {
-        "anchor": <!--0-->,
-        "dom": <div>
-          Hello
-          <!--0-->
-          Hello
-        </div>,
-      }
-    `);
-    });
-
-    test('text-anchor-text', ({ expect }) => {
-        expect(elementWithTextAnchorText()).toMatchInlineSnapshot(`
-      {
-        "anchor": <!--0-->,
-        "dom": <div>
-          Hello
-          <!--0-->
-          Hello
-        </div>,
-      }
-    `);
-    });
-
-    test('anchor', ({ expect }) => {
-        expect(elementWithAnchor()).toMatchInlineSnapshot(`
-      {
-        "anchor": <!--0-->,
-        "dom": <div>
-          <!--0-->
-        </div>,
-      }
-    `);
-    });
-
-    test('anchor-text', ({ expect }) => {
-        expect(elementWithAnchorText()).toMatchInlineSnapshot(`
-      {
-        "anchor": <!--0-->,
-        "dom": <div>
-          <!--0-->
-          Hello
-        </div>,
-      }
-    `);
     });
 });
