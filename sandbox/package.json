@@ -13,11 +13,11 @@
     "license": "ISC",
     "dependencies": {
         "azoth": "workspace:*",
-        "vite-plugin-azoth": "workspace:*",
-        "vitest": "^1.2.2"
+        "vite-plugin-azoth": "workspace:*"
     },
     "devDependencies": {
         "vite": "^5.0.12",
-        "vite-plugin-inspect": "^0.8.3"
+        "vite-plugin-inspect": "^0.8.3",
+        "vitest": "^1.2.2"
     }
 }

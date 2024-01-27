@@ -1,6 +1,3 @@
-
-
-
 export function multiplex(promise, ...outlets) {
     const list = outlets.map(handler => {
         const { promise, resolve, reject } = Promise.withResolvers();
@@ -34,4 +31,10 @@ export function keyedMultiplex(promise, outlets) {
 
     const keyPromiseEntries = list.map(({ entry }) => entry);
     return Object.fromEntries(keyPromiseEntries);
+}
+
+export async function sleep(ms) {
+    const { promise, resolve } = Promise.withResolvers();
+    setTimeout(resolve, ms);
+    return promise;
 }

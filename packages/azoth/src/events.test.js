@@ -1,5 +1,7 @@
 import { test } from 'vitest';
 import { eventOperator } from './events.js';
+import './with-resolvers-polyfill.js';
+
 test('events', async ({ expect }) => {
     const { operator, listener } = eventOperator('/');
 

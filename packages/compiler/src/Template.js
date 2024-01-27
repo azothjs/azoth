@@ -17,7 +17,7 @@ export class Template {
         this.#html = html;
         this.#id = revHash(html);
     }
-    
+
     constructor(node, { isJsxFragment, bindings, boundElements }) {
         this.node = node;
         this.bindings = bindings;
@@ -34,7 +34,7 @@ export class Template {
             const oneChild = children.length === 1;
             // <><div></div><hr/>text</> - multiple jsx children
             // multiple: children.length > 1;
-            
+
             this.isEmpty = noChildren;
             this.isDomFragment = isBound || !oneChild;
         }

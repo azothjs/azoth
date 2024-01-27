@@ -24,9 +24,16 @@ export function compose(input, anchor, keepLast = false) {
         case Array.isArray(input):
             composeArray(input, anchor, keepLast);
             break;
-        case type === 'object':
-            throwTypeErrorForObject(input, type);
+        case type === 'object': {
+            if(input[Symbol.asyncIterator]) {
+                composeAsyncIterator(input, anchor, keepLast);
+            }
+            else {
+                throwTypeErrorForObject(input, type);
+
+            }
             break;
+        }
         default: {
             throwTypeError(input, type);
         }
@@ -49,7 +56,7 @@ function throwTypeErrorForObject(obj, type) {
     catch(ex) {
         throwTypeError(obj, type);
     }
-    
+
     throwTypeError(obj, type, `\n\nReceived as:\n\n${json}\n\n`);
 }
 
@@ -74,4 +81,10 @@ function composeArray(array, anchor) {
 
 function tryRemovePrior({ previousSibling }) {
     return previousSibling ? (previousSibling.remove(), true) : false;
+}
+
+async function composeAsyncIterator(iterator, anchor, keepLast) {
+    for await(const value of iterator) {
+        compose(value, anchor, keepLast);
+    }
 }

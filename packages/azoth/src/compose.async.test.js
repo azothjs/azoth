@@ -1,6 +1,7 @@
-// @vitest-environment jsdom
-import { beforeEach, describe, test, expect } from 'vitest';
+import { beforeEach, describe, test, expect, vi } from 'vitest';
 import { compose } from './compose.js';
+import { sleep } from './promises.js';
+import './with-resolvers-polyfill.js';
 
 const elements = [
     elementWithTextAnchor,
@@ -13,10 +14,6 @@ function runCompose(value, create) {
     const { dom, anchor } = create();
     compose(value, anchor);
     return dom;
-}
-
-function run(value, create) {
-    return runCompose(value, create).outerHTML;
 }
 
 describe('async', () => {
@@ -60,26 +57,71 @@ describe('async', () => {
 
     });
 
-    test('generators', async ({ expect }) => {
-        const promises = [];
-        const getAsyncText = (text) => {
-            const promise = Promise.resolve(text);
-            promises.push(promise);
-            return promise;
+    test.only('generators (async)', async ({ expect }) => {
+        let resolve = null;
+        let promise = null;
+        const doAsync = async (value) => {
+            const { promise: p, resolve: r } = Promise.withResolvers();
+            resolve = () => {
+                r(value);
+            };
+            promise = p;
+            return p;
         };
 
-        async function testArray(value) {
-            return await Promise.all(
-                elements.map(async create => {
-                    const promise = getAsyncText(value);
-                    const dom = runCompose(promise, create);
-                    await promise;
-                    return `${create.name.padEnd(25, ' ')}: ${dom.outerHTML}`;
-                })
-            );
+        async function* numbers() {
+            yield doAsync('one');
+            yield doAsync('two');
+            yield doAsync('three');
         }
 
+        const numbersDom = runCompose(numbers, elementWithTextAnchor);
+        expect(numbersDom).toMatchInlineSnapshot(`
+          <div>
+            Hello
+            <!--0-->
+          </div>
+        `);
 
+        resolve();
+        await sleep(50);
+        expect(numbersDom).toMatchInlineSnapshot(`
+          <div>
+            Hello
+            one
+            <!--1-->
+          </div>
+        `);
+
+        resolve();
+        await sleep(50);
+        expect(numbersDom).toMatchInlineSnapshot(`
+          <div>
+            Hello
+            two
+            <!--1-->
+          </div>
+        `);
+
+        resolve();
+        await sleep(50);
+        expect(numbersDom).toMatchInlineSnapshot(`
+          <div>
+            Hello
+            three
+            <!--1-->
+          </div>
+        `);
+
+        resolve();
+        await sleep(50);
+        expect(numbersDom).toMatchInlineSnapshot(`
+          <div>
+            Hello
+            three
+            <!--1-->
+          </div>
+        `);
     });
 });
 
@@ -101,7 +143,7 @@ describe('invalid throw', () => {
     });
 });
 
-const $anchor = () => document.createComment(0);
+const $anchor = () => document.createComment('0');
 const $div = () => document.createElement('div');
 const $text = (text) => document.createTextNode(text);
 const $helloText = () => $text('Hello');

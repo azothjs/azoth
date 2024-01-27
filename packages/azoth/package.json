@@ -12,13 +12,15 @@
         "./renderer": "./src/renderer.js"
     },
     "scripts": {
-        "test": "vitest"
+        "test": "vitest",
+        "test:ui": "vitest -c vite.config.in-browser.js"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "devDependencies": {
+        "@vitest/browser": "^1.2.2",
         "happy-dom": "^13.3.1",
-        "vitest": "^1.2.1"
+        "vitest": "^1.2.2"
     }
 }

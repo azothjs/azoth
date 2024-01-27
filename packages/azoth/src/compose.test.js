@@ -1,4 +1,3 @@
-// @vitest-environment jsdom
 import { beforeEach, describe, test, expect } from 'vitest';
 import { compose } from './compose.js';
 

@@ -1,5 +1,9 @@
 {
     "compilerOptions": {
+        "types": [
+            "@vitest/browser/providers/webdriverio",
+            "@vitest/browser/providers/playwright"
+        ],
         "jsx": "preserve",
         "target": "ESNext",
         "noImplicitAny": true,
@@ -14,4 +18,4 @@
         // "emitDeclarationOnly": true,
         // "composite": true
     }
-  }
+}
