@@ -109,6 +109,9 @@ export default [
                         },
                         catch: {
                             after: false
+                        },
+                        await: {
+                            after: false
                         }
                     }
                 }
