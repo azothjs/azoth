@@ -1,34 +1,45 @@
-import renderer from './renderer.js';
 
-const htmlToFragment = (html) => {
-    const template = document.createElement('template');
-    template.innerHTML = html;
-    return template.content;
-};
-
-export const makeRenderer = (id, html, isFragment = false) => {
-    if(templates.has(id)) return templates.get(id);
-    const fragment = htmlToFragment(html);
-    const template = renderer(fragment, isFragment);
-    templates.set(id, template);
-    return template;
-};
-
-export function rendererById(id, isFragment = false) {
-    const renderer = getRenderer(id);
-    let { root, targets } = renderer();
-    if(!isFragment) root = root.firstElementChild;
-    return { root, targets };
-}
 
 const templates = new Map();
 
-function getRenderer(id) {
+export function clearTemplates() {
+    templates.clear();
+}
+
+export function makeRenderer(id, html, isFragment = false) {
+    if(templates.has(id)) return templates.get(id);
+
+    const template = document.createElement('template');
+    template.innerHTML = html;
+
+    return rendererFactory(id, template.content, isFragment);
+}
+
+export function rendererById(id, isFragment = false) {
     if(templates.has(id)) return templates.get(id);
 
     // TODO: could fail on bad id...
     const templateEl = document.getElementById(id);
-    const template = renderer(templateEl.content);
+    return rendererFactory(id, templateEl.content, isFragment);
+
+}
+
+function rendererFactory(id, node, isFragment) {
+    const template = renderer(node, isFragment);
     templates.set(id, template);
     return template;
+}
+
+export const ROOT_PROPERTY = 'root';
+export const TARGETS_PROPERTY = 'targets';
+
+function renderer(fragment, isFragment) {
+
+    return function render() {
+        const clone = fragment.cloneNode(true);
+        const targets = clone.querySelectorAll('[data-bind]');
+        const root = isFragment ? clone : clone.firstElementChild;
+
+        return { root, targets };
+    };
 }

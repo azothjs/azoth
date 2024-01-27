@@ -2,7 +2,7 @@ import { generate } from 'astring';
 import { HtmlGenerator } from './HtmlGenerator.js';
 import { Generator } from './GeneratorBase.js';
 import isValidName from 'is-valid-var-name';
-import { ROOT_PROPERTY, TARGETS_PROPERTY } from '../../azoth/src/renderer.js';
+import { ROOT_PROPERTY, TARGETS_PROPERTY } from 'azoth/dom';
 import { Analyzer } from './Analyzer.js';
 
 function getNextLine(state) {
@@ -88,7 +88,7 @@ export class TemplateGenerator extends Generator {
         this.JSXDomLiteral(template, state);
 
         state.write(`${nextLine}return __root_${template.id};`);
-        
+
         if(useIIFEWrapper) {
             state.indentLevel--;
             nextLine = getNextLine(state);
@@ -109,7 +109,7 @@ export class TemplateGenerator extends Generator {
 
     JSXDomLiteral(template, state) {
         const { id, boundElements, bindings } = template;
-        
+
         const { indent, lineEnd, } = state;
         let indentation = indent.repeat(state.indentLevel);
         let nextLine = `${lineEnd}${indentation}`;

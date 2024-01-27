@@ -1,13 +1,28 @@
 
+function withResolvers() {
+    let resolve = null, reject = null;
+    const promise = new Promise((res, rej) => {
+        resolve = res;
+        reject = rej;
+    });
+    return { promise, resolve, reject };
+}
 
-// in-source test suites
-if(import.meta.vitest) {
+export function eventOperator(adaptor) {
+    let nextResolve = null;
+    function listener(payload) {
+        // if(adaptor) payload = adaptor(payload);
+        nextResolve(payload);
+    }
 
-    const { test } = import.meta.vitest
-    test('add', ({ expect }) => {
-        let called = false;
-        const listener = () => { called = true; };
+    async function* operator(initial) {
+        yield initial;
+        while(true) {
+            const { promise, resolve } = withResolvers();
+            nextResolve = resolve;
+            yield await promise;
+        }
+    }
 
-
-    })
+    return { operator, listener };
 }

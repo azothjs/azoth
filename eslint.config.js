@@ -12,6 +12,8 @@ export default [
     //         parser
     //     },
     // },
+
+
     {
         files: ['**/*.js', '**/*.jsx'],
         // files: ['**/*.js'],

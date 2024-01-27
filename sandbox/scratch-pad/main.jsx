@@ -7,11 +7,6 @@ function InnerHtml({ html, className = '' }) {
     return rawEmoji;
 }
 
-function EmojiList({ emojis }) {
-    return <ul>
-        {emojis.map(Emoji)}
-    </ul>;
-}
 
 function Emoji({ name, unicode, htmlCode }) {   
     return <li>
@@ -21,11 +16,18 @@ function Emoji({ name, unicode, htmlCode }) {
     </li>;
 }
 
+
+function EmojiList({ emojis }) {
+    return <ul>
+        {emojis.map(Emoji)}
+    </ul>;
+}
+
 function EmojiCount({ count }) {
     return <span>{count}</span>;
 }
 
-const [Count, List] = multiplex(
+const [$Count, $List] = multiplex(
     fetchEmojis(), 
     ({ length }) => EmojiCount({ count: length }), 
     emojis => EmojiList({ emojis }),
@@ -33,18 +35,14 @@ const [Count, List] = multiplex(
 
 const $App = <div>
     <header>
-        <h1>{Count} emojis for all my friends</h1>
+        <h1>{$Count} emojis for all my friends</h1>
     </header>
         
     <main>
         <h2>Amazing Emoji List</h2>
-        {List}
+        {$List}
     </main>
 
 </div>;
 
 document.body.append($App);
-
-
-
-

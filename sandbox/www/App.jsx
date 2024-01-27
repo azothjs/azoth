@@ -1,18 +1,33 @@
+import { eventOperator } from 'azoth/events';
+
+const { operator, listener } = eventOperator('/');
+
 
 function Link({ href, text = href }) {
     return <a href={href} onclick={e => {
         e.preventDefault();
-        history.pushState(null, null, );
+        history.pushState(null, null, href);
+        listener(href);
     }}>
         {text}
     </a>;
 }
 
-function handlePushState(href) {
-    history.pushState(null, null, href);
-}
+const $someFruits = <ul>
+    <li>apple</li>
+    <li>banana</li>
+    <li>cherry</li>
+    <li>pear</li>
+    <li>orange</li>
+</ul>;
 
-window.onpopstate = console.log
+const [$apple, , ...$rest] = $someFruits.querySelectorAll('li'); //as HTMLUListElement;
+const $vipFruits = [$apple, ...$rest];
+document.body.append(<ol>{$vipFruits}</ol>);
+
+for(const child of $vipFruits) {
+    console.log(child);
+}
 
 
 export default <>
@@ -26,8 +41,8 @@ export default <>
     </header>
 
     <main>
-        <iframe src="/emojis/">
+        {/* <iframe src="/emojis/"></iframe> */}
 
-        </iframe>
+        {/* <button>{count}</button> */}
     </main>
 </>;

@@ -7,6 +7,7 @@
     "exports": {
         ".": "./index.js",
         "./promises": "./src/promises.js",
+        "./events": "./src/events.js",
         "./dom": "./src/dom.js",
         "./renderer": "./src/renderer.js"
     },
@@ -17,6 +18,7 @@
     "author": "",
     "license": "ISC",
     "devDependencies": {
+        "happy-dom": "^13.3.1",
         "vitest": "^1.2.1"
     }
 }

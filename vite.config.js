@@ -12,10 +12,10 @@ export default defineConfig({
     //     jsx: 'preserve',
     // },
     test: {
-        includeSource: ['src/**/*.{js,ts}']
+        // includeSource: ['src/**/*.{js,ts}'],
         // update: true,
         // timeout: 30_000,
-        // environment: 'jsdom',
+        environment: 'happy-dom',
     },
     plugins: [
         inspect()

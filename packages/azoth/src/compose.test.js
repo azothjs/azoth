@@ -8,7 +8,7 @@ const elements = [
     elementWithAnchor,
     elementWithAnchorText,
 ];
-   
+
 function runCompose(value, create) {
     const { dom, anchor } = create();
     compose(value, anchor);
@@ -80,7 +80,7 @@ describe('no-op values not appended', () => {
         `);
     });
 });
-  
+
 describe(`accepted values appended`, () => {
 
     const accepted = () => Object.entries({
@@ -89,7 +89,7 @@ describe(`accepted values appended`, () => {
         TextNode: $text('TextNode'),
         Element: $div(),
     });
-    
+
     test('string, number, TextNode, Element', () => {
         const results = elements.flatMap(create => {
             return [
@@ -184,28 +184,29 @@ describe('array appended', () => {
     });
 });
 
-describe('async resolved appended', () => {
+describe('async', () => {
+    describe('Promise', () => {
 
-    test('promise', async ({ expect }) => {
-        const promises = [];
-        const getAsyncText = (text) => {
-            const promise = Promise.resolve(text);
-            promises.push(promise);
-            return promise;
-        };
+        test('promise', async ({ expect }) => {
+            const promises = [];
+            const getAsyncText = (text) => {
+                const promise = Promise.resolve(text);
+                promises.push(promise);
+                return promise;
+            };
 
-        async function testArray(value) {
-            return await Promise.all(
-                elements.map(async create => {
-                    const promise = getAsyncText(value);
-                    const dom = runCompose(promise, create);
-                    await promise;
-                    return `${create.name.padEnd(25, ' ')}: ${dom.outerHTML}`;
-                })
-            );
-        }
+            async function testArray(value) {
+                return await Promise.all(
+                    elements.map(async create => {
+                        const promise = getAsyncText(value);
+                        const dom = runCompose(promise, create);
+                        await promise;
+                        return `${create.name.padEnd(25, ' ')}: ${dom.outerHTML}`;
+                    })
+                );
+            }
 
-        expect(await testArray('promise?')).toMatchInlineSnapshot(`
+            expect(await testArray('promise?')).toMatchInlineSnapshot(`
           [
             "elementWithTextAnchor    : <div>Hellopromise?<!--1--></div>",
             "elementWithTextAnchorText: <div>Hellopromise?<!--1-->Hello</div>",
@@ -214,7 +215,7 @@ describe('async resolved appended', () => {
           ]
         `);
 
-        expect(await testArray([42, 11, 7])).toMatchInlineSnapshot(`
+            expect(await testArray([42, 11, 7])).toMatchInlineSnapshot(`
           [
             "elementWithTextAnchor    : <div>Hello42117<!--3--></div>",
             "elementWithTextAnchorText: <div>Hello42117<!--3-->Hello</div>",
@@ -223,6 +224,7 @@ describe('async resolved appended', () => {
           ]
         `);
 
+        });
     });
 });
 
@@ -247,7 +249,7 @@ describe('invalid throw', () => {
 const $anchor = () => document.createComment(0);
 const $div = () => document.createElement('div');
 const $text = (text) => document.createTextNode(text);
-const $helloText = () =>$text('Hello');
+const $helloText = () => $text('Hello');
 
 function elementWithTextAnchor() {
     const dom = $div();
