@@ -1,4 +1,4 @@
-import { operator } from 'azoth/events';
+import { operator, collect } from 'azoth/events';
 
 const [control, listener] = operator('/');
 
@@ -13,8 +13,7 @@ function Link({ href, text = href }) {
 }
 
 let count = 0;
-const [increment, counter] = operator(() => ++count);
-const $count = counter(0);
+const [increment, $count] = collect(0, () => ++count);
 
 export default <>
     <header>

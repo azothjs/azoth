@@ -22,3 +22,8 @@ export function operator(adaptor) {
 
     return [control, emitter];
 }
+
+export function collect(initial, adaptor) {
+    const [control, emitter] = operator(adaptor);
+    return [control, emitter(initial)];
+}
