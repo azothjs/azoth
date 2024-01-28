@@ -1,29 +1,32 @@
-export function getTrigger(adaptor) {
-    const relay = { call: null };
-    function control(payload) {
+export function signalToRelay(send, adaptor) {
+    const relay = { send };
+    function signal(payload) {
         if(adaptor) payload = adaptor(payload);
-        relay.call(payload);
+        relay.send(payload);
     }
-
-    return { control, relay };
+    return [signal, relay];
 }
 
-export function operator(adaptor) {
-    const { control, relay } = getTrigger(adaptor);
+export function signalToEmitter(adaptor) {
+    const { promise, resolve } = Promise.withResolvers();
+    const [signal, relay] = signalToRelay(resolve, adaptor);
 
     async function* emitter(initial) {
+        resolve();
+        await promise;
         yield initial;
+
         while(true) {
             const { promise, resolve } = Promise.withResolvers();
-            relay.call = resolve;
+            relay.send = resolve;
             yield await promise;
         }
     }
 
-    return [control, emitter];
+    return [signal, emitter];
 }
 
-export function collect(initial, adaptor) {
-    const [control, emitter] = operator(adaptor);
-    return [control, emitter(initial)];
+export function signalIterator(initial, adaptor) {
+    const [signal, emitter] = signalToEmitter(adaptor);
+    return [signal, emitter(initial)];
 }

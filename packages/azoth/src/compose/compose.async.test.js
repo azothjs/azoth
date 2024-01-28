@@ -1,7 +1,5 @@
 import { elementWithTextAnchor, elements, runCompose } from './compose.test.elements.test.js';
-import { describe, test, expect, vi } from 'vitest';
-import { compose } from './compose.js';
-import { sleep } from '../promises.js';
+import { describe, test } from 'vitest';
 import '../with-resolvers-polyfill.js';
 
 describe('async', () => {

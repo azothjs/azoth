@@ -1,4 +1,4 @@
-import { operator, collect } from 'azoth/events';
+import { operator, relayEmitter } from 'azoth/events';
 
 const [control, listener] = operator('/');
 
@@ -13,20 +13,23 @@ function Link({ href, text = href }) {
 }
 
 let count = 0;
-const [increment, $count] = collect(0, () => ++count);
+const [increment, $count] = relayEmitter(0, () => ++count);
 
 export default <>
     <header>
         <h1>App Header</h1>
+        
         <nav>
-            { Link({ href: '/', text: 'home' }) }
-            { Link({ href: 'emojis' }) }
-            { Link({ href: 'pokedex' }) }
+            {Link({ href: '/', text: 'home' })}
+            {Link({ href: 'emojis' })}
+            {Link({ href: 'pokedex' })}
         </nav>
     </header>
     <main>
-        <button onclick={increment}>++</button>
-        <p>{$count}</p>
+        <p>
+            <button onclick={increment}>++</button>
+            <span>{$count}</span>
+        </p>
 
     </main>
 </>;
