@@ -1,4 +1,4 @@
-import { subject, junction } from 'azoth/generators';
+import { subject, junction, multicast } from 'azoth/generators';
 
 const [signal, generator] = junction();
 const Router = {
@@ -51,6 +51,6 @@ export default <>
         </nav>
     </header>
     <main>
-        
+
     </main>
 </>;

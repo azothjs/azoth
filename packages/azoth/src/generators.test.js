@@ -1,5 +1,5 @@
 import { test } from 'vitest';
-import { subject } from './generators.js';
+import { multicast, subject } from './generators.js';
 import './with-resolvers-polyfill.js';
 
 test('subject', async ({ expect }) => {
@@ -33,35 +33,13 @@ test('adaptor', async ({ expect }) => {
     expect((await iteratorPromise).value).toBe(4);
 });
 
-class Multicast {
-    consumers = [];
-    constructor(subject) {
-        this.subject = subject;
-        this.#start();
-    }
-
-    async #start() {
-        for await(let value of this.subject) {
-            for(let consumer of this.consumers) {
-                consumer(value);
-            }
-        }
-    }
-
-    subscriber() {
-        const [signal, iterator] = subject();
-        this.consumers.push(signal);
-        return iterator;
-    }
-}
-
 test('multicast', async ({ expect }) => {
     const [signal, iterator] = subject(0);
 
-    const multicast = new Multicast(iterator);
-    const s1 = multicast.subscriber();
-    const s2 = multicast.subscriber();
-    const s3 = multicast.subscriber();
+    const mc = multicast(iterator);
+    const s1 = mc.subscriber();
+    const s2 = mc.subscriber();
+    const s3 = mc.subscriber();
 
     const toValues = iterations => iterations.map(({ value }) => value);
 

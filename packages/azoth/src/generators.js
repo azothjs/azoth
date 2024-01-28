@@ -54,3 +54,29 @@ export function subject(initial, adaptor) {
     const [signal, generator] = junction(adaptor);
     return [signal, generator(initial)];
 }
+
+export function multicast(iterator) {
+    return new Multicast(iterator);
+}
+
+class Multicast {
+    consumers = [];
+    constructor(subject) {
+        this.subject = subject;
+        this.#start();
+    }
+
+    async #start() {
+        for await(let value of this.subject) {
+            for(let consumer of this.consumers) {
+                consumer(value);
+            }
+        }
+    }
+
+    subscriber() {
+        const [signal, iterator] = subject();
+        this.consumers.push(signal);
+        return iterator;
+    }
+}
