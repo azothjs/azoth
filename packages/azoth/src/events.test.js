@@ -1,18 +1,18 @@
 import { test } from 'vitest';
-import { eventOperator } from './events.js';
+import { operator } from './events.js';
 import './with-resolvers-polyfill.js';
 
 test('events', async ({ expect }) => {
-    const { operator, listener } = eventOperator('/');
+    const [control, emitter] = operator();
 
-    const iterator = operator('/');
+    const iterator = emitter('/');
     let { value } = await iterator.next();
     expect(value).toBe('/');
 
     // listen for next call
     let iteratorPromise = iterator.next();
     // fire the event
-    listener('/page');
+    control('/page');
     // check the response
     ({ value } = await iteratorPromise);
     // /page
@@ -21,7 +21,7 @@ test('events', async ({ expect }) => {
     // listen for next call
     iteratorPromise = iterator.next();
     // fire the event
-    listener('/');
+    control('/');
     // check the response
     ({ value } = await iteratorPromise);
     // /

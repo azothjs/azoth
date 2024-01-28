@@ -1,18 +1,24 @@
-export function eventOperator(adaptor) {
-    let nextResolve = null;
-    function listener(payload) {
-        // if(adaptor) payload = adaptor(payload);
-        nextResolve(payload);
+export function getTrigger(adaptor) {
+    const relay = { call: null };
+    function control(payload) {
+        if(adaptor) payload = adaptor(payload);
+        relay.call(payload);
     }
 
-    async function* operator(initial) {
+    return { control, relay };
+}
+
+export function operator(adaptor) {
+    const { control, relay } = getTrigger(adaptor);
+
+    async function* emitter(initial) {
         yield initial;
         while(true) {
             const { promise, resolve } = Promise.withResolvers();
-            nextResolve = resolve;
+            relay.call = resolve;
             yield await promise;
         }
     }
 
-    return { operator, listener };
+    return [control, emitter];
 }

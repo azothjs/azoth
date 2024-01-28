@@ -1,7 +1,6 @@
-import { eventOperator } from 'azoth/events';
+import { operator } from 'azoth/events';
 
-const { operator, listener } = eventOperator('/');
-
+const [control, listener] = operator('/');
 
 function Link({ href, text = href }) {
     return <a href={href} onclick={e => {
@@ -13,22 +12,9 @@ function Link({ href, text = href }) {
     </a>;
 }
 
-const $someFruits = <ul>
-    <li>apple</li>
-    <li>banana</li>
-    <li>cherry</li>
-    <li>pear</li>
-    <li>orange</li>
-</ul>;
-
-const [$apple, , ...$rest] = $someFruits.querySelectorAll('li'); //as HTMLUListElement;
-const $vipFruits = [$apple, ...$rest];
-document.body.append(<ol>{$vipFruits}</ol>);
-
-// for(const child of $vipFruits) {
-//     console.log(child);
-// }
-
+let count = 0;
+const [increment, counter] = operator(() => ++count);
+const $count = counter(0);
 
 export default <>
     <header>
@@ -39,10 +25,9 @@ export default <>
             { Link({ href: 'pokedex' }) }
         </nav>
     </header>
-
     <main>
-        {/* <iframe src="/emojis/"></iframe> */}
+        <button onclick={increment}>++</button>
+        <p>{$count}</p>
 
-        {/* <button>{count}</button> */}
     </main>
 </>;

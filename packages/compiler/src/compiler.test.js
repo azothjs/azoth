@@ -76,6 +76,7 @@ describe('JSX dom literals', () => {
                       <!--0-->
                   </div>",
               "id": "090c4b5012",
+              "isDomFragment": false,
             },
           ]
         `);
@@ -110,6 +111,7 @@ describe('JSX dom literals', () => {
             {
               "html": "<input required data-bind />",
               "id": "24a912889d",
+              "isDomFragment": false,
             },
           ]
         `);
@@ -138,10 +140,12 @@ describe('nested context', () => {
             {
               "html": "<div data-bind><!--0--></div>",
               "id": "969db86e55",
+              "isDomFragment": false,
             },
             {
               "html": "<hr />",
               "id": "b19eb87e75",
+              "isDomFragment": false,
             },
           ]
         `);
@@ -165,6 +169,7 @@ describe('template optimizations', () => {
             {
               "html": "<p>Hello</p>",
               "id": "5bf3d2f523",
+              "isDomFragment": false,
             },
           ]
         `);
@@ -232,6 +237,7 @@ describe('fragments', () => {
             {
               "html": "",
               "id": "d41d8cd98f",
+              "isDomFragment": true,
             },
           ]
         `);
@@ -254,6 +260,7 @@ describe('fragments', () => {
             {
               "html": "one<!--0-->three",
               "id": "faf808e6cc",
+              "isDomFragment": true,
             },
           ]
         `);
@@ -289,6 +296,7 @@ describe('fragments', () => {
             {
               "html": "<div><hr /><hr /><hr /></div>",
               "id": "0f05699ae4",
+              "isDomFragment": false,
             },
             {
               "html": "<div data-bind>
@@ -297,6 +305,7 @@ describe('fragments', () => {
                           <p></p>
                       </div>",
               "id": "09771bea6d",
+              "isDomFragment": false,
             },
           ]
         `);
@@ -327,6 +336,7 @@ describe('fragments', () => {
             {
               "html": "<!--0--><main data-bind><!--0--></main><!--0-->",
               "id": "ef691fa27a",
+              "isDomFragment": true,
             },
           ]
         `);
@@ -358,6 +368,7 @@ describe('custom elements', () => {
             {
               "html": "<raw-html data-bind />",
               "id": "c120befcf8",
+              "isDomFragment": false,
             },
           ]
         `);
@@ -413,10 +424,12 @@ describe('render and composition cases', () => {
             {
               "html": "<li data-bind><!--0--></li>",
               "id": "f00e886942",
+              "isDomFragment": false,
             },
             {
               "html": "<div data-bind><!--0--><!--0--></div>",
               "id": "3bee4f3a47",
+              "isDomFragment": false,
             },
           ]
         `);
@@ -446,6 +459,7 @@ describe('render and composition cases', () => {
             {
               "html": "<li data-bind>Hello <!--0--></li>",
               "id": "e19fd83eae",
+              "isDomFragment": false,
             },
           ]
         `);
@@ -485,10 +499,12 @@ describe('render and composition cases', () => {
             {
               "html": "<li data-bind><!--0--></li>",
               "id": "f00e886942",
+              "isDomFragment": false,
             },
             {
               "html": "<ul data-bind><!--0--></ul>",
               "id": "df87cbf024",
+              "isDomFragment": false,
             },
           ]
         `);

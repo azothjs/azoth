@@ -29,8 +29,10 @@ export default function azothPlugin(options) {
             const exports = new URLSearchParams(ids)
                 .getAll('id')
                 .map(id => {
-                    const html = programTemplates.get(id);
-                    return `\nexport const t${id} = makeRenderer('${id}', \`${html}\`);\n`;
+                    const { html, isDomFragment } = programTemplates.get(id);
+                    // default is false, so only add if true (which is less common)
+                    const isFragParam = isDomFragment ? ', true' : '';
+                    return `\nexport const t${id} = makeRenderer('${id}', \`${html}\`${isFragParam});\n`;
                 })
                 .join('');
 
@@ -43,11 +45,13 @@ export default function azothPlugin(options) {
 
             const moduleTemplates = new Set();
 
-            for(let { id, html } of templates) {
+            for(let template of templates) {
+                const { id } = template;
                 if(moduleTemplates.has(id)) continue;
-                moduleTemplates.add(id, html);
+                moduleTemplates.add(id);
+
                 if(programTemplates.has(id)) continue;
-                programTemplates.set(id, html);
+                programTemplates.set(id, template);
             }
 
             if(!moduleTemplates.size) return;
@@ -70,7 +74,7 @@ export default function azothPlugin(options) {
         name: 'inject-html-plugin',
         enforce: 'post',
         transformIndexHtml(html) {
-            const templateHtml = [...programTemplates.entries()].map(([id, html]) => {
+            const templateHtml = [...programTemplates.entries()].map(([id, { html }]) => {
                 return `\n<template id="${id}">${html}</template>`;
             }).join('');
             return html.replace(
