@@ -1,4 +1,4 @@
-import { pipe, junction } from 'azoth/events';
+import { subject, junction } from 'azoth/generators';
 
 const [signal, generator] = junction();
 const Router = {
@@ -34,7 +34,7 @@ function Surprise() {
 
 function Counter() {
     let count = 0;
-    const [increment, $count] = pipe(0, () => ++count);
+    const [increment, $count] = subject(0, () => ++count);
     return <p>
         <button onclick={increment}>++</button>
         <span>{$count}</span>
@@ -51,6 +51,6 @@ export default <>
         </nav>
     </header>
     <main>
-
+        
     </main>
 </>;

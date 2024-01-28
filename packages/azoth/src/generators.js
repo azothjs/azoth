@@ -7,23 +7,29 @@ export function signalRelay(send, adaptor) {
     return [signal, relay];
 }
 
-export function junction2(relay) {
-    const { promise, resolve } = Promise.withResolvers();
+// export function junction2(promise, resolve, relay) {
+//     async function* generator(initial) {
+//         resolve();
+//         await promise;
+//         yield initial;
 
-    async function* generator(initial) {
-        resolve();
-        await promise;
-        yield initial;
+//         while(true) {
+//             const { promise, resolve } = Promise.withResolvers();
+//             relay.send = resolve;
+//             yield await promise;
+//         }
+//     }
 
-        while(true) {
-            const { promise, resolve } = Promise.withResolvers();
-            relay.send = resolve;
-            yield await promise;
-        }
-    }
+//     return generator;
+// }
 
-    return generator;
-}
+// export function junction(adaptor) {
+//     const { promise, resolve } = Promise.withResolvers();
+//     const [signal, relay] = signalRelay(resolve, adaptor);
+
+//     const generator = junction2(promise, resolve, relay);
+//     return [signal, generator];
+// }
 
 export function junction(adaptor) {
     const { promise, resolve } = Promise.withResolvers();
@@ -44,7 +50,7 @@ export function junction(adaptor) {
     return [signal, generator];
 }
 
-export function pipe(initial, adaptor) {
+export function subject(initial, adaptor) {
     const [signal, generator] = junction(adaptor);
     return [signal, generator(initial)];
 }
