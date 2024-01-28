@@ -1,6 +1,5 @@
-import { beforeEach, describe, test, expect, vi } from 'vitest';
+import { describe, test } from 'vitest';
 import { compose } from './compose.js';
-import { sleep } from '../promises.js';
 import '../with-resolvers-polyfill.js';
 
 export const elements = [

@@ -58,11 +58,13 @@ export class TemplateGenerator extends Generator {
 
     /* Inject template statements above and return root dom */
     ReturnStatement(node, state) {
+        // custom handling for direct return of jsx
         if(node.argument?.type === 'JSXElement') {
             node.argument.isReturnArg = true;
             this.JSXElement(node.argument, state);
             return;
         }
+
         super.ReturnStatement(node, state);
     }
 
@@ -70,8 +72,10 @@ export class TemplateGenerator extends Generator {
         const { isEmpty, boundElements, node } = template;
 
         if(isEmpty || !boundElements.length) {
+            if(node.isReturnArg) state.write(`return `);
             this.TemplateRenderer(template, state);
             if(!isEmpty) state.write(`.${ROOT_PROPERTY}`);
+            if(node.isReturnArg) state.write(`;`);
             return;
         }
 

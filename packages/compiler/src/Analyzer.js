@@ -105,16 +105,20 @@ export class Analyzer {
     JSXElement(node) {
         this.#pushElement(node);
         // short-cut JSXOpeningElement > JSXAttributes
-        this.JSXAttributes(node.openingElement.attributes);
+        this.JSXAttributes(node.openingElement.attributes, node.isComponent);
         this.JSXChildren(node);
         this.#popElement();
     }
 
-    JSXAttributes(attributes) {
+    JSXAttributes(attributes, isComponent = false) {
         for(var i = 0; i < attributes.length; i++) {
             const attr = attributes[i];
-            if(attr.value?.type !== 'JSXExpressionContainer') continue;
-            this.#bind('prop', attr, attr.value.expression, i);
+            if(attr.value?.type === 'JSXExpressionContainer') {
+                this.#bind('prop', attr, attr.value.expression, i);
+            }
+            else if(isComponent) {
+                this.#bind('prop', attr, attr.value, i);
+            }
         }
     }
 

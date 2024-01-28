@@ -375,31 +375,60 @@ describe('custom elements', () => {
 
     });
 
-    test('property on custom element', ({ expect }) => {
+    test.only('<Function/> component element + props', ({ expect }) => {
         const input = `
-            const component = <div><Component prop={value}/></div>;
+            const component = <div>
+                <Component prop={value} prop2="literal"/>
+                <GotNoPropsAsYouCanSee/>
+            </div>;
         `;
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
           "const component = (() => {
-              const { root: __root_2797af8021, targets: __targets } = t2797af8021();
+              const { root: __root_9fbfd2e5e7, targets: __targets } = t9fbfd2e5e7();
               const __target0 = __targets[0];
-              const __child0 = __target0.childNodes[0];
-              __composeElement(Component, __child0, { prop: value, });
-              return __root_2797af8021;
+              const __child0 = __target0.childNodes[1];
+              const __child1 = __target0.childNodes[3];
+              __composeElement(Component, __child0, { prop: value, prop2: "literal", });
+              __composeElement(GotNoPropsAsYouCanSee, __child1);
+              return __root_9fbfd2e5e7;
           })();
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<div data-bind><Component /></div>",
-              "id": "2797af8021",
+              "html": "<div data-bind>
+                          <Component prop2="literal" />
+                          <GotNoPropsAsYouCanSee />
+                      </div>",
+              "id": "9fbfd2e5e7",
               "isDomFragment": false,
             },
           ]
         `);
+    });
+
+    test('return keyword in Function with static jsx', ({ expect }) => {
+        const input = `
+            function Surprise() {
+                return <section>
+                    <h2>Guess What...</h2>
+                    <p>surprise!</p>
+                </section>;
+            }
+        `;
+
+        const { code } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "function Surprise() {
+              return t92cc583556().root;
+          }
+          "
+        `);
+
     });
 
     test.todo(`

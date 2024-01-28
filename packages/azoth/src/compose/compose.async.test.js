@@ -1,4 +1,4 @@
-import { elementWithTextAnchor, elements, runCompose } from './compose.test.elements.test.js';
+import { elementWithTextAnchor, elements, runCompose } from './test-elements.test.js';
 import { describe, test } from 'vitest';
 import '../with-resolvers-polyfill.js';
 

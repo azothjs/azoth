@@ -1,4 +1,4 @@
-export function signalToRelay(send, adaptor) {
+export function signalRelay(send, adaptor) {
     const relay = { send };
     function signal(payload) {
         if(adaptor) payload = adaptor(payload);
@@ -7,11 +7,10 @@ export function signalToRelay(send, adaptor) {
     return [signal, relay];
 }
 
-export function signalToEmitter(adaptor) {
+export function junction2(relay) {
     const { promise, resolve } = Promise.withResolvers();
-    const [signal, relay] = signalToRelay(resolve, adaptor);
 
-    async function* emitter(initial) {
+    async function* generator(initial) {
         resolve();
         await promise;
         yield initial;
@@ -23,10 +22,29 @@ export function signalToEmitter(adaptor) {
         }
     }
 
-    return [signal, emitter];
+    return generator;
 }
 
-export function signalIterator(initial, adaptor) {
-    const [signal, emitter] = signalToEmitter(adaptor);
-    return [signal, emitter(initial)];
+export function junction(adaptor) {
+    const { promise, resolve } = Promise.withResolvers();
+    const [signal, relay] = signalRelay(resolve, adaptor);
+
+    async function* generator(initial) {
+        resolve();
+        await promise;
+        yield initial;
+
+        while(true) {
+            const { promise, resolve } = Promise.withResolvers();
+            relay.send = resolve;
+            yield await promise;
+        }
+    }
+
+    return [signal, generator];
+}
+
+export function pipe(initial, adaptor) {
+    const [signal, generator] = junction(adaptor);
+    return [signal, generator(initial)];
 }

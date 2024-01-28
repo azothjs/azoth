@@ -1,9 +1,9 @@
 import { test } from 'vitest';
-import { signalIterator } from './events.js';
+import { pipe } from './events.js';
 import './with-resolvers-polyfill.js';
 
-test('events', async ({ expect }) => {
-    const [signal, iterator] = signalIterator('/');
+test('pipe', async ({ expect }) => {
+    const [signal, iterator] = pipe('/');
 
     let { value } = await iterator.next();
     expect(value).toBe('/');
@@ -17,13 +17,19 @@ test('events', async ({ expect }) => {
     // /page
     expect(value).toBe('/page');
 
-    // listen for next call
+    // set it back
     iteratorPromise = iterator.next();
-    // fire the event
     signal('/');
-    // check the response
     ({ value } = await iteratorPromise);
-    // /
     expect(value).toBe('/');
+});
+
+test('adaptor', async ({ expect }) => {
+    const [signal, iterator] = pipe(0, x => x ** x);
+
+    expect((await iterator.next()).value).toBe(0);
+    let iteratorPromise = iterator.next();
+    signal(2);
+    expect((await iteratorPromise).value).toBe(4);
 });
 

@@ -89,6 +89,10 @@ async function composeAsyncIterator(iterator, anchor, keepLast) {
     }
 }
 
-export function composeElement(constructor, anchor, props) {
-
+export function composeElement(Constructor, anchor, props) {
+    // let JavaScript handle it :)
+    // will throw appropriate errors, 
+    // so key point for source maps in callers
+    const dom = new Constructor(props);
+    compose(dom, anchor);
 }
