@@ -177,7 +177,7 @@ describe('template optimizations', () => {
 });
 
 describe('surrounding code integration', () => {
-    
+
     test('ArrowFunctionExpression: implicit return is block return', ({ expect }) => {
         const input = `
             const template = (text) => <p>{text}</p>
@@ -220,7 +220,7 @@ describe('surrounding code integration', () => {
 
 describe('fragments', () => {
     test('<> ... </> works', ({ expect }) => {
-            // const fragment = <><hr/><hr/></>;
+        // const fragment = <><hr/><hr/></>;
         const input = `
             const empty = <></>;
         `;
@@ -373,6 +373,33 @@ describe('custom elements', () => {
           ]
         `);
 
+    });
+
+    test('property on custom element', ({ expect }) => {
+        const input = `
+            const component = <div><Component prop={value}/></div>;
+        `;
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "const component = (() => {
+              const { root: __root_2797af8021, targets: __targets } = t2797af8021();
+              const __target0 = __targets[0];
+              const __child0 = __target0.childNodes[0];
+              __composeElement(Component, __child0, { prop: value, });
+              return __root_2797af8021;
+          })();
+          "
+        `);
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<div data-bind><Component /></div>",
+              "id": "2797af8021",
+              "isDomFragment": false,
+            },
+          ]
+        `);
     });
 
     test.todo(`

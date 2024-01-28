@@ -551,8 +551,8 @@ packages:
     resolution: {integrity: sha512-1m0bIFVc7eJWyve9S0RnuRgcQqF/Xd5QsUZAZeQFr1Q3/p9JWoQQEqmVy+DPTNpGXwhgIetAoYF8JSc33q29QA==}
     dev: true
 
-  /@types/node@20.11.8:
-    resolution: {integrity: sha512-i7omyekpPTNdv4Jb/Rgqg0RU8YqLcNsI12quKSDkRXNfx7Wxdm6HhK1awT3xTgEkgxPn3bvnSpiEAc7a7Lpyow==}
+  /@types/node@20.11.9:
+    resolution: {integrity: sha512-CQXNuMoS/VcoAMISe5pm4JnEd1Br5jildbQEToEMQvutmv+EaQr90ry9raiudgpyDuqFiV9e4rnjSfLNq12M5w==}
     dependencies:
       undici-types: 5.26.5
     dev: true
@@ -564,14 +564,14 @@ packages:
   /@types/ws@8.5.10:
     resolution: {integrity: sha512-vmQSUcfalpIq0R9q7uTo2lXs6eGIpt9wtnLdMv9LVpIjCA/+ufZRozlVoVelIYixx1ugCBKDhn89vnsEGOCx9A==}
     dependencies:
-      '@types/node': 20.11.8
+      '@types/node': 20.11.9
     dev: true
 
   /@types/yauzl@2.10.3:
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
     requiresBuild: true
     dependencies:
-      '@types/node': 20.11.8
+      '@types/node': 20.11.9
     dev: true
     optional: true
 
@@ -674,14 +674,14 @@ packages:
     resolution: {integrity: sha512-321F3sWafnlw93uRTSjEBVuvWCxTkWNDs7ektQS15drrroL3TMeFOynu4rDrIz0jXD9Vas0HCD2Tq/P0uxFLdw==}
     engines: {node: ^16.13 || >=18}
     dependencies:
-      '@types/node': 20.11.8
+      '@types/node': 20.11.9
     dev: true
 
   /@wdio/types@8.29.1:
     resolution: {integrity: sha512-rZYzu+sK8zY1PjCEWxNu4ELJPYKDZRn7HFcYNgR122ylHygfldwkb5TioI6Pn311hQH/S+663KEeoq//Jb0f8A==}
     engines: {node: ^16.13 || >=18}
     dependencies:
-      '@types/node': 20.11.8
+      '@types/node': 20.11.9
     dev: true
 
   /@wdio/utils@8.29.1:
@@ -3164,7 +3164,7 @@ packages:
     resolution: {integrity: sha512-D3gkbDUxFKBJhNHRfMriWclooLbNavVQC1MRvmENAgPNKaHnFn+M+WtP9K2sEr0XczLGNlbOzT7CKR9K5UXKXA==}
     engines: {node: ^16.13 || >=18}
     dependencies:
-      '@types/node': 20.11.8
+      '@types/node': 20.11.9
       '@types/ws': 8.5.10
       '@wdio/config': 8.29.1
       '@wdio/logger': 8.28.0
@@ -3190,7 +3190,7 @@ packages:
       devtools:
         optional: true
     dependencies:
-      '@types/node': 20.11.8
+      '@types/node': 20.11.9
       '@wdio/config': 8.29.1
       '@wdio/logger': 8.28.0
       '@wdio/protocols': 8.24.12

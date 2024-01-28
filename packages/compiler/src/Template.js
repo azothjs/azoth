@@ -23,7 +23,7 @@ export class Template {
         this.bindings = bindings;
         this.boundElements = boundElements;
 
-        // used jsx <>...</> tags
+        // jsx <>...</> tags
         if(isJsxFragment) {
             const { queryIndex, children } = node;
             // <>{...}</> - bound childNode(s): 

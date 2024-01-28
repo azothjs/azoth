@@ -1,19 +1,19 @@
-import { operator, relayEmitter } from 'azoth/events';
+import { signalIterator } from 'azoth/events';
 
-const [control, listener] = operator('/');
+const [signal, iterator] = signalIterator();
 
 function Link({ href, text = href }) {
     return <a href={href} onclick={e => {
         e.preventDefault();
         history.pushState(null, null, href);
-        listener(href);
+        signal(href);
     }}>
         {text}
     </a>;
 }
 
 let count = 0;
-const [increment, $count] = relayEmitter(0, () => ++count);
+const [increment, $count] = signalIterator(0, () => ++count);
 
 export default <>
     <header>

@@ -5,7 +5,7 @@
     "type": "module",
     "main": "index.js",
     "scripts": {
-        "test": "CI=true pnpm -F=!azoth test"
+        "test": "CI=true pnpm test -r -F=!sandbox"
     },
     "keywords": [],
     "author": "",

@@ -22,16 +22,16 @@ export class Analyzer {
     #root = null;
 
     constructor(node) {
-        this.#root = node
+        this.#root = node;
         this.#analyze();
 
         const boundElements = [...this.#boundElements].sort(byOrder);
         for(let i = 0; i < boundElements.length; i++) {
             boundElements[i].queryIndex = i;
         }
-        
+
         this.#template = new Template(node, {
-            isJsxFragment: this.#isJSXFragment, 
+            isJsxFragment: this.#isJSXFragment,
             bindings: this.#bindings,
             boundElements,
         });
@@ -61,13 +61,20 @@ export class Analyzer {
     #bind(type, node, expr, index) {
         const element = this.#elements.current;
 
-        this.#bindings.push({
+        const binding = {
             element,
             type,
             node,
             expr,
             index,
-        });
+        };
+
+        if(element.isComponent) {
+            element.props.push(binding);
+            return;
+        }
+
+        this.#bindings.push(binding);
 
         if(element === this.#root && this.#isJSXFragment) {
             // fragments can't be "targets", so we give them
@@ -98,7 +105,6 @@ export class Analyzer {
     JSXElement(node) {
         this.#pushElement(node);
         // short-cut JSXOpeningElement > JSXAttributes
-        // this[node.openingElement.type](node.openingElement);
         this.JSXAttributes(node.openingElement.attributes);
         this.JSXChildren(node);
         this.#popElement();
@@ -138,7 +144,7 @@ export class Analyzer {
                     adj--; // no node generated, take 1 away
                 }
             }
-            else if(type === 'JSXExpressionContainer' && 
+            else if(type === 'JSXExpressionContainer' &&
                 child.expression.type === 'JSXEmptyExpression') {
                 adj--; // skip this node, take 1 away
             }
@@ -146,6 +152,17 @@ export class Analyzer {
                 throw new TypeError(`Unexpected AST Type "${type}"`);
             }
             else {
+                if(type === 'JSXElement') {
+                    const { openingElement: { name: identifier } } = child;
+                    // TODO: namespaces: and member.express.ion
+                    const isComponent = /^[A-Z$][a-zA-Z]*$/.test(identifier.name);
+                    if(isComponent) {
+                        child.isComponent = true;
+                        child.props = [];
+                        this.#bind('child', child, identifier, i + adj);
+                    }
+                }
+
                 this[type](child, i + adj);
             }
         }

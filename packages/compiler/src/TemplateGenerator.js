@@ -107,6 +107,10 @@ export class TemplateGenerator extends Generator {
         state.write(`)`);
     }
 
+    JSXIdentifier(identifier, state) {
+        state.write(identifier.name);
+    }
+
     JSXDomLiteral(template, state) {
         const { id, boundElements, bindings } = template;
 
@@ -142,10 +146,31 @@ export class TemplateGenerator extends Generator {
             state.write(`${nextLine}`);
 
             if(!this[expr.type]) {
-                throw new TypeError(`Unexpected AST Type "${expr.type}"`);
+                throw new TypeError(`Unexpected Binding expression AST type "${expr.type}"`);
             }
 
-            if(type === 'child') {
+            if(node.isComponent) {
+                state.write(`__composeElement(`);
+                this[expr.type](expr, state);
+                state.write(`, __child${i}`);
+                // check for props
+                if(node.props.length) {
+                    const { props } = node;
+                    state.write(`, {`);
+                    for(let i = 0; i < props.length; i++) {
+                        const { node, expr } = props[i];
+                        // TODO: Dom lookup, JS .prop v['prop'], etc. 
+                        // refactor with code below
+                        state.write(` ${node.name.name}: `);
+                        this.JSXExpressionContext(expr, state);
+                        state.write(`,`);
+                    }
+                    state.write(` }`);
+                }
+
+                state.write(`);`);
+            }
+            else if(type === 'child') {
                 state.write(`__compose(`);
                 this.JSXExpressionContext(expr, state);
                 state.write(`, __child${i});`);
@@ -155,6 +180,7 @@ export class TemplateGenerator extends Generator {
                 state.write(`${varName}`);
                 // TODO: more property validation
                 const propName = node.name.name;
+                // TODO: refactor with component props
                 if(isValidName(propName)) {
                     state.write(`.${propName}`);
                 }

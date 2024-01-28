@@ -88,3 +88,7 @@ async function composeAsyncIterator(iterator, anchor, keepLast) {
         compose(value, anchor, keepLast);
     }
 }
+
+export function composeElement(constructor, anchor, props) {
+
+}

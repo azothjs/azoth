@@ -1,1 +1,1 @@
-export { compose } from './compose.js';
+export { compose, composeElement } from './compose.js';
