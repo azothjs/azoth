@@ -1,5 +1,3 @@
-
-
 const templates = new Map();
 
 export function clearTemplates() {

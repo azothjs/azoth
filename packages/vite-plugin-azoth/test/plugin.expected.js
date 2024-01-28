@@ -1,27 +1,25 @@
 import { __compose } from "azoth";
-function renderer(fragment) {
-  return function render() {
-    const clone = fragment.cloneNode(true);
-    return {
-      root: clone,
-      targets: clone.querySelectorAll("[data-bind]")
-    };
-  };
-}
-const htmlToFragment = (html) => {
-  const template = document.createElement("template");
-  template.innerHTML = html;
-  return template.content;
-};
-const makeRenderer = (id, html, isFragment = false) => {
+const templates = /* @__PURE__ */ new Map();
+function makeRenderer(id, html, isFragment = false) {
   if (templates.has(id))
     return templates.get(id);
-  const fragment = htmlToFragment(html);
-  const template = renderer(fragment);
+  const template = document.createElement("template");
+  template.innerHTML = html;
+  return rendererFactory(id, template.content, isFragment);
+}
+function rendererFactory(id, node, isFragment) {
+  const template = renderer(node, isFragment);
   templates.set(id, template);
   return template;
-};
-const templates = /* @__PURE__ */ new Map();
+}
+function renderer(fragment, isFragment) {
+  return function render() {
+    const clone = fragment.cloneNode(true);
+    const targets = clone.querySelectorAll("[data-bind]");
+    const root = isFragment ? clone : clone.firstElementChild;
+    return { root, targets };
+  };
+}
 const t92280c0caa = makeRenderer("92280c0caa", `<span data-bind></span>`);
 const t03038e2f88 = makeRenderer("03038e2f88", `<ul data-bind>
         <!--0-->

@@ -1,13 +1,15 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'node:path'
+import { resolve } from 'node:path';
 import azothPlugin from '../index.js';
-
-console.log('****************', __dirname)
 
 export default defineConfig({
     root: './test',
     plugins: [
-        azothPlugin(),
+        azothPlugin({
+            generator: {
+                indent: '    '
+            }
+        }),
     ],
     build: {
         target: 'ESNext',
@@ -15,6 +17,7 @@ export default defineConfig({
         outDir: './out',
         lib: {
             // Could also be a dictionary or array of multiple entry points
+            // eslint-disable-next-line no-undef
             entry: resolve(__dirname, './src/main.jsx'),
             name: 'Compiled',
             // the proper extensions will be added
@@ -29,4 +32,4 @@ export default defineConfig({
             }]
         },
     },
-})
+});

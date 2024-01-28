@@ -1,6 +1,10 @@
 import { compile } from 'compiler';
 import { createFilter } from '@rollup/pluginutils';
 
+// TODO: something better
+const templateServiceModule = `/templates:`;
+
+
 export default function azothPlugin(options) {
     const include = options?.includes;
     const exclude = options?.excludes;
@@ -8,7 +12,6 @@ export default function azothPlugin(options) {
     const filter = createFilter(include, exclude);
 
     const programTemplates = new Map();
-    const templateServiceModule = `/templates:`;
 
     const transform = {
         name: 'rollup-azoth-plugin',
@@ -36,7 +39,7 @@ export default function azothPlugin(options) {
         transform(source, id) {
             if(!filter(id) || !extension.test(id)) return;
 
-            let { code, templates } = compile(source);
+            let { code, templates } = compile(source, options);
 
             const moduleTemplates = new Set();
 
@@ -54,7 +57,7 @@ export default function azothPlugin(options) {
             const names = uniqueIds.map(id => `t${id}`).join(', ');
 
             const imports = [
-                `import { __rendererById, __compose } from 'azoth';\n`,
+                `import { __compose } from 'azoth';\n`,
                 `import { ${names} } from '${templateServiceModule}?${params.toString()}';\n`,
             ].join('');
 
@@ -62,13 +65,6 @@ export default function azothPlugin(options) {
 
         },
     };
-
-    // const handleHMR = {
-    //     name: 'handle-hmr',
-    //     handleHotUpdates(context) {
-    //         console.log(context);
-    //     }
-    // };
 
     const injectHtml = {
         name: 'inject-html-plugin',
@@ -112,5 +108,5 @@ function templateService(programTemplates) {
 
             return renderer + exports;
         },
-    }
+    };
 }

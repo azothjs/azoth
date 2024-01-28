@@ -1,9 +1,3 @@
-import { rendererById } from './src/dom.js';
-import { compose } from './src/compose.js';
+import { compose } from './src/compose/index.js';
 
-export const _ = () => { };
-
-export {
-    rendererById as __rendererById,
-    compose as __compose
-};
+export { compose as __compose };

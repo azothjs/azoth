@@ -21,6 +21,7 @@
     },
     "dependencies": {
         "astring": "^1.8.6",
+        "azoth": "workspace:^",
         "is-valid-var-name": "^1.0.2",
         "rev-hash": "^4.1.0"
     },
