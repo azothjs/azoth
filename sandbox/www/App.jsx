@@ -1,18 +1,35 @@
-import { subject, junction, multicast } from 'azoth/generators';
+import { subject, broadcast, multicast } from 'azoth/generators';
+import page from 'page';
 
-const [signal, iterator] = subject();
-const urlFeed = multicast(iterator);
+const [emit, add] = broadcast();
+const consumers = [];
 const Router = {
     push(url) {
         history.pushState(null, '', url);
-        signal(url);
+        for(const consumer of consumers) {
+            consumer(location.href);
+        }
+        emit(url);
     },
     async subscriber(adaptor) {
         const adapted = adaptor ? () => adaptor(new URL(location.href)) : null; 
         const current = adapted ?? (() => new URL(location.href));
-        return urlFeed.subscriber(current(), current); 
+        return add(current(), current); 
     }
 };
+
+function Link({ href, text = href }) {
+    const click = e => {
+        // e.preventDefault();
+        // history.pushState(null, '', href);
+
+        // Router.push(href);
+    };
+    return <a href={href}>
+        {text}
+    </a>;
+}
+
 
 function Surprise() {
     return <section>
@@ -30,44 +47,30 @@ function Counter() {
     </p>;
 }
 
+const pages = new Map();
+const [handlePage, Page] = subject(null, ({ params }) => {
+    const url = params?.page || '/';
+    if(pages.has(url)) return pages.get(url);
+    const page = <div>{url}<input name="save-me"/></div>;
+    pages.set(url, page);
+    return page;
 
-
-function Link({ href, text = href }) {
-    const click = e => {
-        e.preventDefault();
-        history.pushState(null, null, href);
-        signal(href);
-    };
-    return <a href={href} onclick={click}>
-        {text}
-    </a>;
-}
-
-
-const frames = new Map();
-
-const pages = Router.subscriber(url => {
-    if(frames.has(url)) return frames.get(url);
-    const frame = <iframe src={url.toString()}/>;
-    frames.set(url, frame);
-    return frame;
 });
 
-function Frame({ src }) {
-    return <iframe src={src}/>;
-}
-
+page.start();
+page('/:page', handlePage);
+page('*', handlePage);
 
 export default <>
     <header>
         <h1>App Header</h1>
         <nav>
             <Link href="/" text="home"/>
-            <Link href="emojis"/>
-            <Link href="pokedex"/>
+            <Link href="/emojis"/>
+            <Link href="/pokedex"/>
         </nav>
     </header>
     <main>
-        {pages}
+        {Page}
     </main>
 </>;

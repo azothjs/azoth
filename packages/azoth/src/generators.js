@@ -83,3 +83,21 @@ class Multicast {
         return iterator;
     }
 }
+
+export function broadcast() {
+    const consumers = [];
+
+    function emit(value) {
+        for(let consumer of consumers) {
+            consumer(value);
+        }
+    }
+
+    function add(initial, adapter) {
+        const [signal, iterator] = subject(initial, adapter);
+        consumers.push(signal);
+        return iterator;
+    }
+
+    return [emit, add];
+}

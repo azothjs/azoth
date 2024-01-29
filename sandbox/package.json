@@ -13,6 +13,7 @@
     "license": "ISC",
     "dependencies": {
         "azoth": "workspace:*",
+        "page": "^1.11.6",
         "vite-plugin-azoth": "workspace:*"
     },
     "devDependencies": {
