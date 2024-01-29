@@ -43,6 +43,9 @@ export function junction(adaptor) {
         while(true) {
             const { promise, resolve } = Promise.withResolvers();
             relay.send = resolve;
+            const value = await promise;
+            // could we dispatch subscriber here?
+
             yield await promise;
         }
     }
@@ -74,8 +77,8 @@ class Multicast {
         }
     }
 
-    subscriber() {
-        const [signal, iterator] = subject();
+    subscriber(initial, adapter) {
+        const [signal, iterator] = subject(initial, adapter);
         this.consumers.push(signal);
         return iterator;
     }

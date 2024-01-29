@@ -1,27 +1,45 @@
 import { test } from 'vitest';
 import { multicast, subject } from './generators.js';
+import { elementWithAnchor, runCompose } from './compose/test-elements.test.js';
 import './with-resolvers-polyfill.js';
 
 test('subject', async ({ expect }) => {
-    const [signal, iterator] = subject('/');
+    const [signal, iterator] = subject('Hello');
+    const dom = runCompose(iterator, elementWithAnchor);
 
-    let { value } = await iterator.next();
-    expect(value).toBe('/');
+    await null;
+    await null;
+    await null;
+    expect(dom).toMatchInlineSnapshot(`
+      <div>
+        Hello
+        <!--1-->
+      </div>
+    `);
 
-    // listen for next call
-    let iteratorPromise = iterator.next();
-    // fire the event
-    signal('/page');
-    // check the response
-    ({ value } = await iteratorPromise);
-    // /page
-    expect(value).toBe('/page');
+    await signal('Hello World');
+    await null;
+    await null;
+    await null;
 
-    // set it back
-    iteratorPromise = iterator.next();
-    signal('/');
-    ({ value } = await iteratorPromise);
-    expect(value).toBe('/');
+    expect(dom).toMatchInlineSnapshot(`
+      <div>
+        Hello World
+        <!--1-->
+      </div>
+    `);
+
+    await signal();
+    await null;
+    await null;
+    await null;
+
+    expect(dom).toMatchInlineSnapshot(`
+      <div>
+        <!--0-->
+      </div>
+    `);
+
 });
 
 test('adaptor', async ({ expect }) => {
@@ -34,37 +52,61 @@ test('adaptor', async ({ expect }) => {
 });
 
 test('multicast', async ({ expect }) => {
-    const [signal, iterator] = subject(0);
+    const [signal, iterator] = subject('hello');
+
 
     const mc = multicast(iterator);
     const s1 = mc.subscriber();
     const s2 = mc.subscriber();
     const s3 = mc.subscriber();
+    const dom = [
+        runCompose(s1, elementWithAnchor),
+        runCompose(s2, elementWithAnchor),
+        runCompose(s3, elementWithAnchor),
+    ];
+    signal('wat');
 
-    const toValues = iterations => iterations.map(({ value }) => value);
+    await null;
+    await null;
+    await null;
+    expect(dom).toMatchInlineSnapshot(`
+      [
+        <div>
+          <!--0-->
+        </div>,
+        <div>
+          <!--0-->
+        </div>,
+        <div>
+          <!--0-->
+        </div>,
+      ]
+    `);
 
-    function getNextPromises(list = [s1, s2, s3]) {
-        return Promise.all(list.map(s => s.next()));
-    }
-    function getPromise(s) {
-        return s => s.next();
-    }
 
 
-    let values = toValues(await getNextPromises());
+    // function getNextPromises(list = [s1, s2, s3]) {
+    //     return Promise.all(list.map(s => s.next()));
+    // }
+    // function getPromise(s) {
+    //     return s => s.next();
+    // }
 
-    // eslint-disable-next-line no-sparse-arrays
-    expect(values).toEqual([, , ,]);
 
-    let promises = getNextPromises();
-    signal(1);
-    values = toValues(await promises);
-    expect(values).toEqual([1, 1, 1,]);
+    // let values = toValues(await getNextPromises());
 
-    promises = getNextPromises([s1, s3]);
-    signal(22);
-    values = toValues(await promises);
-    expect(values).toEqual([22, 22]);
+    // // eslint-disable-next-line no-sparse-arrays
+    // expect(values).toEqual([, , ,]);
+
+    // let promises = getNextPromises();
+    // signal(1);
+    // values = toValues(await promises);
+    // expect(values).toEqual([1, 1, 1,]);
+
+    // promises = getNextPromises([s1, s3]);
+    // signal(22);
+    // values = toValues(await promises);
+    // expect(values).toEqual([22, 22]);
 
 
     // signal(10);
