@@ -375,7 +375,7 @@ describe('custom elements', () => {
 
     });
 
-    test.only('<Function/> component element + props', ({ expect }) => {
+    test('<Function/> component element + props', ({ expect }) => {
         const input = `
             const component = <div>
                 <Component prop={value} prop2="literal"/>
