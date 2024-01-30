@@ -91,37 +91,37 @@ describe(`accepted values appended`, () => {
         });
 
         expect(results).toMatchInlineSnapshot(`
-      [
-        "elementWithTextAnchor",
-        "	string(Text)                        <div>HelloText<!--1--></div>",
-        "	number(42)                          <div>Hello42<!--1--></div>",
-        "	TextNode([object Text])             <div>HelloTextNode<!--1--></div>",
-        "	Element([object HTMLDivElement])    <div>Hello<div></div><!--1--></div>",
-        "
-      ",
-        "elementWithTextAnchorText",
-        "	string(Text)                        <div>HelloText<!--1-->Hello</div>",
-        "	number(42)                          <div>Hello42<!--1-->Hello</div>",
-        "	TextNode([object Text])             <div>HelloTextNode<!--1-->Hello</div>",
-        "	Element([object HTMLDivElement])    <div>Hello<div></div><!--1-->Hello</div>",
-        "
-      ",
-        "elementWithAnchor",
-        "	string(Text)                        <div>Text<!--1--></div>",
-        "	number(42)                          <div>42<!--1--></div>",
-        "	TextNode([object Text])             <div>TextNode<!--1--></div>",
-        "	Element([object HTMLDivElement])    <div><div></div><!--1--></div>",
-        "
-      ",
-        "elementWithAnchorText",
-        "	string(Text)                        <div>Text<!--1-->Hello</div>",
-        "	number(42)                          <div>42<!--1-->Hello</div>",
-        "	TextNode([object Text])             <div>TextNode<!--1-->Hello</div>",
-        "	Element([object HTMLDivElement])    <div><div></div><!--1-->Hello</div>",
-        "
-      ",
-      ]
-    `);
+          [
+            "elementWithTextAnchor",
+            "	string(Text)                        <div>HelloText<!--1--></div>",
+            "	number(42)                          <div>Hello42<!--1--></div>",
+            "	TextNode([object Text])             <div>HelloTextNode<!--1--></div>",
+            "	Element(<div></div>)                <div>Hello<div></div><!--1--></div>",
+            "
+          ",
+            "elementWithTextAnchorText",
+            "	string(Text)                        <div>HelloText<!--1-->Hello</div>",
+            "	number(42)                          <div>Hello42<!--1-->Hello</div>",
+            "	TextNode([object Text])             <div>HelloTextNode<!--1-->Hello</div>",
+            "	Element(<div></div>)                <div>Hello<div></div><!--1-->Hello</div>",
+            "
+          ",
+            "elementWithAnchor",
+            "	string(Text)                        <div>Text<!--1--></div>",
+            "	number(42)                          <div>42<!--1--></div>",
+            "	TextNode([object Text])             <div>TextNode<!--1--></div>",
+            "	Element(<div></div>)                <div><div></div><!--1--></div>",
+            "
+          ",
+            "elementWithAnchorText",
+            "	string(Text)                        <div>Text<!--1-->Hello</div>",
+            "	number(42)                          <div>42<!--1-->Hello</div>",
+            "	TextNode([object Text])             <div>TextNode<!--1-->Hello</div>",
+            "	Element(<div></div>)                <div><div></div><!--1-->Hello</div>",
+            "
+          ",
+          ]
+        `);
     });
 
 });

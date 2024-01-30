@@ -89,6 +89,14 @@ function removePrior(anchor) {
 function inject(input, anchor, keepLast) {
     let count = +anchor.data;
     if(!keepLast && count > 0 && tryRemovePrior(anchor)) count--;
+
+    // happy-dom bug
+    const type = typeof input;
+    const isDomNode = input instanceof Node;
+    if(type !== 'string' && !isDomNode) {
+        input = `${input}`;
+    }
+
     anchor.before(input);
     anchor.data = `${count + 1}`;
 }
