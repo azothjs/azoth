@@ -71,7 +71,7 @@ export class TemplateGenerator extends Generator {
     InjectionWrapper(template, state) {
         const { isEmpty, boundElements, node } = template;
 
-        if(isEmpty || !boundElements.length) {
+        if(isEmpty || (!boundElements.length) && node.queryIndex !== -1) {
             if(node.isReturnArg) state.write(`return `);
             this.TemplateRenderer(template, state);
             if(!isEmpty) state.write(`.${ROOT_PROPERTY}`);
@@ -124,8 +124,9 @@ export class TemplateGenerator extends Generator {
 
         // template service renderer call
         const rootVarName = `__root_${id}`;
-        state.write(`const { ${ROOT_PROPERTY}: ${rootVarName}, ${TARGETS_PROPERTY}: __targets }`);
-        state.write(` = `);
+        state.write(`const { ${ROOT_PROPERTY}: ${rootVarName}`);
+        if(boundElements.length) state.write(`, ${TARGETS_PROPERTY}: __targets`);
+        state.write(` } = `);
         this.TemplateRenderer(template, state);
         state.write(';');
 

@@ -1,39 +1,33 @@
-export function signalRelay(send, adaptor) {
-    const relay = { send };
-    function signal(payload) {
-        if(adaptor) payload = adaptor(payload);
-        relay.send(payload);
+
+export function subject(transform, options) {
+    if(!options && typeof transform === 'object') {
+        options = transform;
+        transform = null;
     }
+    const [signal, generator] = junction(transform);
+    return [signal, generator(options?.startWith)];
+}
+
+export function junction(transform) {
+    const [signal, relay] = signalRelay(transform);
+    const generator = runWith(relay);
+    return [signal, generator];
+}
+
+export function signalRelay(transform) {
+    const relay = { resolve: null };
+
+    function signal(payload) {
+        if(transform) payload = transform(payload);
+        relay.resolve(payload);
+    }
+
     return [signal, relay];
 }
 
-// export function junction2(promise, resolve, relay) {
-//     async function* generator(initial) {
-//         resolve();
-//         await promise;
-//         yield initial;
-
-//         while(true) {
-//             const { promise, resolve } = Promise.withResolvers();
-//             relay.send = resolve;
-//             yield await promise;
-//         }
-//     }
-
-//     return generator;
-// }
-
-// export function junction(adaptor) {
-//     const { promise, resolve } = Promise.withResolvers();
-//     const [signal, relay] = signalRelay(resolve, adaptor);
-
-//     const generator = junction2(promise, resolve, relay);
-//     return [signal, generator];
-// }
-
-export function junction(adaptor) {
+export function runWith(relay) {
     const { promise, resolve } = Promise.withResolvers();
-    const [signal, relay] = signalRelay(resolve, adaptor);
+    relay.resolve = resolve;
 
     async function* generator(initial) {
         resolve();
@@ -42,21 +36,14 @@ export function junction(adaptor) {
 
         while(true) {
             const { promise, resolve } = Promise.withResolvers();
-            relay.send = resolve;
-            const value = await promise;
-            // could we dispatch subscriber here?
-
+            relay.resolve = resolve;
             yield await promise;
         }
     }
 
-    return [signal, generator];
+    return generator;
 }
 
-export function subject(initial, adaptor) {
-    const [signal, generator] = junction(adaptor);
-    return [signal, generator(initial)];
-}
 
 export function multicast(iterator) {
     return new Multicast(iterator);
@@ -77,27 +64,9 @@ class Multicast {
         }
     }
 
-    subscriber(initial, adapter) {
-        const [signal, iterator] = subject(initial, adapter);
+    subscriber(transform, options) {
+        const [signal, iterator] = subject(transform, options);
         this.consumers.push(signal);
         return iterator;
     }
-}
-
-export function broadcast() {
-    const consumers = [];
-
-    function emit(value) {
-        for(let consumer of consumers) {
-            consumer(value);
-        }
-    }
-
-    function add(initial, adapter) {
-        const [signal, iterator] = subject(initial, adapter);
-        consumers.push(signal);
-        return iterator;
-    }
-
-    return [emit, add];
 }

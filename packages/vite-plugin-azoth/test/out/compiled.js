@@ -56,18 +56,18 @@ async function fetchEmojis() {
   localStorage.setItem(EMOJIS, JSON.stringify(emojis, true, 4));
   return emojis;
 }
-function multiplex(promise, ...outlets) {
-  const list = outlets.map((handler) => {
+function branch(promise, ...outlets) {
+  const list = outlets.map((transform) => {
     const { promise: promise2, resolve, reject } = Promise.withResolvers();
-    return { promise: promise2, resolve, reject, handler };
+    return { promise: promise2, resolve, reject, transform };
   });
   dispatchAsync(promise, list);
   return list.map(({ promise: promise2 }) => promise2);
 }
 async function dispatchAsync(promise, list) {
   promise.then((data) => {
-    list.forEach(({ resolve, handler }) => {
-      resolve(handler(data));
+    list.forEach(({ resolve, transform }) => {
+      resolve(transform(data));
     });
   });
 }
@@ -108,7 +108,7 @@ function EmojiCount({ count }) {
   __compose(count, __child0);
   return __root_209e6208e8;
 }
-const [Count, List] = multiplex(fetchEmojis(), ({ length }) => EmojiCount({
+const [Count, List] = branch(fetchEmojis(), ({ length }) => EmojiCount({
   count: length
 }), (emojis) => EmojiList({
   emojis

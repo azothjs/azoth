@@ -20,8 +20,8 @@ devDependencies:
     specifier: ^1.2.2
     version: 1.2.2(playwright@1.41.1)(vitest@1.2.2)(webdriverio@8.29.1)
   happy-dom:
-    specifier: ^13.3.1
-    version: 13.3.1
+    specifier: ^13.3.5
+    version: 13.3.5
   jsdom:
     specifier: ^24.0.0
     version: 24.0.0
@@ -33,7 +33,7 @@ devDependencies:
     version: 0.8.3(vite@5.0.12)
   vitest:
     specifier: ^1.2.2
-    version: 1.2.2(@vitest/browser@1.2.2)(happy-dom@13.3.1)(jsdom@24.0.0)
+    version: 1.2.2(@vitest/browser@1.2.2)(happy-dom@13.3.5)(jsdom@24.0.0)
   webdriverio:
     specifier: ^8.29.1
     version: 8.29.1
@@ -598,7 +598,7 @@ packages:
       magic-string: 0.30.5
       playwright: 1.41.1
       sirv: 2.0.4
-      vitest: 1.2.2(@vitest/browser@1.2.2)(happy-dom@13.3.1)(jsdom@24.0.0)
+      vitest: 1.2.2(@vitest/browser@1.2.2)(happy-dom@13.3.5)(jsdom@24.0.0)
       webdriverio: 8.29.1
     dev: true
 
@@ -697,7 +697,7 @@ packages:
       geckodriver: 4.3.1
       get-port: 7.0.0
       import-meta-resolve: 4.0.0
-      locate-app: 2.2.13
+      locate-app: 2.2.14
       safaridriver: 0.1.2
       split2: 4.2.0
       wait-port: 1.1.0
@@ -1704,8 +1704,8 @@ packages:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
     dev: false
 
-  /happy-dom@13.3.1:
-    resolution: {integrity: sha512-KIlztn+nRWstprUyI3Wzy1UJrg72uOaoo4SaBLNrV6xrn2Rq86eQruKOL7ZyDhkfou3nEZX6rgRYtvsqwMInvQ==}
+  /happy-dom@13.3.5:
+    resolution: {integrity: sha512-PBMhFNNBPGVa8oDP7mHv+kTWNtzIPTogS+V05s3ddsluDmTbcU7EaEMxZdYf2ka55MshloE9/opOHEC+YelzVQ==}
     engines: {node: '>=16.0.0'}
     dependencies:
       entities: 4.5.0
@@ -1998,10 +1998,10 @@ packages:
       pkg-types: 1.0.3
     dev: true
 
-  /locate-app@2.2.13:
-    resolution: {integrity: sha512-1jp6iRFrHKBj9vq6Idb0cSjly+KnCIMbxZ2BBKSEzIC4ZJosv47wnLoiJu2EgOAdjhGvNcy/P2fbDCS/WziI8g==}
+  /locate-app@2.2.14:
+    resolution: {integrity: sha512-fqGE0IHZ3v+9kCjYvhwrP52aTGP1itOfp4TZZuv4dNl2gKN/pHCIlMhDSqPDb3qJ5Rti39y5T+/XrfCsiDRjKw==}
     dependencies:
-      n12: 1.8.16
+      n12: 1.8.17
       type-fest: 2.13.0
       userhome: 1.0.0
     dev: true
@@ -2157,8 +2157,8 @@ packages:
   /ms@2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
 
-  /n12@1.8.16:
-    resolution: {integrity: sha512-CZqHAqbzS0UsaUGkMsL+lMaYLyFr1+/ea+pD8dMziqSjkcuWVWDtgWx9phyfT7C3llqQ2+LwnStSb5afggBMfA==}
+  /n12@1.8.17:
+    resolution: {integrity: sha512-/NdfkU7nyqq70E4RvDa3OrR/wkZrYjDGXjn4JgIZnn+ULcyW1f6BLjNqyFC+ND9FqzyWjcQhvagFJmVJ8k8Lew==}
     dev: true
 
   /nanoid@3.3.7:
@@ -3077,7 +3077,7 @@ packages:
       fsevents: 2.3.3
     dev: true
 
-  /vitest@1.2.2(@vitest/browser@1.2.2)(happy-dom@13.3.1)(jsdom@24.0.0):
+  /vitest@1.2.2(@vitest/browser@1.2.2)(happy-dom@13.3.5)(jsdom@24.0.0):
     resolution: {integrity: sha512-d5Ouvrnms3GD9USIK36KG8OZ5bEvKEkITFtnGv56HFaSlbItJuYr7hv2Lkn903+AvRAgSixiamozUVfORUekjw==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
@@ -3113,7 +3113,7 @@ packages:
       chai: 4.4.1
       debug: 4.3.4
       execa: 8.0.1
-      happy-dom: 13.3.1
+      happy-dom: 13.3.5
       jsdom: 24.0.0
       local-pkg: 0.5.0
       magic-string: 0.30.5

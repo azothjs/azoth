@@ -4,12 +4,14 @@ import { elementWithAnchor, runCompose } from './compose/test-elements.test.js';
 import './with-resolvers-polyfill.js';
 
 test('subject', async ({ expect }) => {
-    const [signal, iterator] = subject('Hello');
+    const [signal, iterator] = subject({ startWith: 'Hello' });
     const dom = runCompose(iterator, elementWithAnchor);
 
     await null;
     await null;
     await null;
+    await null;
+
     expect(dom).toMatchInlineSnapshot(`
       <div>
         Hello
@@ -42,8 +44,8 @@ test('subject', async ({ expect }) => {
 
 });
 
-test('adaptor', async ({ expect }) => {
-    const [signal, iterator] = subject(0, x => x ** x);
+test('transform', async ({ expect }) => {
+    const [signal, iterator] = subject(x => x ** x, { startWith: 0 });
 
     expect((await iterator.next()).value).toBe(0);
     let iteratorPromise = iterator.next();
@@ -52,8 +54,7 @@ test('adaptor', async ({ expect }) => {
 });
 
 test('multicast', async ({ expect }) => {
-    const [signal, iterator] = subject('hello');
-
+    const [signal, iterator] = subject({ startWith: 'hello' });
 
     const mc = multicast(iterator);
     const s1 = mc.subscriber();

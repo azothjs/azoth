@@ -17,21 +17,19 @@ export class Analyzer {
     #documentOrder = 0;
     #boundElements = new Set();
     #bindings = [];
-    #isJSXFragment = false;
+    #isComponentRoot = true;
     #template = null;
     #root = null;
 
     constructor(node) {
-        this.#root = node;
-        this.#analyze();
+        this.#analyze(node);
 
         const boundElements = [...this.#boundElements].sort(byOrder);
         for(let i = 0; i < boundElements.length; i++) {
             boundElements[i].queryIndex = i;
         }
 
-        this.#template = new Template(node, {
-            isJsxFragment: this.#isJSXFragment,
+        this.#template = new Template(this.#root, {
             bindings: this.#bindings,
             boundElements,
         });
@@ -43,10 +41,18 @@ export class Analyzer {
         return template;
     }
 
-    #analyze() {
-        const root = this.#root;
-        if(root.type === 'JSXFragment') this.JSXRootFragment(root);
-        else this.JSXElement(root);
+    #analyze(node) {
+        // handle single top-level components with a fake fragment
+        const root = node.type === 'JSXFragment' ? node : {
+            type: 'JSXFragment',
+            children: [node],
+            openingFragment: {
+                attributes: []
+            },
+            isReturnArg: node.isReturnArg
+        };
+        this.#root = root;
+        this.JSXRootFragment(root);
     }
 
     #pushElement(node) {
@@ -69,30 +75,34 @@ export class Analyzer {
             index,
         };
 
-        if(element.isComponent) {
+        if(element?.isComponent) {
             element.props.push(binding);
             return;
         }
 
         this.#bindings.push(binding);
 
-        if(element === this.#root && this.#isJSXFragment) {
-            // fragments can't be "targets", so we give them
+        if(element === this.#root) {
+            // fragment root can't be a "targets", so we give them
             // -1 queryIndex to signal a bound fragment at root
             if(type === 'child') element.queryIndex = -1;
+            return;
         }
-        else if(!this.#boundElements.has(element)) {
+
+        // track element as bound
+        if(!this.#boundElements.has(element)) {
             element.openingElement?.attributes.push(BINDING_ATTR);
             this.#boundElements.add(element);
         }
     }
 
     JSXRootFragment(node) {
-        this.#isJSXFragment = true;
         this.#pushElement(node);
         // short-cut JSXOpeningFragment > JSXAttributes
         // this[node.openingFragment.type](node.openingFragment); 
-        this.JSXAttributes(node.openingFragment.attributes);
+        if(node.openingFragment) {
+            this.JSXAttributes(node.openingFragment.attributes);
+        }
         this.JSXChildren(node);
         this.#popElement();
     }

@@ -20,6 +20,12 @@ export const $div = () => document.createElement('div');
 export const $text = (text) => document.createTextNode(text);
 export const $helloText = () => $text('Hello');
 
+export function elementWithText(text = 'hello') {
+    const dom = $div();
+    dom.append($text(text));
+    return { dom, anchor: null };
+}
+
 export function elementWithTextAnchor() {
     const dom = $div();
     dom.append($helloText(), $anchor());
@@ -94,4 +100,5 @@ describe('element helpers initial anchor and html', () => {
       }
     `);
     });
+
 });

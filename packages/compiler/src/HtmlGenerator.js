@@ -22,6 +22,10 @@ export class HtmlGenerator extends Generator {
 
     // <div></div>
     JSXElement(node, state) {
+        if(node.isComponent) {
+            return this.JSXExpressionContainer(node, state);
+        }
+
         state.write('<');
         this[node.openingElement.type](node.openingElement, state);
 

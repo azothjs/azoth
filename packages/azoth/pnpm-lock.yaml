@@ -9,11 +9,11 @@ devDependencies:
     specifier: ^1.2.2
     version: 1.2.2(vitest@1.2.2)
   happy-dom:
-    specifier: ^13.3.1
-    version: 13.3.1
+    specifier: ^13.3.5
+    version: 13.3.5
   vitest:
     specifier: ^1.2.2
-    version: 1.2.2(@vitest/browser@1.2.2)(happy-dom@13.3.1)
+    version: 1.2.2(@vitest/browser@1.2.2)(happy-dom@13.3.5)
 
 packages:
 
@@ -369,7 +369,7 @@ packages:
       '@vitest/utils': 1.2.2
       magic-string: 0.30.5
       sirv: 2.0.4
-      vitest: 1.2.2(@vitest/browser@1.2.2)(happy-dom@13.3.1)
+      vitest: 1.2.2(@vitest/browser@1.2.2)(happy-dom@13.3.5)
     dev: true
 
   /@vitest/expect@1.2.2:
@@ -562,8 +562,8 @@ packages:
     engines: {node: '>=16'}
     dev: true
 
-  /happy-dom@13.3.1:
-    resolution: {integrity: sha512-KIlztn+nRWstprUyI3Wzy1UJrg72uOaoo4SaBLNrV6xrn2Rq86eQruKOL7ZyDhkfou3nEZX6rgRYtvsqwMInvQ==}
+  /happy-dom@13.3.5:
+    resolution: {integrity: sha512-PBMhFNNBPGVa8oDP7mHv+kTWNtzIPTogS+V05s3ddsluDmTbcU7EaEMxZdYf2ka55MshloE9/opOHEC+YelzVQ==}
     engines: {node: '>=16.0.0'}
     dependencies:
       entities: 4.5.0
@@ -877,7 +877,7 @@ packages:
       fsevents: 2.3.3
     dev: true
 
-  /vitest@1.2.2(@vitest/browser@1.2.2)(happy-dom@13.3.1):
+  /vitest@1.2.2(@vitest/browser@1.2.2)(happy-dom@13.3.5):
     resolution: {integrity: sha512-d5Ouvrnms3GD9USIK36KG8OZ5bEvKEkITFtnGv56HFaSlbItJuYr7hv2Lkn903+AvRAgSixiamozUVfORUekjw==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
@@ -913,7 +913,7 @@ packages:
       chai: 4.4.1
       debug: 4.3.4
       execa: 8.0.1
-      happy-dom: 13.3.1
+      happy-dom: 13.3.5
       local-pkg: 0.5.0
       magic-string: 0.30.5
       pathe: 1.1.2

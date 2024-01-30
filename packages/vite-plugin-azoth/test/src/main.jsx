@@ -1,5 +1,5 @@
 import { fetchEmojis } from './fetchEmojis.js';
-import { multiplex } from 'azoth/promises';
+import { branch } from 'azoth/promises';
 
 function InnerHtml({ html, className = '' }) {
     const rawEmoji = <span className={className ?? ''}></span>;
@@ -25,7 +25,7 @@ function EmojiCount({ count }) {
     return <span>{count}</span>;
 }
 
-const [Count, List] = multiplex(
+const [Count, List] = branch(
     fetchEmojis(), 
     ({ length }) => EmojiCount({ count: length }), 
     emojis => EmojiList({ emojis }),

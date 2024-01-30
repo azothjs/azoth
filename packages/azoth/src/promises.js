@@ -1,7 +1,7 @@
-export function multiplex(promise, ...outlets) {
-    const list = outlets.map(handler => {
+export function branch(promise, ...outlets) {
+    const list = outlets.map(transform => {
         const { promise, resolve, reject } = Promise.withResolvers();
-        return { promise, resolve, reject, handler };
+        return { promise, resolve, reject, transform };
     });
 
     dispatchAsync(promise, list);
@@ -11,21 +11,21 @@ export function multiplex(promise, ...outlets) {
 
 async function dispatchAsync(promise, list) {
     promise.then(data => {
-        list.forEach(({ resolve, handler }) => {
-            resolve(handler(data));
+        list.forEach(({ resolve, transform }) => {
+            resolve(transform(data));
         });
     });
 }
 
-export function keyedMultiplex(promise, outlets) {
-    const list = Object.entries(outlets).map(([key, handler]) => {
+export function keyedBranch(promise, outlets) {
+    const list = Object.entries(outlets).map(([key, transform]) => {
         const { promise, resolve, reject } = Promise.withResolvers();
-        return { entry: [key, promise], resolve, reject, handler };
+        return { entry: [key, promise], resolve, reject, transform };
     });
 
     promise.then(data => {
-        list.forEach(({ resolve, handler }) => {
-            resolve(handler(data));
+        list.forEach(({ resolve, transform }) => {
+            resolve(transform(data));
         });
     });
 

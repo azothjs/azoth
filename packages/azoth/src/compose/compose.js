@@ -25,13 +25,7 @@ export function compose(input, anchor, keepLast = false) {
             composeArray(input, anchor, keepLast);
             break;
         case type === 'object': {
-            if(input[Symbol.asyncIterator]) {
-                composeAsyncIterator(input, anchor, keepLast);
-            }
-            else {
-                throwTypeErrorForObject(input, type);
-
-            }
+            composeObject(input, anchor, keepLast);
             break;
         }
         default: {
@@ -40,29 +34,56 @@ export function compose(input, anchor, keepLast = false) {
     }
 }
 
-function throwTypeError(input, type, footer = '') {
 
-    throw new TypeError(`\
-Invalid {...} compose input type "${type}", \
-value ${input}.${footer}`
-    );
+export function composeObject(object, anchor, keepLast) {
+    switch(true) {
+        case object instanceof ReadableStream:
+            composeAsyncIterator(object, anchor, true);
+            break;
+        // w/o the !! this cause intermittent failures
+        case !!object[Symbol.asyncIterator]:
+            composeAsyncIterator(object, anchor, keepLast);
+            break;
+        case object.subscribe:
+        case object.on:
+        default: {
+            throwTypeErrorForObject(object);
+        }
+    }
 }
 
-function throwTypeErrorForObject(obj, type) {
-    let json = '';
+function throwTypeErrorForObject(obj) {
+    let message = '';
     try {
-        json = JSON.stringify(obj, null, 2);
+        const json = JSON.stringify(obj, null, 2);
+        message = `\n\nReceived as:\n\n${json}\n\n`;
     }
     catch(ex) {
-        throwTypeError(obj, type);
+        /* no-op */
     }
 
-    throwTypeError(obj, type, `\n\nReceived as:\n\n${json}\n\n`);
+    throwTypeError(obj, 'object', message);
+}
+
+
+async function composeAsyncIterator(iterator, anchor, keepLast) {
+    for await(const value of iterator) {
+        compose(value, anchor, keepLast);
+    }
+}
+
+export function composeElement(Constructor, anchor, props) {
+    // let JavaScript handle it :)
+    // will throw appropriate errors, 
+    // so key point for source maps in callers
+    const dom = new Constructor(props);
+    compose(dom, anchor);
 }
 
 function removePrior(anchor) {
     const count = +anchor.data;
-    if(count > 0 && tryRemovePrior(anchor)) anchor.data = `${count - 1}`;
+    if(!count) return;
+    if(tryRemovePrior(anchor)) anchor.data = `${count - 1}`;
 }
 
 function inject(input, anchor, keepLast) {
@@ -79,20 +100,20 @@ function composeArray(array, anchor) {
     }
 }
 
+function throwTypeError(input, type, footer = '') {
+    throw new TypeError(`\
+Invalid {...} compose input type "${type}", \
+value ${input}.${footer}`
+    );
+}
+
+// need to walk additional comments
 function tryRemovePrior({ previousSibling }) {
-    return previousSibling ? (previousSibling.remove(), true) : false;
-}
-
-async function composeAsyncIterator(iterator, anchor, keepLast) {
-    for await(const value of iterator) {
-        compose(value, anchor, keepLast);
+    if(!previousSibling) return false;
+    if(previousSibling.nodeType !== 3 /* comment */) {
+        // TODO: id azoth comments only!
+        removePrior(previousSibling);
     }
-}
-
-export function composeElement(Constructor, anchor, props) {
-    // let JavaScript handle it :)
-    // will throw appropriate errors, 
-    // so key point for source maps in callers
-    const dom = new Constructor(props);
-    compose(dom, anchor);
+    previousSibling.remove();
+    return true;
 }

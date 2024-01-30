@@ -5,6 +5,8 @@
     "type": "module",
     "main": "index.js",
     "scripts": {
+        "check": "pnpm update && pnpm test",
+        "update": "pnpm update -r",
         "test": "CI=true pnpm test -r -F=!sandbox"
     },
     "keywords": [],
@@ -17,7 +19,7 @@
     },
     "devDependencies": {
         "@vitest/browser": "^1.2.2",
-        "happy-dom": "^13.3.1",
+        "happy-dom": "^13.3.5",
         "jsdom": "^24.0.0",
         "vite": "^5.0.12",
         "vite-plugin-inspect": "^0.8.3",
