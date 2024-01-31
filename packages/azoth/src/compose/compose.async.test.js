@@ -43,7 +43,7 @@ describe('async', () => {
 
     });
 
-    test.only('generators (async)', async ({ expect }) => {
+    test('generators (async)', async ({ expect }) => {
         let tickTock = null;
         const doAsync = async (value) => {
             const { promise, resolve } = Promise.withResolvers();

@@ -7,7 +7,7 @@
     "exports": {
         ".": "./index.js",
         "./futures": "./src/futures/index.js",
-        "./dom": "./src/dom.js"
+        "./dom": "./src/dom/index.js"
     },
     "scripts": {
         "test": "vitest",

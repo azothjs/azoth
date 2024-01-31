@@ -68,14 +68,14 @@ function throwTypeErrorForObject(obj) {
 
 async function composeAsyncIterator(iterator, anchor, keepLast) {
     for await(const value of iterator) {
-        () => compose(value, anchor, keepLast);
+        compose(value, anchor, keepLast);
     }
 }
 
 async function composeStream(stream, anchor, keepLast) {
     const writeable = new WritableStream({
         write(chunk) {
-            () => compose(chunk, anchor, keepLast);
+            compose(chunk, anchor, keepLast);
         }
     });
     stream.pipeTo(writeable);

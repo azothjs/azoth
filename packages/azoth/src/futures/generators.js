@@ -5,7 +5,8 @@ export function subject(transform, options) {
         transform = null;
     }
     const [signal, generator] = junction(transform);
-    return [signal, generator(options?.startWith)];
+    const iterator = generator(options?.startWith);
+    return [signal, iterator];
 }
 
 export function junction(transform) {

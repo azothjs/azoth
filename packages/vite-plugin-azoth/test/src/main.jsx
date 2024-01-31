@@ -1,5 +1,5 @@
 import { fetchEmojis } from './fetchEmojis.js';
-import { branch } from 'azoth/promises';
+import { branch } from 'azoth/futures';
 
 function InnerHtml({ html, className = '' }) {
     const rawEmoji = <span className={className ?? ''}></span>;
