@@ -1,36 +1,17 @@
 import { subject } from 'azoth/generators';
+import { Counter } from './Counter.jsx';
+import { Emojis } from './emojis/Emojis.jsx';
 
-function Counter() {
-    let count = 0;
-    const [increment, $count] = subject(0, () => ++count);
-    return <p>
-        <button onclick={increment}>++</button>
-        <span>{$count}</span>
-    </p>;
-}
+const pages = { 
+    emojis: <Emojis/>, 
+    counter: <Counter initial={0}/> 
+};
 
-function Emojis() {
-    return <div>Emojis</div>;
-}
-
-function Pokedex() {
-    return <div>Pokedex</div>;
-}
-
-function Dashboard() {
-    return <div>Dashboard</div>;
-}
-
-const emojis = <Emojis/>;
-const pokedex = <Pokedex/>;
-const dashboard = <Dashboard/>;
-const pages = { emojis, pokedex };
-
-const [hashChange, Page] = subject(dashboard, (e) => {
+const [hashChange, Page] = subject((e) => {
     const url = new URL(e.newURL);
     const key = url.hash.slice(1);
-    return pages[key] || dashboard;
-});
+    return pages[key] || pages.emojis;
+}, { startWith: pages.emojis });
 
 window.onhashchange = hashChange;
 
@@ -45,6 +26,5 @@ export default <>
     </header>
     <main>
         {Page}
-        <Counter/>
     </main>
 </>;

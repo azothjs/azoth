@@ -38,7 +38,7 @@ export function compose(input, anchor, keepLast = false) {
 export function composeObject(object, anchor, keepLast) {
     switch(true) {
         case object instanceof ReadableStream:
-            composeAsyncIterator(object, anchor, true);
+            composeStream(object, anchor, true);
             break;
         // w/o the !! this cause intermittent failures
         case !!object[Symbol.asyncIterator]:
@@ -68,8 +68,17 @@ function throwTypeErrorForObject(obj) {
 
 async function composeAsyncIterator(iterator, anchor, keepLast) {
     for await(const value of iterator) {
-        compose(value, anchor, keepLast);
+        requestAnimationFrame(() => compose(value, anchor, keepLast));
     }
+}
+
+async function composeStream(stream, anchor, keepLast) {
+    const writeable = new WritableStream({
+        write(chunk) {
+            requestAnimationFrame(() => compose(chunk, anchor, keepLast));
+        }
+    });
+    stream.pipeTo(writeable);
 }
 
 export function composeElement(Constructor, anchor, props) {

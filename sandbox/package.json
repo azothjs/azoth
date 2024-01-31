@@ -12,7 +12,9 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@streamparser/json-whatwg": "^0.0.20",
         "azoth": "workspace:*",
+        "npm": "^10.4.0",
         "page": "^1.11.6",
         "vite-plugin-azoth": "workspace:*"
     },
