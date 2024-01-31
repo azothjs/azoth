@@ -60,7 +60,7 @@ const felix = new CatCard();
 felix.name = 'felix';
 
 const name = 'Timmy';
-const promise = Promise.resolve('a future value');
+const promise = Promise.resolve('a subject value');
 
 document.body.append(
     <h1>Hello Azoth {3}</h1>,

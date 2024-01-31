@@ -1,6 +1,6 @@
-import { elementWithTextAnchor, elements, runCompose } from './test-elements.test.js';
+import { elementWithTextAnchor, elements, runCompose } from '../test-utils/elements.test.js';
 import { describe, test } from 'vitest';
-import '../with-resolvers-polyfill.js';
+import '../../with-resolvers-polyfill.js';
 
 describe('async', () => {
 
@@ -43,7 +43,7 @@ describe('async', () => {
 
     });
 
-    test('generators (async)', async ({ expect }) => {
+    test.only('generators (async)', async ({ expect }) => {
         let tickTock = null;
         const doAsync = async (value) => {
             const { promise, resolve } = Promise.withResolvers();

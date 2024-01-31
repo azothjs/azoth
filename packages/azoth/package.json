@@ -6,10 +6,8 @@
     "main": "index.js",
     "exports": {
         ".": "./index.js",
-        "./promises": "./src/promises.js",
-        "./generators": "./src/generators.js",
-        "./dom": "./src/dom.js",
-        "./renderer": "./src/renderer.js"
+        "./futures": "./src/futures/index.js",
+        "./dom": "./src/dom.js"
     },
     "scripts": {
         "test": "vitest",

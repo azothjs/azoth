@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { compose, composeElement } from './compose.js';
-import { $anchor, $div, elementWithAnchor, elementWithText, elementWithTextAnchor, runCompose } from './test-elements.test.js';
+import { $anchor, elementWithAnchor, elementWithText, elementWithTextAnchor, runCompose } from '../test-utils/elements.test.js';
 
 
 describe('compose element', () => {

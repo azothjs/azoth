@@ -1,6 +1,6 @@
 import { describe, test } from 'vitest';
-import { compose } from './compose.js';
-import '../with-resolvers-polyfill.js';
+import { compose } from '../compose/compose.js';
+import '../../with-resolvers-polyfill.js';
 
 export const elements = [
     elementWithTextAnchor,

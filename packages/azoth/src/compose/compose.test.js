@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { compose } from './compose.js';
-import { runCompose, elements, $text, $div } from './test-elements.test.js';
+import { runCompose, elements, $text, $div } from '../test-utils/elements.test.js';
 
 function run(value, create) {
     return runCompose(value, create).outerHTML;
