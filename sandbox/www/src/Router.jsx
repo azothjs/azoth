@@ -1,20 +1,20 @@
 import { subject, broadcast } from 'azoth/generators';
 import page from 'page';
 
-const [emit, add] = broadcast();
+const [signal, join] = broadcast();
 const consumers = [];
 // function push(url) {
 //     history.pushState(null, '', url);
 //     for(const consumer of consumers) {
 //         consumer(location.href);
 //     }
-//     emit(url);
+//     signal(url);
 // }
 
 export async function subscribe(transform) {
     const adapted = transform ? () => transform(new URL(location.href)) : null; 
     const current = adapted ?? (() => new URL(location.href));
-    return add(current(), current); 
+    return join(current(), current); 
 }
 
 export function Link({ href, text = href }) {

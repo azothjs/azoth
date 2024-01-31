@@ -3,19 +3,19 @@ import { subject } from './generators.js';
 export function broadcast() {
     const listeners = [];
 
-    function emit(value) {
+    function signal(value) {
         for(let listener of listeners) {
             listener(value);
         }
     }
 
-    function add(initial, transform) {
+    function join(initial, transform) {
         const [signal, iterator] = subject(initial, transform);
         listeners.push(signal);
         return iterator;
     }
 
-    return [emit, add];
+    return [signal, join];
 }
 
 export function pubsub() {
@@ -27,10 +27,9 @@ export function pubsub() {
         }
     }
 
-    function subscribe(subscriber, initial, transform) {
+    function subscribe(subscriber) {
         set.add(subscriber);
-        if(initial)
-            return () => set.remove(subscriber);
+        return () => set.remove(subscriber);
     }
 
     return [publish, subscribe];

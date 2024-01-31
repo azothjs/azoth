@@ -1,7 +1,7 @@
 import { fetchEmojis, streamEmojis } from './emoji-service.js';
 import { JSONParser } from '@streamparser/json-whatwg';
 import { RawHTML } from './RawHTML.jsx';
-import { sleep } from 'azoth/promises';
+// import { sleep } from 'azoth/promises';
 
 
 const CHUNK_SIZE = 100;

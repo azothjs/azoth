@@ -19,11 +19,11 @@
     },
     "devDependencies": {
         "@vitest/browser": "^1.2.2",
-        "happy-dom": "^13.3.5",
+        "happy-dom": "^13.3.8",
         "vite": "^5.0.12",
         "vite-plugin-inspect": "^0.8.3",
         "vitest": "^1.2.2",
-        "webdriverio": "^8.29.1"
+        "webdriverio": "^8.29.3"
     },
     "packageManager": "pnpm@^8.15.1"
 }

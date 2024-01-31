@@ -1,4 +1,4 @@
-import { subject } from 'azoth/generators';
+import { subject } from 'azoth/futures';
 import { Counter } from './Counter.jsx';
 import { Emojis } from './emojis/Emojis.jsx';
 

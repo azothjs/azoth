@@ -1,4 +1,4 @@
-import { subject } from 'azoth/generators';
+import { subject } from 'azoth/futures';
 
 export function Counter({ initial }) {
     let count = initial ?? 0;

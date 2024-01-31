@@ -4,34 +4,24 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-importers:
+dependencies:
+  azoth:
+    specifier: workspace:*
+    version: link:../azoth
+  compiler:
+    specifier: workspace:*
+    version: link:../compiler
 
-  .:
-    dependencies:
-      azoth:
-        specifier: workspace:*
-        version: link:../azoth
-      compiler:
-        specifier: workspace:*
-        version: link:../compiler
-    devDependencies:
-      '@rollup/pluginutils':
-        specifier: ^5.1.0
-        version: 5.1.0
-      vite:
-        specifier: ^5.0.12
-        version: 5.0.12
-      vitest:
-        specifier: ^1.2.2
-        version: 1.2.2
-
-  ../..: {}
-
-  ../../sandbox: {}
-
-  ../azoth: {}
-
-  ../compiler: {}
+devDependencies:
+  '@rollup/pluginutils':
+    specifier: ^5.1.0
+    version: 5.1.0
+  vite:
+    specifier: ^5.0.12
+    version: 5.0.12
+  vitest:
+    specifier: ^1.2.2
+    version: 1.2.2
 
 packages:
 
