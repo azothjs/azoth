@@ -10,6 +10,7 @@
         "espree",
         "IIFE",
         "inlines",
+        "martypdx",
         "nsbsp",
         "onattribute",
         "onclosetag",
@@ -27,5 +28,11 @@
     ],
     "eslint.experimental.useFlatConfig": true,
     "eslint.format.enable": true,
-    "eslint.enable": true
+    "eslint.enable": true,
+    "eslint.workingDirectories": [
+        {
+            "pattern": "./packages/*/"
+        },
+        "./sandbox"
+    ],
 }

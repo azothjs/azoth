@@ -1,15 +1,15 @@
 {
     "name": "vite-plugin-azoth",
     "version": "1.0.0",
-    "description": "Vite plugin for compiling azoth jsx",
+    "description": "vite plugin for compiling azoth jsx",
+    "author": "martypdx",
+    "license": "MIT",
     "keywords": [
         "vite-plugin",
         "vite plugin",
         "vite",
         "azoth"
     ],
-    "license": "MIT",
-    "author": "Marty Nelson",
     "engines": {
         "node": "^18.0.0 || >=20"
     },

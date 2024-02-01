@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'node:path';
 import azothPlugin from '../index.js';
 
 export default defineConfig({
@@ -12,17 +11,11 @@ export default defineConfig({
         }),
     ],
     build: {
-        target: 'ESNext',
+        target: 'esnext',
         minify: false,
         outDir: './out',
-        lib: {
-            // Could also be a dictionary or array of multiple entry points
-            // eslint-disable-next-line no-undef
-            entry: resolve(__dirname, './src/main.jsx'),
-            name: 'Compiled',
-            // the proper extensions will be added
-            fileName: 'compiled',
-        },
+        assetsDir: './',
+        modulePreload: false,
         rollupOptions: {
             // make sure to externalize deps that shouldn't be bundled
             // into your library

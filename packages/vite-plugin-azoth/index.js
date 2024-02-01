@@ -2,7 +2,7 @@ import { compile } from 'compiler';
 import { createFilter } from '@rollup/pluginutils';
 
 // TODO: something better
-const templateServiceModule = `/templates:`;
+const templateServiceModule = `/az-tmpl:`;
 
 
 export default function azothPlugin(options) {
@@ -12,10 +12,14 @@ export default function azothPlugin(options) {
     const filter = createFilter(include, exclude);
 
     const programTemplates = new Map();
+    let command = '';
 
     const transform = {
         name: 'rollup-azoth-plugin',
         enforce: 'pre',
+        config(config, { command: cmd }) {
+            command = cmd;
+        },
         resolveId(id) {
             const [name, ids] = id.split('?', 2);
             if(name !== templateServiceModule) return;
@@ -25,18 +29,24 @@ export default function azothPlugin(options) {
             const [name, ids] = id.split('?', 2);
             if(name !== templateServiceModule) return;
 
-            const renderer = `import { makeRenderer } from 'azoth/dom';\n`;
+            const isBuild = command === 'build';
+            const renderer = isBuild ? 'rendererById' : 'makeRenderer';
+
+            const importRenderer = `import { ${renderer} } from 'azoth/dom';\n`;
             const exports = new URLSearchParams(ids)
                 .getAll('id')
                 .map(id => {
                     const { html, isDomFragment } = programTemplates.get(id);
+                    let exportRender = `\nexport const t${id} = ${renderer}('${id}'`;
+                    // html gets added to index.html in build
+                    if(!isBuild) exportRender += `, \`${html}\``;
                     // default is false, so only add if true (which is less common)
-                    const isFragParam = isDomFragment ? ', true' : '';
-                    return `\nexport const t${id} = makeRenderer('${id}', \`${html}\`${isFragParam});\n`;
+                    if(isDomFragment) exportRender += ', true';
+                    exportRender += `);\n`;
+                    return exportRender;
                 })
                 .join('');
-
-            return renderer + exports;
+            return importRenderer + exports;
         },
         transform(source, id) {
             if(!filter(id) || !extension.test(id)) return;
@@ -72,45 +82,18 @@ export default function azothPlugin(options) {
 
     const injectHtml = {
         name: 'inject-html-plugin',
+        apply: 'build',
         enforce: 'post',
         transformIndexHtml(html) {
             const templateHtml = [...programTemplates.entries()].map(([id, { html }]) => {
-                return `\n<template id="${id}">${html}</template>`;
+                return `\n    <template id="${id}">${html}</template>`;
             }).join('');
             return html.replace(
-                '<!-- templates -->',
-                `<!-- Azoth templates! -->
-                ${templateHtml}`,
+                '<!--azoth-templates-->',
+                `<!-- 🚀 azoth templates -->${templateHtml}\n    <!-- azoth templates 🌎-->`,
             );
         },
     };
 
-    return [transform]; //, injectHtml];
-}
-
-function templateService(programTemplates) {
-    return {
-        name: 'vite-azoth-template-plugin',
-        enforce: 'pre',
-        resolveId(id) {
-            const [name, ids] = id.split('?', 2);
-            if(name !== templateServiceModule) return;
-            return id;
-        },
-        load(id) {
-            const [name, ids] = id.split('?', 2);
-            if(name !== templateServiceModule) return;
-
-            const renderer = `import { makeRenderer } from '/src/azoth/dom';\n`;
-            const exports = new URLSearchParams(ids)
-                .getAll('id')
-                .map(id => {
-                    const html = programTemplates.get(id);
-                    return `\nexport const t${id} = makeRenderer('${id}', \`${html}\`);\n`;
-                })
-                .join('');
-
-            return renderer + exports;
-        },
-    };
+    return [transform, injectHtml];
 }

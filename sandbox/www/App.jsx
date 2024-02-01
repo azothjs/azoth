@@ -13,6 +13,8 @@ const [hashChange, Page] = subject((e) => {
     return pages[key] || pages.emojis;
 }, { startWith: pages.emojis });
 
+
+
 window.onhashchange = hashChange;
 
 export default <>

@@ -7,41 +7,54 @@ import { RawHTML } from './RawHTML.jsx';
 const CHUNK_SIZE = 100;
 const batch = new TransformStream({
     start() {
+        this.pages = [];
         this.batch = [];
+        this.firstPageSent = false;
     },
     transform(value, controller) {
         const length = this.batch.push(value);
         if(length >= CHUNK_SIZE) {
-            controller.enqueue(this.batch);
+            if(!this.firstPageSent) {
+                this.firstPageSent = true;
+                controller.enqueue(this.batch);
+            }
+            else {
+                this.pages.push(batch);
+            }
+
             this.batch = [];
         }
     },
     flush(controller) {
-        if(this.batch.length) {
+        if(!this.firstPageSent && this.batch.length) {
             controller.enqueue(this.batch);
         }
     }
 });
 
-// const layout = new TransformStream({
-//     transform(batch, controller) {
-//         const emojis = batch.map(emoji => <Emoji emoji={emoji}/>);
-//         controller.enqueue(emojis);
-//     },
-// });
-
 const layout = new TransformStream({
-    transform({ value }, controller) {
-        controller.enqueue(<Emoji emoji={value}/>);
+    transform(batch, controller) {
+        const emojis = batch.map(({ value: emoji }) => <Emoji emoji={emoji}/>);
+        controller.enqueue(emojis);
     },
 });
+
+// const layout = new TransformStream({
+//     transform({ value }, controller) {
+//         controller.enqueue(<Emoji emoji={value}/>);
+//     },
+// });
 
 export function Emojis() {
     const emojiStream = streamEmojis()
         .then(stream => stream
-            .pipeThrough(new JSONParser({ stringBufferSize: undefined, paths: ['$.*'], keepStack: false }))
-            .pipeThrough(layout)
+            .pipeThrough(new JSONParser({ 
+                stringBufferSize: undefined, 
+                paths: ['$.*'], 
+                keepStack: false 
+            }))
             .pipeThrough(batch)
+            .pipeThrough(layout)
         );
 
     // const emojiLayout = fetchEmojis()
@@ -64,7 +77,7 @@ function EmojiList({ emojis }) {
 function Emoji({ emoji }) {
     const { name, unicode, htmlCode } = emoji;   
     return <li>
-        <RawHTML html={htmlCode.join('')}/>
+        <RawHTML html={htmlCode?.join('')}/>
         {name}
         {unicode} 
     </li>;

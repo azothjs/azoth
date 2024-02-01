@@ -1,11 +1,23 @@
 /* eslint-disable no-undef */
 import { test } from 'vitest';
-import fs from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 test('plugin output produces same snapshot', async ({ expect }) => {
-    const expected = resolve(__dirname, './plugin.expected.js');
-    const path = resolve(__dirname, './out/compiled.js');
-    const output = fs.readFileSync(path, 'utf8');
-    expect(output).toMatchFileSnapshot(expected);
+    const expectedHTML = resolve(__dirname, './expected-out/index.html');
+    const actualHTML = await readFile(resolve(__dirname, './out/index.html'), 'utf8');
+    expect(actualHTML).toMatchFileSnapshot(expectedHTML);
+
+    // These are hard coded as vitest was throwing file read errors trying to do 
+    // it programmatically. Probably an npm package that already does this:
+    // Like... https://www.npmjs.com/package/dir-compare
+
+    const expectedJS = resolve(__dirname, './expected-out/index-mAl80-j3.js');
+    const actualJS = await readFile(resolve(__dirname, './out/index-mAl80-j3.js'), 'utf8');
+    expect(actualJS).toMatchFileSnapshot(expectedJS);
+
+    const expectedCSS = resolve(__dirname, './expected-out/index-w2qTGksW.css');
+    const actualCSS = await readFile(resolve(__dirname, './out/index-w2qTGksW.css'), 'utf8');
+    expect(actualCSS).toMatchFileSnapshot(expectedCSS);
+
 });
