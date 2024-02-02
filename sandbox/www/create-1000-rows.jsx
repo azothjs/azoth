@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import './style.css';
 
 document.body.append(
@@ -72,7 +73,7 @@ class Item {
 
 function buildData(count = 1000) {
     const data = new Array(count);
-    for (let i = 0; i < count; i++) {
+    for(let i = 0; i < count; i++) {
         data[i] = new Item();
     }
     return data;
@@ -84,7 +85,7 @@ const data = buildData();
 
 document.body.append($table({ data }));
 
-console.timeEnd('create 1000 rows')
+console.timeEnd('create 1000 rows');
 
 function $table({ data }) {
     const rows = data.map($row);
@@ -104,5 +105,5 @@ function $row({ id, label }) {
                 ><span class="glyphicon glyphicon-remove" aria-hidden="true" /></a
             ></td
         ><td class="col-md-6" /></tr
-    >
+    >;
 }
