@@ -5,5 +5,5 @@ export function $cats({ cats }) {
 export function $cat({ name, lives }) {
     return <li className={lives < 3 ? 'warning' : ''}>
         {name}
-    </li>
+    </li>;
 }

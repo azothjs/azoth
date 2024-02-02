@@ -7,7 +7,8 @@
     "scripts": {
         "check": "pnpm update && pnpm test",
         "update": "pnpm update -r",
-        "test": "CI=true pnpm test -r -F=!sandbox"
+        "test": "CI=true pnpm test -r -F=!sandbox",
+        "lint": "eslint ."
     },
     "keywords": [],
     "author": "",
@@ -25,5 +26,5 @@
         "vitest": "^1.2.2",
         "webdriverio": "^8.29.3"
     },
-    "packageManager": "pnpm@^8.15.1"
+    "packageManager": "^pnpm@8.15.1"
 }

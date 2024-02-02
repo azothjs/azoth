@@ -8,4 +8,3 @@ const $list = <ul>
     <li>orange</li>
 </ul>;
 
-const []

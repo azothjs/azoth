@@ -1,0 +1,35 @@
+[
+    {
+        "name": "grinning face",
+        "category": "smileys and people",
+        "group": "face positive",
+        "htmlCode": [
+            "&#128512;"
+        ],
+        "unicode": [
+            "U+1F600"
+        ]
+    },
+    {
+        "name": "grinning face with smiling eyes",
+        "category": "smileys and people",
+        "group": "face positive",
+        "htmlCode": [
+            "&#128513;"
+        ],
+        "unicode": [
+            "U+1F601"
+        ]
+    },
+    {
+        "name": "face with tears of joy",
+        "category": "smileys and people",
+        "group": "face positive",
+        "htmlCode": [
+            "&#128514;"
+        ],
+        "unicode": [
+            "U+1F602"
+        ]
+    },
+]

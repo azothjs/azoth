@@ -12,12 +12,12 @@ const $form = ({ value, label = '' }) => (
 const $number = n => <li>{n}</li>;
 const listOfNumbers = <ul>
     {[1, 4, 534].map($number)}
-</ul>
+</ul>;
 
 const $chat = () => <>
     <p>chit</p>
     <p>chat</p>
-</>
+</>;
 
 let cats = [
     { name: 'felix', lives: 9 },
