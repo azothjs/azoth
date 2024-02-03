@@ -2,39 +2,8 @@ import { test } from 'vitest';
 import { createReadStream } from 'node:fs';
 import { resolve } from 'node:path';
 import '../test-utils/with-resolvers-polyfill.js';
-
-
-const jsonPath = resolve(__dirname, './emoji-3.json');
-const nodeStream = createReadStream(jsonPath);
-const emojiStream = nodeStreamToReadableStream(nodeStream);
-
-function nodeStreamToReadableStream(stream) {
-    return new ReadableStream({
-        start(controller) {
-            stream.on('data', chunk => {
-                controller.enqueue(chunk);
-            });
-            stream.on('end', () => {
-                controller.close();
-            });
-        }
-    });
-}
-
-function getWriter() {
-    let result = [];
-    const { promise, resolve } = Promise.withResolvers();
-    const writable = new WritableStream({
-        write(chunk) {
-            result.push(chunk);
-        },
-        close() {
-            resolve(result);
-        },
-    });
-
-    return [writable, promise];
-}
+import { JSONParseTransformStream } from './streaming-json-data-parser.js';
+import { NodeStreamToReadableStream, TestWritableStream } from './streaming-test-utils.js';
 
 const jsonParse = new TransformStream({
     transform(chunk, controller) {
@@ -42,135 +11,19 @@ const jsonParse = new TransformStream({
     }
 });
 
-test.only('streams a json file', async ({ expect }) => {
+test('streams a json file', async ({ expect }) => {
 
-    const stack = [];
-    let context = '';
-    let buffer = '';
-    const transform = new TransformStream({
-        start() { },
-        transform(chunk, controller) {
-            for(let i = 0; i < chunk.length; i++) {
-                switch(context) {
-                    case 'END':
-                        // TODO: can we make this stream stop?
-                        // process another array? :shrug:
-                        continue;
-                    case '': {
-                        // found the array
-                        if(chunk[i] === '[') {
-                            stack.push(context);
-                            context = '$';
-                        }
-                        continue;
-                    }
-                    case '$': // target array root
-                        // target object in array
-                        if(chunk[i] === '{') {
-                            buffer += chunk[i];
-                            stack.push(context);
-                            context = '${';
-                        }
-                        // end of array
-                        if(chunk[i] === ']') {
-                            context = stack.pop();
-                        }
-                        // malformed JSON
-                        if(chunk[i] === '}') {
-                            throw new Error(`Unexpected JSON token "}" at ${i} of ${chunk}`);
-                        }
+    const jsonPath = resolve(__dirname, './emoji-3.json');
+    const nodeStream = createReadStream(jsonPath);
+    const testWriter = new TestWritableStream();
 
-                        continue;
-
-                    case '${': {
-                        // object complete
-                        if(chunk[i] === '}') {
-                            buffer += chunk[i];
-                            context = stack.pop();
-                            controller.enqueue(buffer);
-                            buffer = '';
-                            continue;
-                        }
-                        // sub-object
-                        if(chunk[i] === '{') {
-                            stack.push(context);
-                            context = '{';
-                        }
-                        // sub-array
-                        if(chunk[i] === '[') {
-                            stack.push(context);
-                            context = '[';
-                        }
-                        // malformed JSON
-                        if(chunk[i] === ']') {
-                            throw new Error(`Unexpected JSON token "]" at ${i} of ${chunk}`);
-                        }
-
-                        buffer += chunk[i];
-                        continue;
-                    }
-                    case '{': {
-                        // end sub-object
-                        if(chunk[i] === '}') {
-                            context = stack.pop();
-                        }
-                        // sub-object
-                        if(chunk[i] === '{') {
-                            stack.push(context);
-                            context = '{';
-                        }
-                        // sub-array
-                        if(chunk[i] === '[') {
-                            stack.push(context);
-                            context = '[';
-                        }
-                        // malformed JSON
-                        if(chunk[i] === ']') {
-                            throw new Error(`Unexpected JSON token "]" at ${i} of ${chunk}`);
-                        }
-                        continue;
-                    }
-                    case '[': {
-                        // end sub-array
-                        if(chunk[i] === ']') {
-                            context = stack.pop();
-                        }
-                        // sub-object
-                        if(chunk[i] === '{') {
-                            stack.push(context);
-                            context = '{';
-                        }
-                        // sub-array
-                        if(chunk[i] === '[') {
-                            stack.push(context);
-                            context = '[';
-                        }
-                        // malformed JSON
-                        if(chunk[i] === '}') {
-                            throw new Error(`Unexpected JSON token "]" at ${i} of ${chunk}`);
-                        }
-
-                        buffer += chunk[i];
-
-                    }
-
-                }
-
-            }
-        },
-        flush() { },
-    });
-
-
-
-    const [writable, written] = getWriter();
-    emojiStream
+    new NodeStreamToReadableStream(nodeStream)
         .pipeThrough(new TextDecoderStream())
-        .pipeThrough(transform)
+        .pipeThrough(new JSONParseTransformStream())
         .pipeThrough(jsonParse)
-        .pipeTo(writable);
+        .pipeTo(testWriter);
 
-    return written.then(result => {
+    return testWriter.promise.then(result => {
         expect(result).toMatchInlineSnapshot(`
           [
             {
