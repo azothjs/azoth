@@ -1,9 +1,8 @@
 import { compile } from 'compiler';
 import { createFilter } from '@rollup/pluginutils';
 
-// TODO: something better
+// TODO: something better???
 const templateServiceModule = `/az-tmpl:`;
-
 
 export default function azothPlugin(options) {
     const include = options?.includes;
@@ -14,8 +13,8 @@ export default function azothPlugin(options) {
     const programTemplates = new Map();
     let command = '';
 
-    const transform = {
-        name: 'rollup-azoth-plugin',
+    const transformJSX = {
+        name: 'rollup-plugin-azoth',
         enforce: 'pre',
         config(config, { command: cmd }) {
             command = cmd;
@@ -30,9 +29,9 @@ export default function azothPlugin(options) {
             if(name !== templateServiceModule) return;
 
             const isBuild = command === 'build';
-            const renderer = isBuild ? 'rendererById' : 'makeRenderer';
+            const renderer = isBuild ? '__rendererById' : '__makeRenderer';
+            const importRenderer = `import { ${renderer} } from 'azoth';\n`;
 
-            const importRenderer = `import { ${renderer} } from 'azoth/dom';\n`;
             const exports = new URLSearchParams(ids)
                 .getAll('id')
                 .map(id => {
@@ -46,17 +45,18 @@ export default function azothPlugin(options) {
                     return exportRender;
                 })
                 .join('');
+
             return importRenderer + exports;
         },
         transform(source, id) {
             if(!filter(id) || !extension.test(id)) return;
 
             let { code, templates } = compile(source, options);
-
             const moduleTemplates = new Set();
 
             for(let template of templates) {
                 const { id } = template;
+
                 if(moduleTemplates.has(id)) continue;
                 moduleTemplates.add(id);
 
@@ -80,20 +80,27 @@ export default function azothPlugin(options) {
         },
     };
 
-    const injectHtml = {
-        name: 'inject-html-plugin',
+    const TEMPLATE_COMMENT = '<!--azoth-templates-->';
+    const BODY_START = '<body>';
+    const makeReplacement = (html, prefix) => `${prefix}\n    <!-- 🚀 azoth templates -->${html}\n    <!-- azoth templates 🌎-->`;
+
+    const injectHTML = {
+        name: 'vite-plugin-azoth-inject-html',
         apply: 'build',
         enforce: 'post',
         transformIndexHtml(html) {
-            const templateHtml = [...programTemplates.entries()].map(([id, { html }]) => {
-                return `\n    <template id="${id}">${html}</template>`;
-            }).join('');
-            return html.replace(
-                '<!--azoth-templates-->',
-                `<!-- 🚀 azoth templates -->${templateHtml}\n    <!-- azoth templates 🌎-->`,
-            );
+            const templateHtml = [...programTemplates.entries()]
+                .map(([id, { html }]) => {
+                    return `\n    <template id="${id}">${html}</template>`;
+                })
+                .join('');
+
+            const useBody = !html.includes(TEMPLATE_COMMENT);
+            const replace = useBody ? BODY_START : TEMPLATE_COMMENT;
+            const replacement = makeReplacement(templateHtml, useBody ? BODY_START : '');
+            return html.replace(replace, replacement);
         },
     };
 
-    return [transform, injectHtml];
+    return [transformJSX, injectHTML];
 }

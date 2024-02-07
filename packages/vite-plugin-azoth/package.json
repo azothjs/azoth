@@ -29,11 +29,12 @@
         }
     },
     "dependencies": {
-        "compiler": "workspace:*",
-        "azoth": "workspace:*"
+        "azoth": "workspace:*",
+        "compiler": "workspace:*"
     },
     "devDependencies": {
         "@rollup/pluginutils": "^5.1.0",
+        "dir-compare": "^4.2.0",
         "vite": "^5.0.12",
         "vitest": "^1.2.2"
     }

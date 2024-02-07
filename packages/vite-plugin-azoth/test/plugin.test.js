@@ -9,15 +9,14 @@ test('plugin output produces same snapshot', async ({ expect }) => {
     expect(actualHTML).toMatchFileSnapshot(expectedHTML);
 
     // These are hard coded as vitest was throwing file read errors trying to do 
-    // it programmatically. Probably an npm package that already does this:
-    // Like... https://www.npmjs.com/package/dir-compare
+    // it programmatically. Likely need to work out directory permission. 
+    // When that's done, switch to dir-compare
 
-    const expectedJS = resolve(__dirname, './expected-out/index-mAl80-j3.js');
-    const actualJS = await readFile(resolve(__dirname, './out/index-mAl80-j3.js'), 'utf8');
+    const expectedJS = resolve(__dirname, './expected-out/index-XiUcsf2N.js');
+    const actualJS = await readFile(resolve(__dirname, './out/index-XiUcsf2N.js'), 'utf8');
     expect(actualJS).toMatchFileSnapshot(expectedJS);
 
     const expectedCSS = resolve(__dirname, './expected-out/index-w2qTGksW.css');
     const actualCSS = await readFile(resolve(__dirname, './out/index-w2qTGksW.css'), 'utf8');
     expect(actualCSS).toMatchFileSnapshot(expectedCSS);
-
 });

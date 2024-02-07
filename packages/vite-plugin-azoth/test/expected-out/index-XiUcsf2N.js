@@ -1,42 +1,14 @@
-import { __compose } from 'azoth';
+import { __rendererById, __compose } from 'azoth';
 
-const templates = new Map();
+const t92280c0caa = __rendererById('92280c0caa');
 
-function rendererById(id, isFragment = false) {
-    if(templates.has(id)) return templates.get(id);
+const t03038e2f88 = __rendererById('03038e2f88');
 
-    // TODO: could fail on bad id...
-    const templateEl = document.getElementById(id);
-    return rendererFactory(id, templateEl.content, isFragment);
+const te208a2df9b = __rendererById('e208a2df9b');
 
-}
+const t209e6208e8 = __rendererById('209e6208e8');
 
-function rendererFactory(id, node, isFragment) {
-    const template = renderer(node, isFragment);
-    templates.set(id, template);
-    return template;
-}
-
-function renderer(fragment, isFragment) {
-
-    return function render() {
-        const clone = fragment.cloneNode(true);
-        const targets = clone.querySelectorAll('[data-bind]');
-        const root = isFragment ? clone : clone.firstElementChild;
-
-        return { root, targets };
-    };
-}
-
-const t92280c0caa = rendererById('92280c0caa');
-
-const t03038e2f88 = rendererById('03038e2f88');
-
-const te208a2df9b = rendererById('e208a2df9b');
-
-const t209e6208e8 = rendererById('209e6208e8');
-
-const tf459a35a3a = rendererById('f459a35a3a', true);
+const tf459a35a3a = __rendererById('f459a35a3a', true);
 
 const EMOJIS = 'EMOJIS';
 async function fetchEmojis() {
