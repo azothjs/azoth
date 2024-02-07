@@ -1,24 +1,38 @@
 {
     "cSpell.words": [
         "astring",
+        "autohid",
+        "azothjs",
         "backquote",
+        "befcf",
+        "dbaeumer",
+        "donot",
         "espree",
         "IIFE",
+        "inlines",
+        "martypdx",
+        "nsbsp",
         "onattribute",
         "onclosetag",
         "oncomment",
+        "oninit",
         "onopentag",
         "onopentagname",
         "ontext",
+        "pluginutils",
+        "pokedex",
         "quasis",
         "templatize",
-        "tmpl",
-        "donot",
-        "autohid",
-        "dbaeumer"
+        "tfaf",
+        "tmpl"
     ],
     "eslint.experimental.useFlatConfig": true,
     "eslint.format.enable": true,
     "eslint.enable": true,
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "eslint.workingDirectories": [
+        {
+            "pattern": "./packages/*/"
+        },
+        "./sandbox"
+    ],
 }

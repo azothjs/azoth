@@ -1,0 +1,38 @@
+{
+    "name": "@azothjsx/azoth",
+    "version": "1.0.0",
+    "description": "runtime for azoth jsx",
+    "author": "martypdx",
+    "license": "MIT",
+    "keywords": [
+        "azoth",
+        "azoth-jsx",
+        "azothjsx",
+        "azoth jsx",
+        "javascript framework",
+        "javascript library",
+        "js library",
+        "js framework",
+        "ui library",
+        "ui framework"
+    ],
+    "type": "module",
+    "main": "index.js",
+    "files": [
+        "src"
+    ],
+    "exports": {
+        ".": "./src/index.js",
+        "./futures": "./src/futures/index.js"
+    },
+    "scripts": {
+        "test": "vitest",
+        "test:ui": "vitest -c vite.config.in-browser.js"
+    },
+    "devDependencies": {
+        "@vitest/browser": "^1.2.2",
+        "@vitest/ui": "^1.2.2",
+        "happy-dom": "^13.3.8",
+        "vitest": "^1.2.2"
+    }
+}

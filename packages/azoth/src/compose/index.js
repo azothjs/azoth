@@ -1,0 +1,1 @@
+export { compose, composeElement } from './compose.js';

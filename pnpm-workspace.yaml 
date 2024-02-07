@@ -1,0 +1,4 @@
+# azoth/pnpm-workspace.yaml
+packages:
+  - "./packages/*"
+  - "./sandbox"

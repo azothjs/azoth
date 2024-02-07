@@ -1,17 +1,21 @@
-  {
+{
     "compilerOptions": {
+        "types": [
+            "@vitest/browser/providers/webdriverio",
+            "@vitest/browser/providers/playwright"
+        ],
         "jsx": "preserve",
         "target": "ESNext",
-        // "strictNullChecks": false,
         "noImplicitAny": true,
-        "types": ["vite/client"],
-        "experimentalDecorators": true,
         "module": "ESNext",
         "moduleResolution": "Bundler",
+        "isolatedModules": true,
+        // "strictNullChecks": false,
+        // "types": ["vite/client"],
+        // "experimentalDecorators": true,
         // "allowImportingTsExtensions": true,
         // "noEmit": true,
-        "isolatedModules": true,
         // "emitDeclarationOnly": true,
         // "composite": true
     }
-  }
+}

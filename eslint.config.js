@@ -1,23 +1,14 @@
 import js from '@eslint/js';
 import globals from 'globals';
 
+const files = ['**/!(*out)/*.js', '**/!(*out)/*.jsx'];
 export default [
-    js.configs.recommended,
-    // {
-    //     files: ['src/www/*.jsx'],
-    //     plugins: {
-    //         react: reactPlugin,
-    //     },
-    //     languageOptions: {
-    //         parser
-    //     },
-    // },
     {
-        files: ['**/*.js', '**/*.jsx'],
-        // files: ['**/*.js'],
-        // linterOptions: {
-        //     reportUnusedDisableDirectives: 'warn'
-        // },
+        files,
+        ...js.configs.recommended,
+    },
+    {
+        files,
         languageOptions: {
             globals: {
                 ...globals.browser
@@ -106,6 +97,9 @@ export default [
                             after: false
                         },
                         catch: {
+                            after: false
+                        },
+                        await: {
                             after: false
                         }
                     }
