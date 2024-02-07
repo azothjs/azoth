@@ -13,6 +13,11 @@
     "engines": {
         "node": "^18.0.0 || >=20"
     },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/azothjsx/azoth.git",
+        "directory": "packages/vite-plugin-azoth"
+    },
     "type": "module",
     "scripts": {
         "test": "pnpm run build && vitest -w false ",

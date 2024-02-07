@@ -21,6 +21,11 @@
     "files": [
         "src"
     ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/azothjsx/azoth.git",
+        "directory": "packages/azoth"
+    },
     "exports": {
         ".": "./src/index.js",
         "./futures": "./src/futures/index.js"
