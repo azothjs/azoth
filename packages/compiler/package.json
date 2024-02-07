@@ -1,11 +1,10 @@
 {
-    "name": "compiler",
+    "name": "@azothjsx/compiler",
     "version": "1.0.0",
     "description": "Azoth JSX to JavaScript + HTML compiler",
     "keywords": [],
     "author": "Marty Nelson",
-    "private": "true",
-    "license": "UNLICENSED",
+    "license": "MIT",
     "type": "module",
     "main": "./src/index.js",
     "exports": {
@@ -21,7 +20,6 @@
     },
     "dependencies": {
         "astring": "^1.8.6",
-        "azoth": "workspace:^",
         "is-valid-var-name": "^1.0.2",
         "rev-hash": "^4.1.0"
     },
