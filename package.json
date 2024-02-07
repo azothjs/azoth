@@ -12,19 +12,16 @@
     },
     "keywords": [],
     "author": "",
-    "license": "ISC",
-    "dependencies": {
-        "eslint": "^8.56.0",
-        "globals": "^13.24.0",
-        "playwright": "^1.41.1"
-    },
+    "license": "MIT",
     "devDependencies": {
         "@vitest/browser": "^1.2.2",
+        "eslint": "^8.56.0",
+        "globals": "^13.24.0",
         "happy-dom": "^13.3.8",
         "vite": "^5.0.12",
         "vite-plugin-inspect": "^0.8.3",
         "vitest": "^1.2.2",
-        "webdriverio": "^8.29.3"
+        "webdriverio": "^8.30.0"
     },
     "packageManager": "^pnpm@8.15.1"
 }

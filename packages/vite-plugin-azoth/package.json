@@ -1,7 +1,7 @@
 {
     "name": "vite-plugin-azoth",
     "version": "1.0.0",
-    "description": "vite plugin for compiling azoth jsx",
+    "description": "vite plugins for compiling azoth jsx",
     "author": "martypdx",
     "license": "MIT",
     "keywords": [
@@ -29,13 +29,16 @@
         }
     },
     "dependencies": {
-        "azoth": "workspace:*",
         "compiler": "workspace:*"
     },
     "devDependencies": {
         "@rollup/pluginutils": "^5.1.0",
-        "dir-compare": "^4.2.0",
+        "azoth": "workspace:^",
         "vite": "^5.0.12",
         "vitest": "^1.2.2"
+    },
+    "peerDependencies": {
+        "azoth": "workspace:^",
+        "vite": "^5.0.12"
     }
 }
