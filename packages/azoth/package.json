@@ -1,7 +1,7 @@
 {
     "name": "@azothjsx/azoth",
     "version": "1.0.0",
-    "description": "runtime for azoth jsx",
+    "description": "Azoth runtime for hypermedia apps on the web platform",
     "author": "martypdx",
     "license": "MIT",
     "keywords": [
