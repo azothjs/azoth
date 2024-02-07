@@ -2,7 +2,6 @@ import { generate } from 'astring';
 import { HtmlGenerator } from './HtmlGenerator.js';
 import { Generator } from './GeneratorBase.js';
 import isValidName from 'is-valid-var-name';
-import { ROOT_PROPERTY, TARGETS_PROPERTY } from 'azoth/dom';
 import { Analyzer } from './Analyzer.js';
 
 function getNextLine(state) {
@@ -74,7 +73,8 @@ export class TemplateGenerator extends Generator {
         if(isEmpty || (!boundElements.length) && node.queryIndex !== -1) {
             if(node.isReturnArg) state.write(`return `);
             this.TemplateRenderer(template, state);
-            if(!isEmpty) state.write(`.${ROOT_PROPERTY}`);
+            // dom root property
+            if(!isEmpty) state.write(`[0]`);
             if(node.isReturnArg) state.write(`;`);
             return;
         }
@@ -124,9 +124,9 @@ export class TemplateGenerator extends Generator {
 
         // template service renderer call
         const rootVarName = `__root_${id}`;
-        state.write(`const { ${ROOT_PROPERTY}: ${rootVarName}`);
-        if(boundElements.length) state.write(`, ${TARGETS_PROPERTY}: __targets`);
-        state.write(` } = `);
+        state.write(`const [${rootVarName}`);
+        if(boundElements.length) state.write(`, __targets`);
+        state.write(`] = `);
         this.TemplateRenderer(template, state);
         state.write(';');
 

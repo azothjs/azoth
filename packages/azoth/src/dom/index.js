@@ -9,7 +9,6 @@ export function makeRenderer(id, html, isFragment = false) {
 
     const template = document.createElement('template');
     template.innerHTML = html;
-
     return rendererFactory(id, template.content, isFragment);
 }
 
@@ -23,13 +22,10 @@ export function rendererById(id, isFragment = false) {
 }
 
 function rendererFactory(id, node, isFragment) {
-    const template = renderer(node, isFragment);
-    templates.set(id, template);
-    return template;
+    const render = renderer(node, isFragment);
+    templates.set(id, render);
+    return render;
 }
-
-export const ROOT_PROPERTY = 'root';
-export const TARGETS_PROPERTY = 'targets';
 
 function renderer(fragment, isFragment) {
 
@@ -38,6 +34,6 @@ function renderer(fragment, isFragment) {
         const targets = clone.querySelectorAll('[data-bind]');
         const root = isFragment ? clone : clone.firstElementChild;
 
-        return { root, targets };
+        return [root, targets];
     };
 }
