@@ -30,7 +30,7 @@ export default function azothPlugin(options) {
 
             const isBuild = command === 'build';
             const renderer = isBuild ? '__rendererById' : '__makeRenderer';
-            const importRenderer = `import { ${renderer} } from 'azoth';\n`;
+            const importRenderer = `import { ${renderer} } from '@azothjsx/azoth';\n`;
 
             const exports = new URLSearchParams(ids)
                 .getAll('id')
@@ -71,7 +71,7 @@ export default function azothPlugin(options) {
             const names = uniqueIds.map(id => `t${id}`).join(', ');
 
             const imports = [
-                `import { __compose, __composeElement } from 'azoth';\n`,
+                `import { __compose, __composeElement } from '@azothjsx/azoth';\n`,
                 `import { ${names} } from '${templateServiceModule}?${params.toString()}';\n`,
             ].join('');
 

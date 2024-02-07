@@ -1,5 +1,5 @@
 import { fetchEmojis } from './fetchEmojis.js';
-import { branch } from 'azoth/futures';
+import { branch } from '@azothjsx/azoth/futures';
 import './style.css';
 
 function InnerHtml({ html, className = '' }) {
@@ -32,7 +32,7 @@ const [Count, List] = branch(
     emojis => EmojiList({ emojis }),
 );
 
-const $App = <>
+const App = <>
     <header>
         <h1>{Count} emojis for all my friends</h1>
     </header>
@@ -43,7 +43,7 @@ const $App = <>
     </main>
 </>;
 
-document.body.append($App);
+document.body.append(App);
 
 
 

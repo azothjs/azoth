@@ -1,5 +1,5 @@
 {
-    "name": "@azothjsx/vite-plugin-azoth",
+    "name": "vite-plugin-azoth",
     "version": "1.0.0",
     "description": "vite plugins for compiling azoth jsx",
     "author": "martypdx",
@@ -32,13 +32,13 @@
         "compiler": "workspace:*"
     },
     "devDependencies": {
+        "@azothjsx/azoth": "workspace:^",
         "@rollup/pluginutils": "^5.1.0",
-        "azoth": "workspace:^",
         "vite": "^5.0.12",
         "vitest": "^1.2.2"
     },
     "peerDependencies": {
-        "azoth": "workspace:^",
+        "@azothjsx/azoth": "workspace:^",
         "vite": "^5.0.12"
     }
 }
