@@ -1,4 +1,4 @@
-import { compile } from '../compiler/src/index.js';
+import { compile } from '@azothjsx/compiler';
 import { createFilter } from '@rollup/pluginutils';
 
 // TODO: something better???

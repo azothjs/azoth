@@ -1,6 +1,6 @@
 {
     "name": "@azothjsx/vite-plugin-azoth",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "vite plugins for compiling azoth hypermedia apps",
     "author": "martypdx",
     "license": "MIT",
@@ -25,7 +25,8 @@
         "build": "vite build"
     },
     "files": [
-        "index.js"
+        "index.js",
+        "dist"
     ],
     "exports": {
         ".": {
@@ -36,14 +37,14 @@
     },
     "devDependencies": {
         "@azothjsx/azoth": "workspace:^",
-        "@azothjsx/compile": "workspace:^",
+        "@azothjsx/compiler": "workspace:^",
         "@rollup/pluginutils": "^5.1.0",
         "vite": "^5.0.12",
         "vitest": "^1.2.2"
     },
     "peerDependencies": {
         "@azothjsx/azoth": "workspace:^",
-        "@azothjsx/compile": "workspace:^",
+        "@azothjsx/compiler": "workspace:^",
         "vite": "^5.0.12"
     }
 }
