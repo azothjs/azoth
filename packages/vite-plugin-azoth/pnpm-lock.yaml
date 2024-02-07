@@ -8,8 +8,8 @@ importers:
 
   .:
     dependencies:
-      compiler:
-        specifier: workspace:*
+      '@azothjsx/compiler':
+        specifier: workspace:../compiler
         version: link:../compiler
     devDependencies:
       '@azothjsx/azoth':

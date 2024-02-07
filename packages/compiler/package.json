@@ -2,7 +2,12 @@
     "name": "@azothjsx/compiler",
     "version": "1.0.0",
     "description": "Azoth JSX to JavaScript + HTML compiler",
-    "keywords": [],
+    "keywords": [
+        "azoth compiler",
+        "azoth-compiler",
+        "azoth jsx compiler",
+        "azoth-jsx-compiler"
+    ],
     "author": "Marty Nelson",
     "license": "MIT",
     "type": "module",

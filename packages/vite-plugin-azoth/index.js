@@ -1,4 +1,4 @@
-import { compile } from 'compiler';
+import { compile } from '../compiler/src/index.js';
 import { createFilter } from '@rollup/pluginutils';
 
 // TODO: something better???

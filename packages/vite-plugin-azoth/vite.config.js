@@ -1,8 +1,6 @@
 import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
 export default defineConfig({
-    exclude: ['./out'],
-    optimizeDeps: {
-        include: ['@azothjsx/compiler'],
-    },
+    exclude: ['./out']
 });
