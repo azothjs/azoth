@@ -52,7 +52,7 @@ async function dispatchAsync(promise, list) {
 
 function InnerHtml({ html, className = "" }) {
   const rawEmoji = (() => {
-    const { root: __root_92280c0caa, targets: __targets } = t92280c0caa();
+    const [__root_92280c0caa, __targets] = t92280c0caa();
     const __target0 = __targets[0];
     __target0.className = className ?? "";
     return __root_92280c0caa;
@@ -61,14 +61,14 @@ function InnerHtml({ html, className = "" }) {
   return rawEmoji;
 }
 function EmojiList({ emojis }) {
-  const { root: __root_03038e2f88, targets: __targets } = t03038e2f88();
+  const [__root_03038e2f88, __targets] = t03038e2f88();
   const __target0 = __targets[0];
   const __child0 = __target0.childNodes[1];
   __compose(emojis.map(Emoji), __child0);
   return __root_03038e2f88;
 }
 function Emoji({ name, unicode, htmlCode }) {
-  const { root: __root_e208a2df9b, targets: __targets } = te208a2df9b();
+  const [__root_e208a2df9b, __targets] = te208a2df9b();
   const __target0 = __targets[0];
   const __child0 = __target0.childNodes[1];
   const __child1 = __target0.childNodes[3];
@@ -81,7 +81,7 @@ function Emoji({ name, unicode, htmlCode }) {
   return __root_e208a2df9b;
 }
 function EmojiCount({ count }) {
-  const { root: __root_209e6208e8, targets: __targets } = t209e6208e8();
+  const [__root_209e6208e8, __targets] = t209e6208e8();
   const __target0 = __targets[0];
   const __child0 = __target0.childNodes[0];
   __compose(count, __child0);
@@ -93,7 +93,7 @@ const [Count, List] = branch(fetchEmojis(), ({ length }) => EmojiCount({
   emojis
 }));
 const $App = (() => {
-  const { root: __root_f459a35a3a, targets: __targets } = tf459a35a3a(true);
+  const [__root_f459a35a3a, __targets] = tf459a35a3a(true);
   const __target0 = __targets[0];
   const __target1 = __targets[1];
   const __child0 = __target0.childNodes[0];

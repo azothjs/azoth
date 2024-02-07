@@ -29,7 +29,7 @@ describe('JSX dom literals', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
-              const { root: __root_090c4b5012, targets: __targets } = t090c4b5012();
+              const [__root_090c4b5012, __targets] = t090c4b5012();
               const __target0 = __targets[0];
               const __target1 = __targets[1];
               const __target2 = __targets[2];
@@ -95,7 +95,7 @@ describe('JSX dom literals', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
-              const { root: __root_24a912889d, targets: __targets } = t24a912889d();
+              const [__root_24a912889d, __targets] = t24a912889d();
               const __target0 = __targets[0];
               __target0.className = ("className");
               __target0.name = ("name");
@@ -126,10 +126,10 @@ describe('nested context', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "(() => {
-              const { root: __root_969db86e55, targets: __targets } = t969db86e55();
+              const [__root_969db86e55, __targets] = t969db86e55();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
-              __compose(tb19eb87e75().root, __child0);
+              __compose(tb19eb87e75()[0], __child0);
               return __root_969db86e55;
           })();
           "
@@ -160,7 +160,7 @@ describe('template optimizations', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const template = t5bf3d2f523().root;
+          "const template = t5bf3d2f523()[0];
           "
         `);
 
@@ -185,7 +185,7 @@ describe('surrounding code integration', () => {
 
         expect(compile(input).code).toMatchInlineSnapshot(`
           "const template = text => {
-              const { root: __root_666c3103ad, targets: __targets } = t666c3103ad();
+              const [__root_666c3103ad, __targets] = t666c3103ad();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               __compose(text, __child0);
@@ -207,7 +207,7 @@ describe('surrounding code integration', () => {
         expect(compile(input).code).toMatchInlineSnapshot(`
           "function template(text) {
               const format = 'text' + '!';
-              const { root: __root_666c3103ad, targets: __targets } = t666c3103ad();
+              const [__root_666c3103ad, __targets] = t666c3103ad();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               __compose(text, __child0);
@@ -232,12 +232,12 @@ describe('fragments', () => {
         expect(code).toMatchInlineSnapshot(`
           "const empty = null;
           const compose = (() => {
-              const { root: __root_c084de4382 } = tc084de4382(true);
+              const [__root_c084de4382] = tc084de4382(true);
               const __child0 = __root_c084de4382.childNodes[0];
               __compose(x, __child0);
               return __root_c084de4382;
           })();
-          const text = t1cb251ec0d().root;
+          const text = t1cb251ec0d()[0];
           "
         `);
 
@@ -271,7 +271,7 @@ describe('fragments', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const fragment = (() => {
-              const { root: __root_faf808e6cc } = tfaf808e6cc(true);
+              const [__root_faf808e6cc] = tfaf808e6cc(true);
               const __child0 = __root_faf808e6cc.childNodes[1];
               __compose("two", __child0);
               return __root_faf808e6cc;
@@ -304,9 +304,9 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const extraneous = t0f05699ae4().root;
+          "const extraneous = t0f05699ae4()[0];
           const childNodeIndex = (() => {
-              const { root: __root_09771bea6d, targets: __targets } = t09771bea6d();
+              const [__root_09771bea6d, __targets] = t09771bea6d();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[3];
               __compose("expect index 3", __child0);
@@ -342,7 +342,7 @@ describe('fragments', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const App = (() => {
-              const { root: __root_ef691fa27a, targets: __targets } = tef691fa27a(true);
+              const [__root_ef691fa27a, __targets] = tef691fa27a(true);
               const __target0 = __targets[0];
               const __child0 = __root_ef691fa27a.childNodes[0];
               const __child1 = __target0.childNodes[0];
@@ -380,7 +380,7 @@ describe('element composition', () => {
         expect(code).toMatchInlineSnapshot(`
           "const html = \`&nsbsp;<strong>Hello Raw</strong>\`;
           document.body.append((() => {
-              const { root: __root_c120befcf8, targets: __targets } = tc120befcf8();
+              const [__root_c120befcf8, __targets] = tc120befcf8();
               const __target0 = __targets[0];
               __target0.html = (html);
               return __root_c120befcf8;
@@ -408,13 +408,13 @@ describe('element composition', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const c = (() => {
-              const { root: __root_c084de4382 } = tc084de4382(true);
+              const [__root_c084de4382] = tc084de4382(true);
               const __child0 = __root_c084de4382.childNodes[0];
               __composeElement(Component, __child0);
               return __root_c084de4382;
           })();
           const cProps = (() => {
-              const { root: __root_c084de4382 } = tc084de4382(true);
+              const [__root_c084de4382] = tc084de4382(true);
               const __child0 = __root_c084de4382.childNodes[0];
               __composeElement(Component, __child0, { prop: value, attr: "static", });
               return __root_c084de4382;
@@ -451,19 +451,19 @@ describe('element composition', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const $A = (() => {
-              const { root: __root_c084de4382 } = tc084de4382(true);
+              const [__root_c084de4382] = tc084de4382(true);
               const __child0 = __root_c084de4382.childNodes[0];
               __composeElement(A, __child0);
               return __root_c084de4382;
           })();
           const $B = (() => {
-              const { root: __root_c084de4382 } = tc084de4382(true);
+              const [__root_c084de4382] = tc084de4382(true);
               const __child0 = __root_c084de4382.childNodes[0];
               __composeElement(B, __child0);
               return __root_c084de4382;
           })();
           const dom = (() => {
-              const { root: __root_980f8821fb, targets: __targets } = t980f8821fb();
+              const [__root_980f8821fb, __targets] = t980f8821fb();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[1];
               const __child1 = __target0.childNodes[3];
@@ -509,7 +509,7 @@ describe('element composition', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const component = (() => {
-              const { root: __root_980f8821fb, targets: __targets } = t980f8821fb();
+              const [__root_980f8821fb, __targets] = t980f8821fb();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[1];
               const __child1 = __target0.childNodes[3];
@@ -547,7 +547,7 @@ describe('element composition', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "function Surprise() {
-              return t92cc583556().root;
+              return t92cc583556()[0];
           }
           "
         `);
@@ -580,14 +580,14 @@ describe('render and composition cases', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const Item = name => {
-              const { root: __root_f00e886942, targets: __targets } = tf00e886942();
+              const [__root_f00e886942, __targets] = tf00e886942();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               __compose(name, __child0);
               return __root_f00e886942;
           };
           const Template = () => {
-              const { root: __root_3bee4f3a47, targets: __targets } = t3bee4f3a47();
+              const [__root_3bee4f3a47, __targets] = t3bee4f3a47();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               const __child1 = __target0.childNodes[1];
@@ -623,7 +623,7 @@ describe('render and composition cases', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const render = () => {
-              const { root: __root_e19fd83eae, targets: __targets } = te19fd83eae();
+              const [__root_e19fd83eae, __targets] = te19fd83eae();
               const __target0 = __targets[0];
               const __child1 = __target0.childNodes[1];
               __target0.className = (category);
@@ -656,7 +656,7 @@ describe('render and composition cases', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const Emoji = ({name}) => {
-              const { root: __root_f00e886942, targets: __targets } = tf00e886942();
+              const [__root_f00e886942, __targets] = tf00e886942();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               __compose(name, __child0);
@@ -664,7 +664,7 @@ describe('render and composition cases', () => {
           };
           const promise = fetchEmojis().then(emojis => emojis.map(Emoji));
           const Emojis = (() => {
-              const { root: __root_df87cbf024, targets: __targets } = tdf87cbf024();
+              const [__root_df87cbf024, __targets] = tdf87cbf024();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
               __compose(promise, __child0);
