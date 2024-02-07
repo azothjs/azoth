@@ -37,14 +37,14 @@
     },
     "devDependencies": {
         "@azothjsx/azoth": "workspace:^",
-        "@azothjsx/compiler": "workspace:^",
         "@rollup/pluginutils": "^5.1.0",
         "vite": "^5.0.12",
         "vitest": "^1.2.2"
     },
     "peerDependencies": {
-        "@azothjsx/azoth": "workspace:^",
-        "@azothjsx/compiler": "workspace:^",
         "vite": "^5.0.12"
+    },
+    "dependencies": {
+        "@azothjsx/compiler": "workspace:^"
     }
 }
