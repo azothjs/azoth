@@ -8,6 +8,9 @@
         "azoth jsx compiler",
         "azoth-jsx-compiler"
     ],
+    "files": [
+        "src/!(*test*).js"
+    ],
     "author": "Marty Nelson",
     "license": "MIT",
     "type": "module",
