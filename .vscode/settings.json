@@ -3,6 +3,7 @@
         "astring",
         "autohid",
         "azothjs",
+        "azothjsx",
         "backquote",
         "befcf",
         "dbaeumer",
@@ -24,7 +25,8 @@
         "quasis",
         "templatize",
         "tfaf",
-        "tmpl"
+        "tmpl",
+        "vitepress"
     ],
     "eslint.experimental.useFlatConfig": true,
     "eslint.format.enable": true,
