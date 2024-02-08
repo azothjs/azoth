@@ -4,10 +4,15 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  vitepress@1.0.0-rc.42:
+    hash: azmins3ge5dalhly7maulnotyu
+    path: patches/vitepress@1.0.0-rc.42.patch
+
 devDependencies:
   vitepress:
     specifier: 1.0.0-rc.42
-    version: 1.0.0-rc.42(@algolia/client-search@4.22.1)(search-insights@2.13.0)
+    version: 1.0.0-rc.42(patch_hash=azmins3ge5dalhly7maulnotyu)(@algolia/client-search@4.22.1)(search-insights@2.13.0)
 
 packages:
 
@@ -967,7 +972,7 @@ packages:
       fsevents: 2.3.3
     dev: true
 
-  /vitepress@1.0.0-rc.42(@algolia/client-search@4.22.1)(search-insights@2.13.0):
+  /vitepress@1.0.0-rc.42(patch_hash=azmins3ge5dalhly7maulnotyu)(@algolia/client-search@4.22.1)(search-insights@2.13.0):
     resolution: {integrity: sha512-VeiVVXFblt/sjruFSJBNChMWwlztMrRMe8UXdNpf4e05mKtTYEY38MF5qoP90KxPTCfMQiKqwEGwXAGuOTK8HQ==}
     hasBin: true
     peerDependencies:
@@ -1021,6 +1026,7 @@ packages:
       - typescript
       - universal-cookie
     dev: true
+    patched: true
 
   /vue-demi@0.14.7(vue@3.4.16):
     resolution: {integrity: sha512-EOG8KXDQNwkJILkx/gPcoL/7vH+hORoBaKgGe+6W7VFMvCYJfmF2dGbvgDroVnI8LU7/kTu8mbjRZGBU1z9NTA==}

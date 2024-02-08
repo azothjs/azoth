@@ -4,6 +4,7 @@ import { defineConfig } from 'vitepress';
 export default defineConfig({
     title: "Azoth JSX",
     description: "Azoth JSX UI library documentation",
+    lastUpdated: true,
     head: [['link', { rel: 'icon', href: '/azothjsx-ico.png' }]],
     themeConfig: {
         logo: '/azothjsx-ico.png',

@@ -5,6 +5,11 @@
     "devDependencies": {
         "vitepress": "1.0.0-rc.42"
     },
+    "pnpm": {
+        "patchedDependencies": {
+            "vitepress@1.0.0-rc.42": "patches/vitepress@1.0.0-rc.42.patch"
+        }
+    },
     "author": "",
     "license": "MIT",
     "description": "",
