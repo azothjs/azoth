@@ -1,6 +1,6 @@
 {
     "name": "@azothjsx/azoth",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Azoth runtime for hypermedia apps on the web platform",
     "author": "martypdx",
     "license": "MIT",
@@ -17,7 +17,7 @@
         "ui framework"
     ],
     "type": "module",
-    "main": "index.js",
+    "main": "./src/index.js",
     "files": [
         "src/!(test-utils)/!(*test*).js"
     ],
