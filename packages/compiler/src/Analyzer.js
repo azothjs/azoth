@@ -1,5 +1,6 @@
 import { Stack } from './Stack.js';
 import { Template } from './Template.js';
+import { voidElements } from './html.js';
 
 const BINDING_ATTR = {
     type: 'JSXAttribute',
@@ -17,7 +18,6 @@ export class Analyzer {
     #documentOrder = 0;
     #boundElements = new Set();
     #bindings = [];
-    #isComponentRoot = true;
     #template = null;
     #root = null;
 
@@ -169,11 +169,16 @@ export class Analyzer {
                 if(type === 'JSXElement') {
                     const { openingElement: { name: identifier } } = child;
                     // TODO: namespaces: and member.express.ion
-                    const isComponent = /^[A-Z$][a-zA-Z]*$/.test(identifier.name);
-                    if(isComponent) {
-                        child.isComponent = true;
-                        child.props = [];
-                        this.#bind('child', child, identifier, i + adj);
+
+                    child.isCustomElement = identifier.name.includes('-');
+                    child.isVoidElement = voidElements.has(identifier.name);
+                    if(!child.isCustomElement) {
+                        const isComponent = /^[A-Z$][a-zA-Z]*$/.test(identifier.name);
+                        if(isComponent) {
+                            child.isComponent = true;
+                            child.props = [];
+                            this.#bind('child', child, identifier, i + adj);
+                        }
                     }
                 }
 

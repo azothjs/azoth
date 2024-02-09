@@ -30,7 +30,10 @@
         "acorn": "^8.11.3",
         "acorn-jsx": "^5.3.2",
         "astring": "^1.8.6",
+        "html-void-elements": "^3.0.0",
+        "install": "^0.13.0",
         "is-valid-var-name": "^1.0.2",
+        "npm": "^10.4.0",
         "rev-hash": "^4.1.0"
     },
     "devDependencies": {

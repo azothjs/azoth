@@ -28,15 +28,18 @@ export class HtmlGenerator extends Generator {
 
         state.write('<');
         this[node.openingElement.type](node.openingElement, state);
+        state.write('>');
 
-        if(node.closingElement) {
-            state.write('>');
-            this.JSXChildren(node, state);
+        if(!node.isVoidElement) {
+            if(node.closingElement) {
+                this.JSXChildren(node, state);
+            }
+
             state.write('</');
-            this[node.closingElement.type](node.closingElement, state);
+            const closingType = node.closingElement?.type || 'JSXClosingElement';
+            const closingElement = node.closingElement || node.openingElement;
+            this[closingType](closingElement, state);
             state.write('>');
-        } else {
-            state.write(' />');
         }
     }
 

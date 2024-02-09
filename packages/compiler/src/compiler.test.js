@@ -20,8 +20,9 @@ describe('JSX dom literals', () => {
                 <li><span className={"span-class"}>three</span></li>
                 {"ul-footer"}
             </ul>
-            <self-closing/>
-            <self-closing />
+            <img/>
+            <custom-element/>
+            <custom-element />
             {"footer"}
         </div>;`;
 
@@ -29,7 +30,7 @@ describe('JSX dom literals', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
-              const [__root_090c4b5012, __targets] = t090c4b5012();
+              const [__root_57ebcc4946, __targets] = t57ebcc4946();
               const __target0 = __targets[0];
               const __target1 = __targets[1];
               const __target2 = __targets[2];
@@ -43,7 +44,7 @@ describe('JSX dom literals', () => {
               const __child4 = __target5.childNodes[1];
               const __child5 = __target5.childNodes[3];
               const __child7 = __target4.childNodes[7];
-              const __child8 = __target0.childNodes[13];
+              const __child8 = __target0.childNodes[15];
               __target1.className = ("my-class");
               __compose("felix", __child1);
               __compose("this is", __child2);
@@ -53,7 +54,7 @@ describe('JSX dom literals', () => {
               __target6.className = ("span-class");
               __compose("ul-footer", __child7);
               __compose("footer", __child8);
-              return __root_090c4b5012;
+              return __root_57ebcc4946;
           })();
           "
         `);
@@ -71,11 +72,12 @@ describe('JSX dom literals', () => {
                           <li><span data-bind>three</span></li>
                           <!--0-->
                       </ul>
-                      <self-closing />
-                      <self-closing />
+                      <img>
+                      <custom-element></custom-element>
+                      <custom-element></custom-element>
                       <!--0-->
                   </div>",
-              "id": "090c4b5012",
+              "id": "57ebcc4946",
               "isDomFragment": false,
             },
           ]
@@ -95,13 +97,13 @@ describe('JSX dom literals', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
-              const [__root_24a912889d, __targets] = t24a912889d();
+              const [__root_05a73e3fe9, __targets] = t05a73e3fe9();
               const __target0 = __targets[0];
               __target0.className = ("className");
               __target0.name = ("name");
               __target0["class"] = ("class");
               __target0["class-name"] = ("class-name");
-              return __root_24a912889d;
+              return __root_05a73e3fe9;
           })();
           "
         `);
@@ -109,8 +111,8 @@ describe('JSX dom literals', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<input required data-bind />",
-              "id": "24a912889d",
+              "html": "<input required data-bind>",
+              "id": "05a73e3fe9",
               "isDomFragment": false,
             },
           ]
@@ -129,7 +131,7 @@ describe('nested context', () => {
               const [__root_969db86e55, __targets] = t969db86e55();
               const __target0 = __targets[0];
               const __child0 = __target0.childNodes[0];
-              __compose(tb19eb87e75()[0], __child0);
+              __compose(t1a78cbe949()[0], __child0);
               return __root_969db86e55;
           })();
           "
@@ -143,8 +145,8 @@ describe('nested context', () => {
               "isDomFragment": false,
             },
             {
-              "html": "<hr />",
-              "id": "b19eb87e75",
+              "html": "<hr>",
+              "id": "1a78cbe949",
               "isDomFragment": false,
             },
           ]
@@ -304,7 +306,7 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const extraneous = t0f05699ae4()[0];
+          "const extraneous = tccaa44c114()[0];
           const childNodeIndex = (() => {
               const [__root_09771bea6d, __targets] = t09771bea6d();
               const __target0 = __targets[0];
@@ -318,8 +320,8 @@ describe('fragments', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<div><hr /><hr /><hr /></div>",
-              "id": "0f05699ae4",
+              "html": "<div><hr><hr><hr></div>",
+              "id": "ccaa44c114",
               "isDomFragment": false,
             },
             {
@@ -370,7 +372,7 @@ describe('fragments', () => {
 
 describe('element composition', () => {
 
-    test('property on custom-element', ({ expect }) => {
+    test('custom-element with property', ({ expect }) => {
         const input = `
             const html = \`&nsbsp;<strong>Hello Raw</strong>\`;
             document.body.append(<raw-html html={html}/>);
@@ -380,18 +382,19 @@ describe('element composition', () => {
         expect(code).toMatchInlineSnapshot(`
           "const html = \`&nsbsp;<strong>Hello Raw</strong>\`;
           document.body.append((() => {
-              const [__root_c120befcf8, __targets] = tc120befcf8();
+              const [__root_e10f86d6b4, __targets] = te10f86d6b4();
               const __target0 = __targets[0];
               __target0.html = (html);
-              return __root_c120befcf8;
+              return __root_e10f86d6b4;
           })());
           "
         `);
+
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<raw-html data-bind />",
-              "id": "c120befcf8",
+              "html": "<raw-html data-bind></raw-html>",
+              "id": "e10f86d6b4",
               "isDomFragment": false,
             },
           ]
