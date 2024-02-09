@@ -23,6 +23,7 @@
         "pluginutils",
         "pokedex",
         "quasis",
+        "templating",
         "templatize",
         "tfaf",
         "tmpl",
