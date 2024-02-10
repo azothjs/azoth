@@ -154,15 +154,13 @@ function renderer(fragment, isFragment) {
     };
 }
 
-const t92280c0caa = rendererById('92280c0caa');
+const t61b16566ed = rendererById('61b16566ed', true);
 
 const t03038e2f88 = rendererById('03038e2f88');
 
-const te208a2df9b = rendererById('e208a2df9b');
+const t68bf46eb1d = rendererById('68bf46eb1d');
 
-const t209e6208e8 = rendererById('209e6208e8');
-
-const tf459a35a3a = rendererById('f459a35a3a', true);
+const t92280c0caa = rendererById('92280c0caa');
 
 const EMOJIS = 'EMOJIS';
 async function fetchEmojis() {
@@ -185,25 +183,37 @@ async function fetchEmojis() {
     return emojis;
 }
 
-function branch(promise, ...outlets) {
-    const list = outlets.map(transform => {
-        const { promise, resolve, reject } = Promise.withResolvers();
-        return { promise, resolve, reject, transform };
-    });
-
-    dispatchAsync(promise, list);
-
-    return list.map(({ promise }) => promise);
+const List = fetchEmojis().then((emojis) => EmojiList({
+  emojis
+}));
+const App = (() => {
+  const [__root_61b16566ed, __targets] = t61b16566ed(true);
+  const __target0 = __targets[0];
+  const __child0 = __target0.childNodes[3];
+  compose(List, __child0);
+  return __root_61b16566ed;
+})();
+document.body.append(App);
+function EmojiList({ emojis }) {
+  const [__root_03038e2f88, __targets] = t03038e2f88();
+  const __target0 = __targets[0];
+  const __child0 = __target0.childNodes[1];
+  compose(emojis.map(Emoji), __child0);
+  return __root_03038e2f88;
 }
-
-async function dispatchAsync(promise, list) {
-    promise.then(data => {
-        list.forEach(({ resolve, transform }) => {
-            resolve(transform(data));
-        });
-    });
+function Emoji({ name, unicode, htmlCode }) {
+  const [__root_68bf46eb1d, __targets] = t68bf46eb1d();
+  const __target0 = __targets[0];
+  const __child0 = __target0.childNodes[1];
+  const __child1 = __target0.childNodes[3];
+  const __child2 = __target0.childNodes[5];
+  compose(InnerHtml({
+    html: htmlCode.join("")
+  }), __child0);
+  compose(name, __child1);
+  compose(unicode, __child2);
+  return __root_68bf46eb1d;
 }
-
 function InnerHtml({ html, className = "" }) {
   const rawEmoji = (() => {
     const [__root_92280c0caa, __targets] = t92280c0caa();
@@ -214,46 +224,3 @@ function InnerHtml({ html, className = "" }) {
   rawEmoji.firstChild.innerHTML = html;
   return rawEmoji;
 }
-function EmojiList({ emojis }) {
-  const [__root_03038e2f88, __targets] = t03038e2f88();
-  const __target0 = __targets[0];
-  const __child0 = __target0.childNodes[1];
-  compose(emojis.map(Emoji), __child0);
-  return __root_03038e2f88;
-}
-function Emoji({ name, unicode, htmlCode }) {
-  const [__root_e208a2df9b, __targets] = te208a2df9b();
-  const __target0 = __targets[0];
-  const __child0 = __target0.childNodes[1];
-  const __child1 = __target0.childNodes[3];
-  const __child2 = __target0.childNodes[5];
-  compose(InnerHtml({
-    html: htmlCode.join("")
-  }), __child0);
-  compose(name, __child1);
-  compose(unicode, __child2);
-  return __root_e208a2df9b;
-}
-function EmojiCount({ count }) {
-  const [__root_209e6208e8, __targets] = t209e6208e8();
-  const __target0 = __targets[0];
-  const __child0 = __target0.childNodes[0];
-  compose(count, __child0);
-  return __root_209e6208e8;
-}
-const [Count, List] = branch(fetchEmojis(), ({ length }) => EmojiCount({
-  count: length
-}), (emojis) => EmojiList({
-  emojis
-}));
-const App = (() => {
-  const [__root_f459a35a3a, __targets] = tf459a35a3a(true);
-  const __target0 = __targets[0];
-  const __target1 = __targets[1];
-  const __child0 = __target0.childNodes[0];
-  const __child1 = __target1.childNodes[3];
-  compose(Count, __child0);
-  compose(List, __child1);
-  return __root_f459a35a3a;
-})();
-document.body.append(App);

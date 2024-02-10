@@ -16,16 +16,16 @@
         "ui library",
         "ui framework"
     ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/azothjsx/azoth.git",
+        "directory": "packages/runtime"
+    },
     "type": "module",
     "main": "./src/index.js",
     "files": [
         "src/!(test-utils)/!(*test*).js"
     ],
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/azothjsx/azoth.git",
-        "directory": "packages/azoth"
-    },
     "exports": {
         ".": "./src/index.js",
         "./futures": "./src/futures/index.js"

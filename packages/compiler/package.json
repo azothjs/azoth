@@ -1,20 +1,25 @@
 {
     "name": "@azoth-web/compiler",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Azoth JSX to JavaScript + HTML compiler",
+    "author": "Marty Nelson",
+    "license": "MIT",
     "keywords": [
         "azoth compiler",
         "azoth-compiler",
         "azoth jsx compiler",
         "azoth-jsx-compiler"
     ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/azothjsx/azoth.git",
+        "directory": "packages/compiler"
+    },
+    "type": "module",
+    "main": "./src/index.js",
     "files": [
         "src/!(*test*).js"
     ],
-    "author": "Marty Nelson",
-    "license": "MIT",
-    "type": "module",
-    "main": "./src/index.js",
     "exports": {
         ".": {
             "import": {

@@ -4,34 +4,24 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-importers:
+dependencies:
+  '@azoth-web/compiler':
+    specifier: workspace:^
+    version: link:../compiler
+  '@rollup/pluginutils':
+    specifier: ^5.1.0
+    version: 5.1.0
 
-  .:
-    dependencies:
-      '@azoth-web/compiler':
-        specifier: workspace:^
-        version: link:../compiler
-    devDependencies:
-      '@azoth-web/runtime':
-        specifier: workspace:^
-        version: link:../azoth
-      '@rollup/pluginutils':
-        specifier: ^5.1.0
-        version: 5.1.0
-      vite:
-        specifier: ^5.0.12
-        version: 5.0.12
-      vitest:
-        specifier: ^1.2.2
-        version: 1.2.2
-
-  ../..: {}
-
-  ../../sandbox: {}
-
-  ../azoth: {}
-
-  ../compiler: {}
+devDependencies:
+  '@azoth-web/runtime':
+    specifier: workspace:^
+    version: link:../runtime
+  vite:
+    specifier: ^5.0.12
+    version: 5.0.12
+  vitest:
+    specifier: ^1.2.2
+    version: 1.2.2
 
 packages:
 
@@ -265,7 +255,7 @@ packages:
       '@types/estree': 1.0.5
       estree-walker: 2.0.2
       picomatch: 2.3.1
-    dev: true
+    dev: false
 
   /@rollup/rollup-android-arm-eabi@4.9.6:
     resolution: {integrity: sha512-MVNXSSYN6QXOulbHpLMKYi60ppyO13W9my1qogeiAqtjb2yR4LSmfU2+POvDkLzhjYLXz9Rf9+9a3zFHW1Lecg==}
@@ -377,7 +367,6 @@ packages:
 
   /@types/estree@1.0.5:
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
-    dev: true
 
   /@vitest/expect@1.2.2:
     resolution: {integrity: sha512-3jpcdPAD7LwHUUiT2pZTj2U82I2Tcgg2oVPvKxhn6mDI2On6tfvPQTjAI4628GUGDZrCm4Zna9iQHm5cEexOAg==}
@@ -528,7 +517,7 @@ packages:
 
   /estree-walker@2.0.2:
     resolution: {integrity: sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==}
-    dev: true
+    dev: false
 
   /estree-walker@3.0.3:
     resolution: {integrity: sha512-7RUKfXgSMMkzt6ZuXmqapOurLGPPfgj6l9uRZ7lRGolvk0y2yocc35LdcxKC5PQZdn2DMqioAQ2NoWcrTKmm6g==}
@@ -681,7 +670,7 @@ packages:
   /picomatch@2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
-    dev: true
+    dev: false
 
   /pkg-types@1.0.3:
     resolution: {integrity: sha512-nN7pYi0AQqJnoLPC9eHFQ8AcyaixBUOwvqc5TDnIKCMEE6I0y8P7OKA7fPexsXGCGxQDl/cmrLAp26LhcwxZ4A==}
