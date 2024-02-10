@@ -1,5 +1,5 @@
 {
-    "name": "@azothjsx/vite-plugin-azoth",
+    "name": "@azoth-web/vite-plugin-azoth",
     "version": "1.1.0",
     "description": "vite plugins for compiling azoth hypermedia apps",
     "author": "martypdx",
@@ -36,7 +36,7 @@
         }
     },
     "devDependencies": {
-        "@azothjsx/azoth": "workspace:^",
+        "@azoth-web/runtime": "workspace:^",
         "vite": "^5.0.12",
         "vitest": "^1.2.2"
     },
@@ -45,6 +45,6 @@
     },
     "dependencies": {
         "@rollup/pluginutils": "^5.1.0",
-        "@azothjsx/compiler": "workspace:^"
+        "@azoth-web/compiler": "workspace:^"
     }
 }

@@ -1,5 +1,5 @@
 {
-    "name": "@azothjsx/compiler",
+    "name": "@azoth-web/compiler",
     "version": "1.1.0",
     "description": "Azoth JSX to JavaScript + HTML compiler",
     "keywords": [

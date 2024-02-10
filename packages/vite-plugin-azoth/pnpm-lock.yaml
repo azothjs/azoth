@@ -8,11 +8,11 @@ importers:
 
   .:
     dependencies:
-      '@azothjsx/compiler':
+      '@azoth-web/compiler':
         specifier: workspace:^
         version: link:../compiler
     devDependencies:
-      '@azothjsx/azoth':
+      '@azoth-web/runtime':
         specifier: workspace:^
         version: link:../azoth
       '@rollup/pluginutils':

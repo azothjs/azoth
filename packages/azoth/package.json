@@ -1,5 +1,5 @@
 {
-    "name": "@azothjsx/azoth",
+    "name": "@azoth-web/runtime",
     "version": "1.0.1",
     "description": "Azoth runtime for hypermedia apps on the web platform",
     "author": "martypdx",

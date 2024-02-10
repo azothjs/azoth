@@ -6,9 +6,7 @@ function run(value, create) {
     return runCompose(value, create).outerHTML;
 }
 
-
 describe('no-op values not appended', () => {
-
 
     const noValues = () => Object.entries({
         undefined: undefined,
