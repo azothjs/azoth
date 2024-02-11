@@ -65,14 +65,35 @@ export class TemplateGenerator extends Generator {
     }
 
     InjectionWrapper(template, state) {
-        const { isEmpty, boundElements, node } = template;
+        const { isEmpty, boundElements, node, bindings } = template;
 
-        if(isEmpty || (!boundElements.length) && node.queryIndex !== -1) {
+        // console.log('wrap', node.isComponent, node.queryIndex, bindings.length);
+
+        if(node.isComponent) {
+            if(node.isReturnArg) state.write(`return `);
+
+            if(bindings.length !== 1) {
+                throw new Error('Unexpected component binding length');
+            }
+
+            const { expr } = bindings[0];
+            state.write(`__createElement(`);
+            this[expr.type](expr, state);
+            this.JSXComponentProps(node, state);
+            state.write(`)`);
+
+            if(node.isReturnArg) state.write(`;`);
+
+            return;
+
+        }
+        else if(isEmpty || (!boundElements.length) && node.queryIndex !== -1) {
             if(node.isReturnArg) state.write(`return `);
             this.TemplateRenderer(template, state);
             // dom root property
             if(!isEmpty) state.write(`[0]`);
             if(node.isReturnArg) state.write(`;`);
+
             return;
         }
 
@@ -88,7 +109,7 @@ export class TemplateGenerator extends Generator {
 
         this.JSXDomLiteral(template, state);
 
-        state.write(`${nextLine}return __root_${template.id};`);
+        state.write(`${nextLine}return __root;`);
 
         if(useIIFEWrapper) {
             state.indentLevel--;
@@ -120,7 +141,7 @@ export class TemplateGenerator extends Generator {
         let nextLine = `${lineEnd}${indentation}`;
 
         // template service renderer call
-        const rootVarName = `__root_${id}`;
+        const rootVarName = `__root`;
         state.write(`const [${rootVarName}`);
         if(boundElements.length) state.write(`, __targets`);
         state.write(`] = `);
@@ -155,21 +176,7 @@ export class TemplateGenerator extends Generator {
                 state.write(`__composeElement(`);
                 this[expr.type](expr, state);
                 state.write(`, __child${i}`);
-                // check for props
-                if(node.props.length) {
-                    const { props } = node;
-                    state.write(`, {`);
-                    for(let i = 0; i < props.length; i++) {
-                        const { node, expr } = props[i];
-                        // TODO: Dom lookup, JS .prop v['prop'], etc. 
-                        // refactor with code below
-                        state.write(` ${node.name.name}: `);
-                        this.JSXExpressionContext(expr, state);
-                        state.write(`,`);
-                    }
-                    state.write(` }`);
-                }
-
+                this.JSXComponentProps(node, state);
                 state.write(`);`);
             }
             else if(type === 'child') {
@@ -200,6 +207,21 @@ export class TemplateGenerator extends Generator {
                 throw new Error(message);
             }
         }
+    }
+
+    JSXComponentProps({ props }, state) {
+        if(!props?.length) return;
+
+        state.write(`, {`);
+        for(let i = 0; i < props.length; i++) {
+            const { node, expr } = props[i];
+            // TODO: Dom lookup, JS .prop v['prop'], etc. 
+            // refactor with code below
+            state.write(` ${node.name.name}: `);
+            this.JSXExpressionContext(expr, state);
+            state.write(`,`);
+        }
+        state.write(` }`);
     }
 
     // process javascript in {...} exprs,

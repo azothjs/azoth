@@ -42,17 +42,27 @@ export class Analyzer {
     }
 
     #analyze(node) {
-        // handle single top-level components with a fake fragment
-        const root = node.type === 'JSXFragment' ? node : {
-            type: 'JSXFragment',
-            children: [node],
-            openingFragment: {
-                attributes: []
-            },
-            isReturnArg: node.isReturnArg
-        };
-        this.#root = root;
-        this.JSXRootFragment(root);
+        const { type, children } = node;
+        const isJSXFragment = node.isJSXFragment = type === 'JSXFragment';
+        const childCount = node.children.length;
+
+        if(isJSXFragment && childCount === 1 && children[0].type === 'JSXElement') {
+            // <><div>...</div></>  
+            return this.#analyze(children[0]);
+        }
+
+        this.#root = node;
+
+        if(isJSXFragment) {
+            this.JSXFragmentRoot(node);
+        }
+        else {
+            const identifier = accessElement(node);
+            this.JSXElement(node);
+            if(node.isComponent) {
+                this.#bind('child', node, identifier);
+            }
+        }
     }
 
     #pushElement(node) {
@@ -75,28 +85,28 @@ export class Analyzer {
             index,
         };
 
-        if(element?.isComponent) {
+        if(element && element.isComponent) {
             element.props.push(binding);
-            return;
+        }
+        else {
+            this.#bindings.push(binding);
         }
 
-        this.#bindings.push(binding);
+        if(!element || element.isComponent) return;
 
         if(element === this.#root) {
-            // fragment root can't be a "targets", so we give them
-            // -1 queryIndex to signal a bound fragment at root
-            if(type === 'child') element.queryIndex = -1;
-            return;
+            // root can't be a "target", so we give them
+            // -1 queryIndex to signal a bound fragment or element at root
+            element.queryIndex = -1;
         }
-
         // track element as bound
-        if(!this.#boundElements.has(element)) {
+        else if(!this.#boundElements.has(element)) {
             element.openingElement?.attributes.push(BINDING_ATTR);
             this.#boundElements.add(element);
         }
     }
 
-    JSXRootFragment(node) {
+    JSXFragmentRoot(node) {
         this.#pushElement(node);
         // short-cut JSXOpeningFragment > JSXAttributes
         // this[node.openingFragment.type](node.openingFragment); 
@@ -118,25 +128,6 @@ export class Analyzer {
         this.JSXAttributes(node.openingElement.attributes, node.isComponent);
         this.JSXChildren(node);
         this.#popElement();
-    }
-
-    JSXAttributes(attributes, isComponent = false) {
-        for(var i = 0; i < attributes.length; i++) {
-            const attr = attributes[i];
-            if(attr.value?.type === 'JSXExpressionContainer') {
-                this.#bind('prop', attr, attr.value.expression, i);
-            }
-            else if(isComponent) {
-                this.#bind('prop', attr, attr.value, i);
-            }
-        }
-    }
-
-    JSXExpressionContainer(node, index) {
-        if(node.expression.type === 'JSXEmptyExpression') {
-            return;
-        }
-        this.#bind('child', node, node.expression, index);
     }
 
     // Tracks index adjustments across recursive calls:
@@ -166,29 +157,45 @@ export class Analyzer {
                 throw new TypeError(`Unexpected AST Type "${type}"`);
             }
             else {
-                if(type === 'JSXElement') {
-                    const { openingElement: { name: identifier } } = child;
-                    // TODO: namespaces: and member.express.ion
-
-                    child.isCustomElement = identifier.name.includes('-');
-                    child.isVoidElement = voidElements.has(identifier.name);
-                    if(!child.isCustomElement) {
-                        const isComponent = /^[A-Z$][a-zA-Z]*$/.test(identifier.name);
-                        if(isComponent) {
-                            child.isComponent = true;
-                            child.props = [];
-                            this.#bind('child', child, identifier, i + adj);
-                        }
-                    }
+                const identifier = accessElement(child);
+                if(child.isComponent) {
+                    this.#bind('child', child, identifier, i + adj);
                 }
-
                 this[type](child, i + adj);
             }
         }
+    }
+
+    JSXAttributes(attributes, isComponent = false) {
+        for(var i = 0; i < attributes.length; i++) {
+            const attr = attributes[i];
+            if(attr.value?.type === 'JSXExpressionContainer') {
+                this.#bind('prop', attr, attr.value.expression, i);
+            }
+            else if(isComponent) {
+                this.#bind('prop', attr, attr.value, i);
+            }
+        }
+    }
+
+    JSXExpressionContainer(node, index) {
+        if(node.expression.type === 'JSXEmptyExpression') return;
+        this.#bind('child', node, node.expression, index);
     }
 
     JSXText() { /* no-op */ }
     JSXEmptyExpression() { /* no-op */ }
 }
 
+function accessElement(node) {
+    if(node.type !== 'JSXElement') return;
 
+    const { openingElement: { name: identifier } } = node;
+    // TODO: <namespaces:el and <member.express.ion
+    const isCustom = node.isCustomElement = identifier.name.includes('-');
+    node.isVoidElement = !isCustom && voidElements.has(identifier.name);
+    const isComponent = node.isComponent = !isCustom && /^[A-Z$][a-zA-Z]*$/.test(identifier.name);
+    if(isComponent) node.props = [];
+
+    return identifier;
+}

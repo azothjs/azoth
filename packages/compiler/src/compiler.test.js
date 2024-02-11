@@ -30,31 +30,30 @@ describe('JSX dom literals', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
-              const [__root_57ebcc4946, __targets] = t57ebcc4946();
+              const [__root, __targets] = tfdd1a869cf();
               const __target0 = __targets[0];
               const __target1 = __targets[1];
               const __target2 = __targets[2];
               const __target3 = __targets[3];
               const __target4 = __targets[4];
               const __target5 = __targets[5];
-              const __target6 = __targets[6];
-              const __child1 = __target1.childNodes[0];
-              const __child2 = __target2.childNodes[0];
-              const __child3 = __target3.childNodes[0];
-              const __child4 = __target5.childNodes[1];
-              const __child5 = __target5.childNodes[3];
-              const __child7 = __target4.childNodes[7];
-              const __child8 = __target0.childNodes[15];
-              __target1.className = ("my-class");
+              const __child1 = __target0.childNodes[0];
+              const __child2 = __target1.childNodes[0];
+              const __child3 = __target2.childNodes[0];
+              const __child4 = __target4.childNodes[1];
+              const __child5 = __target4.childNodes[3];
+              const __child7 = __target3.childNodes[7];
+              const __child8 = __root.childNodes[15];
+              __target0.className = ("my-class");
               __compose("felix", __child1);
               __compose("this is", __child2);
               __compose("azoth", __child3);
               __compose("two", __child4);
               __compose("and...", __child5);
-              __target6.className = ("span-class");
+              __target5.className = ("span-class");
               __compose("ul-footer", __child7);
               __compose("footer", __child8);
-              return __root_57ebcc4946;
+              return __root;
           })();
           "
         `);
@@ -62,7 +61,7 @@ describe('JSX dom literals', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<div data-bind>
+              "html": "<div>
                       <p data-bind><!--0--></p>
                       <p>static</p>
                       <p data-bind><!--0--><span data-bind><!--0--></span></p>
@@ -77,7 +76,7 @@ describe('JSX dom literals', () => {
                       <custom-element></custom-element>
                       <!--0-->
                   </div>",
-              "id": "57ebcc4946",
+              "id": "fdd1a869cf",
               "isDomFragment": false,
             },
           ]
@@ -97,13 +96,12 @@ describe('JSX dom literals', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
-              const [__root_05a73e3fe9, __targets] = t05a73e3fe9();
-              const __target0 = __targets[0];
-              __target0.className = ("className");
-              __target0.name = ("name");
-              __target0["class"] = ("class");
-              __target0["class-name"] = ("class-name");
-              return __root_05a73e3fe9;
+              const [__root] = t10073da0ec();
+              __root.className = ("className");
+              __root.name = ("name");
+              __root["class"] = ("class");
+              __root["class-name"] = ("class-name");
+              return __root;
           })();
           "
         `);
@@ -111,8 +109,8 @@ describe('JSX dom literals', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<input required data-bind>",
-              "id": "05a73e3fe9",
+              "html": "<input required>",
+              "id": "10073da0ec",
               "isDomFragment": false,
             },
           ]
@@ -128,11 +126,10 @@ describe('nested context', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "(() => {
-              const [__root_969db86e55, __targets] = t969db86e55();
-              const __target0 = __targets[0];
-              const __child0 = __target0.childNodes[0];
+              const [__root] = t8dae88052a();
+              const __child0 = __root.childNodes[0];
               __compose(t1a78cbe949()[0], __child0);
-              return __root_969db86e55;
+              return __root;
           })();
           "
         `);
@@ -140,8 +137,8 @@ describe('nested context', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<div data-bind><!--0--></div>",
-              "id": "969db86e55",
+              "html": "<div><!--0--></div>",
+              "id": "8dae88052a",
               "isDomFragment": false,
             },
             {
@@ -187,11 +184,10 @@ describe('surrounding code integration', () => {
 
         expect(compile(input).code).toMatchInlineSnapshot(`
           "const template = text => {
-              const [__root_666c3103ad, __targets] = t666c3103ad();
-              const __target0 = __targets[0];
-              const __child0 = __target0.childNodes[0];
+              const [__root] = t904ca237ee();
+              const __child0 = __root.childNodes[0];
               __compose(text, __child0);
-              return __root_666c3103ad;
+              return __root;
           };
           "
         `);
@@ -209,11 +205,10 @@ describe('surrounding code integration', () => {
         expect(compile(input).code).toMatchInlineSnapshot(`
           "function template(text) {
               const format = 'text' + '!';
-              const [__root_666c3103ad, __targets] = t666c3103ad();
-              const __target0 = __targets[0];
-              const __child0 = __target0.childNodes[0];
+              const [__root] = t904ca237ee();
+              const __child0 = __root.childNodes[0];
               __compose(text, __child0);
-              return __root_666c3103ad;
+              return __root;
           }
           "
         `);
@@ -234,12 +229,12 @@ describe('fragments', () => {
           "const fragment = tc203fe7dcd(true)[0];
           const empty = null;
           const compose = (() => {
-              const [__root_c084de4382] = tc084de4382(true);
-              const __child0 = __root_c084de4382.childNodes[0];
+              const [__root] = tc084de4382(true);
+              const __child0 = __root.childNodes[0];
               __compose(x, __child0);
-              return __root_c084de4382;
+              return __root;
           })();
-          const text = t1cb251ec0d()[0];
+          const text = t1cb251ec0d(true)[0];
           "
         `);
 
@@ -258,7 +253,7 @@ describe('fragments', () => {
             {
               "html": "text",
               "id": "1cb251ec0d",
-              "isDomFragment": false,
+              "isDomFragment": true,
             },
           ]
         `);
@@ -273,10 +268,10 @@ describe('fragments', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const fragment = (() => {
-              const [__root_faf808e6cc] = tfaf808e6cc(true);
-              const __child0 = __root_faf808e6cc.childNodes[1];
+              const [__root] = tfaf808e6cc(true);
+              const __child0 = __root.childNodes[1];
               __compose("two", __child0);
-              return __root_faf808e6cc;
+              return __root;
           })();
           "
         `);
@@ -308,11 +303,10 @@ describe('fragments', () => {
         expect(code).toMatchInlineSnapshot(`
           "const extraneous = tccaa44c114()[0];
           const childNodeIndex = (() => {
-              const [__root_09771bea6d, __targets] = t09771bea6d();
-              const __target0 = __targets[0];
-              const __child0 = __target0.childNodes[3];
+              const [__root] = t681310be49();
+              const __child0 = __root.childNodes[3];
               __compose("expect index 3", __child0);
-              return __root_09771bea6d;
+              return __root;
           })();
           "
         `);
@@ -325,12 +319,12 @@ describe('fragments', () => {
               "isDomFragment": false,
             },
             {
-              "html": "<div data-bind>
+              "html": "<div>
                           <p></p>
                           <!--0--><p></p>
                           <p></p>
                       </div>",
-              "id": "09771bea6d",
+              "id": "681310be49",
               "isDomFragment": false,
             },
           ]
@@ -344,15 +338,15 @@ describe('fragments', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const App = (() => {
-              const [__root_ef691fa27a, __targets] = tef691fa27a(true);
+              const [__root, __targets] = tef691fa27a(true);
               const __target0 = __targets[0];
-              const __child0 = __root_ef691fa27a.childNodes[0];
+              const __child0 = __root.childNodes[0];
               const __child1 = __target0.childNodes[0];
-              const __child2 = __root_ef691fa27a.childNodes[2];
+              const __child2 = __root.childNodes[2];
               __compose('foo', __child0);
               __compose('bar', __child1);
               __compose('qux', __child2);
-              return __root_ef691fa27a;
+              return __root;
           })();
           "
         `);
@@ -363,6 +357,36 @@ describe('fragments', () => {
               "html": "<!--0--><main data-bind><!--0--></main><!--0-->",
               "id": "ef691fa27a",
               "isDomFragment": true,
+            },
+          ]
+        `);
+
+    });
+});
+
+describe('template root', () => {
+    test('single element is root', ({ expect }) => {
+        const input = `
+            const div = <div>{hello}</div>;
+        `;
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "const div = (() => {
+              const [__root] = t8dae88052a();
+              const __child0 = __root.childNodes[0];
+              __compose(hello, __child0);
+              return __root;
+          })();
+          "
+        `);
+
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<div><!--0--></div>",
+              "id": "8dae88052a",
+              "isDomFragment": false,
             },
           ]
         `);
@@ -382,10 +406,9 @@ describe('element composition', () => {
         expect(code).toMatchInlineSnapshot(`
           "const html = \`&nsbsp;<strong>Hello Raw</strong>\`;
           document.body.append((() => {
-              const [__root_e10f86d6b4, __targets] = te10f86d6b4();
-              const __target0 = __targets[0];
-              __target0.html = (html);
-              return __root_e10f86d6b4;
+              const [__root] = t4ca37f3876();
+              __root.html = (html);
+              return __root;
           })());
           "
         `);
@@ -393,8 +416,8 @@ describe('element composition', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<raw-html data-bind></raw-html>",
-              "id": "e10f86d6b4",
+              "html": "<raw-html></raw-html>",
+              "id": "4ca37f3876",
               "isDomFragment": false,
             },
           ]
@@ -410,18 +433,8 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const c = (() => {
-              const [__root_c084de4382] = tc084de4382(true);
-              const __child0 = __root_c084de4382.childNodes[0];
-              __composeElement(Component, __child0);
-              return __root_c084de4382;
-          })();
-          const cProps = (() => {
-              const [__root_c084de4382] = tc084de4382(true);
-              const __child0 = __root_c084de4382.childNodes[0];
-              __composeElement(Component, __child0, { prop: value, attr: "static", });
-              return __root_c084de4382;
-          })();
+          "const c = __createElement(Component);
+          const cProps = __createElement(Component, { prop: value, attr: "static", });
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
@@ -429,12 +442,46 @@ describe('element composition', () => {
             {
               "html": "<!--0-->",
               "id": "c084de4382",
-              "isDomFragment": true,
+              "isDomFragment": false,
             },
             {
               "html": "<!--0-->",
               "id": "c084de4382",
-              "isDomFragment": true,
+              "isDomFragment": false,
+            },
+          ]
+        `);
+    });
+
+    test('child level components: empty and with props', ({ expect }) => {
+        const input = `
+            const component = <div>
+                <Component prop={value} prop2="literal"/>
+                <GotNoPropsAsYouCanSee/>
+            </div>;
+        `;
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "const component = (() => {
+              const [__root] = t2288998344();
+              const __child0 = __root.childNodes[1];
+              const __child1 = __root.childNodes[3];
+              __composeElement(Component, __child0, { prop: value, prop2: "literal", });
+              __composeElement(GotNoPropsAsYouCanSee, __child1);
+              return __root;
+          })();
+          "
+        `);
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<div>
+                          <!--0-->
+                          <!--0-->
+                      </div>",
+              "id": "2288998344",
+              "isDomFragment": false,
             },
           ]
         `);
@@ -453,26 +500,15 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const $A = (() => {
-              const [__root_c084de4382] = tc084de4382(true);
-              const __child0 = __root_c084de4382.childNodes[0];
-              __composeElement(A, __child0);
-              return __root_c084de4382;
-          })();
-          const $B = (() => {
-              const [__root_c084de4382] = tc084de4382(true);
-              const __child0 = __root_c084de4382.childNodes[0];
-              __composeElement(B, __child0);
-              return __root_c084de4382;
-          })();
+          "const $A = __createElement(A);
+          const $B = __createElement(B);
           const dom = (() => {
-              const [__root_980f8821fb, __targets] = t980f8821fb();
-              const __target0 = __targets[0];
-              const __child0 = __target0.childNodes[1];
-              const __child1 = __target0.childNodes[3];
+              const [__root] = t2288998344();
+              const __child0 = __root.childNodes[1];
+              const __child1 = __root.childNodes[3];
               __compose($A, __child0);
               __compose($B, __child1);
-              return __root_980f8821fb;
+              return __root;
           })();
           "
         `);
@@ -481,59 +517,24 @@ describe('element composition', () => {
             {
               "html": "<!--0-->",
               "id": "c084de4382",
-              "isDomFragment": true,
+              "isDomFragment": false,
             },
             {
               "html": "<!--0-->",
               "id": "c084de4382",
-              "isDomFragment": true,
+              "isDomFragment": false,
             },
             {
-              "html": "<div data-bind>
+              "html": "<div>
                           <!--0-->
                           <!--0-->
                       </div>",
-              "id": "980f8821fb",
+              "id": "2288998344",
               "isDomFragment": false,
             },
           ]
         `);
 
-    });
-
-    test('<Function/> component element + props', ({ expect }) => {
-        const input = `
-            const component = <div>
-                <Component prop={value} prop2="literal"/>
-                <GotNoPropsAsYouCanSee/>
-            </div>;
-        `;
-        const { code, templates } = compile(input);
-
-        expect(code).toMatchInlineSnapshot(`
-          "const component = (() => {
-              const [__root_980f8821fb, __targets] = t980f8821fb();
-              const __target0 = __targets[0];
-              const __child0 = __target0.childNodes[1];
-              const __child1 = __target0.childNodes[3];
-              __composeElement(Component, __child0, { prop: value, prop2: "literal", });
-              __composeElement(GotNoPropsAsYouCanSee, __child1);
-              return __root_980f8821fb;
-          })();
-          "
-        `);
-        expect(templates).toMatchInlineSnapshot(`
-          [
-            {
-              "html": "<div data-bind>
-                          <!--0-->
-                          <!--0-->
-                      </div>",
-              "id": "980f8821fb",
-              "isDomFragment": false,
-            },
-          ]
-        `);
     });
 
     test('return keyword in Function with static jsx', ({ expect }) => {
@@ -570,20 +571,18 @@ describe('render and composition cases', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const Item = name => {
-              const [__root_f00e886942, __targets] = tf00e886942();
-              const __target0 = __targets[0];
-              const __child0 = __target0.childNodes[0];
+              const [__root] = t62831a5152();
+              const __child0 = __root.childNodes[0];
               __compose(name, __child0);
-              return __root_f00e886942;
+              return __root;
           };
           const Template = () => {
-              const [__root_3bee4f3a47, __targets] = t3bee4f3a47();
-              const __target0 = __targets[0];
-              const __child0 = __target0.childNodes[0];
-              const __child1 = __target0.childNodes[1];
+              const [__root] = t8dc93cc914();
+              const __child0 = __root.childNodes[0];
+              const __child1 = __root.childNodes[1];
               __compose([2, 4, 7].map(Item), __child0);
               __compose("text", __child1);
-              return __root_3bee4f3a47;
+              return __root;
           };
           "
         `);
@@ -591,13 +590,13 @@ describe('render and composition cases', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<li data-bind><!--0--></li>",
-              "id": "f00e886942",
+              "html": "<li><!--0--></li>",
+              "id": "62831a5152",
               "isDomFragment": false,
             },
             {
-              "html": "<div data-bind><!--0--><!--0--></div>",
-              "id": "3bee4f3a47",
+              "html": "<div><!--0--><!--0--></div>",
+              "id": "8dc93cc914",
               "isDomFragment": false,
             },
           ]
@@ -613,12 +612,11 @@ describe('render and composition cases', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const render = () => {
-              const [__root_e19fd83eae, __targets] = te19fd83eae();
-              const __target0 = __targets[0];
-              const __child1 = __target0.childNodes[1];
-              __target0.className = (category);
+              const [__root] = t2b440f4741();
+              const __child1 = __root.childNodes[1];
+              __root.className = (category);
               __compose(place, __child1);
-              return __root_e19fd83eae;
+              return __root;
           };
           "
         `);
@@ -626,8 +624,8 @@ describe('render and composition cases', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<li data-bind>Hello <!--0--></li>",
-              "id": "e19fd83eae",
+              "html": "<li>Hello <!--0--></li>",
+              "id": "2b440f4741",
               "isDomFragment": false,
             },
           ]
@@ -646,19 +644,17 @@ describe('render and composition cases', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "const Emoji = ({name}) => {
-              const [__root_f00e886942, __targets] = tf00e886942();
-              const __target0 = __targets[0];
-              const __child0 = __target0.childNodes[0];
+              const [__root] = t62831a5152();
+              const __child0 = __root.childNodes[0];
               __compose(name, __child0);
-              return __root_f00e886942;
+              return __root;
           };
           const promise = fetchEmojis().then(emojis => emojis.map(Emoji));
           const Emojis = (() => {
-              const [__root_df87cbf024, __targets] = tdf87cbf024();
-              const __target0 = __targets[0];
-              const __child0 = __target0.childNodes[0];
+              const [__root] = t25ec157413();
+              const __child0 = __root.childNodes[0];
               __compose(promise, __child0);
-              return __root_df87cbf024;
+              return __root;
           })();
           document.body.append(Emojis);
           "
@@ -666,13 +662,13 @@ describe('render and composition cases', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<li data-bind><!--0--></li>",
-              "id": "f00e886942",
+              "html": "<li><!--0--></li>",
+              "id": "62831a5152",
               "isDomFragment": false,
             },
             {
-              "html": "<ul data-bind><!--0--></ul>",
-              "id": "df87cbf024",
+              "html": "<ul><!--0--></ul>",
+              "id": "25ec157413",
               "isDomFragment": false,
             },
           ]
