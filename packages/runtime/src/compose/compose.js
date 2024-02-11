@@ -82,11 +82,16 @@ async function composeStream(stream, anchor, keepLast) {
 }
 
 export function composeElement(Constructor, anchor, props) {
+    const dom = createElement(Constructor, props);
+    // TODO: optimize arrays here or in compose array
+    compose(dom, anchor);
+}
+
+export function createElement(Constructor, props) {
     // let JavaScript handle it :)
     // will throw appropriate errors, 
     // so key point for source maps in callers
-    const dom = new Constructor(props);
-    compose(dom, anchor);
+    return new Constructor(props);
 }
 
 function removePrior(anchor) {
@@ -110,8 +115,9 @@ function inject(input, anchor, keepLast) {
     anchor.data = `${count + 1}`;
 }
 
-// TODO: array in array with replace param
+// TODO: TEST array in array with replace param
 function composeArray(array, anchor) {
+    // TODO: optimize arrays here if Node[]
     for(let i = 0; i < array.length; i++) {
         compose(array[i], anchor, true);
     }
