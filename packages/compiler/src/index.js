@@ -11,7 +11,7 @@ export function compile(code, options) {
     return generate(ast, generateOptions);
 }
 
-// parse = js > ast
+// parse = js --> ast
 const JsxParser = Parser.extend(acornJsx());
 const base = { ecmaVersion: 'latest' };
 const required = { sourceType: 'module' };
@@ -24,7 +24,7 @@ export function parse(code, options = {}) {
     });
 }
 
-// generate = ast > code + html
+// generate = ast --> code + html
 export function generate(ast, config) {
     const generator = new TemplateGenerator();
 

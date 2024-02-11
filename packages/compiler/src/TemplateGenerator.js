@@ -15,29 +15,26 @@ export class TemplateGenerator extends Generator {
 
     constructor() {
         super();
-        const generator = new HtmlGenerator();
         this.htmlGenerator = node => generate(node, {
-            // TODO: ...config.html 
-            generator,
-            // sourceMap: new SourceMapGenerator()
+            generator: new HtmlGenerator(),
         });
     }
 
     JSXFragment(node, state) {
-        this.JSXTemplate(node, state, true);
+        this.JSXTemplate(node, state);
     }
 
     JSXElement(node, state) {
         this.JSXTemplate(node, state);
     }
 
-    //  virtual AST type for overall jsx template
     JSXTemplate(node, state) {
         const analyzer = new Analyzer(node);
         const template = analyzer.generateTemplate(this.htmlGenerator);
-        this.templates.push(template);
+        if(!template.isEmpty) {
+            this.templates.push(template);
+        }
 
-        // generate javascript
         this.InjectionWrapper(template, state);
     }
 
@@ -107,7 +104,7 @@ export class TemplateGenerator extends Generator {
         }
 
         state.write(`t${id}(`);
-        if(isDomFragment) state.write('true'); // fragment
+        if(isDomFragment) state.write('true');
         state.write(`)`);
     }
 

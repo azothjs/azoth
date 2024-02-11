@@ -24,16 +24,19 @@ export class Template {
         this.boundElements = boundElements;
 
         // all have logical jsx <>...</> root tag
-
         const { queryIndex, children } = node;
+
         // <>{...}</> - bound childNode(s): 
         const isBound = queryIndex === -1;
+
         // <></>
         const noChildren = children.length === 0;
+
         // <><div></div></>
         const oneChild = children.length === 1;
+
         // <><div></div><hr/>text</> - multiple jsx children
-        // multiple: children.length > 1;
+        // const multiple = children.length > 1;
 
         this.isEmpty = noChildren;
         this.isDomFragment = isBound || !oneChild;

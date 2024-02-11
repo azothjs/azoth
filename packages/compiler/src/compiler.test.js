@@ -222,17 +222,17 @@ describe('surrounding code integration', () => {
 
 describe('fragments', () => {
     test('<> ... </> works', ({ expect }) => {
-        // const fragment = <><hr/><hr/></>;
         const input = `
+            const fragment = <><hr/><hr/></>;
             const empty = <></>;
             const compose = <>{x}</>;
             const text = <>text</>;
         `;
         const { code, templates } = compile(input);
 
-        //   "const fragment = t7c9daff739(true).root;
         expect(code).toMatchInlineSnapshot(`
-          "const empty = null;
+          "const fragment = tc203fe7dcd(true)[0];
+          const empty = null;
           const compose = (() => {
               const [__root_c084de4382] = tc084de4382(true);
               const __child0 = __root_c084de4382.childNodes[0];
@@ -246,8 +246,8 @@ describe('fragments', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "",
-              "id": "d41d8cd98f",
+              "html": "<hr><hr>",
+              "id": "c203fe7dcd",
               "isDomFragment": true,
             },
             {
