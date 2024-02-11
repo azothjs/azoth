@@ -557,19 +557,6 @@ describe('element composition', () => {
 
     });
 
-    test.todo(`
-        return <li><span is="raw-html" html={htmlCode} /> {unicode} {name}</li>;
-    `, () => {
-
-    });
-
-    test.todo(`
-        return <li>
-            <RawHtml html={htmlCode.join('')}/> 
-            {name}
-            {unicode} 
-        </li>;
-    `);
 });
 
 describe('render and composition cases', () => {
@@ -618,7 +605,7 @@ describe('render and composition cases', () => {
 
     });
 
-    test('edge case: broken esbuild jsx', ({ expect }) => {
+    test('edge case: previously broken esbuild jsx', ({ expect }) => {
         const input = `
             const render = () => <li className={category}>Hello {place}</li>
         `;
