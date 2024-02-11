@@ -134,7 +134,7 @@ export class TemplateGenerator extends Generator {
     }
 
     JSXDomLiteral(template, state) {
-        const { id, boundElements, bindings } = template;
+        const { boundElements, bindings } = template;
 
         const { indent, lineEnd, } = state;
         let indentation = indent.repeat(state.indentLevel);
@@ -142,11 +142,16 @@ export class TemplateGenerator extends Generator {
 
         // template service renderer call
         const rootVarName = `__root`;
-        state.write(`const [${rootVarName}`);
-        if(boundElements.length) state.write(`, __targets`);
-        state.write(`] = `);
-        this.TemplateRenderer(template, state);
-        state.write(';');
+        if(boundElements.length) {
+            state.write(`const [${rootVarName}, __targets] = `);
+            this.TemplateRenderer(template, state);
+            state.write(';');
+        }
+        else {
+            state.write(`const ${rootVarName} = `);
+            this.TemplateRenderer(template, state);
+            state.write('[0];');
+        }
 
         // target variables
         for(let i = 0; i < boundElements.length; i++) {
