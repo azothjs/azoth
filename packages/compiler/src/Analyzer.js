@@ -73,7 +73,7 @@ export class Analyzer {
             this.JSXFragmentRoot(node);
         }
         else {
-            accessElement(node);
+            assessElement(node);
             this.JSXElement(node);
         }
     }
@@ -98,17 +98,16 @@ export class Analyzer {
             index,
         };
 
-        if(element && element.isComponent) {
+        if(element.isComponent) {
+            // only props, component children are "slot" template
             if(type !== 'prop') {
                 throw new TypeError(`Unexpected binding type "${type}", expected "prop"`);
             }
             element.props.push(binding);
-        }
-        else {
-            this.#bindings.push(binding);
+            return;
         }
 
-        if(!element || element.isComponent) return;
+        this.#bindings.push(binding);
 
         if(element === this.#root) {
             // root can't be a "target", it gets a -1 queryIndex 
@@ -116,8 +115,9 @@ export class Analyzer {
             element.queryIndex = -1;
         }
         else {
-            // track element as "bound" for retrieval at runtime:
+            // track element as having bindings
             if(!this.#boundElements.has(element)) {
+                // querySelectorAll locator at runtime:
                 element.openingElement?.attributes.push(BINDING_ATTR);
                 this.#boundElements.add(element);
             }
@@ -126,8 +126,6 @@ export class Analyzer {
 
     JSXFragmentRoot(node) {
         this.#pushElement(node);
-        // short-cut JSXOpeningFragment > JSXAttributes
-        // this[node.openingFragment.type](node.openingFragment); 
         if(node.openingFragment) {
             this.JSXAttributes(node.openingFragment.attributes);
         }
@@ -143,7 +141,6 @@ export class Analyzer {
     JSXElement(node) {
         this.#pushElement(node);
 
-        // short-cut JSXOpeningElement > JSXAttributes
         if(node.isComponent) {
             this.JSXProps(node.openingElement.attributes);
             if(node.children.length) {
@@ -190,7 +187,7 @@ export class Analyzer {
                 throw new TypeError(`Unexpected AST Type "${type}"`);
             }
             else {
-                accessElement(child);
+                assessElement(child);
                 if(child.isComponent) {
                     this.#bind('child', child, child.componentExpr, i + adj);
                 }
@@ -224,7 +221,7 @@ export class Analyzer {
     JSXEmptyExpression() { /* no-op */ }
 }
 
-function accessElement(node) {
+function assessElement(node) {
     if(node.type !== 'JSXElement') return;
 
     const { openingElement: { name: identifier } } = node;

@@ -433,6 +433,62 @@ describe('fragments', () => {
 
     });
 
+    test('<> ... </> no trim', ({ expect }) => {
+        const input = `
+            const fragment = <> <hr/><hr/> </>;
+            const single = <> <hr/> </>;
+            const fragInFrag = <> <> <hr/> </> </>;
+            const spaces = <>    </>;
+            const compose = <> {x} </>;
+        `;
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "const fragment = t653a3aad80(true)[0];
+          const single = tdcaa233028(true)[0];
+          const fragInFrag = t2dc1738d5c(true)[0];
+          const spaces = t0cf31b2c28(true)[0];
+          const compose = (() => {
+              const __root = t5bc2a159b1(true)[0];
+              const __child0 = __root.childNodes[1];
+              __compose(x, __child0);
+              return __root;
+          })();
+          "
+        `);
+
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": " <hr><hr> ",
+              "id": "653a3aad80",
+              "isDomFragment": true,
+            },
+            {
+              "html": " <hr> ",
+              "id": "dcaa233028",
+              "isDomFragment": true,
+            },
+            {
+              "html": "  <hr>  ",
+              "id": "2dc1738d5c",
+              "isDomFragment": true,
+            },
+            {
+              "html": "    ",
+              "id": "0cf31b2c28",
+              "isDomFragment": true,
+            },
+            {
+              "html": " <!--0--> ",
+              "id": "5bc2a159b1",
+              "isDomFragment": true,
+            },
+          ]
+        `);
+
+    });
+
     test('text in fragment', ({ expect }) => {
         const input = `
             const fragment = <>one{"two"}three</>;

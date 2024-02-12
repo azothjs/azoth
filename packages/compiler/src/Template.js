@@ -25,7 +25,6 @@ export class Template {
 
         this.isDomFragment = node.isJSXFragment;
         this.isEmpty = node.isComponent ||
-            (node.isJSXFragment &&
-                node.children.length === 0);
+            (node.isJSXFragment && node.children.length === 0);
     }
 }
