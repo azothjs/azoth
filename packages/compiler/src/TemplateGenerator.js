@@ -105,7 +105,7 @@ export class TemplateGenerator extends Generator {
         if(isReturnArg) state.write(`return `);
 
         const expr = componentExpr;
-        state.write(`__createElement(`);
+        state.write(`__makeElement(`);
         this[expr.type](expr, state);
         this.ComponentProps(node, state, !!slotFragment);
         if(slotFragment) {

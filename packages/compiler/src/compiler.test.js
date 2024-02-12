@@ -662,8 +662,8 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const c = __createElement(Component);
-          const cProps = __createElement(Component, { prop: value, attr: "static", });
+          "const c = __makeElement(Component);
+          const cProps = __makeElement(Component, { prop: value, attr: "static", });
           "
         `);
         expect(templates).toMatchInlineSnapshot(`[]`);
@@ -716,8 +716,8 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const $A = __createElement(A);
-          const $B = __createElement(B);
+          "const $A = __makeElement(A);
+          const $B = __makeElement(B);
           const dom = (() => {
               const __root = t2288998344()[0];
               const __child0 = __root.childNodes[1];
@@ -783,32 +783,32 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const c = __createElement(Component, null, (() => {
+          "const c = __makeElement(Component, null, (() => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
               __compose("test", __child0);
               return __root;
           })());
-          const cTrim = __createElement(Component, null, (() => {
+          const cTrim = __makeElement(Component, null, (() => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
               __compose("test", __child0);
               return __root;
           })());
-          const cTrimStart = __createElement(Component, null, (() => {
+          const cTrimStart = __makeElement(Component, null, (() => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
               __compose("test", __child0);
               return __root;
           })());
-          const cTrimEnd = __createElement(Component, null, (() => {
+          const cTrimEnd = __makeElement(Component, null, (() => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
               __compose("test", __child0);
               return __root;
           })());
-          const cText = __createElement(Component, null, t1cb251ec0d(true)[0]);
-          const cFrag = __createElement(Component, null, (() => {
+          const cText = __makeElement(Component, null, t1cb251ec0d(true)[0]);
+          const cFrag = __makeElement(Component, null, (() => {
               const [__root, __targets] = t9b045328fb(true);
               const __target0 = __targets[0];
               const __target1 = __targets[1];

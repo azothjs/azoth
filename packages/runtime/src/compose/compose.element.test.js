@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { compose, composeElement, createElement } from './compose.js';
+import { compose, composeElement, makeElement } from './compose.js';
 import { $anchor, elementWithAnchor, elementWithText, elementWithTextAnchor, runCompose } from '../test-utils/elements.test.js';
 
 
@@ -86,7 +86,7 @@ describe('create element', () => {
             return runCompose(name, elementWithAnchor);
         }
 
-        const dom = createElement(Component, { name: 'felix' });
+        const dom = makeElement(Component, { name: 'felix' });
 
         expect(dom).toMatchInlineSnapshot(`
           <div>
