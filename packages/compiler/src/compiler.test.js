@@ -216,17 +216,28 @@ describe('surrounding code integration', () => {
 });
 
 describe('fragments', () => {
-    test.only('<> ... </> works', ({ expect }) => {
+    test('<> ... </> basic', ({ expect }) => {
         const input = `
             const fragment = <><hr/><hr/></>;
-            // const empty = <></>;
-            // const compose = <>{x}</>;
-            // const text = <>text</>;
+            const single = <><hr/></>;
+            const fragInFrag = <><><hr/></></>;
+            const fragInFragCompose = <><>{x}</></>;
+            const empty = <></>;
+            const compose = <>{x}</>;
+            const text = <>text</>;
         `;
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
           "const fragment = tc203fe7dcd(true)[0];
+          const single = t1a78cbe949()[0];
+          const fragInFrag = t1a78cbe949()[0];
+          const fragInFragCompose = (() => {
+              const __root = tc084de4382(true)[0];
+              const __child0 = __root.childNodes[0];
+              __compose(x, __child0);
+              return __root;
+          })();
           const empty = null;
           const compose = (() => {
               const __root = tc084de4382(true)[0];
@@ -246,6 +257,21 @@ describe('fragments', () => {
               "isDomFragment": true,
             },
             {
+              "html": "<hr>",
+              "id": "1a78cbe949",
+              "isDomFragment": false,
+            },
+            {
+              "html": "<hr>",
+              "id": "1a78cbe949",
+              "isDomFragment": false,
+            },
+            {
+              "html": "<!--0-->",
+              "id": "c084de4382",
+              "isDomFragment": true,
+            },
+            {
               "html": "<!--0-->",
               "id": "c084de4382",
               "isDomFragment": true,
@@ -253,6 +279,153 @@ describe('fragments', () => {
             {
               "html": "text",
               "id": "1cb251ec0d",
+              "isDomFragment": true,
+            },
+          ]
+        `);
+
+    });
+
+    test('<> ... </> trim as basic except text html', ({ expect }) => {
+        const input = `
+            const fragment = <>
+                <hr/><hr/>
+            </>;
+            const single = <>
+                <hr/>
+            </>;
+            const fragInFrag = <>
+                <>
+                    <hr/>
+                </>
+            </>;
+            const fragInFragCompose = <>
+                <>
+                    {x}
+                </>
+            </>;
+            const empty = <>
+            </>;
+            const compose = <>
+                {x}
+            </>;
+            const text = <>
+                text
+            </>;
+        `;
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "const fragment = tc203fe7dcd(true)[0];
+          const single = t1a78cbe949()[0];
+          const fragInFrag = t1a78cbe949()[0];
+          const fragInFragCompose = (() => {
+              const __root = tc084de4382(true)[0];
+              const __child0 = __root.childNodes[0];
+              __compose(x, __child0);
+              return __root;
+          })();
+          const empty = null;
+          const compose = (() => {
+              const __root = tc084de4382(true)[0];
+              const __child0 = __root.childNodes[0];
+              __compose(x, __child0);
+              return __root;
+          })();
+          const text = t6c72de769d(true)[0];
+          "
+        `);
+
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<hr><hr>",
+              "id": "c203fe7dcd",
+              "isDomFragment": true,
+            },
+            {
+              "html": "<hr>",
+              "id": "1a78cbe949",
+              "isDomFragment": false,
+            },
+            {
+              "html": "<hr>",
+              "id": "1a78cbe949",
+              "isDomFragment": false,
+            },
+            {
+              "html": "<!--0-->",
+              "id": "c084de4382",
+              "isDomFragment": true,
+            },
+            {
+              "html": "<!--0-->",
+              "id": "c084de4382",
+              "isDomFragment": true,
+            },
+            {
+              "html": "
+                          text
+                      ",
+              "id": "6c72de769d",
+              "isDomFragment": true,
+            },
+          ]
+        `);
+
+    });
+
+    test('<> ... </> partial trim', ({ expect }) => {
+        const input = `
+            const start = <>
+                <hr/></>;
+            const end = <><hr/>
+            </>;
+            const composeStart = <>
+                {x}</>;
+            const composeEnd = <>{x}
+            </>;
+        `;
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "const start = t1a78cbe949()[0];
+          const end = t1a78cbe949()[0];
+          const composeStart = (() => {
+              const __root = tc084de4382(true)[0];
+              const __child0 = __root.childNodes[0];
+              __compose(x, __child0);
+              return __root;
+          })();
+          const composeEnd = (() => {
+              const __root = tc084de4382(true)[0];
+              const __child0 = __root.childNodes[0];
+              __compose(x, __child0);
+              return __root;
+          })();
+          "
+        `);
+
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<hr>",
+              "id": "1a78cbe949",
+              "isDomFragment": false,
+            },
+            {
+              "html": "<hr>",
+              "id": "1a78cbe949",
+              "isDomFragment": false,
+            },
+            {
+              "html": "<!--0-->",
+              "id": "c084de4382",
+              "isDomFragment": true,
+            },
+            {
+              "html": "<!--0-->",
+              "id": "c084de4382",
               "isDomFragment": true,
             },
           ]
@@ -437,20 +610,7 @@ describe('element composition', () => {
           const cProps = __createElement(Component, { prop: value, attr: "static", });
           "
         `);
-        expect(templates).toMatchInlineSnapshot(`
-          [
-            {
-              "html": "<!--0-->",
-              "id": "c084de4382",
-              "isDomFragment": false,
-            },
-            {
-              "html": "<!--0-->",
-              "id": "c084de4382",
-              "isDomFragment": false,
-            },
-          ]
-        `);
+        expect(templates).toMatchInlineSnapshot(`[]`);
     });
 
     test('child level components: empty and with props', ({ expect }) => {
@@ -515,16 +675,6 @@ describe('element composition', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<!--0-->",
-              "id": "c084de4382",
-              "isDomFragment": false,
-            },
-            {
-              "html": "<!--0-->",
-              "id": "c084de4382",
-              "isDomFragment": false,
-            },
-            {
               "html": "<div>
                           <!--0-->
                           <!--0-->
@@ -560,8 +710,18 @@ describe('element composition', () => {
 
     test('component child templates', ({ expect }) => {
         const input = `
-            const c = <Component>
+            const c = <Component><p>{"test"}</p></Component>;
+            const cTrim = <Component>
                 <p>{"test"}</p>
+            </Component>;
+            const cTrimStart = <Component>
+                <p>{"test"}</p></Component>;
+            const cTrimEnd = <Component><p>{"test"}</p>
+            </Component>;
+            const cText = <Component>text</Component>;
+            const cFrag = <Component>
+                <p>{1}</p>
+                <p>{2}</p>
             </Component>;
         `;
         const { code, templates } = compile(input);
@@ -573,6 +733,35 @@ describe('element composition', () => {
               __compose("test", __child0);
               return __root;
           })());
+          const cTrim = __createElement(Component, null, (() => {
+              const __root = t904ca237ee()[0];
+              const __child0 = __root.childNodes[0];
+              __compose("test", __child0);
+              return __root;
+          })());
+          const cTrimStart = __createElement(Component, null, (() => {
+              const __root = t904ca237ee()[0];
+              const __child0 = __root.childNodes[0];
+              __compose("test", __child0);
+              return __root;
+          })());
+          const cTrimEnd = __createElement(Component, null, (() => {
+              const __root = t904ca237ee()[0];
+              const __child0 = __root.childNodes[0];
+              __compose("test", __child0);
+              return __root;
+          })());
+          const cText = __createElement(Component, null, t1cb251ec0d(true)[0]);
+          const cFrag = __createElement(Component, null, (() => {
+              const [__root, __targets] = t9b045328fb(true);
+              const __target0 = __targets[0];
+              const __target1 = __targets[1];
+              const __child0 = __target0.childNodes[0];
+              const __child1 = __target1.childNodes[0];
+              __compose(1, __child0);
+              __compose(2, __child1);
+              return __root;
+          })());
           "
         `);
 
@@ -582,6 +771,32 @@ describe('element composition', () => {
               "html": "<p><!--0--></p>",
               "id": "904ca237ee",
               "isDomFragment": false,
+            },
+            {
+              "html": "<p><!--0--></p>",
+              "id": "904ca237ee",
+              "isDomFragment": false,
+            },
+            {
+              "html": "<p><!--0--></p>",
+              "id": "904ca237ee",
+              "isDomFragment": false,
+            },
+            {
+              "html": "<p><!--0--></p>",
+              "id": "904ca237ee",
+              "isDomFragment": false,
+            },
+            {
+              "html": "text",
+              "id": "1cb251ec0d",
+              "isDomFragment": true,
+            },
+            {
+              "html": "<p data-bind><!--0--></p>
+                          <p data-bind><!--0--></p>",
+              "id": "9b045328fb",
+              "isDomFragment": true,
             },
           ]
         `);

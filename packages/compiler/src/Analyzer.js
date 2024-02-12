@@ -13,14 +13,6 @@ const BINDING_ATTR = {
 
 const byOrder = (a, b) => a.order - b.order;
 
-const isWhitespace = ({ type, value }) => {
-    if(type !== 'JSXText') return false;
-    // eslint-disable-next-line eqeqeq
-    if(value == undefined) return false;
-    if(/^\S/.test(value)) return false;
-    return true;
-};
-
 export class Analyzer {
     #elements = new Stack();
     #documentOrder = 0;
@@ -50,57 +42,28 @@ export class Analyzer {
     }
 
     #analyze(node) {
-        const { type, children } = node;
-        const isJSXFragment = node.isJSXFragment = type === 'JSXFragment';
+        const isJSXFragment = node.isJSXFragment = node.type === 'JSXFragment';
 
-        const { length } = children;
-        if(isJSXFragment && length >= 1 && length <= 3) {
-            // if(length > 1) {
-            //     const first = children[0];
-            //     const last = children.at(-1);
+        if(isJSXFragment) {
+            // trims whitespace with newline from first/last
+            trimChildren(node);
+            const { children } = node;
 
-            // }
-            // if(children.length !== 1) {
-            //     isWhitespace(first)
-            // }
-            // switch(children.length) {
-            //     case 3: {
-            //         const { type, value } = children[0];
-            //         if(type !== 'JSXText') break;
-            //         // eslint-disable-next-line eqeqeq
-            //         if(value == undefined) break;
-            //         if(/^\S/.test(value)) break;
-            //     }
-            // }
-
-
-            let start = -1;
-
-            while(start < children.length - 1) {
-                const child = children[++start];
-                const { type, value } = child;
-                if(type !== 'JSXText') break;
-                // eslint-disable-next-line eqeqeq
-                if(value == undefined) break;
-                if(/^\S/.test(value)) break;
+            // Empty <></>:
+            if(children.length === 0) {
+                this.#root = node;
+                return;
             }
 
-            let end = children.length;
-            // eslint-disable-next-line no-constant-condition
-            while(end > start + 1) {
-                const child = children[--end];
-                const { type, value } = child;
-                if(type !== 'JSXText') break;
-                // eslint-disable-next-line eqeqeq
-                if(value == undefined) break;
-                if(/^\S/.test(value)) break;
-            }
-
-            const trimmed = children.slice(start, end);
-
-            if(trimmed.length === 1 && trimmed[0].type === 'JSXElement') {
-                // <><div>...</div></>  
-                return this.#analyze(trimmed[0]);
+            if(children.length === 1) {
+                const soloChild = children[0];
+                const { type } = soloChild;
+                // <><p>...</p></> or <Component><p>...</p></Component>
+                // <><>...</></> or <Component><>...</></Component>
+                if(type === 'JSXElement' || type === 'JSXFragment') {
+                    this.#analyze(soloChild);
+                    return;
+                }
             }
         }
 
@@ -112,9 +75,6 @@ export class Analyzer {
         else {
             accessElement(node);
             this.JSXElement(node);
-            // if(node.isComponent) {
-            //     this.#bind('child', node, identifier);
-            // }
         }
     }
 
@@ -139,6 +99,9 @@ export class Analyzer {
         };
 
         if(element && element.isComponent) {
+            if(type !== 'prop') {
+                throw new TypeError(`Unexpected binding type "${type}", expected "prop"`);
+            }
             element.props.push(binding);
         }
         else {
@@ -148,14 +111,16 @@ export class Analyzer {
         if(!element || element.isComponent) return;
 
         if(element === this.#root) {
-            // root can't be a "target", so we give them
-            // -1 queryIndex to signal a bound fragment or element at root
+            // root can't be a "target", it gets a -1 queryIndex 
+            // to signal bound template root (either el or fragment)
             element.queryIndex = -1;
         }
-        // track element as bound
-        else if(!this.#boundElements.has(element)) {
-            element.openingElement?.attributes.push(BINDING_ATTR);
-            this.#boundElements.add(element);
+        else {
+            // track element as "bound" for retrieval at runtime:
+            if(!this.#boundElements.has(element)) {
+                element.openingElement?.attributes.push(BINDING_ATTR);
+                this.#boundElements.add(element);
+            }
         }
     }
 
@@ -272,3 +237,21 @@ function accessElement(node) {
         node.componentExpr = identifier;
     }
 }
+
+function trimChildren(node) {
+    if(!node.children.length) return;
+
+    const trimmed = node.children.slice();
+    const isTrim = (node) => {
+        if(node.type !== 'JSXText') return false;
+        return /^\s*[\r\n]+\s*$/.test(node.value);
+    };
+    if(isTrim(trimmed.at(-1))) trimmed.pop();
+    if(trimmed.length && isTrim(trimmed[0])) trimmed.shift();
+
+    if(trimmed.length !== node.children.length) {
+        node.children = trimmed;
+    }
+}
+
+

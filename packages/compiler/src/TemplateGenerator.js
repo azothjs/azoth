@@ -31,7 +31,7 @@ export class TemplateGenerator extends Generator {
     JSXTemplate(node, state) {
         const analyzer = new Analyzer(node);
         const template = analyzer.generateTemplate(this.htmlGenerator);
-        if(!template.isEmpty) {
+        if(template && !template.isEmpty) {
             this.templates.push(template);
         }
 
