@@ -71,7 +71,7 @@ export default function azothPlugin(options) {
             const names = uniqueIds.map(id => `t${id}`).join(', ');
 
             const imports = [
-                `import { __compose, __composeElement } from '@azoth-web/runtime';\n`,
+                `import { __compose, __composeElement, __createElement } from '@azoth-web/runtime';\n`,
                 `import { ${names} } from '${templateServiceModule}?${params.toString()}';\n`,
             ].join('');
 

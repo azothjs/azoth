@@ -38,14 +38,14 @@
     },
     "devDependencies": {
         "@azoth-web/runtime": "workspace:^",
-        "vite": "^5.0.12",
+        "vite": "^5.1.1",
         "vitest": "^1.2.2"
     },
     "peerDependencies": {
         "vite": "^5.0.12"
     },
     "dependencies": {
-        "@rollup/pluginutils": "^5.1.0",
-        "@azoth-web/compiler": "workspace:^"
+        "@azoth-web/compiler": "workspace:^",
+        "@rollup/pluginutils": "^5.1.0"
     }
 }
