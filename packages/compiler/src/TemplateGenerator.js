@@ -1,14 +1,8 @@
 import { generate } from 'astring';
 import { HtmlGenerator } from './HtmlGenerator.js';
-import { Generator } from './GeneratorBase.js';
+import { Generator, getNextLine } from './GeneratorBase.js';
 import isValidName from 'is-valid-var-name';
 import { Analyzer } from './Analyzer.js';
-
-function getNextLine(state) {
-    const { indent, lineEnd, } = state;
-    const indentation = indent.repeat(state.indentLevel);
-    return `${lineEnd}${indentation}`;
-}
 
 export class TemplateGenerator extends Generator {
     templates = [];
@@ -46,6 +40,16 @@ export class TemplateGenerator extends Generator {
         }
 
         this.InjectionWrapper(template, state);
+    }
+
+    // process javascript in {...} exprs,
+    // supports nested template: recursive processing ftw!
+    JSXExpressionContainer({ expression }, state) {
+        this[expression.type](expression, state);
+    }
+
+    JSXIdentifier(identifier, state) {
+        state.write(identifier.name);
     }
 
     /* Adopt implicit arrow as containing function */
@@ -116,7 +120,7 @@ export class TemplateGenerator extends Generator {
     StaticRoot({ isReturnArg }, template, state) {
         if(isReturnArg) state.write(`return `);
         this.TemplateRenderer(template, state);
-        if(!template.isEmpty) state.write(`[0]`); // dom root property
+        if(!template.isEmpty) state.write(`[0]`); // dom root
         if(isReturnArg) state.write(`;`);
     }
 
@@ -128,10 +132,6 @@ export class TemplateGenerator extends Generator {
         state.write(`t${id}(`);
         if(isDomFragment) state.write('true');
         state.write(`)`);
-    }
-
-    JSXIdentifier(identifier, state) {
-        state.write(identifier.name);
     }
 
     DomLiteral(template, state) {
@@ -243,13 +243,6 @@ export class TemplateGenerator extends Generator {
         this[expr.type](expr, state);
         state.write(`, __child${i});`);
     }
-
-    // process javascript in {...} exprs,
-    // supports nested template: recursive processing ftw!
-    JSXExpressionContainer({ expression }, state) {
-        this[expression.type](expression, state);
-    }
-
 }
 
 
