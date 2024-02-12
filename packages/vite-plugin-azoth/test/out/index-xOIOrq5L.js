@@ -101,8 +101,9 @@ function inject(input, anchor, keepLast) {
     anchor.data = `${count + 1}`;
 }
 
-// TODO: array in array with replace param
+// TODO: TEST array in array with replace param
 function composeArray(array, anchor) {
+    // TODO: optimize arrays here if Node[]
     for(let i = 0; i < array.length; i++) {
         compose(array[i], anchor, true);
     }
@@ -131,10 +132,12 @@ const templates = new Map();
 function rendererById(id, isFragment = false) {
     if(templates.has(id)) return templates.get(id);
 
-    // TODO: could fail on bad id...
     const templateEl = document.getElementById(id);
-    return rendererFactory(id, templateEl.content, isFragment);
+    if(!templateEl) {
+        throw new Error(`No template with id "${id}"`);
+    }
 
+    return rendererFactory(id, templateEl.content, isFragment);
 }
 
 function rendererFactory(id, node, isFragment) {
@@ -144,23 +147,23 @@ function rendererFactory(id, node, isFragment) {
 }
 
 function renderer(fragment, isFragment) {
+    if(!isFragment) fragment = fragment.firstElementChild;
+    // TODO: malformed fragments...necessary?
 
     return function render() {
         const clone = fragment.cloneNode(true);
         const targets = clone.querySelectorAll('[data-bind]');
-        const root = isFragment ? clone : clone.firstElementChild;
-
-        return [root, targets];
+        return [clone, targets];
     };
 }
 
-const t61b16566ed = rendererById('61b16566ed', true);
+const t14720b3874 = rendererById('14720b3874', true);
 
-const t03038e2f88 = rendererById('03038e2f88');
+const ta51edaabfe = rendererById('a51edaabfe');
 
-const t68bf46eb1d = rendererById('68bf46eb1d');
+const t880311674b = rendererById('880311674b');
 
-const t92280c0caa = rendererById('92280c0caa');
+const tdfc9870d38 = rendererById('dfc9870d38');
 
 const EMOJIS = 'EMOJIS';
 async function fetchEmojis() {
@@ -187,39 +190,36 @@ const List = fetchEmojis().then((emojis) => EmojiList({
   emojis
 }));
 const App = (() => {
-  const [__root_61b16566ed, __targets] = t61b16566ed(true);
+  const [__root, __targets] = t14720b3874(true);
   const __target0 = __targets[0];
   const __child0 = __target0.childNodes[3];
   compose(List, __child0);
-  return __root_61b16566ed;
+  return __root;
 })();
 document.body.append(App);
 function EmojiList({ emojis }) {
-  const [__root_03038e2f88, __targets] = t03038e2f88();
-  const __target0 = __targets[0];
-  const __child0 = __target0.childNodes[1];
+  const __root = ta51edaabfe()[0];
+  const __child0 = __root.childNodes[1];
   compose(emojis.map(Emoji), __child0);
-  return __root_03038e2f88;
+  return __root;
 }
 function Emoji({ name, unicode, htmlCode }) {
-  const [__root_68bf46eb1d, __targets] = t68bf46eb1d();
-  const __target0 = __targets[0];
-  const __child0 = __target0.childNodes[1];
-  const __child1 = __target0.childNodes[3];
-  const __child2 = __target0.childNodes[5];
+  const __root = t880311674b()[0];
+  const __child0 = __root.childNodes[1];
+  const __child1 = __root.childNodes[3];
+  const __child2 = __root.childNodes[5];
   compose(InnerHtml({
     html: htmlCode.join("")
   }), __child0);
   compose(name, __child1);
   compose(unicode, __child2);
-  return __root_68bf46eb1d;
+  return __root;
 }
 function InnerHtml({ html, className = "" }) {
   const rawEmoji = (() => {
-    const [__root_92280c0caa, __targets] = t92280c0caa();
-    const __target0 = __targets[0];
-    __target0.className = className ?? "";
-    return __root_92280c0caa;
+    const __root = tdfc9870d38()[0];
+    __root.className = className ?? "";
+    return __root;
   })();
   rawEmoji.firstChild.innerHTML = html;
   return rawEmoji;
