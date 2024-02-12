@@ -244,5 +244,3 @@ export class TemplateGenerator extends Generator {
         state.write(`, __child${i});`);
     }
 }
-
-
