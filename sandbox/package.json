@@ -1,0 +1,26 @@
+{
+    "name": "sandbox",
+    "version": "1.0.0",
+    "description": "",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "start": "vite",
+        "test": "vitest"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@azoth-web/runtime": "workspace:^",
+        "@streamparser/json-whatwg": "^0.0.20",
+        "npm": "^10.4.0",
+        "page": "^1.11.6"
+    },
+    "devDependencies": {
+        "@azoth-web/vite-plugin-azoth": "workspace:^",
+        "vite": "^5.1.1",
+        "vite-plugin-inspect": "^0.8.3",
+        "vitest": "^1.2.2"
+    }
+}
