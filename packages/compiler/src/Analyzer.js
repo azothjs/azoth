@@ -13,6 +13,14 @@ const BINDING_ATTR = {
 
 const byOrder = (a, b) => a.order - b.order;
 
+const isWhitespace = ({ type, value }) => {
+    if(type !== 'JSXText') return false;
+    // eslint-disable-next-line eqeqeq
+    if(value == undefined) return false;
+    if(/^\S/.test(value)) return false;
+    return true;
+};
+
 export class Analyzer {
     #elements = new Stack();
     #documentOrder = 0;
@@ -44,11 +52,56 @@ export class Analyzer {
     #analyze(node) {
         const { type, children } = node;
         const isJSXFragment = node.isJSXFragment = type === 'JSXFragment';
-        const childCount = node.children.length;
 
-        if(isJSXFragment && childCount === 1 && children[0].type === 'JSXElement') {
-            // <><div>...</div></>  
-            return this.#analyze(children[0]);
+        const { length } = children;
+        if(isJSXFragment && length >= 1 && length <= 3) {
+            // if(length > 1) {
+            //     const first = children[0];
+            //     const last = children.at(-1);
+
+            // }
+            // if(children.length !== 1) {
+            //     isWhitespace(first)
+            // }
+            // switch(children.length) {
+            //     case 3: {
+            //         const { type, value } = children[0];
+            //         if(type !== 'JSXText') break;
+            //         // eslint-disable-next-line eqeqeq
+            //         if(value == undefined) break;
+            //         if(/^\S/.test(value)) break;
+            //     }
+            // }
+
+
+            let start = -1;
+
+            while(start < children.length - 1) {
+                const child = children[++start];
+                const { type, value } = child;
+                if(type !== 'JSXText') break;
+                // eslint-disable-next-line eqeqeq
+                if(value == undefined) break;
+                if(/^\S/.test(value)) break;
+            }
+
+            let end = children.length;
+            // eslint-disable-next-line no-constant-condition
+            while(end > start + 1) {
+                const child = children[--end];
+                const { type, value } = child;
+                if(type !== 'JSXText') break;
+                // eslint-disable-next-line eqeqeq
+                if(value == undefined) break;
+                if(/^\S/.test(value)) break;
+            }
+
+            const trimmed = children.slice(start, end);
+
+            if(trimmed.length === 1 && trimmed[0].type === 'JSXElement') {
+                // <><div>...</div></>  
+                return this.#analyze(trimmed[0]);
+            }
         }
 
         this.#root = node;
@@ -57,11 +110,11 @@ export class Analyzer {
             this.JSXFragmentRoot(node);
         }
         else {
-            const identifier = accessElement(node);
+            accessElement(node);
             this.JSXElement(node);
-            if(node.isComponent) {
-                this.#bind('child', node, identifier);
-            }
+            // if(node.isComponent) {
+            //     this.#bind('child', node, identifier);
+            // }
         }
     }
 
@@ -124,9 +177,24 @@ export class Analyzer {
 
     JSXElement(node) {
         this.#pushElement(node);
+
         // short-cut JSXOpeningElement > JSXAttributes
-        this.JSXAttributes(node.openingElement.attributes, node.isComponent);
-        this.JSXChildren(node);
+        if(node.isComponent) {
+            this.JSXProps(node.openingElement.attributes);
+            if(node.children.length) {
+                node.slotFragment = {
+                    type: 'JSXFragment',
+                    children: node.children,
+                    openingFragment: {
+                        attributes: []
+                    }
+                };
+            }
+        } else {
+            this.JSXAttributes(node.openingElement.attributes);
+            this.JSXChildren(node);
+        }
+
         this.#popElement();
     }
 
@@ -157,23 +225,27 @@ export class Analyzer {
                 throw new TypeError(`Unexpected AST Type "${type}"`);
             }
             else {
-                const identifier = accessElement(child);
+                accessElement(child);
                 if(child.isComponent) {
-                    this.#bind('child', child, identifier, i + adj);
+                    this.#bind('child', child, child.componentExpr, i + adj);
                 }
                 this[type](child, i + adj);
             }
         }
     }
 
-    JSXAttributes(attributes, isComponent = false) {
+    JSXProps(attributes) {
+        for(var i = 0; i < attributes.length; i++) {
+            const attr = attributes[i];
+            this.#bind('prop', attr, attr.value, i);
+        }
+    }
+
+    JSXAttributes(attributes) {
         for(var i = 0; i < attributes.length; i++) {
             const attr = attributes[i];
             if(attr.value?.type === 'JSXExpressionContainer') {
                 this.#bind('prop', attr, attr.value.expression, i);
-            }
-            else if(isComponent) {
-                this.#bind('prop', attr, attr.value, i);
             }
         }
     }
@@ -195,7 +267,8 @@ function accessElement(node) {
     const isCustom = node.isCustomElement = identifier.name.includes('-');
     node.isVoidElement = !isCustom && voidElements.has(identifier.name);
     const isComponent = node.isComponent = !isCustom && /^[A-Z$][a-zA-Z]*$/.test(identifier.name);
-    if(isComponent) node.props = [];
-
-    return identifier;
+    if(isComponent) {
+        node.props = [];
+        node.componentExpr = identifier;
+    }
 }

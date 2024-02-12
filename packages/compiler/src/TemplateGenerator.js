@@ -66,40 +66,25 @@ export class TemplateGenerator extends Generator {
 
     InjectionWrapper(template, state) {
         const { isEmpty, boundElements, node, bindings } = template;
+        const { isReturnArg, isComponent, queryIndex } = node;
 
-        // console.log('wrap', node.isComponent, node.queryIndex, bindings.length);
-
-        if(node.isComponent) {
-            if(node.isReturnArg) state.write(`return `);
-
-            if(bindings.length !== 1) {
+        // Short-circuit templates
+        if(isComponent) {
+            if(bindings.length) {
                 throw new Error('Unexpected component binding length');
             }
-
-            const { expr } = bindings[0];
-            state.write(`__createElement(`);
-            this[expr.type](expr, state);
-            this.JSXComponentProps(node, state);
-            state.write(`)`);
-
-            if(node.isReturnArg) state.write(`;`);
-
+            this.ComponentRoot(node, state);
             return;
-
         }
-        else if(isEmpty || (!boundElements.length) && node.queryIndex !== -1) {
-            if(node.isReturnArg) state.write(`return `);
-            this.TemplateRenderer(template, state);
-            // dom root property
-            if(!isEmpty) state.write(`[0]`);
-            if(node.isReturnArg) state.write(`;`);
-
+        else if(isEmpty || (!boundElements.length) && queryIndex !== -1) {
+            this.StaticRoot(node, template, state);
             return;
         }
 
+        // Regular template
         let nextLine = getNextLine(state);
 
-        const useIIFEWrapper = !node.isReturnArg;
+        const useIIFEWrapper = !isReturnArg;
         if(useIIFEWrapper) {
             state.write(`(() => {`);
             state.indentLevel++;
@@ -108,7 +93,6 @@ export class TemplateGenerator extends Generator {
         }
 
         this.JSXDomLiteral(template, state);
-
         state.write(`${nextLine}return __root;`);
 
         if(useIIFEWrapper) {
@@ -118,12 +102,35 @@ export class TemplateGenerator extends Generator {
         }
     }
 
+    ComponentRoot(node, state) {
+        const { isReturnArg, componentExpr, slotFragment } = node;
+        if(isReturnArg) state.write(`return `);
+
+        const expr = componentExpr;
+        state.write(`__createElement(`);
+        this[expr.type](expr, state);
+        this.JSXComponentProps(node, state, !!slotFragment);
+        if(slotFragment) {
+            state.write(', ');
+            this.JSXTemplate(slotFragment, state);
+        }
+        state.write(`)`);
+
+        if(isReturnArg) state.write(`;`);
+    }
+
+    StaticRoot({ isReturnArg }, template, state) {
+        if(isReturnArg) state.write(`return `);
+        this.TemplateRenderer(template, state);
+        if(!template.isEmpty) state.write(`[0]`); // dom root property
+        if(isReturnArg) state.write(`;`);
+    }
+
     TemplateRenderer({ id, isEmpty, isDomFragment }, state) {
         if(isEmpty) {
             state.write('null');
             return;
         }
-
         state.write(`t${id}(`);
         if(isDomFragment) state.write('true');
         state.write(`)`);
@@ -182,11 +189,15 @@ export class TemplateGenerator extends Generator {
                 this[expr.type](expr, state);
                 state.write(`, __child${i}`);
                 this.JSXComponentProps(node, state);
+                if(node.slotFragment) {
+                    state.write(', ');
+                    this.JSXTemplate(node, state);
+                }
                 state.write(`);`);
             }
             else if(type === 'child') {
                 state.write(`__compose(`);
-                this.JSXExpressionContext(expr, state);
+                this[expr.type](expr, state);
                 state.write(`, __child${i});`);
             }
             else if(type === 'prop') {
@@ -204,7 +215,7 @@ export class TemplateGenerator extends Generator {
 
                 /* expression */
                 state.write(` = (`); // do we need (...)? 
-                this.JSXExpressionContext(expr, state);
+                this[expr.type](expr, state);
                 state.write(`);`);
             }
             else {
@@ -214,8 +225,11 @@ export class TemplateGenerator extends Generator {
         }
     }
 
-    JSXComponentProps({ props }, state) {
-        if(!props?.length) return;
+    JSXComponentProps({ props }, state, includeParam) {
+        if(!props?.length) {
+            if(includeParam) state.write(`, null`);
+            return;
+        }
 
         state.write(`, {`);
         for(let i = 0; i < props.length; i++) {
@@ -223,7 +237,7 @@ export class TemplateGenerator extends Generator {
             // TODO: Dom lookup, JS .prop v['prop'], etc. 
             // refactor with code below
             state.write(` ${node.name.name}: `);
-            this.JSXExpressionContext(expr, state);
+            this[expr.type](expr, state);
             state.write(`,`);
         }
         state.write(` }`);
@@ -232,8 +246,8 @@ export class TemplateGenerator extends Generator {
     // process javascript in {...} exprs,
     // stack context to support nested template,
     // recursive template processing ftw!
-    JSXExpressionContext(node, state) {
-        this[node.type](node, state);
+    JSXExpressionContainer({ expression }, state) {
+        this[expression.type](expression, state);
     }
 
 }

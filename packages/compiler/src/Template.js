@@ -24,6 +24,8 @@ export class Template {
         this.boundElements = boundElements;
 
         this.isDomFragment = node.isJSXFragment;
-        this.isEmpty = node.isJSXFragment && node.children.length === 0;
+        this.isEmpty = node.isComponent ||
+            (node.isJSXFragment &&
+                node.children.length === 0);
     }
 }

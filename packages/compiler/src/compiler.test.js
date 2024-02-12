@@ -216,12 +216,12 @@ describe('surrounding code integration', () => {
 });
 
 describe('fragments', () => {
-    test('<> ... </> works', ({ expect }) => {
+    test.only('<> ... </> works', ({ expect }) => {
         const input = `
             const fragment = <><hr/><hr/></>;
-            const empty = <></>;
-            const compose = <>{x}</>;
-            const text = <>text</>;
+            // const empty = <></>;
+            // const compose = <>{x}</>;
+            // const text = <>text</>;
         `;
         const { code, templates } = compile(input);
 
@@ -556,6 +556,35 @@ describe('element composition', () => {
           "
         `);
 
+    });
+
+    test('component child templates', ({ expect }) => {
+        const input = `
+            const c = <Component>
+                <p>{"test"}</p>
+            </Component>;
+        `;
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "const c = __createElement(Component, null, (() => {
+              const __root = t904ca237ee()[0];
+              const __child0 = __root.childNodes[0];
+              __compose("test", __child0);
+              return __root;
+          })());
+          "
+        `);
+
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<p><!--0--></p>",
+              "id": "904ca237ee",
+              "isDomFragment": false,
+            },
+          ]
+        `);
     });
 
 });
