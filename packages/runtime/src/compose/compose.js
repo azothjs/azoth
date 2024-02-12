@@ -82,13 +82,13 @@ async function composeStream(stream, anchor, keepLast) {
 }
 
 export function composeElement(Constructor, anchor, props) {
-    const dom = makeElement(Constructor, props);
+    const dom = createElement(Constructor, props);
     // TODO: optimize arrays here or in compose array
     compose(dom, anchor);
 }
 
-// esbuild or vite bug chokes on makeElement
-export function makeElement(Constructor, props) {
+// esbuild or vite bug chokes on createElement
+export function createElement(Constructor, props) {
     // let JavaScript handle it :)
     // will throw appropriate errors, 
     // so key point for source maps in callers

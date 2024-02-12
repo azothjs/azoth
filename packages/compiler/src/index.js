@@ -33,8 +33,8 @@ export function generate(ast, config) {
         generator,
     });
 
-    const templates = generator.templates.map(({ id, html, isDomFragment }) => {
-        return { id, html, isDomFragment };
+    const templates = generator.templates.map(({ id, html, isDomFragment, needs }) => {
+        return { id, html, isDomFragment, needs };
     });
 
     return { code, templates };

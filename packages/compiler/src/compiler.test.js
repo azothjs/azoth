@@ -78,6 +78,11 @@ describe('JSX dom literals', () => {
                   </div>",
               "id": "fdd1a869cf",
               "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -112,6 +117,11 @@ describe('JSX dom literals', () => {
               "html": "<input required>",
               "id": "10073da0ec",
               "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -140,11 +150,21 @@ describe('nested context', () => {
               "html": "<div><!--0--></div>",
               "id": "8dae88052a",
               "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<hr>",
               "id": "1a78cbe949",
               "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -169,6 +189,11 @@ describe('template optimizations', () => {
               "html": "<p>Hello</p>",
               "id": "5bf3d2f523",
               "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -182,17 +207,30 @@ describe('surrounding code integration', () => {
             const template = (text) => <p>{text}</p>
         `;
 
-        expect(compile(input).code).toMatchInlineSnapshot(`
-          "const template = text => {
+        expect(compile(input)).toMatchInlineSnapshot(`
+          {
+            "code": "const template = text => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
               __compose(text, __child0);
               return __root;
           };
-          "
+          ",
+            "templates": [
+              {
+                "html": "<p><!--0--></p>",
+                "id": "904ca237ee",
+                "isDomFragment": false,
+                "needs": {
+                  "compose": true,
+                  "composeElement": false,
+                  "createElement": false,
+                },
+              },
+            ],
+          }
         `);
     });
-
 
     test('ReturnStatement: injects statements before, returns root', ({ expect }) => {
         const input = `
@@ -202,15 +240,29 @@ describe('surrounding code integration', () => {
             }
         `;
 
-        expect(compile(input).code).toMatchInlineSnapshot(`
-          "function template(text) {
+        expect(compile(input)).toMatchInlineSnapshot(`
+          {
+            "code": "function template(text) {
               const format = 'text' + '!';
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
               __compose(text, __child0);
               return __root;
           }
-          "
+          ",
+            "templates": [
+              {
+                "html": "<p><!--0--></p>",
+                "id": "904ca237ee",
+                "isDomFragment": false,
+                "needs": {
+                  "compose": true,
+                  "composeElement": false,
+                  "createElement": false,
+                },
+              },
+            ],
+          }
         `);
     });
 });
@@ -255,31 +307,71 @@ describe('fragments', () => {
               "html": "<hr><hr>",
               "id": "c203fe7dcd",
               "isDomFragment": true,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<hr>",
               "id": "1a78cbe949",
               "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<hr>",
               "id": "1a78cbe949",
               "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<!--0-->",
               "id": "c084de4382",
               "isDomFragment": true,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
+            },
+            {
+              "html": "",
+              "id": "",
+              "isDomFragment": true,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<!--0-->",
               "id": "c084de4382",
               "isDomFragment": true,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "text",
               "id": "1cb251ec0d",
               "isDomFragment": true,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -342,26 +434,61 @@ describe('fragments', () => {
               "html": "<hr><hr>",
               "id": "c203fe7dcd",
               "isDomFragment": true,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<hr>",
               "id": "1a78cbe949",
               "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<hr>",
               "id": "1a78cbe949",
               "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<!--0-->",
               "id": "c084de4382",
               "isDomFragment": true,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
+            },
+            {
+              "html": "",
+              "id": "",
+              "isDomFragment": true,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<!--0-->",
               "id": "c084de4382",
               "isDomFragment": true,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "
@@ -369,6 +496,11 @@ describe('fragments', () => {
                       ",
               "id": "6c72de769d",
               "isDomFragment": true,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -412,21 +544,41 @@ describe('fragments', () => {
               "html": "<hr>",
               "id": "1a78cbe949",
               "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<hr>",
               "id": "1a78cbe949",
               "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<!--0-->",
               "id": "c084de4382",
               "isDomFragment": true,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<!--0-->",
               "id": "c084de4382",
               "isDomFragment": true,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -463,26 +615,51 @@ describe('fragments', () => {
               "html": " <hr><hr> ",
               "id": "653a3aad80",
               "isDomFragment": true,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": " <hr> ",
               "id": "dcaa233028",
               "isDomFragment": true,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "  <hr>  ",
               "id": "2dc1738d5c",
               "isDomFragment": true,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "    ",
               "id": "0cf31b2c28",
               "isDomFragment": true,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": " <!--0--> ",
               "id": "5bc2a159b1",
               "isDomFragment": true,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -511,6 +688,11 @@ describe('fragments', () => {
               "html": "one<!--0-->three",
               "id": "faf808e6cc",
               "isDomFragment": true,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -546,6 +728,11 @@ describe('fragments', () => {
               "html": "<div><hr><hr><hr></div>",
               "id": "ccaa44c114",
               "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<div>
@@ -555,6 +742,11 @@ describe('fragments', () => {
                       </div>",
               "id": "681310be49",
               "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -586,6 +778,11 @@ describe('fragments', () => {
               "html": "<!--0--><main data-bind><!--0--></main><!--0-->",
               "id": "ef691fa27a",
               "isDomFragment": true,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -616,6 +813,11 @@ describe('template root', () => {
               "html": "<div><!--0--></div>",
               "id": "8dae88052a",
               "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -648,6 +850,11 @@ describe('element composition', () => {
               "html": "<raw-html></raw-html>",
               "id": "4ca37f3876",
               "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -662,11 +869,34 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const c = __makeElement(Component);
-          const cProps = __makeElement(Component, { prop: value, attr: "static", });
+          "const c = __createElement(Component);
+          const cProps = __createElement(Component, { prop: value, attr: "static", });
           "
         `);
-        expect(templates).toMatchInlineSnapshot(`[]`);
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "",
+              "id": "",
+              "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": true,
+              },
+            },
+            {
+              "html": "",
+              "id": "",
+              "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": true,
+              },
+            },
+          ]
+        `);
     });
 
     test('child level components: empty and with props', ({ expect }) => {
@@ -698,6 +928,11 @@ describe('element composition', () => {
                       </div>",
               "id": "2288998344",
               "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": true,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -716,8 +951,8 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const $A = __makeElement(A);
-          const $B = __makeElement(B);
+          "const $A = __createElement(A);
+          const $B = __createElement(B);
           const dom = (() => {
               const __root = t2288998344()[0];
               const __child0 = __root.childNodes[1];
@@ -731,12 +966,37 @@ describe('element composition', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "html": "",
+              "id": "",
+              "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": true,
+              },
+            },
+            {
+              "html": "",
+              "id": "",
+              "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": true,
+              },
+            },
+            {
               "html": "<div>
                           <!--0-->
                           <!--0-->
                       </div>",
               "id": "2288998344",
               "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -755,11 +1015,28 @@ describe('element composition', () => {
 
         const { code } = compile(input);
 
-        expect(code).toMatchInlineSnapshot(`
-          "function Surprise() {
+        expect(compile(input)).toMatchInlineSnapshot(`
+          {
+            "code": "function Surprise() {
               return t92cc583556()[0];
           }
-          "
+          ",
+            "templates": [
+              {
+                "html": "<section>
+                              <h2>Guess What...</h2>
+                              <p>surprise!</p>
+                          </section>",
+                "id": "92cc583556",
+                "isDomFragment": false,
+                "needs": {
+                  "compose": false,
+                  "composeElement": false,
+                  "createElement": false,
+                },
+              },
+            ],
+          }
         `);
 
     });
@@ -783,32 +1060,32 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const c = __makeElement(Component, null, (() => {
+          "const c = __createElement(Component, null, (() => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
               __compose("test", __child0);
               return __root;
           })());
-          const cTrim = __makeElement(Component, null, (() => {
+          const cTrim = __createElement(Component, null, (() => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
               __compose("test", __child0);
               return __root;
           })());
-          const cTrimStart = __makeElement(Component, null, (() => {
+          const cTrimStart = __createElement(Component, null, (() => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
               __compose("test", __child0);
               return __root;
           })());
-          const cTrimEnd = __makeElement(Component, null, (() => {
+          const cTrimEnd = __createElement(Component, null, (() => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
               __compose("test", __child0);
               return __root;
           })());
-          const cText = __makeElement(Component, null, t1cb251ec0d(true)[0]);
-          const cFrag = __makeElement(Component, null, (() => {
+          const cText = __createElement(Component, null, t1cb251ec0d(true)[0]);
+          const cFrag = __createElement(Component, null, (() => {
               const [__root, __targets] = t9b045328fb(true);
               const __target0 = __targets[0];
               const __target1 = __targets[1];
@@ -824,35 +1101,125 @@ describe('element composition', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<p><!--0--></p>",
-              "id": "904ca237ee",
+              "html": "",
+              "id": "",
               "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": true,
+              },
             },
             {
               "html": "<p><!--0--></p>",
               "id": "904ca237ee",
               "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
+            },
+            {
+              "html": "",
+              "id": "",
+              "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": true,
+              },
             },
             {
               "html": "<p><!--0--></p>",
               "id": "904ca237ee",
               "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
+            },
+            {
+              "html": "",
+              "id": "",
+              "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": true,
+              },
             },
             {
               "html": "<p><!--0--></p>",
               "id": "904ca237ee",
               "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
+            },
+            {
+              "html": "",
+              "id": "",
+              "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": true,
+              },
+            },
+            {
+              "html": "<p><!--0--></p>",
+              "id": "904ca237ee",
+              "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
+            },
+            {
+              "html": "",
+              "id": "",
+              "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": true,
+              },
             },
             {
               "html": "text",
               "id": "1cb251ec0d",
               "isDomFragment": true,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
+              },
+            },
+            {
+              "html": "",
+              "id": "",
+              "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": true,
+              },
             },
             {
               "html": "<p data-bind><!--0--></p>
                           <p data-bind><!--0--></p>",
               "id": "9b045328fb",
               "isDomFragment": true,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -893,11 +1260,21 @@ describe('render and composition cases', () => {
               "html": "<li><!--0--></li>",
               "id": "62831a5152",
               "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<div><!--0--><!--0--></div>",
               "id": "8dc93cc914",
               "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -927,6 +1304,11 @@ describe('render and composition cases', () => {
               "html": "<li>Hello <!--0--></li>",
               "id": "2b440f4741",
               "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);
@@ -965,11 +1347,21 @@ describe('render and composition cases', () => {
               "html": "<li><!--0--></li>",
               "id": "62831a5152",
               "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
             {
               "html": "<ul><!--0--></ul>",
               "id": "25ec157413",
               "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
+              },
             },
           ]
         `);

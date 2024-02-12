@@ -52,10 +52,21 @@ export default function azothPlugin(options) {
             if(!filter(id) || !extension.test(id)) return;
 
             let { code, templates } = compile(source, options);
+            if(!templates.length) {
+                return code;
+            }
+
             const moduleTemplates = new Set();
+            const importSet = new Set();
 
             for(let template of templates) {
-                const { id } = template;
+                const { id, html, needs } = template;
+                const { compose, composeElement, createElement } = needs;
+                if(compose) importSet.add('__compose');
+                if(composeElement) importSet.add('__composeElement');
+                if(createElement) importSet.add('__createElement');
+
+                if(!html) continue;
 
                 if(moduleTemplates.has(id)) continue;
                 moduleTemplates.add(id);
@@ -64,19 +75,19 @@ export default function azothPlugin(options) {
                 programTemplates.set(id, template);
             }
 
-            if(!moduleTemplates.size) return;
+            const imports = [];
+            if(importSet.size) {
+                imports.push(`import { ${[...importSet].join(', ')} } from '@azoth-web/runtime';\n`);
+            }
 
-            const uniqueIds = [...moduleTemplates];
-            const params = new URLSearchParams(uniqueIds.map(id => ['id', id]));
-            const names = uniqueIds.map(id => `t${id}`).join(', ');
+            if(moduleTemplates.size) {
+                const uniqueIds = [...moduleTemplates];
+                const params = new URLSearchParams(uniqueIds.map(id => ['id', id]));
+                const names = uniqueIds.map(id => `t${id}`).join(', ');
+                imports.push(`import { ${names} } from '${templateServiceModule}?${params.toString()}';\n`);
+            }
 
-            const imports = [
-                `import { __compose, __composeElement, __makeElement } from '@azoth-web/runtime';\n`,
-                `import { ${names} } from '${templateServiceModule}?${params.toString()}';\n`,
-            ].join('');
-
-            return imports + code;
-
+            return imports.join('') + code;
         },
     };
 

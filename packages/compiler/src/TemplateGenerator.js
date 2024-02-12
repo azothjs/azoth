@@ -25,9 +25,7 @@ export class TemplateGenerator extends Generator {
     JSXTemplate(node, state) {
         const analyzer = new Analyzer(node);
         const template = analyzer.generateTemplate(this.htmlGenerator);
-        if(!template.isEmpty) {
-            this.templates.push(template);
-        }
+        this.templates.push(template);
 
         const { isStatic, node: root } = template;
 
@@ -105,7 +103,7 @@ export class TemplateGenerator extends Generator {
         if(isReturnArg) state.write(`return `);
 
         const expr = componentExpr;
-        state.write(`__makeElement(`);
+        state.write(`__createElement(`);
         this[expr.type](expr, state);
         this.ComponentProps(node, state, !!slotFragment);
         if(slotFragment) {

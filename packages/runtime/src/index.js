@@ -1,7 +1,7 @@
 export {
     compose as __compose,
     composeElement as __composeElement,
-    makeElement as __makeElement,
+    createElement as __createElement,
 } from './compose/index.js';
 
 export {

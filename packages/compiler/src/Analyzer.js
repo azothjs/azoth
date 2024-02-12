@@ -20,6 +20,11 @@ export class Analyzer {
     #bindings = [];
     #template = null;
     #root = null;
+    #needs = {
+        compose: false,
+        composeElement: false,
+        createElement: false,
+    };
 
     constructor(node) {
         this.#analyze(node);
@@ -32,12 +37,13 @@ export class Analyzer {
         this.#template = new Template(this.#root, {
             bindings: this.#bindings,
             boundElements,
+            needs: this.#needs,
         });
     }
 
     generateTemplate(htmlGenerator) {
         const template = this.#template;
-        template.html = htmlGenerator(template.node);
+        if(!template.isEmpty) template.html = htmlGenerator(template.node);
         return template;
     }
 
@@ -74,6 +80,7 @@ export class Analyzer {
         }
         else {
             assessElement(node);
+            if(node.isComponent) this.#needs.createElement = true;
             this.JSXElement(node);
         }
     }
@@ -108,6 +115,10 @@ export class Analyzer {
         }
 
         this.#bindings.push(binding);
+
+        if(binding.type === 'child') {
+            this.#needs.compose = true;
+        }
 
         if(element === this.#root) {
             // root can't be a "target", it gets a -1 queryIndex 
@@ -189,6 +200,7 @@ export class Analyzer {
             else {
                 assessElement(child);
                 if(child.isComponent) {
+                    this.#needs.composeElement = true;
                     this.#bind('child', child, child.componentExpr, i + adj);
                 }
                 this[type](child, i + adj);
