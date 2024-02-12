@@ -3,6 +3,7 @@ import revHash from 'rev-hash';
 export class Template {
     isDomFragment = false;
     isEmpty = false;
+    isStatic = false;
     #html = '';
     #id = '';
 
@@ -23,8 +24,13 @@ export class Template {
         this.bindings = bindings;
         this.boundElements = boundElements;
 
+        if(node.isComponent && bindings.length) {
+            throw new Error('Unexpected component binding length');
+        }
+
         this.isDomFragment = node.isJSXFragment;
         this.isEmpty = node.isComponent ||
             (node.isJSXFragment && node.children.length === 0);
+        this.isStatic = this.isEmpty || (!boundElements.length) && node.queryIndex !== -1;
     }
 }

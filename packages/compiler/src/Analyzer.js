@@ -239,9 +239,8 @@ function trimChildren(node) {
     if(!node.children.length) return;
 
     const trimmed = node.children.slice();
-    const isTrim = (node) => {
-        if(node.type !== 'JSXText') return false;
-        return /^\s*[\r\n]+\s*$/.test(node.value);
+    const isTrim = ({ type, value }) => {
+        return type === 'JSXText' && /^\s*[\r\n]+\s*$/.test(value);
     };
     if(isTrim(trimmed.at(-1))) trimmed.pop();
     if(trimmed.length && isTrim(trimmed[0])) trimmed.shift();

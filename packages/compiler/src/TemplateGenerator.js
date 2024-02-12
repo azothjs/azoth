@@ -31,8 +31,18 @@ export class TemplateGenerator extends Generator {
     JSXTemplate(node, state) {
         const analyzer = new Analyzer(node);
         const template = analyzer.generateTemplate(this.htmlGenerator);
-        if(template && !template.isEmpty) {
+        if(!template.isEmpty) {
             this.templates.push(template);
+        }
+
+        const { isStatic, node: root } = template;
+
+        // Short-circuit templates
+        if(root.isComponent) {
+            return this.ComponentRoot(root, state);
+        }
+        if(isStatic) {
+            return this.StaticRoot(root, template, state);
         }
 
         this.InjectionWrapper(template, state);
@@ -54,10 +64,11 @@ export class TemplateGenerator extends Generator {
 
     /* Inject template statements above and return root dom */
     ReturnStatement(node, state) {
-        // custom handling for direct return of jsx
-        if(node.argument?.type === 'JSXElement') {
+        // custom handling for direct return of template jsx
+        const type = node.argument?.type;
+        if(type === 'JSXElement' || type === 'JSXFragment') {
             node.argument.isReturnArg = true;
-            this.JSXElement(node.argument, state);
+            this.JSXTemplate(node.argument, state);
             return;
         }
 
@@ -65,26 +76,9 @@ export class TemplateGenerator extends Generator {
     }
 
     InjectionWrapper(template, state) {
-        const { isEmpty, boundElements, node, bindings } = template;
-        const { isReturnArg, isComponent, queryIndex } = node;
-
-        // Short-circuit templates
-        if(isComponent) {
-            if(bindings.length) {
-                throw new Error('Unexpected component binding length');
-            }
-            this.ComponentRoot(node, state);
-            return;
-        }
-        else if(isEmpty || (!boundElements.length) && queryIndex !== -1) {
-            this.StaticRoot(node, template, state);
-            return;
-        }
-
-        // Regular template
+        const useIIFEWrapper = !template.node.isReturnArg;
         let nextLine = getNextLine(state);
 
-        const useIIFEWrapper = !isReturnArg;
         if(useIIFEWrapper) {
             state.write(`(() => {`);
             state.indentLevel++;
@@ -92,7 +86,7 @@ export class TemplateGenerator extends Generator {
             state.write(nextLine);
         }
 
-        this.JSXDomLiteral(template, state);
+        this.DomLiteral(template, state);
         state.write(`${nextLine}return __root;`);
 
         if(useIIFEWrapper) {
@@ -109,7 +103,7 @@ export class TemplateGenerator extends Generator {
         const expr = componentExpr;
         state.write(`__createElement(`);
         this[expr.type](expr, state);
-        this.JSXComponentProps(node, state, !!slotFragment);
+        this.ComponentProps(node, state, !!slotFragment);
         if(slotFragment) {
             state.write(', ');
             this.JSXTemplate(slotFragment, state);
@@ -140,44 +134,35 @@ export class TemplateGenerator extends Generator {
         state.write(identifier.name);
     }
 
-    JSXDomLiteral(template, state) {
+    DomLiteral(template, state) {
         const { boundElements, bindings } = template;
-
         const { indent, lineEnd, } = state;
-        let indentation = indent.repeat(state.indentLevel);
-        let nextLine = `${lineEnd}${indentation}`;
+        const indentation = indent.repeat(state.indentLevel);
+        const nextLine = `${lineEnd}${indentation}`;
 
         // template service renderer call
-        const rootVarName = `__root`;
-        if(boundElements.length) {
-            state.write(`const [${rootVarName}, __targets] = `);
-            this.TemplateRenderer(template, state);
-            state.write(';');
-        }
-        else {
-            state.write(`const ${rootVarName} = `);
-            this.TemplateRenderer(template, state);
-            state.write('[0];');
-        }
+        const hasTargets = !!boundElements.length;
+        state.write(hasTargets ? `const [__root, __targets] = ` : `const __root = `);
+        this.TemplateRenderer(template, state);
+        state.write(hasTargets ? ';' : '[0];');
 
         // target variables
         for(let i = 0; i < boundElements.length; i++) {
             state.write(`${nextLine}const __target${i} = __targets[${i}];`);
         }
-
-        // childNode variables prevent binding mutations from changing 
-        // .childNode[1] returned value as it is a live list)
+        // sequential tasks before bindings generation below,
+        // variables prevent downstream binding mutations from 
+        // changing index because childNodes is live list.
         for(let i = 0; i < bindings.length; i++) {
             const { element: { queryIndex }, type, index } = bindings[i];
             if(type !== 'child') continue;
-            state.write(`${nextLine}const __child${i} = `);
-            const varName = queryIndex === -1 ? rootVarName : `__target${queryIndex}`;
-            state.write(`${varName}.childNodes[${index}];`);
+            const varName = queryIndex === -1 ? `__root` : `__target${queryIndex}`;
+            state.write(`${nextLine}const __child${i} = ${varName}.childNodes[${index}];`);
         }
 
         // bindings
         for(let i = 0; i < bindings.length; i++) {
-            const { element: { queryIndex }, type, node, expr } = bindings[i];
+            const { element, type, node, expr } = bindings[i];
             state.write(`${nextLine}`);
 
             if(!this[expr.type]) {
@@ -185,49 +170,40 @@ export class TemplateGenerator extends Generator {
             }
 
             if(node.isComponent) {
-                state.write(`__composeElement(`);
-                this[expr.type](expr, state);
-                state.write(`, __child${i}`);
-                this.JSXComponentProps(node, state);
-                if(node.slotFragment) {
-                    state.write(', ');
-                    this.JSXTemplate(node, state);
-                }
-                state.write(`);`);
+                this.Component(node, expr, i, state);
+                continue;
             }
-            else if(type === 'child') {
-                state.write(`__compose(`);
-                this[expr.type](expr, state);
-                state.write(`, __child${i});`);
-            }
-            else if(type === 'prop') {
-                const varName = queryIndex === -1 ? rootVarName : `__target${queryIndex}`;
-                state.write(`${varName}`);
-                // TODO: more property validation
-                const propName = node.name.name;
-                // TODO: refactor with component props
-                if(isValidName(propName)) {
-                    state.write(`.${propName}`);
-                }
-                else {
-                    state.write(`["${propName}"]`);
-                }
 
-                /* expression */
-                state.write(` = (`); // do we need (...)? 
-                this[expr.type](expr, state);
-                state.write(`);`);
+            if(type === 'child') {
+                this.ChildNode(expr, i, state);
+                continue;
             }
-            else {
-                const message = `Unexpected binding type "${type}", expected "child" or "prop"`;
-                throw new Error(message);
+
+            if(type === 'prop') {
+                this.BindingProp(node, expr, element.queryIndex, state);
+                continue;
             }
+
+            const message = `Unexpected binding type "${type}", expected "child" or "prop"`;
+            throw new Error(message);
         }
     }
 
-    JSXComponentProps({ props }, state, includeParam) {
+    Component(node, expr, index, state) {
+        state.write(`__composeElement(`);
+        this[expr.type](expr, state);
+        state.write(`, __child${index}`);
+        this.ComponentProps(node, state);
+        if(node.slotFragment) {
+            state.write(', ');
+            this.JSXTemplate(node, state);
+        }
+        state.write(`);`);
+    }
+
+    ComponentProps({ props }, state, forceArgument) {
         if(!props?.length) {
-            if(includeParam) state.write(`, null`);
+            if(forceArgument) state.write(`, null`);
             return;
         }
 
@@ -243,9 +219,33 @@ export class TemplateGenerator extends Generator {
         state.write(` }`);
     }
 
+    BindingProp({ name }, expr, queryIndex, state) {
+        const varName = queryIndex === -1 ? `__root` : `__target${queryIndex}`;
+        state.write(`${varName}`);
+        // TODO: more property validation
+        const propName = name.name;
+        // TODO: refactor with component props
+        if(isValidName(propName)) {
+            state.write(`.${propName}`);
+        }
+        else {
+            state.write(`["${propName}"]`);
+        }
+
+        /* expression */
+        state.write(` = (`); // do we need (...)? 
+        this[expr.type](expr, state);
+        state.write(`);`);
+    }
+
+    ChildNode(expr, i, state) {
+        state.write(`__compose(`);
+        this[expr.type](expr, state);
+        state.write(`, __child${i});`);
+    }
+
     // process javascript in {...} exprs,
-    // stack context to support nested template,
-    // recursive template processing ftw!
+    // supports nested template: recursive processing ftw!
     JSXExpressionContainer({ expression }, state) {
         this[expression.type](expression, state);
     }
