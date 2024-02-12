@@ -1,6 +1,6 @@
 {
     "name": "@azoth-web/runtime",
-    "version": "1.3.2",
+    "version": "1.3.3",
     "description": "Azoth runtime for hypermedia apps on the web platform",
     "author": "martypdx",
     "license": "MIT",
