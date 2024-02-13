@@ -7,9 +7,9 @@
     "scripts": {
         "check": "pnpm update && pnpm test",
         "update": "pnpm update -r",
-        "test": "CI=true pnpm test -r -F=!sandbox",
+        "test": "CI=true pnpm test -r -F @azoth-web/*",
         "lint": "eslint .",
-        "publish": "pnpm publish --access=publish -F \"@azoth-web/*\""
+        "publish": "pnpm publish --access=publish -F @azoth-web/*"
     },
     "keywords": [],
     "author": "",
