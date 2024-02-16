@@ -9,7 +9,7 @@
         "update": "pnpm update -r",
         "test": "CI=true pnpm test -r -F @azoth-web/*",
         "lint": "eslint .",
-        "publish": "pnpm publish --access=publish -F @azoth-web/*"
+        "publish": "pnpm -F maat publish --access=public && pnpm -F thoth publish --access=public && pnpm -F vite-plugin-azoth publish --access=public"
     },
     "keywords": [],
     "author": "",
