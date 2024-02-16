@@ -37,7 +37,7 @@
         }
     },
     "devDependencies": {
-        "@azoth-web/runtime": "workspace:^",
+        "@azoth-web/maat": "workspace:^",
         "vite": "^5.1.1",
         "vitest": "^1.2.2"
     },
@@ -45,7 +45,7 @@
         "vite": "^5.0.12"
     },
     "dependencies": {
-        "@azoth-web/compiler": "workspace:^",
+        "@azoth-web/thoth": "workspace:^",
         "@rollup/pluginutils": "^5.1.0"
     }
 }

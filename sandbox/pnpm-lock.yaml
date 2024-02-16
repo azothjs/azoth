@@ -5,9 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@azoth-web/runtime':
+  '@azoth-web/maat':
     specifier: workspace:^
-    version: link:../packages/runtime
+    version: link:../packages/maat
   '@streamparser/json-whatwg':
     specifier: ^0.0.20
     version: 0.0.20

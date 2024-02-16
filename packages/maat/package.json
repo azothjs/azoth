@@ -1,5 +1,5 @@
 {
-    "name": "@azoth-web/runtime",
+    "name": "@azoth-web/maat",
     "version": "1.3.3",
     "description": "Azoth runtime for hypermedia apps on the web platform",
     "author": "martypdx",
@@ -19,7 +19,7 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/azoth-web/azoth.git",
-        "directory": "packages/runtime"
+        "directory": "packages/maat"
     },
     "type": "module",
     "main": "./src/index.js",

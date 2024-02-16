@@ -18,7 +18,7 @@ export default defineConfig({
     //         // into your library
     //         external: [
     //             '@rollup/pluginutils',
-    //             '@azoth-web/compiler',
+    //             '@azoth-web/thoth',
     //         ],
     //     },
     // },

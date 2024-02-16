@@ -39,12 +39,13 @@ function composeObject(object, anchor, keepLast) {
         case object instanceof ReadableStream:
             composeStream(object, anchor, true);
             break;
-        // w/o the !! this cause intermittent failures
+        // w/o the !! this causes intermittent failures
         case !!object[Symbol.asyncIterator]:
             composeAsyncIterator(object, anchor, keepLast);
             break;
-        case object.subscribe:
-        case object.on:
+        // TODO:
+        case !!object.subscribe:
+        case !!object.on:
         default: {
             throwTypeErrorForObject(object);
         }
@@ -66,6 +67,7 @@ function throwTypeErrorForObject(obj) {
 
 
 async function composeAsyncIterator(iterator, anchor, keepLast) {
+    // TODO: use iterator and intercept
     for await(const value of iterator) {
         compose(value, anchor, keepLast);
     }

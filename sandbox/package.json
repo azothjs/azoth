@@ -12,7 +12,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@azoth-web/runtime": "workspace:^",
+        "@azoth-web/maat": "workspace:^",
         "@streamparser/json-whatwg": "^0.0.20",
         "npm": "^10.4.0",
         "page": "^1.11.6"

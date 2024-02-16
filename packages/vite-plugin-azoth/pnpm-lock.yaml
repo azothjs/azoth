@@ -5,17 +5,17 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@azoth-web/compiler':
+  '@azoth-web/thoth':
     specifier: workspace:^
-    version: link:../compiler
+    version: link:../thoth
   '@rollup/pluginutils':
     specifier: ^5.1.0
     version: 5.1.0
 
 devDependencies:
-  '@azoth-web/runtime':
+  '@azoth-web/maat':
     specifier: workspace:^
-    version: link:../runtime
+    version: link:../maat
   vite:
     specifier: ^5.1.1
     version: 5.1.1
