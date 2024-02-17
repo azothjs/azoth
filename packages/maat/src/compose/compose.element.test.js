@@ -80,11 +80,37 @@ describe('compose element', () => {
 
 describe('create element', () => {
 
+    test('constructors', ({ expect }) => {
+        function Component() { }
+        const component = () => { };
+        class ClassComp { }
+
+        expect(Component.prototype.constructor).toBeDefined();
+        expect(component.prototype?.constructor).not.toBeDefined();
+        expect(ClassComp.prototype.constructor).toBeDefined();
+    });
+
     test('instantiate with props', ({ expect }) => {
         function Component({ name }) {
             // <div>{name}</div>
             return runCompose(name, elementWithAnchor);
         }
+
+        const dom = createElement(Component, { name: 'felix' });
+
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            felix
+            <!--1-->
+          </div>
+        `);
+    });
+
+    test('arrow function', ({ expect }) => {
+        const Component = ({ name }) => {
+            // <div>{name}</div>
+            return runCompose(name, elementWithAnchor);
+        };
 
         const dom = createElement(Component, { name: 'felix' });
 

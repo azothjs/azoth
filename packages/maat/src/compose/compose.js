@@ -89,12 +89,13 @@ export function composeElement(Constructor, anchor, props) {
     compose(dom, anchor);
 }
 
-// esbuild or vite bug chokes on createElement
 export function createElement(Constructor, props) {
-    // let JavaScript handle it :)
-    // will throw appropriate errors, 
-    // so key point for source maps in callers
-    return new Constructor(props);
+    // JavaScript will handle appropriate errors, 
+    // key point for source maps.
+    // Arrow Function has no prototype
+    return (Constructor.prototype?.constructor)
+        ? new Constructor(props)
+        : Constructor(props);
 }
 
 function removePrior(anchor) {
@@ -136,6 +137,7 @@ value ${input}.${footer}`
 // need to walk additional comments
 function tryRemovePrior({ previousSibling }) {
     if(!previousSibling) return false;
+    // TODO: isn't type 8?
     if(previousSibling.nodeType !== 3 /* comment */) {
         // TODO: id azoth comments only!
         removePrior(previousSibling);
