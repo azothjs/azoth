@@ -35,6 +35,7 @@
         "test:ui": "vitest -c vite.config.in-browser.js"
     },
     "devDependencies": {
+        "@testing-library/dom": "^9.3.4",
         "@vitest/browser": "^1.2.2",
         "@vitest/ui": "^1.2.2",
         "happy-dom": "^13.3.8",

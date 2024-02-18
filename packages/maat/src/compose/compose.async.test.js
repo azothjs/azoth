@@ -1,6 +1,12 @@
-import { elementWithTextAnchor, elements, runCompose } from '../test-utils/elements.test.js';
-import { describe, test } from 'vitest';
+import { elementWithAnchor, elementWithTextAnchor, elements, runCompose } from '../test-utils/elements.test.js';
+import { beforeEach, describe, test } from 'vitest';
 import '../test-utils/with-resolvers-polyfill.js';
+import { screen } from '@testing-library/dom';
+
+beforeEach(context => {
+    document.body.innerHTML = '';
+    context.fixture = document.body;
+});
 
 describe('async', () => {
 
@@ -43,20 +49,31 @@ describe('async', () => {
 
     });
 
-    test('generators (async)', async ({ expect }) => {
-        let tickTock = null;
+    test('array of promises', async ({ expect, fixture }) => {
+        const futureLetters = [
+            Promise.resolve('a'),
+            Promise.resolve('b'),
+            Promise.resolve('c'),
+        ];
+
+        const dom = runCompose(futureLetters, elementWithAnchor);
+        fixture.append(dom);
+        await screen.findByText('c', { exact: false });
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            a
+            b
+            c
+            <!--3-->
+          </div>
+        `);
+    });
+
+    test('generators (async)', async ({ expect, fixture }) => {
+        let resolve = null;
         const doAsync = async (value) => {
-            const { promise, resolve } = Promise.withResolvers();
-            // it takes two event loops for the value to get through
-            tickTock = async () => {
-                resolve(value);
-                // this is the async activity the generator is waiting on
-                await promise.then((value) => {
-                    // wait for the async generator to yield 
-                    // the value asynchronously itself!
-                    return Promise.resolve();
-                });
-            };
+            const { promise, resolve: res } = Promise.withResolvers();
+            resolve = () => res(value);
             return promise;
         };
 
@@ -66,7 +83,8 @@ describe('async', () => {
             yield doAsync('three');
         }
 
-        const numbersDom = runCompose(numbers, elementWithTextAnchor);
+        const numbersDom = runCompose(numbers(), elementWithTextAnchor);
+        fixture.append(numbersDom);
         // initial render
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
@@ -75,7 +93,8 @@ describe('async', () => {
           </div>
         `);
 
-        await tickTock();
+        resolve();
+        await screen.findByText('one', { exact: false });
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
             Hello
@@ -84,7 +103,8 @@ describe('async', () => {
           </div>
         `);
 
-        await tickTock();
+        resolve();
+        await screen.findByText('two', { exact: false });
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
             Hello
@@ -93,7 +113,8 @@ describe('async', () => {
           </div>
         `);
 
-        await tickTock();
+        resolve();
+        await screen.findByText('three', { exact: false });
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
             Hello
@@ -102,7 +123,8 @@ describe('async', () => {
           </div>
         `);
 
-        await tickTock();
+        resolve();
+        await screen.findByText('three', { exact: false });
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
             Hello
