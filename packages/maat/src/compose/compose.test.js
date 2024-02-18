@@ -169,6 +169,23 @@ describe('array appended', () => {
           ]
         `);
     });
+
+    test('nested arrays', async ({ expect }) => {
+        const results = elements.map(create => {
+            return `${create.name.padEnd(25, ' ')} ${run([
+                ['a', 'b', ['c', 'd', 'e']],
+                [() => 'f', { render: () => 'g' }, function() { return 'h'; }],
+            ], create)}`;
+        });
+        expect(results).toMatchInlineSnapshot(`
+          [
+            "elementWithTextAnchor     <div>Helloabcdefgh<!--8--></div>",
+            "elementWithTextAnchorText <div>Helloabcdefgh<!--8-->Hello</div>",
+            "elementWithAnchor         <div>abcdefgh<!--8--></div>",
+            "elementWithAnchorText     <div>abcdefgh<!--8-->Hello</div>",
+          ]
+        `);
+    });
 });
 
 describe('invalid throw', () => {
