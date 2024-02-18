@@ -1,21 +1,103 @@
 import { describe, test, expect } from 'vitest';
 import { compose, composeElement, createElement } from './compose.js';
-import { $anchor, elementWithAnchor, elementWithText, elementWithTextAnchor, runCompose } from '../test-utils/elements.test.js';
+import { $anchor, $div, elementWithAnchor, elementWithText, elementWithTextAnchor, runCompose } from '../test-utils/elements.test.js';
 
+// <div>{name}</div>
+
+function Component({ name }) {
+    return runCompose(name, elementWithAnchor);
+}
+
+const ArrowComp = ({ name }) => runCompose(name, elementWithAnchor);
+
+class ClassComp {
+    constructor({ name }) {
+        this.name = name;
+    }
+    render() {
+        return runCompose(this.name, elementWithAnchor);
+    }
+}
+
+// async render
+
+function ComponentP({ name }) {
+    return Promise.resolve(runCompose(name, elementWithAnchor));
+}
+
+const ArrowCompP = async ({ name }) => runCompose(name, elementWithAnchor);
+
+class ClassCompP {
+    constructor({ name }) {
+        this.name = name;
+    }
+    async render() {
+        return () => runCompose(this.name, elementWithAnchor);
+    }
+}
+
+describe('create element', () => {
+
+    test('pin JavaScript constructors: function, arrow fn, class', ({ expect }) => {
+        expect(Component.prototype.constructor).toBeDefined();
+        expect(ClassComp.prototype.constructor).toBeDefined();
+        expect(ArrowComp.prototype?.constructor).not.toBeDefined();
+    });
+
+    test('functions with props', ({ expect }) => {
+        const dom = createElement(Component, { name: 'felix' });
+        const domClass = createElement(ClassComp, { name: 'felix' });
+        const domArrow = createElement(ArrowComp, { name: 'felix' });
+
+        const expected = `
+          <div>
+            felix
+            <!--1-->
+          </div>
+        `;
+        expect(dom).toMatchInlineSnapshot(expected);
+        expect(domClass).toMatchInlineSnapshot(expected);
+        expect(domArrow).toMatchInlineSnapshot(expected);
+    });
+
+    test('secondary instance', async ({ except }) => {
+        const div = $div();
+        const divClass = $div();
+        const divArrow = $div();
+        div.append(createElement(ComponentP, { name: 'felix' }));
+        divClass.append(createElement(ClassCompP, { name: 'felix' }));
+        divArrow.append(createElement(ArrowCompP, { name: 'felix' }));
+
+        const expected = `
+          <div>
+            <div>
+              felix
+              <!--1-->
+            </div>
+            <!--1-->
+          </div>
+        `;
+
+        await null;
+
+        expect(div).toMatchInlineSnapshot(expected);
+        expect(divClass).toMatchInlineSnapshot(expected);
+        expect(divArrow).toMatchInlineSnapshot(expected);
+    });
+
+});
 
 describe('compose element', () => {
 
     test('instantiate with props', ({ expect }) => {
-        function Component({ name }) {
-            // <div>{name}</div>
-            return runCompose(name, elementWithAnchor);
-        }
-
         const { dom, anchor } = elementWithTextAnchor();
-
+        const { dom: domClass, anchor: anchorClass } = elementWithTextAnchor();
+        const { dom: domArrow, anchor: anchorArrow } = elementWithTextAnchor();
         composeElement(Component, anchor, { name: 'felix' });
+        composeElement(ClassComp, anchorClass, { name: 'felix' });
+        composeElement(ArrowComp, anchorArrow, { name: 'felix' });
 
-        expect(dom).toMatchInlineSnapshot(`
+        const expected = `
           <div>
             Hello
             <div>
@@ -24,12 +106,40 @@ describe('compose element', () => {
             </div>
             <!--1-->
           </div>
-        `);
+        `;
+
+        expect(dom).toMatchInlineSnapshot(expected);
+        expect(domClass).toMatchInlineSnapshot(expected);
+        expect(domArrow).toMatchInlineSnapshot(expected);
+    });
+
+    test('secondary instance', async ({ except }) => {
+        const { dom, anchor } = elementWithAnchor();
+        const { dom: domClass, anchor: anchorClass } = elementWithAnchor();
+        const { dom: domArrow, anchor: anchorArrow } = elementWithAnchor();
+        composeElement(ComponentP, anchor, { name: 'felix' });
+        composeElement(ClassCompP, anchorClass, { name: 'felix' });
+        composeElement(ArrowCompP, anchorArrow, { name: 'felix' });
+
+        const expected = `
+          <div>
+            <div>
+              felix
+              <!--1-->
+            </div>
+            <!--1-->
+            <!--1-->
+          </div>
+        `;
+
+        await null;
+
+        expect(dom).toMatchInlineSnapshot(expected);
+        expect(domClass).toMatchInlineSnapshot(expected);
+        expect(domArrow).toMatchInlineSnapshot(expected);
     });
 
     test('nested anchors', ({ expect }) => {
-        // arrange
-
         // <!--0-->
         const anchor = $anchor();
         const { dom, anchor: parent } = elementWithAnchor();
@@ -74,123 +184,6 @@ describe('compose element', () => {
           </div>
         `);
 
-    });
-});
-
-
-describe('create element', () => {
-
-    test('constructors', ({ expect }) => {
-        function Component() { }
-        const component = () => { };
-        class ClassComp { }
-
-        expect(Component.prototype.constructor).toBeDefined();
-        expect(component.prototype?.constructor).not.toBeDefined();
-        expect(ClassComp.prototype.constructor).toBeDefined();
-    });
-
-    test('instantiate with props', ({ expect }) => {
-        function Component({ name }) {
-            // <div>{name}</div>
-            return runCompose(name, elementWithAnchor);
-        }
-
-        const dom = createElement(Component, { name: 'felix' });
-
-        expect(dom).toMatchInlineSnapshot(`
-          <div>
-            felix
-            <!--1-->
-          </div>
-        `);
-    });
-
-    test('arrow function', ({ expect }) => {
-        const Component = ({ name }) => {
-            // <div>{name}</div>
-            return runCompose(name, elementWithAnchor);
-        };
-
-        const dom = createElement(Component, { name: 'felix' });
-
-        expect(dom).toMatchInlineSnapshot(`
-          <div>
-            felix
-            <!--1-->
-          </div>
-        `);
-    });
-
-    test('nested anchors', ({ expect }) => {
-        // arrange
-
-        // <!--0-->
-        const anchor = $anchor();
-        const { dom, anchor: parent } = elementWithAnchor();
-        compose(anchor, parent);
-
-        expect(dom).toMatchInlineSnapshot(`
-          <div>
-            <!--0-->
-            <!--1-->
-          </div>
-        `);
-
-        compose(elementWithText().dom, anchor);
-
-        expect(dom).toMatchInlineSnapshot(`
-          <div>
-            <div>
-              hello
-            </div>
-            <!--1-->
-            <!--1-->
-          </div>
-        `);
-
-        const anchor2 = $anchor();
-        compose(anchor2, parent);
-        expect(dom).toMatchInlineSnapshot(`
-          <div>
-            <!--0-->
-            <!--1-->
-          </div>
-        `);
-
-        compose(elementWithText('goodbye').dom, anchor2);
-        expect(dom).toMatchInlineSnapshot(`
-          <div>
-            <div>
-              goodbye
-            </div>
-            <!--1-->
-            <!--1-->
-          </div>
-        `);
-
-    });
-
-    test('instantiate with props', ({ expect }) => {
-        function Component({ name }) {
-            // <div>{name}</div>
-            return runCompose(name, elementWithAnchor);
-        }
-
-        const { dom, anchor } = elementWithTextAnchor();
-
-        composeElement(Component, anchor, { name: 'felix' });
-
-        expect(dom).toMatchInlineSnapshot(`
-          <div>
-            Hello
-            <div>
-              felix
-              <!--1-->
-            </div>
-            <!--1-->
-          </div>
-        `);
     });
 });
 

@@ -1,4 +1,3 @@
-
 export function compose(input, anchor, keepLast = false) {
     const type = typeof input;
     switch(true) {
@@ -34,8 +33,7 @@ export function compose(input, anchor, keepLast = false) {
     }
 }
 
-
-export function composeObject(object, anchor, keepLast) {
+function composeObject(object, anchor, keepLast) {
     switch(true) {
         case object instanceof ReadableStream:
             composeStream(object, anchor, true);
@@ -43,6 +41,9 @@ export function composeObject(object, anchor, keepLast) {
         // w/o the !! this causes intermittent failures
         case !!object[Symbol.asyncIterator]:
             composeAsyncIterator(object, anchor, keepLast);
+            break;
+        case !!object.render:
+            compose(object.render(), anchor, keepLast);
             break;
         // TODO:
         case !!object.subscribe:
@@ -66,7 +67,6 @@ function throwTypeErrorForObject(obj) {
     throwTypeError(obj, 'object', message);
 }
 
-
 async function composeAsyncIterator(iterator, anchor, keepLast) {
     // TODO: use iterator and intercept
     for await(const value of iterator) {
@@ -84,24 +84,34 @@ async function composeStream(stream, anchor, keepLast) {
 }
 
 export function composeElement(Constructor, anchor, props) {
-    const dom = createElement(Constructor, props);
-    // TODO: optimize arrays here and/or in compose array
+    const dom = doCreateElement(Constructor, props);
     compose(dom, anchor);
 }
 
-export function createElement(Constructor, props) {
-    // JavaScript will handle appropriate errors, 
-    // key point for source maps.
-    // Arrow Function has no prototype
-    return (Constructor.prototype?.constructor)
-        ? new Constructor(props)
-        : Constructor(props);
+// TODO: TEST array in array with replace param
+function composeArray(array, anchor) {
+    // TODO: optimize arrays here if Node[]
+    for(let i = 0; i < array.length; i++) {
+        compose(array[i], anchor, true);
+    }
 }
 
 function removePrior(anchor) {
     const count = +anchor.data;
     if(!count) return;
     if(tryRemovePrior(anchor)) anchor.data = `${count - 1}`;
+}
+
+// need to walk additional comments
+function tryRemovePrior({ previousSibling }) {
+    if(!previousSibling) return false;
+    // TODO: isn't type 8?
+    if(previousSibling.nodeType !== 3 /* comment */) {
+        // TODO: id azoth comments only!
+        removePrior(previousSibling);
+    }
+    previousSibling.remove();
+    return true;
 }
 
 function inject(input, anchor, keepLast) {
@@ -119,14 +129,6 @@ function inject(input, anchor, keepLast) {
     anchor.data = `${count + 1}`;
 }
 
-// TODO: TEST array in array with replace param
-function composeArray(array, anchor) {
-    // TODO: optimize arrays here if Node[]
-    for(let i = 0; i < array.length; i++) {
-        compose(array[i], anchor, true);
-    }
-}
-
 function throwTypeError(input, type, footer = '') {
     throw new TypeError(`\
 Invalid {...} compose input type "${type}", \
@@ -134,14 +136,51 @@ value ${input}.${footer}`
     );
 }
 
-// need to walk additional comments
-function tryRemovePrior({ previousSibling }) {
-    if(!previousSibling) return false;
-    // TODO: isn't type 8?
-    if(previousSibling.nodeType !== 3 /* comment */) {
-        // TODO: id azoth comments only!
-        removePrior(previousSibling);
+export function createElement(Constructor, props) {
+    const result = doCreateElement(Constructor, props);
+    const type = typeof result;
+    if(type === 'string' || type === 'number') {
+        return document.createTextNode(result);
     }
-    previousSibling.remove();
-    return true;
+    return result;
+}
+
+function doCreateElement(Constructor, props) {
+    if(Constructor.prototype?.constructor) {
+        return create(new Constructor(props));
+    }
+    if(typeof Constructor === 'function') {
+        return create(Constructor(props));
+    }
+    throw new Error(`Unexpected Component type ${Constructor}`);
+}
+
+function create(input) {
+    const type = typeof input;
+    switch(true) {
+        case input instanceof Node:
+        case type === 'string':
+        case type === 'number':
+            return input;
+        case input === undefined:
+        case input === null:
+        case input === true:
+        case input === false:
+        case input === '':
+            return null;
+        case type === 'function':
+            return create(input());
+        case type === 'object' && input.render && typeof input.render === 'function':
+            return create(input.render());
+        case Array.isArray(input):
+        case input instanceof Promise:
+        case type === 'object': {
+            const anchor = document.createComment('0');
+            compose(input, anchor);
+            return anchor;
+        }
+        default: {
+            throwTypeError(input, type);
+        }
+    }
 }
