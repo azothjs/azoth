@@ -829,16 +829,14 @@ describe('element composition', () => {
 
     test('custom-element with property', ({ expect }) => {
         const input = `
-            const html = \`&nsbsp;<strong>Hello Raw</strong>\`;
-            document.body.append(<raw-html html={html}/>);
+            document.body.append(<custom-element prop={prop}/>);
         `;
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const html = \`&nsbsp;<strong>Hello Raw</strong>\`;
-          document.body.append((() => {
-              const __root = t4ca37f3876()[0];
-              __root.html = (html);
+          "document.body.append((() => {
+              const __root = t1cdf0d646f()[0];
+              __root.prop = (prop);
               return __root;
           })());
           "
@@ -847,8 +845,8 @@ describe('element composition', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "html": "<raw-html></raw-html>",
-              "id": "4ca37f3876",
+              "html": "<custom-element></custom-element>",
+              "id": "1cdf0d646f",
               "isDomFragment": false,
               "needs": {
                 "compose": false,
