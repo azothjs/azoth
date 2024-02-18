@@ -1,7 +1,8 @@
 # Child Composition `{...}`
 
-JSX expression containers accept a variety of data types when used 
-for element children. The end goal is a DOM Node that can be appended as a child of the parent element.
+JSX expression containers accept a variety of data types when used for 
+element children. The end goal is a DOM Node that can be appended as a 
+child of the parent element.
 
 ```jsx
 <>
@@ -61,7 +62,7 @@ Strings and numbers are rendered by the browser as text content:
 
 ### Raw HTML
 
-Use the `innerHTML` property for raw HTML:
+Use the DOM `innerHTML` property for raw HTML:
 
 ```jsx
 <p aria-label="content" contenteditable innerHTML={content} />
@@ -112,7 +113,7 @@ gsap.to(specialSpan, { rotation: 27, x: 100, duration: 1 }); // [!code ++]
 ```
 
 :::info Is this like `ref`?
-This is similar in concept to using `ref`, but it's all DOM in Azoth and you're encouraged to directly manipulate elements.
+This is similar in concept to using `ref`, but the DOM is the API in Azoth and you're encouraged to directly manipulate elements.
 :::
 
 ## Arrays

@@ -105,7 +105,3 @@ return <div>
 ``` 
 
 
-## Utilities
-
-TODO: Azoth utils for async
-
