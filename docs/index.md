@@ -3,7 +3,7 @@
 layout: home
 
 hero:
-  name: "Azoth JSX"
+  name: "Azoth"
 #   text: "Familiar Syntax, Infinite Possibilities"
   tagline: "Hypermedia UI/X Library for the Web Platform"
 #   tagline: The web is fun again

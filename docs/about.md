@@ -23,3 +23,17 @@ It's not just different, but anathma
 
 ## Syntax Highlighting
 
+
+### Traditional Templates
+
+Consider the following template in a state-driven framework (for simplicity, there are no loading semantics):
+
+```jsx
+return <div>{items && <List items={items}/>}</div>;
+```
+
+There's an intentional ambiguity in this template: Is it _waiting_ for items? Or is it mitigating a response that _didn't have items_? Or both?
+
+This is intended as a DX feature, part and parcel of thinking in `ui = fn(state)`.
+
+But is that the best way to think about it?

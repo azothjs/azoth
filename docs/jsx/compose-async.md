@@ -1,12 +1,24 @@
 # Async Child Composition `{...}`
 
-A variety of asynchronous data providers can be used with Azoth child composition.
+A variety of asynchronous data providers can be used with Azoth child composition:
+
+type | mechanism | terminate via
+---|---|---
+`Promise` | `.then()` | abort*
+`ReadableStream` | `WritableStream` | close
+`AsyncIterator`* | `.next()` | return
+subscription | `.subscribe()` or `.on()` | unsubscribe*
+
+Notes:
+- Unless an abort controller is provided, promises can't be cancelled by consumers 
+- Generator functions are the primary means of creating async iterators
+- Subscriptions are expected to return an unsubscribe function
 
 ## Thinking Asynchronously
 
 In hypermedia apps, changes to the ui are made in discrete chunks. 
 
-Design templates that:
+Design for templates that:
 1. Consume data on initial render
 1. Plan for future layout modifications
 
@@ -20,51 +32,44 @@ Consider the following template in a state-driven framework (for simplicity, the
 return <div>{items && <List items={items}/>}</div>;
 ```
 
-Because time has been abstracted away as a DX feature, there's ambiguity in whether this template is _waiting_ for items:
+There is an ambiguity in this template: Is it _waiting_ for items? Or is it mitigating a response that _didn't have items_? Or both? 
+
+It is an intended feature of thinking in `ui = fn(state)` that you theoretically shouldn't need to care about it. But with effect dependencies, memo and memoize, SSR and hydration complexity, there is a rising cost of maintaining the abstraction.
+
+How else could we think about this?
+
+### Hypermedia Templates
+
+Hypermedia is thinking in terms of:
+
+<pre>
+ui<sub>n</sub> = ui<sub>n-1</sub> + Δ
+</pre>
+
+- Complete render of the current phase with what is known
+- Connect future data and events to future layout modifications
+
+In practice in the example, start by lifting out what cannot be rendered _right now_:
 
 ```jsx
-const [items] = useFetchItems();
-return <div>{items && <List items={items}/>}</div>;
-```
-
-Or whether some responses _don't have items_:
-
-```jsx
-const { category, title, items } = useFetchContent();
-return <div>{items && <List items={items} />}</div>;
-```
-
-Techniques exist to deal with these issues, but fundamentally the difference can only deduced by examining the "effects" used.
-
-### Azoth Hypermedia Templates
-
-Azoth templates delineate between
-- what is being rendered right now, _and_
-- planning for what will be rendered in the future
-
-Using the example, start by lifting the things that can't be rendered _right now_ out of the returned template:
-
-```jsx
-// Returns a promise for a list
-const itemsPromise = fetchItems();
 // TODO: we need <List items={items}/>, but not now!
 return <div>{/*future*/}</div>;
 ```
 
-That's all that can be rendered initially. Next, plan the layout for the future resolution of items:
+ Next, implement the layout of the items in the future when the data is known. 
+ 
+ Depending on your coding preference, you can create an effect-type function:
 
 ```jsx
-// Returns a promise for DOM based on the list
-const listPromise = fetchItems().then(items => { 
-    // This function executes in the future "now" 
-    // when the needed data actually exists :) 
+async function loadList() {
+    const items = await fetchItems();
     return <List items={items}/>;
 });
 
-return <div>{listPromise}</div>; 
-```
+return <div>{loadList()}</div>; 
+``` 
 
-It's Just JavaScript™️, refactor how you like:
+Or chain the layout creation using promise resolution:
 
 ```jsx
 <div>
@@ -72,24 +77,35 @@ It's Just JavaScript™️, refactor how you like:
 </div>
 ```
 
+In both cases, the rendering occurs in the future "now" with known data. The focus is on _layout_ management instead of state management. 
+
+Error responses happen in context and can use the same layout channel to provide updates:
+
+```jsx
+async function loadList() {
+    try {
+        const items = await fetchItems();
+        return <List items={items}/>;
+    }
+    catch(err) {
+        return <Oops error={err}/>
+    }
+});
+
+return <div>{loadList()}</div>; 
+
+// or
+
+return <div>
+    {fetchItems
+        .then(items => <List items={items}/>)
+        .catch(err => <Oops error={err}/>)}
+</div>
+
+``` 
+
+
 ## Utilities
 
 TODO: Azoth utils for async
 
-## Async Providers
-
-The following async data structures are supported:
-
-type | mechanism | terminate
----|---|---
-`Promise` | `.then()` | abort*
-`ReadableStream` | `WritableStream` | close
-`AsyncIterator`** | `.next()` | return
-observables*** | `.subscribe()` or `.on()` | unsubscribe
-
-*Unless an abort controller is provided, promises can't be cancelled
-by consumers 
-
-**i.e. called generator functions
-
-***Duck typing. Return value is expected to be unsubscribe function

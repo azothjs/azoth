@@ -2,11 +2,15 @@ import { defineConfig } from 'vitepress';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-    title: "Azoth JSX",
-    description: "Azoth JSX UI library documentation",
+    title: "Azoth",
+    description: "Azoth UI library documentation",
     lastUpdated: true,
     head: [['link', { rel: 'icon', href: '/azothjsx-ico.png' }]],
     themeConfig: {
+        outline: {
+            level: [2, 4],
+            label: 'Async FTW'
+        },
         logo: '/azothjsx-ico.png',
         nav: [
             { text: 'Home', link: '/' },
