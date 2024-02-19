@@ -20,7 +20,7 @@ export default function azothPlugin(options) {
             command = cmd;
         },
         resolveId(id) {
-            const [name, ids] = id.split('?', 2);
+            const [name] = id.split('?', 2);
             if(name !== templateServiceModule) return;
             return id;
         },
@@ -37,10 +37,13 @@ export default function azothPlugin(options) {
                 .map(id => {
                     const { html, isDomFragment } = programTemplates.get(id);
                     let exportRender = `\nexport const t${id} = ${renderer}('${id}'`;
+
                     // html gets added to index.html in build
                     if(!isBuild) exportRender += `, \`${html}\``;
+
                     // default is false, so only add if true (which is less common)
                     if(isDomFragment) exportRender += ', true';
+
                     exportRender += `);\n`;
                     return exportRender;
                 })
