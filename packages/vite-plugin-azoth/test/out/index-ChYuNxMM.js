@@ -1,4 +1,4 @@
-function compose(input, anchor, keepLast = false) {
+function compose(anchor, input, keepLast = false) {
     const type = typeof input;
     switch(true) {
         case input === undefined:
@@ -10,21 +10,20 @@ function compose(input, anchor, keepLast = false) {
             break;
         case type === 'string':
         case type === 'number':
-        case input instanceof Node: {
-            inject(input, anchor, keepLast);
+        case input instanceof Node:
+            inject(anchor, input, keepLast);
             break;
-        }
         case type === 'function':
-            compose(input(), anchor, keepLast);
+            compose(anchor, input(), keepLast);
             break;
         case input instanceof Promise:
-            input.then(v => compose(v, anchor, keepLast));
+            input.then(value => compose(anchor, value, keepLast));
             break;
         case Array.isArray(input):
-            composeArray(input, anchor);
+            composeArray(anchor, input);
             break;
         case type === 'object': {
-            composeObject(input, anchor, keepLast);
+            composeObject(anchor, input, keepLast);
             break;
         }
         default: {
@@ -33,15 +32,18 @@ function compose(input, anchor, keepLast = false) {
     }
 }
 
-
-function composeObject(object, anchor, keepLast) {
+function composeObject(anchor, object, keepLast) {
     switch(true) {
         case object instanceof ReadableStream:
-            composeStream(object, anchor, true);
+            composeStream(anchor, object, true);
             break;
-        // w/o the !! this causes intermittent failures
+        // w/o the !! this causes intermittent failures :p
+        // maybe vitest/node thing?
         case !!object[Symbol.asyncIterator]:
-            composeAsyncIterator(object, anchor, keepLast);
+            composeAsyncIterator(anchor, object, keepLast);
+            break;
+        case !!object.render:
+            compose(anchor, object.render(), keepLast);
             break;
         // TODO:
         case !!object.subscribe:
@@ -61,34 +63,33 @@ function throwTypeErrorForObject(obj) {
     catch(ex) {
         /* no-op */
     }
-
     throwTypeError(obj, 'object', message);
 }
 
-
-async function composeAsyncIterator(iterator, anchor, keepLast) {
+async function composeAsyncIterator(anchor, iterator, keepLast) {
     // TODO: use iterator and intercept
     for await(const value of iterator) {
-        compose(value, anchor, keepLast);
+        compose(anchor, value, keepLast);
     }
 }
 
-async function composeStream(stream, anchor, keepLast) {
+async function composeStream(anchor, stream, keepLast) {
     const writeable = new WritableStream({
         write(chunk) {
-            compose(chunk, anchor, keepLast);
+            compose(anchor, chunk, keepLast);
         }
     });
     stream.pipeTo(writeable);
 }
 
-function removePrior(anchor) {
-    const count = +anchor.data;
-    if(!count) return;
-    if(tryRemovePrior(anchor)) anchor.data = `${count - 1}`;
+function composeArray(anchor, array) {
+    // TODO: optimize arrays here if Node[]
+    for(let i = 0; i < array.length; i++) {
+        compose(anchor, array[i], true);
+    }
 }
 
-function inject(input, anchor, keepLast) {
+function inject(anchor, input, keepLast) {
     let count = +anchor.data;
     if(!keepLast && count > 0 && tryRemovePrior(anchor)) count--;
 
@@ -103,12 +104,22 @@ function inject(input, anchor, keepLast) {
     anchor.data = `${count + 1}`;
 }
 
-// TODO: TEST array in array with replace param
-function composeArray(array, anchor) {
-    // TODO: optimize arrays here if Node[]
-    for(let i = 0; i < array.length; i++) {
-        compose(array[i], anchor, true);
+function removePrior(anchor) {
+    const count = +anchor.data;
+    if(!count) return;
+    if(tryRemovePrior(anchor)) anchor.data = `${count - 1}`;
+}
+
+// need to walk additional comments
+function tryRemovePrior({ previousSibling }) {
+    if(!previousSibling) return false;
+    // TODO: isn't type 8?
+    if(previousSibling.nodeType !== 3 /* comment */) {
+        // TODO: id azoth comments only!
+        removePrior(previousSibling);
     }
+    previousSibling.remove();
+    return true;
 }
 
 function throwTypeError(input, type, footer = '') {
@@ -116,17 +127,6 @@ function throwTypeError(input, type, footer = '') {
 Invalid {...} compose input type "${type}", \
 value ${input}.${footer}`
     );
-}
-
-// need to walk additional comments
-function tryRemovePrior({ previousSibling }) {
-    if(!previousSibling) return false;
-    if(previousSibling.nodeType !== 3 /* comment */) {
-        // TODO: id azoth comments only!
-        removePrior(previousSibling);
-    }
-    previousSibling.remove();
-    return true;
 }
 
 const templates = new Map();
@@ -195,14 +195,14 @@ const App = (() => {
   const [__root, __targets] = t14720b3874(true);
   const __target0 = __targets[0];
   const __child0 = __target0.childNodes[3];
-  compose(List, __child0);
+  compose(__child0, List);
   return __root;
 })();
 document.body.append(App);
 function EmojiList({ emojis }) {
   const __root = ta51edaabfe()[0];
   const __child0 = __root.childNodes[1];
-  compose(emojis.map(Emoji), __child0);
+  compose(__child0, emojis.map(Emoji));
   return __root;
 }
 function Emoji({ name, unicode, htmlCode }) {
@@ -210,11 +210,11 @@ function Emoji({ name, unicode, htmlCode }) {
   const __child0 = __root.childNodes[1];
   const __child1 = __root.childNodes[3];
   const __child2 = __root.childNodes[5];
-  compose(InnerHtml({
+  compose(__child0, InnerHtml({
     html: htmlCode.join("")
-  }), __child0);
-  compose(name, __child1);
-  compose(unicode, __child2);
+  }));
+  compose(__child1, name);
+  compose(__child2, unicode);
   return __root;
 }
 function InnerHtml({ html, className = "" }) {
