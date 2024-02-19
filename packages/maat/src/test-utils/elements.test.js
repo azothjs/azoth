@@ -11,7 +11,7 @@ export const elements = [
 
 export function runCompose(value, create) {
     const { dom, anchor } = create();
-    compose(value, anchor);
+    compose(anchor, value);
     return dom;
 }
 

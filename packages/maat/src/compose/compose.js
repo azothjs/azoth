@@ -1,4 +1,4 @@
-export function compose(input, anchor, keepLast = false) {
+export function compose(anchor, input, keepLast = false) {
     const type = typeof input;
     switch(true) {
         case input === undefined:
@@ -10,21 +10,20 @@ export function compose(input, anchor, keepLast = false) {
             break;
         case type === 'string':
         case type === 'number':
-        case input instanceof Node: {
-            inject(input, anchor, keepLast);
+        case input instanceof Node:
+            inject(anchor, input, keepLast);
             break;
-        }
         case type === 'function':
-            compose(input(), anchor, keepLast);
+            compose(anchor, input(), keepLast);
             break;
         case input instanceof Promise:
-            input.then(v => compose(v, anchor, keepLast));
+            input.then(value => compose(anchor, value, keepLast));
             break;
         case Array.isArray(input):
-            composeArray(input, anchor, keepLast);
+            composeArray(anchor, input, keepLast);
             break;
         case type === 'object': {
-            composeObject(input, anchor, keepLast);
+            composeObject(anchor, input, keepLast);
             break;
         }
         default: {
@@ -33,17 +32,18 @@ export function compose(input, anchor, keepLast = false) {
     }
 }
 
-function composeObject(object, anchor, keepLast) {
+function composeObject(anchor, object, keepLast) {
     switch(true) {
         case object instanceof ReadableStream:
-            composeStream(object, anchor, true);
+            composeStream(anchor, object, true);
             break;
-        // w/o the !! this causes intermittent failures
+        // w/o the !! this causes intermittent failures :p
+        // maybe vitest/node thing?
         case !!object[Symbol.asyncIterator]:
-            composeAsyncIterator(object, anchor, keepLast);
+            composeAsyncIterator(anchor, object, keepLast);
             break;
         case !!object.render:
-            compose(object.render(), anchor, keepLast);
+            compose(anchor, object.render(), keepLast);
             break;
         // TODO:
         case !!object.subscribe:
@@ -63,37 +63,50 @@ function throwTypeErrorForObject(obj) {
     catch(ex) {
         /* no-op */
     }
-
     throwTypeError(obj, 'object', message);
 }
 
-async function composeAsyncIterator(iterator, anchor, keepLast) {
+async function composeAsyncIterator(anchor, iterator, keepLast) {
     // TODO: use iterator and intercept
     for await(const value of iterator) {
-        compose(value, anchor, keepLast);
+        compose(anchor, value, keepLast);
     }
 }
 
-async function composeStream(stream, anchor, keepLast) {
+async function composeStream(anchor, stream, keepLast) {
     const writeable = new WritableStream({
         write(chunk) {
-            compose(chunk, anchor, keepLast);
+            compose(anchor, chunk, keepLast);
         }
     });
     stream.pipeTo(writeable);
 }
 
-export function composeElement(Constructor, anchor, props) {
-    const dom = doCreateElement(Constructor, props);
-    compose(dom, anchor);
+export function composeElement(anchor, Constructor, props) {
+    const dom = createConstructed(Constructor, props);
+    compose(anchor, dom);
 }
 
-// TODO: TEST array in array with replace param
-function composeArray(array, anchor) {
+function composeArray(anchor, array) {
     // TODO: optimize arrays here if Node[]
     for(let i = 0; i < array.length; i++) {
-        compose(array[i], anchor, true);
+        compose(anchor, array[i], true);
     }
+}
+
+function inject(anchor, input, keepLast) {
+    let count = +anchor.data;
+    if(!keepLast && count > 0 && tryRemovePrior(anchor)) count--;
+
+    // happy-dom bug
+    const type = typeof input;
+    const isDomNode = input instanceof Node;
+    if(type !== 'string' && !isDomNode) {
+        input = `${input}`;
+    }
+
+    anchor.before(input);
+    anchor.data = `${count + 1}`;
 }
 
 function removePrior(anchor) {
@@ -114,45 +127,11 @@ function tryRemovePrior({ previousSibling }) {
     return true;
 }
 
-function inject(input, anchor, keepLast) {
-    let count = +anchor.data;
-    if(!keepLast && count > 0 && tryRemovePrior(anchor)) count--;
-
-    // happy-dom bug
-    const type = typeof input;
-    const isDomNode = input instanceof Node;
-    if(type !== 'string' && !isDomNode) {
-        input = `${input}`;
-    }
-
-    anchor.before(input);
-    anchor.data = `${count + 1}`;
-}
-
 function throwTypeError(input, type, footer = '') {
     throw new TypeError(`\
 Invalid {...} compose input type "${type}", \
 value ${input}.${footer}`
     );
-}
-
-export function createElement(Constructor, props) {
-    const result = doCreateElement(Constructor, props);
-    const type = typeof result;
-    if(type === 'string' || type === 'number') {
-        return document.createTextNode(result);
-    }
-    return result;
-}
-
-function doCreateElement(Constructor, props) {
-    if(Constructor.prototype?.constructor) {
-        return create(new Constructor(props));
-    }
-    if(typeof Constructor === 'function') {
-        return create(Constructor(props));
-    }
-    throw new Error(`Unexpected Component type ${Constructor}`);
 }
 
 function create(input) {
@@ -176,11 +155,30 @@ function create(input) {
         case input instanceof Promise:
         case type === 'object': {
             const anchor = document.createComment('0');
-            compose(input, anchor);
+            compose(anchor, input);
             return anchor;
         }
         default: {
             throwTypeError(input, type);
         }
     }
+}
+
+export function createElement(Constructor, props) {
+    const result = createConstructed(Constructor, props);
+    const type = typeof result;
+    if(type === 'string' || type === 'number') {
+        return document.createTextNode(result);
+    }
+    return result;
+}
+
+function createConstructed(Constructor, props) {
+    if(Constructor.prototype?.constructor) {
+        return create(new Constructor(props));
+    }
+    if(typeof Constructor === 'function') {
+        return create(Constructor(props));
+    }
+    throw new Error(`Unexpected Component type ${Constructor}`);
 }

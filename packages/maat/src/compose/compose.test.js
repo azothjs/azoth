@@ -191,7 +191,7 @@ describe('array appended', () => {
 describe('invalid throw', () => {
     test('object', () => {
         expect(() => {
-            compose({ name: 'felix' });
+            compose(null, { name: 'felix' });
         }).toThrowErrorMatchingInlineSnapshot(`
           [TypeError: Invalid {...} compose input type "object", value [object Object].
 

@@ -9,9 +9,8 @@ export class TemplateGenerator extends Generator {
 
     constructor() {
         super();
-        this.htmlGenerator = node => generate(node, {
-            generator: new HtmlGenerator(),
-        });
+        const generator = new HtmlGenerator();
+        this.htmlGenerator = node => generate(node, { generator });
     }
 
     JSXFragment(node, state) {
@@ -27,14 +26,15 @@ export class TemplateGenerator extends Generator {
         const template = analyzer.generateTemplate(this.htmlGenerator);
         this.templates.push(template);
 
-        const { isStatic, node: root } = template;
-
         // Short-circuit templates
-        if(root.isComponent) {
-            return this.ComponentRoot(root, state);
-        }
-        if(isStatic) {
-            return this.StaticRoot(root, template, state);
+        const { isStatic, node: root } = template;
+        const { isComponent, isReturnArg } = root;
+        if(isStatic || isComponent) {
+            if(isReturnArg) state.write(`return `);
+            if(isComponent) this.CreateElement(root, state);
+            else if(isStatic) this.StaticRoot(template, state);
+            if(isReturnArg) state.write(`;`);
+            return;
         }
 
         this.InjectionWrapper(template, state);
@@ -98,28 +98,9 @@ export class TemplateGenerator extends Generator {
         }
     }
 
-    ComponentRoot(node, state) {
-        const { isReturnArg, componentExpr, slotFragment } = node;
-        if(isReturnArg) state.write(`return `);
-
-        const expr = componentExpr;
-        state.write(`__createElement(`);
-        this[expr.type](expr, state);
-        this.ComponentProps(node, state, !!slotFragment);
-        if(slotFragment) {
-            state.write(', ');
-            this.JSXTemplate(slotFragment, state);
-        }
-        state.write(`)`);
-
-        if(isReturnArg) state.write(`;`);
-    }
-
-    StaticRoot({ isReturnArg }, template, state) {
-        if(isReturnArg) state.write(`return `);
+    StaticRoot(template, state) {
         this.TemplateRenderer(template, state);
         if(!template.isEmpty) state.write(`[0]`); // dom root
-        if(isReturnArg) state.write(`;`);
     }
 
     TemplateRenderer({ id, isEmpty, isDomFragment }, state) {
@@ -168,15 +149,13 @@ export class TemplateGenerator extends Generator {
             }
 
             if(node.isComponent) {
-                this.Component(node, expr, i, state);
+                this.ComposeElement(node, expr, i, state);
                 continue;
             }
-
             if(type === 'child') {
-                this.ChildNode(expr, i, state);
+                this.Compose(expr, i, state);
                 continue;
             }
-
             if(type === 'prop') {
                 this.BindingProp(node, expr, element.queryIndex, state);
                 continue;
@@ -187,24 +166,40 @@ export class TemplateGenerator extends Generator {
         }
     }
 
-    Component(node, expr, index, state) {
-        state.write(`__composeElement(`);
+    Compose(expr, index, state) {
+        state.write(`__compose(`);
+        state.write(`__child${index}, `);
         this[expr.type](expr, state);
-        state.write(`, __child${index}`);
-        this.ComponentProps(node, state);
-        if(node.slotFragment) {
-            state.write(', ');
-            this.JSXTemplate(node, state);
-        }
         state.write(`);`);
     }
 
-    ComponentProps({ props }, state, forceArgument) {
-        if(!props?.length) {
-            if(forceArgument) state.write(`, null`);
-            return;
-        }
+    ComposeElement(node, expr, index, state) {
+        state.write(`__composeElement(`);
+        state.write(`__child${index}, `);
+        this.CompleteElement(node, expr, state);
+        state.write(`);`);
+    }
 
+    CreateElement(node, state) {
+        state.write(`__createElement(`);
+        this.CompleteElement(node, node.componentExpr, state);
+        state.write(`)`);
+    }
+
+    CompleteElement({ props, slotFragment }, expr, state) {
+        this[expr.type](expr, state);
+        if(props?.length) {
+            this.ComponentProps(props, state);
+        }
+        else if(slotFragment) state.write(`, null`);
+
+        if(slotFragment) {
+            state.write(', ');
+            this.JSXTemplate(slotFragment, state);
+        }
+    }
+
+    ComponentProps(props, state) {
         state.write(`, {`);
         for(let i = 0; i < props.length; i++) {
             const { node, expr } = props[i];
@@ -234,11 +229,5 @@ export class TemplateGenerator extends Generator {
         state.write(` = (`); // do we need (...)? 
         this[expr.type](expr, state);
         state.write(`);`);
-    }
-
-    ChildNode(expr, i, state) {
-        state.write(`__compose(`);
-        this[expr.type](expr, state);
-        state.write(`, __child${i});`);
     }
 }

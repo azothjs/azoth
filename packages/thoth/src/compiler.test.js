@@ -45,14 +45,14 @@ describe('JSX dom literals', () => {
               const __child7 = __target3.childNodes[7];
               const __child8 = __root.childNodes[15];
               __target0.className = ("my-class");
-              __compose("felix", __child1);
-              __compose("this is", __child2);
-              __compose("azoth", __child3);
-              __compose("two", __child4);
-              __compose("and...", __child5);
+              __compose(__child1, "felix");
+              __compose(__child2, "this is");
+              __compose(__child3, "azoth");
+              __compose(__child4, "two");
+              __compose(__child5, "and...");
               __target5.className = ("span-class");
-              __compose("ul-footer", __child7);
-              __compose("footer", __child8);
+              __compose(__child7, "ul-footer");
+              __compose(__child8, "footer");
               return __root;
           })();
           "
@@ -138,7 +138,7 @@ describe('nested context', () => {
           "(() => {
               const __root = t8dae88052a()[0];
               const __child0 = __root.childNodes[0];
-              __compose(t1a78cbe949()[0], __child0);
+              __compose(__child0, t1a78cbe949()[0]);
               return __root;
           })();
           "
@@ -212,7 +212,7 @@ describe('surrounding code integration', () => {
             "code": "const template = text => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
-              __compose(text, __child0);
+              __compose(__child0, text);
               return __root;
           };
           ",
@@ -246,7 +246,7 @@ describe('surrounding code integration', () => {
               const format = 'text' + '!';
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
-              __compose(text, __child0);
+              __compose(__child0, text);
               return __root;
           }
           ",
@@ -287,14 +287,14 @@ describe('fragments', () => {
           const fragInFragCompose = (() => {
               const __root = tc084de4382(true)[0];
               const __child0 = __root.childNodes[0];
-              __compose(x, __child0);
+              __compose(__child0, x);
               return __root;
           })();
           const empty = null;
           const compose = (() => {
               const __root = tc084de4382(true)[0];
               const __child0 = __root.childNodes[0];
-              __compose(x, __child0);
+              __compose(__child0, x);
               return __root;
           })();
           const text = t1cb251ec0d(true)[0];
@@ -414,14 +414,14 @@ describe('fragments', () => {
           const fragInFragCompose = (() => {
               const __root = tc084de4382(true)[0];
               const __child0 = __root.childNodes[0];
-              __compose(x, __child0);
+              __compose(__child0, x);
               return __root;
           })();
           const empty = null;
           const compose = (() => {
               const __root = tc084de4382(true)[0];
               const __child0 = __root.childNodes[0];
-              __compose(x, __child0);
+              __compose(__child0, x);
               return __root;
           })();
           const text = t6c72de769d(true)[0];
@@ -526,13 +526,13 @@ describe('fragments', () => {
           const composeStart = (() => {
               const __root = tc084de4382(true)[0];
               const __child0 = __root.childNodes[0];
-              __compose(x, __child0);
+              __compose(__child0, x);
               return __root;
           })();
           const composeEnd = (() => {
               const __root = tc084de4382(true)[0];
               const __child0 = __root.childNodes[0];
-              __compose(x, __child0);
+              __compose(__child0, x);
               return __root;
           })();
           "
@@ -603,7 +603,7 @@ describe('fragments', () => {
           const compose = (() => {
               const __root = t5bc2a159b1(true)[0];
               const __child0 = __root.childNodes[1];
-              __compose(x, __child0);
+              __compose(__child0, x);
               return __root;
           })();
           "
@@ -676,7 +676,7 @@ describe('fragments', () => {
           "const fragment = (() => {
               const __root = tfaf808e6cc(true)[0];
               const __child0 = __root.childNodes[1];
-              __compose("two", __child0);
+              __compose(__child0, "two");
               return __root;
           })();
           "
@@ -716,7 +716,7 @@ describe('fragments', () => {
           const childNodeIndex = (() => {
               const __root = t681310be49()[0];
               const __child0 = __root.childNodes[3];
-              __compose("expect index 3", __child0);
+              __compose(__child0, "expect index 3");
               return __root;
           })();
           "
@@ -764,9 +764,9 @@ describe('fragments', () => {
               const __child0 = __root.childNodes[0];
               const __child1 = __target0.childNodes[0];
               const __child2 = __root.childNodes[2];
-              __compose('foo', __child0);
-              __compose('bar', __child1);
-              __compose('qux', __child2);
+              __compose(__child0, 'foo');
+              __compose(__child1, 'bar');
+              __compose(__child2, 'qux');
               return __root;
           })();
           "
@@ -801,7 +801,7 @@ describe('template root', () => {
           "const div = (() => {
               const __root = t8dae88052a()[0];
               const __child0 = __root.childNodes[0];
-              __compose(hello, __child0);
+              __compose(__child0, hello);
               return __root;
           })();
           "
@@ -911,8 +911,8 @@ describe('element composition', () => {
               const __root = t2288998344()[0];
               const __child0 = __root.childNodes[1];
               const __child1 = __root.childNodes[3];
-              __composeElement(Component, __child0, { prop: value, prop2: "literal", });
-              __composeElement(GotNoPropsAsYouCanSee, __child1);
+              __composeElement(__child0, Component, { prop: value, prop2: "literal", });
+              __composeElement(__child1, GotNoPropsAsYouCanSee);
               return __root;
           })();
           "
@@ -955,8 +955,8 @@ describe('element composition', () => {
               const __root = t2288998344()[0];
               const __child0 = __root.childNodes[1];
               const __child1 = __root.childNodes[3];
-              __compose($A, __child0);
-              __compose($B, __child1);
+              __compose(__child0, $A);
+              __compose(__child1, $B);
               return __root;
           })();
           "
@@ -1061,25 +1061,25 @@ describe('element composition', () => {
           "const c = __createElement(Component, null, (() => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
-              __compose("test", __child0);
+              __compose(__child0, "test");
               return __root;
           })());
           const cTrim = __createElement(Component, null, (() => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
-              __compose("test", __child0);
+              __compose(__child0, "test");
               return __root;
           })());
           const cTrimStart = __createElement(Component, null, (() => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
-              __compose("test", __child0);
+              __compose(__child0, "test");
               return __root;
           })());
           const cTrimEnd = __createElement(Component, null, (() => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
-              __compose("test", __child0);
+              __compose(__child0, "test");
               return __root;
           })());
           const cText = __createElement(Component, null, t1cb251ec0d(true)[0]);
@@ -1089,8 +1089,8 @@ describe('element composition', () => {
               const __target1 = __targets[1];
               const __child0 = __target0.childNodes[0];
               const __child1 = __target1.childNodes[0];
-              __compose(1, __child0);
-              __compose(2, __child1);
+              __compose(__child0, 1);
+              __compose(__child1, 2);
               return __root;
           })());
           "
@@ -1238,15 +1238,15 @@ describe('render and composition cases', () => {
           "const Item = name => {
               const __root = t62831a5152()[0];
               const __child0 = __root.childNodes[0];
-              __compose(name, __child0);
+              __compose(__child0, name);
               return __root;
           };
           const Template = () => {
               const __root = t8dc93cc914()[0];
               const __child0 = __root.childNodes[0];
               const __child1 = __root.childNodes[1];
-              __compose([2, 4, 7].map(Item), __child0);
-              __compose("text", __child1);
+              __compose(__child0, [2, 4, 7].map(Item));
+              __compose(__child1, "text");
               return __root;
           };
           "
@@ -1290,7 +1290,7 @@ describe('render and composition cases', () => {
               const __root = t2b440f4741()[0];
               const __child1 = __root.childNodes[1];
               __root.className = (category);
-              __compose(place, __child1);
+              __compose(__child1, place);
               return __root;
           };
           "
@@ -1326,14 +1326,14 @@ describe('render and composition cases', () => {
           "const Emoji = ({name}) => {
               const __root = t62831a5152()[0];
               const __child0 = __root.childNodes[0];
-              __compose(name, __child0);
+              __compose(__child0, name);
               return __root;
           };
           const promise = fetchEmojis().then(emojis => emojis.map(Emoji));
           const Emojis = (() => {
               const __root = t25ec157413()[0];
               const __child0 = __root.childNodes[0];
-              __compose(promise, __child0);
+              __compose(__child0, promise);
               return __root;
           })();
           document.body.append(Emojis);

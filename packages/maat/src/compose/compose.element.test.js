@@ -93,9 +93,9 @@ describe('compose element', () => {
         const { dom, anchor } = elementWithTextAnchor();
         const { dom: domClass, anchor: anchorClass } = elementWithTextAnchor();
         const { dom: domArrow, anchor: anchorArrow } = elementWithTextAnchor();
-        composeElement(Component, anchor, { name: 'felix' });
-        composeElement(ClassComp, anchorClass, { name: 'felix' });
-        composeElement(ArrowComp, anchorArrow, { name: 'felix' });
+        composeElement(anchor, Component, { name: 'felix' });
+        composeElement(anchorClass, ClassComp, { name: 'felix' });
+        composeElement(anchorArrow, ArrowComp, { name: 'felix' });
 
         const expected = `
           <div>
@@ -117,9 +117,9 @@ describe('compose element', () => {
         const { dom, anchor } = elementWithAnchor();
         const { dom: domClass, anchor: anchorClass } = elementWithAnchor();
         const { dom: domArrow, anchor: anchorArrow } = elementWithAnchor();
-        composeElement(ComponentP, anchor, { name: 'felix' });
-        composeElement(ClassCompP, anchorClass, { name: 'felix' });
-        composeElement(ArrowCompP, anchorArrow, { name: 'felix' });
+        composeElement(anchor, ComponentP, { name: 'felix' });
+        composeElement(anchorClass, ClassCompP, { name: 'felix' });
+        composeElement(anchorArrow, ArrowCompP, { name: 'felix' });
 
         const expected = `
           <div>
@@ -143,7 +143,7 @@ describe('compose element', () => {
         // <!--0-->
         const anchor = $anchor();
         const { dom, anchor: parent } = elementWithAnchor();
-        compose(anchor, parent);
+        compose(parent, anchor);
 
         expect(dom).toMatchInlineSnapshot(`
           <div>
@@ -152,7 +152,7 @@ describe('compose element', () => {
           </div>
         `);
 
-        compose(elementWithText().dom, anchor);
+        compose(anchor, elementWithText().dom);
 
         expect(dom).toMatchInlineSnapshot(`
           <div>
@@ -165,7 +165,7 @@ describe('compose element', () => {
         `);
 
         const anchor2 = $anchor();
-        compose(anchor2, parent);
+        compose(parent, anchor2);
         expect(dom).toMatchInlineSnapshot(`
           <div>
             <!--0-->
@@ -173,7 +173,7 @@ describe('compose element', () => {
           </div>
         `);
 
-        compose(elementWithText('goodbye').dom, anchor2);
+        compose(anchor2, elementWithText('goodbye').dom);
         expect(dom).toMatchInlineSnapshot(`
           <div>
             <div>
