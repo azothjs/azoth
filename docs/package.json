@@ -2,14 +2,6 @@
     "name": "docs",
     "version": "1.0.0",
     "main": "index.js",
-    "devDependencies": {
-        "vitepress": "1.0.0-rc.42"
-    },
-    "pnpm": {
-        "patchedDependencies": {
-            "vitepress@1.0.0-rc.42": "patches/vitepress@1.0.0-rc.42.patch"
-        }
-    },
     "author": "",
     "license": "MIT",
     "description": "",
@@ -17,5 +9,8 @@
         "start": "vitepress dev",
         "build": "vitepress build",
         "preview": "vitepress preview"
+    },
+    "devDependencies": {
+        "vitepress": "1.0.0-rc.44"
     }
 }

@@ -2,6 +2,7 @@ import { Parser } from 'acorn';
 import acornJsx from 'acorn-jsx';
 import { generate as astring } from 'astring';
 import { TemplateGenerator } from './TemplateGenerator.js';
+import { SourceMapGenerator } from 'source-map';
 
 // compile = parse + generate
 export function compile(code, options) {
@@ -13,8 +14,13 @@ export function compile(code, options) {
 
 // parse = js --> ast
 const JsxParser = Parser.extend(acornJsx());
-const base = { ecmaVersion: 'latest' };
-const required = { sourceType: 'module' };
+const base = {
+    ecmaVersion: 'latest'
+};
+const required = {
+    sourceType: 'module',
+    locations: true,
+};
 
 export function parse(code, options = {}) {
     return JsxParser.parse(code, {
@@ -26,16 +32,18 @@ export function parse(code, options = {}) {
 
 // generate = ast --> code + html
 export function generate(ast, config) {
+    const file = config?.sourceFile || 'script.js'; // TODO: testing purposes, remove
+    const sourceMap = new SourceMapGenerator({ file });
     const generator = new TemplateGenerator();
 
     const code = astring(ast, {
         ...config,
         generator,
+        sourceMap,
     });
 
     const templates = generator.templates.map(({ id, html, isDomFragment, needs }) => {
         return { id, html, isDomFragment, needs };
     });
-
-    return { code, templates };
+    return { code, templates, sourceMap };
 }

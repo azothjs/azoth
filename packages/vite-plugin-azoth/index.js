@@ -1,13 +1,15 @@
 import { compile } from '@azoth-web/thoth';
 import { createFilter } from '@rollup/pluginutils';
+import { SourceNode, SourceMapConsumer } from 'source-map';
+
 
 // TODO: something better???
 const templateServiceModule = `/az-tmpl:`;
 
 export default function azothPlugin(options) {
-    const include = options?.includes;
-    const exclude = options?.excludes;
-    const extension = options?.extension ?? /\.jsx$/;
+    options = options ?? {};
+
+    const { include, exclude, extension = /\.jsx$/ } = options;
     const filter = createFilter(include, exclude);
 
     const programTemplates = new Map();
@@ -51,12 +53,13 @@ export default function azothPlugin(options) {
 
             return importRenderer + exports;
         },
-        transform(source, id) {
+        async transform(source, id) {
             if(!filter(id) || !extension.test(id)) return;
 
-            let { code, templates } = compile(source, options);
+            options.sourceFile = id;
+            let { code, templates, sourceMap } = compile(source, options);
             if(!templates.length) {
-                return code;
+                return { code, map: sourceMap };
             }
 
             const moduleTemplates = new Set();
@@ -90,7 +93,16 @@ export default function azothPlugin(options) {
                 imports.push(`import { ${names} } from '${templateServiceModule}?${params.toString()}';\n`);
             }
 
-            return imports.join('') + code;
+            if(imports.length) {
+                const consumer = await new SourceMapConsumer(sourceMap.toString());
+                const node = SourceNode.fromStringWithSourceMap(code, consumer);
+                node.prepend(imports);
+                const result = node.toStringWithSourceMap();
+                consumer.destroy();
+                return result;
+            }
+
+            return { code, map: sourceMap };
         },
     };
 

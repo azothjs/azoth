@@ -1,6 +1,6 @@
 import { generate } from 'astring';
 import { HtmlGenerator } from './HtmlGenerator.js';
-import { Generator, getNextLine } from './GeneratorBase.js';
+import { Generator, writeNextLine } from './GeneratorBase.js';
 import isValidName from 'is-valid-var-name';
 import { Analyzer } from './Analyzer.js';
 
@@ -28,12 +28,12 @@ export class TemplateGenerator extends Generator {
 
         // Short-circuit templates
         const { isStatic, node: root } = template;
-        const { isComponent, isReturnArg } = root;
+        const { isComponent, returnStatement } = root;
         if(isStatic || isComponent) {
-            if(isReturnArg) state.write(`return `);
+            if(returnStatement) state.write(`return `, returnStatement);
             if(isComponent) this.CreateElement(root, state);
             else if(isStatic) this.StaticRoot(template, state);
-            if(isReturnArg) state.write(`;`);
+            if(returnStatement) state.write(`;`);
             return;
         }
 
@@ -47,7 +47,7 @@ export class TemplateGenerator extends Generator {
     }
 
     JSXIdentifier(identifier, state) {
-        state.write(identifier.name);
+        state.write(identifier.name, identifier);
     }
 
     /* Adopt implicit arrow as containing function */
@@ -69,7 +69,7 @@ export class TemplateGenerator extends Generator {
         // custom handling for direct return of template jsx
         const type = node.argument?.type;
         if(type === 'JSXElement' || type === 'JSXFragment') {
-            node.argument.isReturnArg = true;
+            node.argument.returnStatement = node;
             this.JSXTemplate(node.argument, state);
             return;
         }
@@ -78,71 +78,81 @@ export class TemplateGenerator extends Generator {
     }
 
     InjectionWrapper(template, state) {
-        const useIIFEWrapper = !template.node.isReturnArg;
-        let nextLine = getNextLine(state);
+        const returnStatement = template.node.returnStatement;
+        const useIIFEWrapper = !returnStatement;
 
         if(useIIFEWrapper) {
             state.write(`(() => {`);
             state.indentLevel++;
-            nextLine = getNextLine(state);
-            state.write(nextLine);
+            writeNextLine(state);
         }
 
         this.DomLiteral(template, state);
-        state.write(`${nextLine}return __root;`);
+        writeNextLine(state);
+        state.write(`return `, returnStatement);
+        state.write(`__root;`, template.node);
 
         if(useIIFEWrapper) {
             state.indentLevel--;
-            nextLine = getNextLine(state);
-            state.write(`${nextLine}})()`);
+            writeNextLine(state);
+            state.write(`})()`);
         }
     }
 
     StaticRoot(template, state) {
         this.TemplateRenderer(template, state);
-        if(!template.isEmpty) state.write(`[0]`); // dom root
+        if(!template.isEmpty) state.write(`[0]`, template.node); // dom root
     }
 
-    TemplateRenderer({ id, isEmpty, isDomFragment }, state) {
+    TemplateRenderer({ id, isEmpty, isDomFragment, node }, state) {
         if(isEmpty) {
-            state.write('null');
+            state.write('null', node);
             return;
         }
-        state.write(`t${id}(`);
+        state.write(`t${id}`, node);
+        state.write(`(`);
         if(isDomFragment) state.write('true');
         state.write(`)`);
     }
 
     DomLiteral(template, state) {
-        const { boundElements, bindings } = template;
-        const { indent, lineEnd, } = state;
-        const indentation = indent.repeat(state.indentLevel);
-        const nextLine = `${lineEnd}${indentation}`;
+        const { boundElements, bindings, node } = template;
 
         // template service renderer call
         const hasTargets = !!boundElements.length;
         state.write(hasTargets ? `const [__root, __targets] = ` : `const __root = `);
         this.TemplateRenderer(template, state);
-        state.write(hasTargets ? ';' : '[0];');
+        state.write(hasTargets ? ';' : '[0];', node);
 
         // target variables
         for(let i = 0; i < boundElements.length; i++) {
-            state.write(`${nextLine}const __target${i} = __targets[${i}];`);
+            const boundElement = boundElements[i];
+            const opening = boundElement.openingElement || boundElement.openFragment;
+            writeNextLine(state);
+            state.write(`const __target${i} =`);
+            state.write(`__targets[${i}]`, opening?.name);
+            state.write(`;`);
         }
         // sequential tasks before bindings generation below,
         // variables prevent downstream binding mutations from 
         // changing index because childNodes is live list.
         for(let i = 0; i < bindings.length; i++) {
-            const { element: { queryIndex }, type, index } = bindings[i];
+            const { element, type, index, node } = bindings[i];
+            const { queryIndex } = element;
             if(type !== 'child') continue;
             const varName = queryIndex === -1 ? `__root` : `__target${queryIndex}`;
-            state.write(`${nextLine}const __child${i} = ${varName}.childNodes[${index}];`);
+            const opening = element.openingElement ?? element.openingFragment;
+            writeNextLine(state);
+            state.write(`const __child${i} = `);
+            state.write(`${varName}.childNodes`, opening.name ?? opening);
+            state.write(`[${index}]`, node);
+            state.write(`;`);
         }
 
         // bindings
         for(let i = 0; i < bindings.length; i++) {
             const { element, type, node, expr } = bindings[i];
-            state.write(`${nextLine}`);
+            writeNextLine(state);
 
             if(!this[expr.type]) {
                 throw new TypeError(`Unexpected Binding expression AST type "${expr.type}"`);
@@ -153,11 +163,11 @@ export class TemplateGenerator extends Generator {
                 continue;
             }
             if(type === 'child') {
-                this.Compose(expr, i, state);
+                this.Compose(node, expr, i, state);
                 continue;
             }
             if(type === 'prop') {
-                this.BindingProp(node, expr, element.queryIndex, state);
+                this.BindingProp(node, expr, element, state);
                 continue;
             }
 
@@ -166,22 +176,22 @@ export class TemplateGenerator extends Generator {
         }
     }
 
-    Compose(expr, index, state) {
-        state.write(`__compose(`);
-        state.write(`__child${index}, `);
+    Compose(node, expr, index, state) {
+        state.write(`__compose(`, node);
+        state.write(`__child${index}, `, node);
         this[expr.type](expr, state);
         state.write(`);`);
     }
 
     ComposeElement(node, expr, index, state) {
-        state.write(`__composeElement(`);
+        state.write(`__composeElement(`, node);
         state.write(`__child${index}, `);
         this.CompleteElement(node, expr, state);
         state.write(`);`);
     }
 
     CreateElement(node, state) {
-        state.write(`__createElement(`);
+        state.write(`__createElement(`, node);
         this.CompleteElement(node, node.componentExpr, state);
         state.write(`)`);
     }
@@ -205,28 +215,36 @@ export class TemplateGenerator extends Generator {
             const { node, expr } = props[i];
             // TODO: Dom lookup, JS .prop v['prop'], etc. 
             // refactor with code below
-            state.write(` ${node.name.name}: `);
+            state.write(` `);
+            state.write(node.name.name, node.name);
+            state.write(`: `);
             this[expr.type](expr, state);
             state.write(`,`);
         }
         state.write(` }`);
     }
 
-    BindingProp({ name }, expr, queryIndex, state) {
+    BindingProp(node, expr, element, state) {
+        const { queryIndex, openingElement, openingFragment } = element;
         const varName = queryIndex === -1 ? `__root` : `__target${queryIndex}`;
-        state.write(`${varName}`);
+        const opening = openingElement ?? openingFragment;
+        state.write(`${varName}`, opening.name);
         // TODO: more property validation
-        const propName = name.name;
+        const identity = node.name;
+        const propName = identity.name;
         // TODO: refactor with component props
         if(isValidName(propName)) {
-            state.write(`.${propName}`);
+            state.write(`.`);
+            state.write(propName, node.name);
         }
         else {
-            state.write(`["${propName}"]`);
+            state.write(`["`, node.name);
+            state.write(propName, node.name);
+            state.write(`"]`);
         }
 
         /* expression */
-        state.write(` = (`); // do we need (...)? 
+        state.write(` = (`);
         this[expr.type](expr, state);
         state.write(`);`);
     }

@@ -31,12 +31,12 @@ describe('JSX dom literals', () => {
         expect(code).toMatchInlineSnapshot(`
           "const t = (() => {
               const [__root, __targets] = tfdd1a869cf();
-              const __target0 = __targets[0];
-              const __target1 = __targets[1];
-              const __target2 = __targets[2];
-              const __target3 = __targets[3];
-              const __target4 = __targets[4];
-              const __target5 = __targets[5];
+              const __target0 =__targets[0];
+              const __target1 =__targets[1];
+              const __target2 =__targets[2];
+              const __target3 =__targets[3];
+              const __target4 =__targets[4];
+              const __target5 =__targets[5];
               const __child1 = __target0.childNodes[0];
               const __child2 = __target1.childNodes[0];
               const __child3 = __target2.childNodes[0];
@@ -207,28 +207,31 @@ describe('surrounding code integration', () => {
             const template = (text) => <p>{text}</p>
         `;
 
-        expect(compile(input)).toMatchInlineSnapshot(`
-          {
-            "code": "const template = text => {
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "const template = text => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
               __compose(__child0, text);
               return __root;
           };
-          ",
-            "templates": [
-              {
-                "html": "<p><!--0--></p>",
-                "id": "904ca237ee",
-                "isDomFragment": false,
-                "needs": {
-                  "compose": true,
-                  "composeElement": false,
-                  "createElement": false,
-                },
+          "
+        `);
+
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<p><!--0--></p>",
+              "id": "904ca237ee",
+              "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
               },
-            ],
-          }
+            },
+          ]
         `);
     });
 
@@ -240,29 +243,31 @@ describe('surrounding code integration', () => {
             }
         `;
 
-        expect(compile(input)).toMatchInlineSnapshot(`
-          {
-            "code": "function template(text) {
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "function template(text) {
               const format = 'text' + '!';
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
               __compose(__child0, text);
               return __root;
           }
-          ",
-            "templates": [
-              {
-                "html": "<p><!--0--></p>",
-                "id": "904ca237ee",
-                "isDomFragment": false,
-                "needs": {
-                  "compose": true,
-                  "composeElement": false,
-                  "createElement": false,
-                },
+          "
+        `);
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<p><!--0--></p>",
+              "id": "904ca237ee",
+              "isDomFragment": false,
+              "needs": {
+                "compose": true,
+                "composeElement": false,
+                "createElement": false,
               },
-            ],
-          }
+            },
+          ]
         `);
     });
 });
@@ -760,7 +765,7 @@ describe('fragments', () => {
         expect(code).toMatchInlineSnapshot(`
           "const App = (() => {
               const [__root, __targets] = tef691fa27a(true);
-              const __target0 = __targets[0];
+              const __target0 =__targets[0];
               const __child0 = __root.childNodes[0];
               const __child1 = __target0.childNodes[0];
               const __child2 = __root.childNodes[2];
@@ -1011,30 +1016,30 @@ describe('element composition', () => {
             }
         `;
 
-        const { code } = compile(input);
+        const { code, templates } = compile(input);
 
-        expect(compile(input)).toMatchInlineSnapshot(`
-          {
-            "code": "function Surprise() {
+        expect(code).toMatchInlineSnapshot(`
+          "function Surprise() {
               return t92cc583556()[0];
           }
-          ",
-            "templates": [
-              {
-                "html": "<section>
+          "
+        `);
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<section>
                               <h2>Guess What...</h2>
                               <p>surprise!</p>
                           </section>",
-                "id": "92cc583556",
-                "isDomFragment": false,
-                "needs": {
-                  "compose": false,
-                  "composeElement": false,
-                  "createElement": false,
-                },
+              "id": "92cc583556",
+              "isDomFragment": false,
+              "needs": {
+                "compose": false,
+                "composeElement": false,
+                "createElement": false,
               },
-            ],
-          }
+            },
+          ]
         `);
 
     });
@@ -1085,8 +1090,8 @@ describe('element composition', () => {
           const cText = __createElement(Component, null, t1cb251ec0d(true)[0]);
           const cFrag = __createElement(Component, null, (() => {
               const [__root, __targets] = t9b045328fb(true);
-              const __target0 = __targets[0];
-              const __target1 = __targets[1];
+              const __target0 =__targets[0];
+              const __target1 =__targets[1];
               const __child0 = __target0.childNodes[0];
               const __child1 = __target1.childNodes[0];
               __compose(__child0, 1);
