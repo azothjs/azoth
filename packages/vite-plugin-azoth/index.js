@@ -1,10 +1,10 @@
 import { compile } from '@azoth-web/thoth';
 import { createFilter } from '@rollup/pluginutils';
 import { SourceNode, SourceMapConsumer } from 'source-map';
+import path from 'node:path';
 
-
-// TODO: something better???
-const templateServiceModule = `/az-tmpl:`;
+const templateModule = `virtual:azoth-templates`;
+const resolvedTemplateModule = '\0' + templateModule;
 
 export default function azothPlugin(options) {
     options = options ?? {};
@@ -16,19 +16,20 @@ export default function azothPlugin(options) {
     let command = '';
 
     const transformJSX = {
-        name: 'rollup-plugin-azoth',
+        name: 'azoth-jsx',
         enforce: 'pre',
         config(config, { command: cmd }) {
             command = cmd;
         },
         resolveId(id) {
-            const [name] = id.split('?', 2);
-            if(name !== templateServiceModule) return;
-            return id;
+            const [name, ids] = id.split('?', 2);
+            if(name !== templateModule) return;
+
+            return ids ? `${resolvedTemplateModule}?${ids}` : resolvedTemplateModule;
         },
         load(id) {
             const [name, ids] = id.split('?', 2);
-            if(name !== templateServiceModule) return;
+            if(name !== resolvedTemplateModule) return;
 
             const isBuild = command === 'build';
             const renderer = isBuild ? '__rendererById' : '__makeRenderer';
@@ -54,12 +55,12 @@ export default function azothPlugin(options) {
             return importRenderer + exports;
         },
         async transform(source, id) {
-            if(!filter(id) || !extension.test(id)) return;
-
-            options.sourceFile = id;
+            if(!filter(id) || !extension.test(id)) return null;
+            const sourceFile = path.basename(id);
+            options.generator = { sourceFile };
             let { code, templates, sourceMap } = compile(source, options);
             if(!templates.length) {
-                return { code, map: sourceMap };
+                return { code, map: null };
             }
 
             const moduleTemplates = new Set();
@@ -90,7 +91,7 @@ export default function azothPlugin(options) {
                 const uniqueIds = [...moduleTemplates];
                 const params = new URLSearchParams(uniqueIds.map(id => ['id', id]));
                 const names = uniqueIds.map(id => `t${id}`).join(', ');
-                imports.push(`import { ${names} } from '${templateServiceModule}?${params.toString()}';\n`);
+                imports.push(`import { ${names} } from '${templateModule}?${params.toString()}';\n`);
             }
 
             if(imports.length) {
