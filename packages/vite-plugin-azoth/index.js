@@ -95,12 +95,14 @@ export default function azothPlugin(options) {
             }
 
             if(imports.length) {
-                const consumer = await new SourceMapConsumer(sourceMap.toString());
-                const node = SourceNode.fromStringWithSourceMap(code, consumer);
-                node.prepend(imports);
-                const result = node.toStringWithSourceMap();
-                consumer.destroy();
-                return result;
+                return SourceMapConsumer.with(
+                    sourceMap.toString(),
+                    null,
+                    async consumer => {
+                        const node = SourceNode.fromStringWithSourceMap(code, consumer);
+                        node.prepend(imports);
+                        return node.toStringWithSourceMap();
+                    });
             }
 
             return { code, map: sourceMap };
@@ -112,7 +114,7 @@ export default function azothPlugin(options) {
     const makeReplacement = (html, prefix) => `${prefix}\n    <!-- 🚀 azoth templates -->${html}\n    <!-- azoth templates 🌎-->`;
 
     const injectHTML = {
-        name: 'vite-plugin-azoth-inject-html',
+        name: 'azoth-inject-template-html',
         apply: 'build',
         enforce: 'post',
         transformIndexHtml(html) {
