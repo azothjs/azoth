@@ -82,8 +82,8 @@ async function composeStream(anchor, stream, keepLast) {
     stream.pipeTo(writeable);
 }
 
-export function composeElement(anchor, Constructor, props) {
-    const dom = createConstructed(Constructor, props);
+export function composeElement(anchor, Constructor, props, slottable) {
+    const dom = createConstructed(Constructor, props, slottable);
     compose(anchor, dom);
 }
 
@@ -164,8 +164,8 @@ function create(input) {
     }
 }
 
-export function createElement(Constructor, props) {
-    const result = createConstructed(Constructor, props);
+export function createElement(Constructor, props, slottable) {
+    const result = createConstructed(Constructor, props, slottable);
     const type = typeof result;
     if(type === 'string' || type === 'number') {
         return document.createTextNode(result);
@@ -173,12 +173,12 @@ export function createElement(Constructor, props) {
     return result;
 }
 
-function createConstructed(Constructor, props) {
+function createConstructed(Constructor, props, slottable) {
     if(Constructor.prototype?.constructor) {
-        return create(new Constructor(props));
+        return create(new Constructor(props, slottable));
     }
     if(typeof Constructor === 'function') {
-        return create(Constructor(props));
+        return create(Constructor(props, slottable));
     }
     throw new Error(`Unexpected Component type ${Constructor}`);
 }
