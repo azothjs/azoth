@@ -1,6 +1,6 @@
 {
     "name": "@azoth-web/thoth",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "description": "Azoth JSX to JavaScript + HTML compiler",
     "author": "Marty Nelson",
     "license": "MIT",
