@@ -34,3 +34,7 @@ features:
   - title: Hyper-optimized compilation
     details: Fast and small in both time and space. JSX is deconstructed into HTML processed by the browser and the minimal required JS execution code.
 ---
+
+Mandatory state management is unnecessary complexity
+
+Hypermedia works in alignment with the web
