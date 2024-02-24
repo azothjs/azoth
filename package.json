@@ -5,7 +5,7 @@
     "type": "module",
     "main": "index.js",
     "scripts": {
-        "start:sandbox": "pnpm -F sandbox start",
+        "start": "pnpm -F sandbox start",
         "check": "pnpm update && pnpm test",
         "update": "pnpm update -r",
         "test": "CI=true pnpm test -r -F @azoth-web/*",
