@@ -180,5 +180,14 @@ function createConstructed(Constructor, props, slottable) {
     if(typeof Constructor === 'function') {
         return create(Constructor(props, slottable));
     }
+    if(Constructor instanceof Promise) {
+        const anchor = document.createComment('0');
+        Constructor.then(input => {
+            if(props) Object.assign(input, props);
+            if(slottable) input.slottable = slottable;
+            compose(anchor, input);
+        });
+        return anchor;
+    }
     throw new Error(`Unexpected Component type ${Constructor}`);
 }
