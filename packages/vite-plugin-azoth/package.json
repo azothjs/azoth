@@ -1,6 +1,6 @@
 {
     "name": "@azoth-web/vite-plugin-azoth",
-    "version": "1.6.1",
+    "version": "1.6.2",
     "description": "vite plugins for compiling azoth hypermedia apps",
     "author": "martypdx",
     "license": "MIT",

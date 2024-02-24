@@ -1,6 +1,6 @@
 {
     "name": "@azoth-web/maat",
-    "version": "1.6.1",
+    "version": "1.6.2",
     "description": "Azoth runtime for hypermedia apps on the web platform",
     "author": "martypdx",
     "license": "MIT",
