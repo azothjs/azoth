@@ -18,15 +18,17 @@ export default function azothPlugin(options) {
     const transformJSX = {
         name: 'azoth-jsx',
         enforce: 'pre',
+
         config(config, { command: cmd }) {
             command = cmd;
         },
+
         resolveId(id) {
             const [name, ids] = id.split('?', 2);
             if(name !== templateModule) return;
-
             return ids ? `${resolvedTemplateModule}?${ids}` : resolvedTemplateModule;
         },
+
         load(id) {
             const [name, ids] = id.split('?', 2);
             if(name !== resolvedTemplateModule) return;
@@ -41,7 +43,8 @@ export default function azothPlugin(options) {
                     const { html, isDomFragment } = programTemplates.get(id);
                     let exportRender = `\nexport const t${id} = ${renderer}('${id}'`;
 
-                    // html gets added to index.html in build
+                    // html gets added to index.html in build,
+                    // but dev mode html is string in virtual module
                     if(!isBuild) exportRender += `, \`${html}\``;
 
                     // default is false, so only add if true (which is less common)
@@ -54,11 +57,14 @@ export default function azothPlugin(options) {
 
             return importRenderer + exports;
         },
+
         async transform(source, id) {
             if(!filter(id) || !extension.test(id)) return null;
-            const sourceFile = path.basename(id);
-            options.generator = { sourceFile };
-            let { code, templates, sourceMap } = compile(source, options);
+
+            let { code, templates, map } = compile(source, {
+                generator: { sourceFile: path.basename(id) }
+            });
+
             if(!templates.length) {
                 return { code, map: null };
             }
@@ -67,11 +73,11 @@ export default function azothPlugin(options) {
             const importSet = new Set();
 
             for(let template of templates) {
-                const { id, html, needs } = template;
-                const { compose, composeElement, createElement } = needs;
-                if(compose) importSet.add('__compose');
-                if(composeElement) importSet.add('__composeElement');
-                if(createElement) importSet.add('__createElement');
+                const { id, html, imports } = template;
+
+                for(let namedImport of imports) {
+                    importSet.add(`__${namedImport}`);
+                }
 
                 if(!html) continue;
 
@@ -82,30 +88,36 @@ export default function azothPlugin(options) {
                 programTemplates.set(id, template);
             }
 
-            const imports = [];
+            const maatImports = [];
             if(importSet.size) {
-                imports.push(`import { ${[...importSet].join(', ')} } from '@azoth-web/maat';\n`);
+                maatImports.push(`import { ${[...importSet].join(', ')} } from '@azoth-web/maat';\n`);
             }
 
             if(moduleTemplates.size) {
                 const uniqueIds = [...moduleTemplates];
                 const params = new URLSearchParams(uniqueIds.map(id => ['id', id]));
                 const names = uniqueIds.map(id => `t${id}`).join(', ');
-                imports.push(`import { ${names} } from '${templateModule}?${params.toString()}';\n`);
+                maatImports.push(`import { ${names} } from '${templateModule}?${params.toString()}';\n`);
             }
 
-            if(imports.length) {
+            // TODO: find a better way to add imports while maintaining sourcemaps,
+            // it shouldn't need to be async...
+            if(maatImports.length) {
                 return SourceMapConsumer.with(
-                    sourceMap.toString(),
+                    map,
                     null,
                     async consumer => {
                         const node = SourceNode.fromStringWithSourceMap(code, consumer);
-                        node.prepend(imports);
-                        return node.toStringWithSourceMap();
+                        node.prepend(maatImports);
+                        const { map, code: newCode } = node.toStringWithSourceMap();
+                        return {
+                            code: newCode,
+                            map: map.toJSON()
+                        };
                     });
             }
 
-            return { code, map: sourceMap };
+            return { code, map };
         },
     };
 

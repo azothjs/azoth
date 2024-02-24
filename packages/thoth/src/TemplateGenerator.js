@@ -13,6 +13,11 @@ export class TemplateGenerator extends Generator {
         this.htmlGenerator = node => generate(node, { generator });
     }
 
+    // Program(node, state) {
+    //     console.log('Program');
+    //     super.Program(node, state);
+    // }
+
     JSXFragment(node, state) {
         this.JSXTemplate(node, state);
     }

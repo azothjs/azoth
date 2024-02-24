@@ -19,11 +19,11 @@ export class Template {
         this.#id = revHash(html);
     }
 
-    constructor(node, { bindings, boundElements, needs }) {
+    constructor(node, { bindings, boundElements, imports }) {
         this.node = node;
         this.bindings = bindings;
         this.boundElements = boundElements;
-        this.needs = needs;
+        this.imports = imports;
 
         if(node.isComponent && bindings.length) {
             throw new Error('Unexpected component binding length');

@@ -3,9 +3,15 @@ import { compile as _compile } from './index.js';
 import { describe, test } from 'vitest';
 
 const compile = input => {
-    return _compile(input, {
+    const { code, templates, map } = _compile(input, {
         generator: { indent: '    ' }
     });
+    return {
+        code, map,
+        templates: templates.map(({ id, html, isDomFragment, isEmpty, isStatic, imports }) => {
+            return { id, html, isDomFragment, isEmpty, isStatic, imports };
+        })
+    };
 };
 
 describe('JSX dom literals', () => {
@@ -77,12 +83,12 @@ describe('JSX dom literals', () => {
                       <!--0-->
                   </div>",
               "id": "fdd1a869cf",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -116,12 +122,10 @@ describe('JSX dom literals', () => {
             {
               "html": "<input required>",
               "id": "10073da0ec",
+              "imports": [],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -149,22 +153,20 @@ describe('nested context', () => {
             {
               "html": "<div><!--0--></div>",
               "id": "8dae88052a",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
             {
               "html": "<hr>",
               "id": "1a78cbe949",
+              "imports": [],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
           ]
         `);
@@ -188,12 +190,10 @@ describe('template optimizations', () => {
             {
               "html": "<p>Hello</p>",
               "id": "5bf3d2f523",
+              "imports": [],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
           ]
         `);
@@ -224,12 +224,12 @@ describe('surrounding code integration', () => {
             {
               "html": "<p><!--0--></p>",
               "id": "904ca237ee",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -260,12 +260,12 @@ describe('surrounding code integration', () => {
             {
               "html": "<p><!--0--></p>",
               "id": "904ca237ee",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -311,72 +311,62 @@ describe('fragments', () => {
             {
               "html": "<hr><hr>",
               "id": "c203fe7dcd",
+              "imports": [],
               "isDomFragment": true,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
             {
               "html": "<hr>",
               "id": "1a78cbe949",
+              "imports": [],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
             {
               "html": "<hr>",
               "id": "1a78cbe949",
+              "imports": [],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
             {
               "html": "<!--0-->",
               "id": "c084de4382",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": true,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
             {
               "html": "",
               "id": "",
+              "imports": [],
               "isDomFragment": true,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": true,
+              "isStatic": true,
             },
             {
               "html": "<!--0-->",
               "id": "c084de4382",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": true,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
             {
               "html": "text",
               "id": "1cb251ec0d",
+              "imports": [],
               "isDomFragment": true,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
           ]
         `);
@@ -438,74 +428,64 @@ describe('fragments', () => {
             {
               "html": "<hr><hr>",
               "id": "c203fe7dcd",
+              "imports": [],
               "isDomFragment": true,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
             {
               "html": "<hr>",
               "id": "1a78cbe949",
+              "imports": [],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
             {
               "html": "<hr>",
               "id": "1a78cbe949",
+              "imports": [],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
             {
               "html": "<!--0-->",
               "id": "c084de4382",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": true,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
             {
               "html": "",
               "id": "",
+              "imports": [],
               "isDomFragment": true,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": true,
+              "isStatic": true,
             },
             {
               "html": "<!--0-->",
               "id": "c084de4382",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": true,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
             {
               "html": "
                           text
                       ",
               "id": "6c72de769d",
+              "imports": [],
               "isDomFragment": true,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
           ]
         `);
@@ -548,42 +528,38 @@ describe('fragments', () => {
             {
               "html": "<hr>",
               "id": "1a78cbe949",
+              "imports": [],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
             {
               "html": "<hr>",
               "id": "1a78cbe949",
+              "imports": [],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
             {
               "html": "<!--0-->",
               "id": "c084de4382",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": true,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
             {
               "html": "<!--0-->",
               "id": "c084de4382",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": true,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -619,52 +595,44 @@ describe('fragments', () => {
             {
               "html": " <hr><hr> ",
               "id": "653a3aad80",
+              "imports": [],
               "isDomFragment": true,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
             {
               "html": " <hr> ",
               "id": "dcaa233028",
+              "imports": [],
               "isDomFragment": true,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
             {
               "html": "  <hr>  ",
               "id": "2dc1738d5c",
+              "imports": [],
               "isDomFragment": true,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
             {
               "html": "    ",
               "id": "0cf31b2c28",
+              "imports": [],
               "isDomFragment": true,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
             {
               "html": " <!--0--> ",
               "id": "5bc2a159b1",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": true,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -692,12 +660,12 @@ describe('fragments', () => {
             {
               "html": "one<!--0-->three",
               "id": "faf808e6cc",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": true,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -732,12 +700,10 @@ describe('fragments', () => {
             {
               "html": "<div><hr><hr><hr></div>",
               "id": "ccaa44c114",
+              "imports": [],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
             {
               "html": "<div>
@@ -746,12 +712,12 @@ describe('fragments', () => {
                           <p></p>
                       </div>",
               "id": "681310be49",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -782,12 +748,12 @@ describe('fragments', () => {
             {
               "html": "<!--0--><main data-bind><!--0--></main><!--0-->",
               "id": "ef691fa27a",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": true,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -817,12 +783,12 @@ describe('template root', () => {
             {
               "html": "<div><!--0--></div>",
               "id": "8dae88052a",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -852,12 +818,10 @@ describe('element composition', () => {
             {
               "html": "<custom-element></custom-element>",
               "id": "1cdf0d646f",
+              "imports": [],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -881,22 +845,22 @@ describe('element composition', () => {
             {
               "html": "",
               "id": "",
+              "imports": [
+                "createElement",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": true,
-              },
+              "isEmpty": true,
+              "isStatic": true,
             },
             {
               "html": "",
               "id": "",
+              "imports": [
+                "createElement",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": true,
-              },
+              "isEmpty": true,
+              "isStatic": true,
             },
           ]
         `);
@@ -930,12 +894,13 @@ describe('element composition', () => {
                           <!--0-->
                       </div>",
               "id": "2288998344",
+              "imports": [
+                "composeElement",
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": true,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -971,22 +936,22 @@ describe('element composition', () => {
             {
               "html": "",
               "id": "",
+              "imports": [
+                "createElement",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": true,
-              },
+              "isEmpty": true,
+              "isStatic": true,
             },
             {
               "html": "",
               "id": "",
+              "imports": [
+                "createElement",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": true,
-              },
+              "isEmpty": true,
+              "isStatic": true,
             },
             {
               "html": "<div>
@@ -994,12 +959,12 @@ describe('element composition', () => {
                           <!--0-->
                       </div>",
               "id": "2288998344",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -1032,12 +997,10 @@ describe('element composition', () => {
                               <p>surprise!</p>
                           </section>",
               "id": "92cc583556",
+              "imports": [],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
           ]
         `);
@@ -1106,123 +1069,121 @@ describe('element composition', () => {
             {
               "html": "",
               "id": "",
+              "imports": [
+                "createElement",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": true,
-              },
+              "isEmpty": true,
+              "isStatic": true,
             },
             {
               "html": "<p><!--0--></p>",
               "id": "904ca237ee",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
             {
               "html": "",
               "id": "",
+              "imports": [
+                "createElement",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": true,
-              },
+              "isEmpty": true,
+              "isStatic": true,
             },
             {
               "html": "<p><!--0--></p>",
               "id": "904ca237ee",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
             {
               "html": "",
               "id": "",
+              "imports": [
+                "createElement",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": true,
-              },
+              "isEmpty": true,
+              "isStatic": true,
             },
             {
               "html": "<p><!--0--></p>",
               "id": "904ca237ee",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
             {
               "html": "",
               "id": "",
+              "imports": [
+                "createElement",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": true,
-              },
+              "isEmpty": true,
+              "isStatic": true,
             },
             {
               "html": "<p><!--0--></p>",
               "id": "904ca237ee",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
             {
               "html": "",
               "id": "",
+              "imports": [
+                "createElement",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": true,
-              },
+              "isEmpty": true,
+              "isStatic": true,
             },
             {
               "html": "text",
               "id": "1cb251ec0d",
+              "imports": [],
               "isDomFragment": true,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": true,
             },
             {
               "html": "",
               "id": "",
+              "imports": [
+                "createElement",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": false,
-                "composeElement": false,
-                "createElement": true,
-              },
+              "isEmpty": true,
+              "isStatic": true,
             },
             {
               "html": "<p data-bind><!--0--></p>
                           <p data-bind><!--0--></p>",
               "id": "9b045328fb",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": true,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -1262,22 +1223,22 @@ describe('render and composition cases', () => {
             {
               "html": "<li><!--0--></li>",
               "id": "62831a5152",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
             {
               "html": "<div><!--0--><!--0--></div>",
               "id": "8dc93cc914",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -1306,12 +1267,12 @@ describe('render and composition cases', () => {
             {
               "html": "<li>Hello <!--0--></li>",
               "id": "2b440f4741",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);
@@ -1349,22 +1310,22 @@ describe('render and composition cases', () => {
             {
               "html": "<li><!--0--></li>",
               "id": "62831a5152",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
             {
               "html": "<ul><!--0--></ul>",
               "id": "25ec157413",
+              "imports": [
+                "compose",
+              ],
               "isDomFragment": false,
-              "needs": {
-                "compose": true,
-                "composeElement": false,
-                "createElement": false,
-              },
+              "isEmpty": false,
+              "isStatic": false,
             },
           ]
         `);

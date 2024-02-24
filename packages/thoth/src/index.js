@@ -42,8 +42,9 @@ export function generate(ast, config) {
         sourceMap,
     });
 
-    const templates = generator.templates.map(({ id, html, isDomFragment, needs }) => {
-        return { id, html, isDomFragment, needs };
-    });
-    return { code, templates, sourceMap };
+    return {
+        code,
+        templates: generator.templates,
+        map: sourceMap.toJSON()
+    };
 }
