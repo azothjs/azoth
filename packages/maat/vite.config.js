@@ -1,11 +1,11 @@
-import config from './vite.config.js';
-import { mergeConfig } from 'vite';
+import { defineConfig } from 'vite';
 
-export default mergeConfig(config, {
+export default defineConfig({
     test: {
         // testTimeout: 30_000,
         browser: {
             headless: false,
-        }
+        },
+        environment: 'happy-dom',
     }
 });
