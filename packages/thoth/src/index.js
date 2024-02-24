@@ -32,7 +32,7 @@ export function parse(code, options = {}) {
 
 // generate = ast --> code + html
 export function generate(ast, config) {
-    const file = config?.sourceFile || 'jsx';
+    const file = config?.sourceFile || 'module.jsx';
     const sourceMap = new SourceMapGenerator({ file });
     const generator = new TemplateGenerator();
 

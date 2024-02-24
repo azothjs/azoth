@@ -24,7 +24,7 @@ test('static one line', ({ expect }) => {
           "name": "t",
           "originalColumn": 6,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 10,
@@ -32,7 +32,7 @@ test('static one line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 10,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 23,
@@ -40,7 +40,7 @@ test('static one line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 10,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
       ]
     `);
@@ -66,7 +66,7 @@ test('{...} one line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 0,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 32,
@@ -74,7 +74,7 @@ test('{...} one line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 0,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 21,
@@ -82,7 +82,7 @@ test('{...} one line', ({ expect }) => {
           "name": "div",
           "originalColumn": 1,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 38,
@@ -90,7 +90,7 @@ test('{...} one line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 11,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 4,
@@ -98,7 +98,7 @@ test('{...} one line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 11,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 14,
@@ -106,7 +106,7 @@ test('{...} one line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 11,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 24,
@@ -114,7 +114,7 @@ test('{...} one line', ({ expect }) => {
           "name": "place",
           "originalColumn": 12,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 11,
@@ -122,7 +122,7 @@ test('{...} one line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 0,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
       ]
     `);
@@ -145,7 +145,7 @@ test('static three line', ({ expect }) => {
           "name": "t",
           "originalColumn": 6,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 10,
@@ -153,7 +153,7 @@ test('static three line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 10,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 23,
@@ -161,7 +161,7 @@ test('static three line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 10,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
       ]
     `);
@@ -189,7 +189,7 @@ test('{...} three line', ({ expect }) => {
           "name": "t",
           "originalColumn": 6,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 19,
@@ -197,7 +197,7 @@ test('{...} three line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 10,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 32,
@@ -205,7 +205,7 @@ test('{...} three line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 10,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 21,
@@ -213,7 +213,7 @@ test('{...} three line', ({ expect }) => {
           "name": "div",
           "originalColumn": 11,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 38,
@@ -221,7 +221,7 @@ test('{...} three line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 14,
           "originalLine": 2,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 4,
@@ -229,7 +229,7 @@ test('{...} three line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 14,
           "originalLine": 2,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 14,
@@ -237,7 +237,7 @@ test('{...} three line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 14,
           "originalLine": 2,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 24,
@@ -245,7 +245,7 @@ test('{...} three line', ({ expect }) => {
           "name": "place",
           "originalColumn": 15,
           "originalLine": 2,
-          "source": "script.js",
+          "source": "module.jsx",
         },
         {
           "generatedColumn": 11,
@@ -253,7 +253,7 @@ test('{...} three line', ({ expect }) => {
           "name": undefined,
           "originalColumn": 10,
           "originalLine": 1,
-          "source": "script.js",
+          "source": "module.jsx",
         },
       ]
     `);

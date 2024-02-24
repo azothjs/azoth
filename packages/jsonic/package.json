@@ -1,0 +1,35 @@
+{
+    "name": "jsonic",
+    "version": "0.0.1",
+    "description": "Super sonic streaming json parser",
+    "author": "martypdx",
+    "license": "MIT",
+    "keywords": [
+        "json",
+        "streaming",
+        "parsing",
+        "parser",
+        "json parser",
+        "json streaming",
+        "json streaming parser",
+        "streaming parser"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/azoth-web/azoth.git",
+        "directory": "packages/jsonic"
+    },
+    "type": "module",
+    "main": "./index.js",
+    "files": [],
+    "exports": {
+        ".": "./index.js"
+    },
+    "scripts": {
+        "test": "vitest"
+    },
+    "dependencies": {
+        "test-utils": "workspace:^",
+        "vitest": "^1.3.0"
+    }
+}
