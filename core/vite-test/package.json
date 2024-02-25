@@ -1,5 +1,5 @@
 {
-    "name": "vite-plugin",
+    "name": "vite-test",
     "version": "0.0.0",
     "description": "azoth plugins for vite",
     "author": "martypdx",
@@ -21,7 +21,10 @@
     },
     "type": "module",
     "scripts": {
-        "test": "exit 0"
+        "test": "pnpm run test:build && vitest -w false ",
+        "test:build": "vite build -c ./test/vite.config.js",
+        "test:update": "rm -rf ./test/expected-out && cp -R ./test/out ./test/expected-out",
+        "build": "vite build"
     },
     "files": [
         "index.js",
@@ -35,6 +38,8 @@
         }
     },
     "devDependencies": {
+        "runtime": "workspace:^",
+        "vite": "^5.1.4",
         "vitest": "^1.3.1"
     },
     "peerDependencies": {

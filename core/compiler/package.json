@@ -13,17 +13,17 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/azoth-web/azoth.git",
-        "directory": "aetheria-core/thoth-compiler"
+        "directory": "core/compiler"
     },
     "type": "module",
-    "main": "./src/index.js",
+    "main": "./index.js",
     "files": [
-        "src/!(*test*).js"
+        "!(*test*).js"
     ],
     "exports": {
         ".": {
             "import": {
-                "default": "./src/index.js"
+                "default": "./index.js"
             }
         }
     },

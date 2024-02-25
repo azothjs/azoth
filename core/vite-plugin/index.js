@@ -1,4 +1,4 @@
-import { compile } from 'thoth';
+import { compile } from 'compiler';
 import { createFilter } from '@rollup/pluginutils';
 import { SourceNode, SourceMapConsumer } from 'source-map';
 import path from 'node:path';
@@ -35,7 +35,7 @@ export default function azothPlugin(options) {
 
             const isBuild = command === 'build';
             const renderer = isBuild ? '__rendererById' : '__makeRenderer';
-            const importRenderer = `import { ${renderer} } from 'maya';\n`;
+            const importRenderer = `import { ${renderer} } from 'azoth/runtime';\n`;
 
             const exports = new URLSearchParams(ids)
                 .getAll('id')
@@ -88,27 +88,27 @@ export default function azothPlugin(options) {
                 programTemplates.set(id, template);
             }
 
-            const maatImports = [];
+            const runtimeImports = [];
             if(importSet.size) {
-                maatImports.push(`import { ${[...importSet].join(', ')} } from 'maya';\n`);
+                runtimeImports.push(`import { ${[...importSet].join(', ')} } from 'azoth/runtime';\n`);
             }
 
             if(moduleTemplates.size) {
                 const uniqueIds = [...moduleTemplates];
                 const params = new URLSearchParams(uniqueIds.map(id => ['id', id]));
                 const names = uniqueIds.map(id => `t${id}`).join(', ');
-                maatImports.push(`import { ${names} } from '${templateModule}?${params.toString()}';\n`);
+                runtimeImports.push(`import { ${names} } from '${templateModule}?${params.toString()}';\n`);
             }
 
             // TODO: find a better way to add imports while maintaining sourcemaps,
             // it shouldn't need to be async...
-            if(maatImports.length) {
+            if(runtimeImports.length) {
                 return SourceMapConsumer.with(
                     map,
                     null,
                     async consumer => {
                         const node = SourceNode.fromStringWithSourceMap(code, consumer);
-                        node.prepend(maatImports);
+                        node.prepend(runtimeImports);
                         const { map, code: newCode } = node.toStringWithSourceMap();
                         return {
                             code: newCode,

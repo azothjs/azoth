@@ -1,7 +1,7 @@
 import { Parser } from 'acorn';
 import acornJsx from 'acorn-jsx';
 import { generate as astring } from 'astring';
-import { TemplateGenerator } from './TemplateGenerator.js';
+import { TemplateGenerator } from './transform/TemplateGenerator.js';
 import { SourceMapGenerator } from 'source-map';
 
 // compile = parse + generate

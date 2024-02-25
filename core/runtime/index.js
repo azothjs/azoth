@@ -7,4 +7,4 @@ export {
 export {
     makeRenderer as __makeRenderer,
     rendererById as __rendererById,
-} from './dom/index.js';
+} from './renderer/index.js';

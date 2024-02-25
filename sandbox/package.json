@@ -14,7 +14,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "maya": "workspace:^",
+        "azoth": "workspace:^",
         "npm": "^10.4.0",
         "page": "^1.11.6"
     },
