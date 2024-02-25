@@ -1,13 +1,12 @@
 /* eslint-disable no-fallthrough */
 
-export class JSONParseTransformStream extends TransformStream {
+export default class JSONStream extends TransformStream {
     constructor(options) {
         super(new Transform(options));
-
     }
 }
 
-export class Transform {
+class Transform {
     stack = [];
     context = '';
     buffer = '';

@@ -9,6 +9,7 @@
         "check": "pnpm update && pnpm test",
         "update": "pnpm update -r",
         "test": "CI=true pnpm test -r -F @azoth-web/*",
+        "test:jsonic": "pnpm -F jsonic test",
         "lint": "eslint .",
         "publish": "pnpm -F maat publish --access=public && pnpm -F thoth publish --access=public && pnpm -F vite-plugin-azoth publish --access=public"
     },
