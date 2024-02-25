@@ -6,8 +6,8 @@ import { SourceMapGenerator } from 'source-map';
 
 // compile = parse + generate
 export function compile(code, options) {
-    const parseOptions = options?.parser;
-    const generateOptions = options?.generator;
+    const parseOptions = options?.parse;
+    const generateOptions = options?.generate;
     const ast = parse(code, parseOptions);
     return generate(ast, generateOptions);
 }
@@ -45,6 +45,8 @@ export function generate(ast, config) {
     return {
         code,
         templates: generator.templates,
-        map: sourceMap.toJSON()
+        map: sourceMap.toJSON(),
+        // exposed for testing
+        _sourceMap: sourceMap,
     };
 }

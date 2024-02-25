@@ -4,7 +4,7 @@ import { test } from 'vitest';
 
 const compile = input => {
     return _compile(input, {
-        generator: { indent: '    ' }
+        generate: { indent: '    ' }
     });
 };
 
@@ -34,7 +34,7 @@ test('static one line', ({ expect }) => {
 
 test.skip('{...} one line', ({ expect }) => {
     const input = `<div>Hello {place}</div>`;
-    const { sourceMap, code } = compile(input);
+    const { _sourceMap, code } = compile(input);
     expect(code).toMatchInlineSnapshot(`
       "(() => {
           const __root = ta94b210052()[0];
@@ -44,7 +44,7 @@ test.skip('{...} one line', ({ expect }) => {
       })();
       "
     `);
-    expect(sourceMap._mappings._array).toMatchInlineSnapshot(`
+    expect(_sourceMap._mappings._array).toMatchInlineSnapshot(`
       [
         {
           "generatedColumn": 19,
@@ -114,16 +114,16 @@ test.skip('{...} one line', ({ expect }) => {
     `);
 });
 
-test.skip('static three line', ({ expect }) => {
+test('static three line', ({ expect }) => {
     const input = `const t = <div>
         Hello World
     </div>`;
-    const { sourceMap, code } = compile(input);
+    const { _sourceMap, code } = compile(input);
     expect(code).toMatchInlineSnapshot(`
       "const t = te36ec5cf73()[0];
       "
     `);
-    expect(sourceMap._mappings._array).toMatchInlineSnapshot(`
+    expect(_sourceMap._mappings._array).toMatchInlineSnapshot(`
       [
         {
           "generatedColumn": 6,
@@ -153,11 +153,11 @@ test.skip('static three line', ({ expect }) => {
     `);
 });
 
-test.skip('{...} three line', ({ expect }) => {
+test('{...} three line', ({ expect }) => {
     const input = `const t = <div>
         Hello {place}
     </div>`;
-    const { sourceMap, code } = compile(input);
+    const { _sourceMap, code } = compile(input);
     expect(code).toMatchInlineSnapshot(`
       "const t = (() => {
           const __root = tf2d718c3f5()[0];
@@ -167,7 +167,7 @@ test.skip('{...} three line', ({ expect }) => {
       })();
       "
     `);
-    expect(sourceMap._mappings._array).toMatchInlineSnapshot(`
+    expect(_sourceMap._mappings._array).toMatchInlineSnapshot(`
       [
         {
           "generatedColumn": 6,
@@ -243,40 +243,4 @@ test.skip('{...} three line', ({ expect }) => {
         },
       ]
     `);
-});
-
-
-function testTrack(code, lineEnd) {
-    const state = { line: 1, column: 0 };
-    if(code.length > 0) {
-        const segments = code.split(lineEnd);
-        state.line += (segments.length - 1) * lineEnd.length;
-        state.column += segments.at(-1).length;
-    }
-    return state;
-}
-
-test.skip('track \\n', ({ expect }) => {
-    // expect(testTrack(`let s = '\n';`, `\n`)).toEqual({ column: 4, line: 1, });
-    expect(testTrack(`    `, `\n`)).toEqual({ column: 4, line: 1, });
-    expect(testTrack(`\n    `, `\n`)).toEqual({ column: 4, line: 2, });
-    expect(testTrack(`    \n`, `\n`)).toEqual({ column: 0, line: 2, });
-    expect(testTrack(`    \n    `, `\n`)).toEqual({ column: 4, line: 2, });
-    expect(testTrack(`\n\n`, `\n`)).toEqual({ column: 0, line: 3, });
-    expect(testTrack(`\n\n    `, `\n`)).toEqual({ column: 4, line: 3, });
-    expect(testTrack(`    \n\n    `, `\n`)).toEqual({ column: 4, line: 3, });
-    expect(testTrack(`    \n\n`, `\n`)).toEqual({ column: 0, line: 3, });
-    expect(testTrack(`\n    \n`, `\n`)).toEqual({ column: 0, line: 3, });
-});
-
-test.skip('track \\r\\n', ({ expect }) => {
-    expect(testTrack(`    `, `\r\n`)).toEqual({ column: 4, line: 1, });
-    expect(testTrack(`\r\n    `, `\r\n`)).toEqual({ column: 4, line: 3, });
-    expect(testTrack(`    \r\n`, `\r\n`)).toEqual({ column: 0, line: 3, });
-    expect(testTrack(`    \r\n    `, `\r\n`)).toEqual({ column: 4, line: 3, });
-    expect(testTrack(`\r\n\r\n`, `\r\n`)).toEqual({ column: 0, line: 5, });
-    expect(testTrack(`\r\n\r\n    `, `\r\n`)).toEqual({ column: 4, line: 5, });
-    expect(testTrack(`    \r\n\r\n    `, `\r\n`)).toEqual({ column: 4, line: 5, });
-    expect(testTrack(`    \r\n\r\n`, `\r\n`)).toEqual({ column: 0, line: 5, });
-    expect(testTrack(`\r\n    \r\n`, `\r\n`)).toEqual({ column: 0, line: 5, });
 });

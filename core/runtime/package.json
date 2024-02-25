@@ -1,6 +1,6 @@
 {
-    "name": "maya",
-    "version": "0.0.0",
+    "name": "runtime",
+    "version": "1.0.0",
     "description": "Azoth runtime",
     "author": "martypdx",
     "license": "MIT",

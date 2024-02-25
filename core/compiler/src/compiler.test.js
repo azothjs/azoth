@@ -4,7 +4,7 @@ import { describe, test } from 'vitest';
 
 const compile = input => {
     const { code, templates, map } = _compile(input, {
-        generator: { indent: '    ' }
+        generate: { indent: '    ' }
     });
     return {
         code, map,
