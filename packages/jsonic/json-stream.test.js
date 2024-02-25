@@ -122,4 +122,4 @@ test('ignores context tokens in strings', async ({ expect, writeStream, wrote })
     `);
 });
 
-test.todo('unicode specials from @webstream lib');
+test.todo('unicode specials from https://github.com/juanjoDiaz/streamparser-json');
