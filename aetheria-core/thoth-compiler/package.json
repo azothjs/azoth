@@ -1,7 +1,7 @@
 {
-    "name": "@azoth-web/thoth",
-    "version": "1.6.2",
-    "description": "Azoth JSX to JavaScript + HTML compiler",
+    "name": "thoth",
+    "version": "0.0.0",
+    "description": "Azoth compiler",
     "author": "Marty Nelson",
     "license": "MIT",
     "keywords": [
@@ -13,7 +13,7 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/azoth-web/azoth.git",
-        "directory": "packages/thoth"
+        "directory": "aetheria-core/thoth-compiler"
     },
     "type": "module",
     "main": "./src/index.js",

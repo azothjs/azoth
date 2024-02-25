@@ -1,5 +1,7 @@
 # azoth/pnpm-workspace.yaml
 packages:
-  - "./packages/*"
+  - "./aetheria-core/*"
+  - "./jsonic"
   - "./sandbox"
   - "./docs"
+  - "./test-utils"

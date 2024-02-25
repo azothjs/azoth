@@ -1,4 +1,4 @@
-import { compile } from '@azoth-web/thoth';
+import { compile } from 'thoth';
 import { createFilter } from '@rollup/pluginutils';
 import { SourceNode, SourceMapConsumer } from 'source-map';
 import path from 'node:path';
@@ -35,7 +35,7 @@ export default function azothPlugin(options) {
 
             const isBuild = command === 'build';
             const renderer = isBuild ? '__rendererById' : '__makeRenderer';
-            const importRenderer = `import { ${renderer} } from '@azoth-web/maya';\n`;
+            const importRenderer = `import { ${renderer} } from 'maya';\n`;
 
             const exports = new URLSearchParams(ids)
                 .getAll('id')
@@ -90,7 +90,7 @@ export default function azothPlugin(options) {
 
             const maatImports = [];
             if(importSet.size) {
-                maatImports.push(`import { ${[...importSet].join(', ')} } from '@azoth-web/maya';\n`);
+                maatImports.push(`import { ${[...importSet].join(', ')} } from 'maya';\n`);
             }
 
             if(moduleTemplates.size) {

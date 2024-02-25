@@ -8,7 +8,7 @@
         "start": "pnpm -F sandbox start",
         "check": "pnpm update && pnpm test",
         "update": "pnpm update -r",
-        "test": "CI=true pnpm test -r -F @azoth-web/*",
+        "test": "CI=true pnpm test -r -- --passWithNoTests",
         "test:jsonic": "pnpm -F jsonic test",
         "test:maya": "pnpm -F maya test",
         "test:test-utils": "pnpm -F test-utils test",

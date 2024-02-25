@@ -22,7 +22,7 @@ devDependencies:
     version: 24.0.0
   test-utils:
     specifier: workspace:^
-    version: link:../test-utils
+    version: link:../../test-utils
   vitest:
     specifier: ^1.3.1
     version: 1.3.1(@vitest/browser@1.3.1)(@vitest/ui@1.3.1)(happy-dom@13.5.3)(jsdom@24.0.0)

@@ -5,9 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@azoth-web/maya':
+  maya:
     specifier: workspace:^
-    version: link:../packages/maat
+    version: link:../aetheria-core/maya-runtime
   npm:
     specifier: ^10.4.0
     version: 10.4.0
@@ -16,12 +16,12 @@ dependencies:
     version: 1.11.6
 
 devDependencies:
-  '@azoth-web/vite-plugin-azoth':
-    specifier: workspace:^
-    version: link:../packages/vite-plugin-azoth
   vite:
     specifier: ^5.1.4
     version: 5.1.4
+  vite-plugin:
+    specifier: workspace:^
+    version: link:../aetheria-core/vite-plugin
   vite-plugin-inspect:
     specifier: ^0.8.3
     version: 0.8.3(vite@5.1.4)

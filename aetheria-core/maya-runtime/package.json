@@ -1,7 +1,7 @@
 {
-    "name": "@azoth-web/maya",
-    "version": "1.6.3",
-    "description": "Azoth runtime for hypermedia apps on the web platform",
+    "name": "maya",
+    "version": "0.0.0",
+    "description": "Azoth runtime",
     "author": "martypdx",
     "license": "MIT",
     "keywords": [
@@ -19,7 +19,7 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/azoth-web/azoth.git",
-        "directory": "packages/maya"
+        "directory": "aetheria-core/maya-runtime"
     },
     "type": "module",
     "main": "./src/index.js",

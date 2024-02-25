@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import inspect from 'vite-plugin-inspect';
-import azothPlugin from '@azoth-web/vite-plugin-azoth';
+import azothPlugin from 'vite-plugin';
 
 export default defineConfig({
     esbuild: {

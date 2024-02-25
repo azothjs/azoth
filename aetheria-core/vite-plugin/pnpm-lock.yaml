@@ -5,20 +5,20 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@azoth-web/thoth':
-    specifier: workspace:^
-    version: link:../thoth
   '@rollup/pluginutils':
     specifier: ^5.1.0
     version: 5.1.0
   source-map:
     specifier: ^0.7.4
     version: 0.7.4
+  thoth:
+    specifier: workspace:^
+    version: link:../thoth-compiler
 
 devDependencies:
-  '@azoth-web/maya':
+  maya:
     specifier: workspace:^
-    version: link:../maat
+    version: link:../maya-runtime
   vite:
     specifier: ^5.1.4
     version: 5.1.4
