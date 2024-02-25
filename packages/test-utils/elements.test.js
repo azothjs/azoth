@@ -1,6 +1,4 @@
 import { describe, test } from 'vitest';
-import { compose } from '../compose/compose.js';
-import './with-resolvers-polyfill.js';
 
 export const elements = [
     elementWithTextAnchor,
@@ -8,12 +6,6 @@ export const elements = [
     elementWithAnchor,
     elementWithAnchorText,
 ];
-
-export function runCompose(value, create) {
-    const { dom, anchor } = create();
-    compose(anchor, value);
-    return dom;
-}
 
 export const $anchor = () => document.createComment('0');
 export const $div = () => document.createElement('div');

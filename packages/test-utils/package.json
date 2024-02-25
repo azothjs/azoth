@@ -14,7 +14,7 @@
         "test": "vitest"
     },
     "dependencies": {
-        "@azoth-web/maat": "workspace:*",
+        "@azoth-web/maya": "workspace:*",
         "vitest": "^1.3.1"
     }
 }

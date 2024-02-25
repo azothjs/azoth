@@ -30,6 +30,6 @@
     },
     "dependencies": {
         "test-utils": "workspace:^",
-        "vitest": "^1.3.0"
+        "vitest": "^1.3.1"
     }
 }

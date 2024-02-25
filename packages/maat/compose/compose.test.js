@@ -1,6 +1,12 @@
 import { describe, test, expect } from 'vitest';
 import { compose } from './compose.js';
-import { runCompose, elements, $text, $div } from '../test-utils/elements.test.js';
+import { elements, $text, $div } from 'test-utils/elements';
+
+export function runCompose(value, create) {
+    const { dom, anchor } = create();
+    compose(anchor, value);
+    return dom;
+}
 
 function run(value, create) {
     return runCompose(value, create).outerHTML;

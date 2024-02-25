@@ -35,7 +35,7 @@ export default function azothPlugin(options) {
 
             const isBuild = command === 'build';
             const renderer = isBuild ? '__rendererById' : '__makeRenderer';
-            const importRenderer = `import { ${renderer} } from '@azoth-web/maat';\n`;
+            const importRenderer = `import { ${renderer} } from '@azoth-web/maya';\n`;
 
             const exports = new URLSearchParams(ids)
                 .getAll('id')
@@ -90,7 +90,7 @@ export default function azothPlugin(options) {
 
             const maatImports = [];
             if(importSet.size) {
-                maatImports.push(`import { ${[...importSet].join(', ')} } from '@azoth-web/maat';\n`);
+                maatImports.push(`import { ${[...importSet].join(', ')} } from '@azoth-web/maya';\n`);
             }
 
             if(moduleTemplates.size) {

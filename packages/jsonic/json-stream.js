@@ -45,12 +45,17 @@ class Transform {
         const batch_size = this.#batch_size;
         // track escape sequence: \"
         let last_char = '';
+        let should_add = false;
+        let char = '';
 
         for(let i = 0; i < chunk.length; i++) {
+            if(should_add) this.#buffer += char;
+            last_char = char;
+            char = chunk[i];
+            should_add = true;
+
             const context = this.#context;
-            const char = chunk[i];
             let new_context = char;
-            let should_add = true;
 
             switch(char) {
                 case '"': {
@@ -172,10 +177,6 @@ class Transform {
                     }
                 }
             }
-
-            if(should_add) this.#buffer += char;
-            last_char = char;
         }
-
     }
 }

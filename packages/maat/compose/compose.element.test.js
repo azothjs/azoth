@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { compose, composeElement, createElement } from './compose.js';
-import { $anchor, $div, elementWithAnchor, elementWithText, elementWithTextAnchor, runCompose } from '../test-utils/elements.test.js';
+import { $anchor, $div, elementWithAnchor, elementWithText, elementWithTextAnchor } from 'test-utils/elements';
+import { runCompose } from './compose.test.js';
 
 // <div>{name}</div>
 

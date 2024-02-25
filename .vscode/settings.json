@@ -12,7 +12,7 @@
         "IIFE",
         "inlines",
         "jsonic",
-        "maat",
+        "maya",
         "martypdx",
         "nsbsp",
         "onattribute",
@@ -41,4 +41,8 @@
         },
         "./sandbox"
     ],
+    "typescript.format.indentSwitchCase": false,
+    "vitest.showFailMessages": true,
+    "vitest.watchOnStartup": true,
+    "vitest.commandLine": "npx vitest --dom --",
 }

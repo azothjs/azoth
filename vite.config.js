@@ -7,6 +7,9 @@ export default defineConfig({
         // update: true,
         // timeout: 30_000,
         environment: 'happy-dom',
+        browser: {
+            headless: false,
+        },
     },
     plugins: [
         inspect()
