@@ -5,9 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@azoth-web/runtime':
-    specifier: workspace:*
-    version: link:../packages/runtime
+  azoth:
+    specifier: workspace:^
+    version: link:../packages/azoth
   npm:
     specifier: ^10.4.0
     version: 10.4.0
@@ -16,9 +16,6 @@ dependencies:
     version: 1.11.6
 
 devDependencies:
-  '@azoth-web/vite-plugin':
-    specifier: workspace:*
-    version: link:../packages/vite-plugin
   vite:
     specifier: ^5.1.4
     version: 5.1.4

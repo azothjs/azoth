@@ -62,7 +62,7 @@ export default function azothPlugin(options) {
             if(!filter(id) || !extension.test(id)) return null;
 
             let { code, templates, map } = compile(source, {
-                generator: { sourceFile: path.basename(id) }
+                generate: { sourceFile: path.basename(id) }
             });
 
             if(!templates.length) {
@@ -102,22 +102,20 @@ export default function azothPlugin(options) {
 
             // TODO: find a better way to add imports while maintaining sourcemaps,
             // it shouldn't need to be async...
-            if(runtimeImports.length) {
-                return SourceMapConsumer.with(
-                    map,
-                    null,
-                    async consumer => {
-                        const node = SourceNode.fromStringWithSourceMap(code, consumer);
-                        node.prepend(runtimeImports);
-                        const { map, code: newCode } = node.toStringWithSourceMap();
-                        return {
-                            code: newCode,
-                            map: map.toJSON()
-                        };
-                    });
-            }
+            if(!runtimeImports.length) return { code, map };
 
-            return { code, map };
+            return SourceMapConsumer.with(
+                map,
+                null,
+                async consumer => {
+                    const node = SourceNode.fromStringWithSourceMap(code, consumer);
+                    node.prepend(runtimeImports);
+                    const { map, code: newCode } = node.toStringWithSourceMap();
+                    return {
+                        code: newCode,
+                        map: map.toJSON()
+                    };
+                });
         },
     };
 

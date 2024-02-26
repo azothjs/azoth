@@ -23,12 +23,12 @@
     },
     "type": "module",
     "files": [
-        "lib/*.js"
+        "*.js"
     ],
     "exports": {
-        "./runtime": "./lib/runtime.js",
-        "./composition": "./lib/composition.js",
-        "./vite-plugin": "./lib/vite-plugin.js"
+        "./runtime": "./runtime.js",
+        "./composition": "./composition.js",
+        "./vite-plugin": "./vite-plugin.js"
     },
     "scripts": {
         "publint": "pnpm -r run publint"
