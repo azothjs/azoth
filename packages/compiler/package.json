@@ -1,6 +1,6 @@
 {
     "name": "@azoth-web/compiler",
-    "version": "1.7.0",
+    "version": "1.7.1",
     "description": "Azoth compiler",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -18,7 +18,7 @@
     "type": "module",
     "main": "./index.js",
     "files": [
-        "!(*test*).js"
+        "**/!(*test*).js"
     ],
     "exports": {
         ".": {
