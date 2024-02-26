@@ -5,7 +5,7 @@
     "type": "module",
     "main": "index.js",
     "scripts": {
-        "start": "vite --clearScreen=false --passWithNoTests",
+        "start": "vite --clearScreen=false",
         "build": "vite build",
         "preview": "vite preview",
         "test": "vitest"
@@ -14,7 +14,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "azoth": "workspace:^",
+        "azoth/runtime": "workspace:runtime@*",
         "npm": "^10.4.0",
         "page": "^1.11.6"
     },

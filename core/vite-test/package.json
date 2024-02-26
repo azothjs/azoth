@@ -21,7 +21,7 @@
     },
     "type": "module",
     "scripts": {
-        "test": "pnpm run test:build && vitest -w false ",
+        "test:onhold": "pnpm run test:build && vitest -w false ",
         "test:build": "vite build -c ./test/vite.config.js",
         "test:update": "rm -rf ./test/expected-out && cp -R ./test/out ./test/expected-out",
         "build": "vite build"

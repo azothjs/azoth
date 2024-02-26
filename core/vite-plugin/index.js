@@ -1,4 +1,4 @@
-import { compile } from 'compiler';
+import { compile } from '../compiler/index.js';
 import { createFilter } from '@rollup/pluginutils';
 import { SourceNode, SourceMapConsumer } from 'source-map';
 import path from 'node:path';

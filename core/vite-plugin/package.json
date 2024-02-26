@@ -20,9 +20,7 @@
         "directory": "aetheria-core/vite-plugin"
     },
     "type": "module",
-    "scripts": {
-        "test": "exit 0"
-    },
+    "scripts": {},
     "files": [
         "index.js",
         "dist"

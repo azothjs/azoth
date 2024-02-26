@@ -1,7 +1,7 @@
 import { generate } from 'astring';
 import { HtmlGenerator } from './HtmlGenerator.js';
 import { Generator, writeNextLine } from './GeneratorBase.js';
-import isValidName from 'is-valid-var-name';
+import { isValidESIdentifier } from 'is-valid-es-identifier';
 import { Analyzer } from './Analyzer.js';
 
 export class TemplateGenerator extends Generator {
@@ -238,7 +238,7 @@ export class TemplateGenerator extends Generator {
         const identity = node.name;
         const propName = identity.name;
         // TODO: refactor with component props
-        if(isValidName(propName)) {
+        if(isValidESIdentifier(propName)) {
             state.write(`.`);
             state.write(propName, node.name);
         }

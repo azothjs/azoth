@@ -1,1 +1,4 @@
 /packages/vite-plugin-azoth/test/out/**
+node_modules
+docs
+dist
