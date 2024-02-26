@@ -1,6 +1,6 @@
 # azoth/pnpm-workspace.yaml
 packages:
-  - "./core/*"
+  - "./packages/*"
   - "./jsonic"
   - "./sandbox"
   - "./docs"

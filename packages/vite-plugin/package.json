@@ -1,8 +1,8 @@
 {
-    "name": "vite-test",
-    "version": "0.0.0",
+    "name": "@azoth-web/vite-plugin",
+    "version": "1.7.0",
     "description": "azoth plugins for vite",
-    "author": "martypdx",
+    "author": "Marty Nelson",
     "license": "MIT",
     "keywords": [
         "vite-plugin",
@@ -17,15 +17,10 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/azoth-web/azoth.git",
-        "directory": "aetheria-core/vite-plugin"
+        "directory": "core/vite-plugin"
     },
     "type": "module",
-    "scripts": {
-        "test:onhold": "pnpm run test:build && vitest -w false ",
-        "test:build": "vite build -c ./test/vite.config.js",
-        "test:update": "rm -rf ./test/expected-out && cp -R ./test/out ./test/expected-out",
-        "build": "vite build"
-    },
+    "scripts": {},
     "files": [
         "index.js",
         "dist"
@@ -38,15 +33,13 @@
         }
     },
     "devDependencies": {
-        "runtime": "workspace:^",
-        "vite": "^5.1.4",
         "vitest": "^1.3.1"
     },
     "peerDependencies": {
         "vite": "^5.0.12"
     },
     "dependencies": {
-        "compiler": "workspace:^",
+        "@azoth-web/compiler": "workspace:*",
         "@rollup/pluginutils": "^5.1.0",
         "source-map": "^0.7.4"
     }

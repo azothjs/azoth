@@ -14,12 +14,12 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "azoth/runtime": "workspace:runtime@*",
+        "@azoth-web/runtime": "workspace:*",
         "npm": "^10.4.0",
         "page": "^1.11.6"
     },
     "devDependencies": {
-        "vite-plugin": "workspace:^",
+        "@azoth-web/vite-plugin": "workspace:*",
         "vite": "^5.1.4",
         "vite-plugin-inspect": "^0.8.3",
         "vitest": "^1.3.1"

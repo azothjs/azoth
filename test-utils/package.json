@@ -5,7 +5,9 @@
     "author": "martypdx",
     "license": "MIT",
     "type": "module",
-    "files": [],
+    "files": [
+        "**/!(*test|*config).js"
+    ],
     "exports": {
         "./with-resolvers-polyfill": "./with-resolvers-polyfill.js",
         "./elements": "./elements.test.js"
@@ -15,5 +17,8 @@
     },
     "dependencies": {
         "vitest": "^1.3.1"
+    },
+    "devDependencies": {
+        "happy-dom": "^13.6.2"
     }
 }

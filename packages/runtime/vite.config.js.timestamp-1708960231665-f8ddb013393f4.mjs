@@ -1,0 +1,15 @@
+// vite.config.js
+import { defineConfig } from "file:///Users/marty/dev/azoth-web/azoth/node_modules/.pnpm/vite@5.1.4/node_modules/vite/dist/node/index.js";
+var vite_config_default = defineConfig({
+  test: {
+    // testTimeout: 30_000,
+    browser: {
+      headless: false
+    },
+    environment: "happy-dom"
+  }
+});
+export {
+  vite_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZS5jb25maWcuanMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbImNvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9kaXJuYW1lID0gXCIvVXNlcnMvbWFydHkvZGV2L2F6b3RoLXdlYi9hem90aC9wYWNrYWdlcy9ydW50aW1lXCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ZpbGVuYW1lID0gXCIvVXNlcnMvbWFydHkvZGV2L2F6b3RoLXdlYi9hem90aC9wYWNrYWdlcy9ydW50aW1lL3ZpdGUuY29uZmlnLmpzXCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ltcG9ydF9tZXRhX3VybCA9IFwiZmlsZTovLy9Vc2Vycy9tYXJ0eS9kZXYvYXpvdGgtd2ViL2F6b3RoL3BhY2thZ2VzL3J1bnRpbWUvdml0ZS5jb25maWcuanNcIjtpbXBvcnQgeyBkZWZpbmVDb25maWcgfSBmcm9tICd2aXRlJztcblxuZXhwb3J0IGRlZmF1bHQgZGVmaW5lQ29uZmlnKHtcbiAgICB0ZXN0OiB7XG4gICAgICAgIC8vIHRlc3RUaW1lb3V0OiAzMF8wMDAsXG4gICAgICAgIGJyb3dzZXI6IHtcbiAgICAgICAgICAgIGhlYWRsZXNzOiBmYWxzZSxcbiAgICAgICAgfSxcbiAgICAgICAgZW52aXJvbm1lbnQ6ICdoYXBweS1kb20nLFxuICAgIH1cbn0pO1xuIl0sCiAgIm1hcHBpbmdzIjogIjtBQUFxVSxTQUFTLG9CQUFvQjtBQUVsVyxJQUFPLHNCQUFRLGFBQWE7QUFBQSxFQUN4QixNQUFNO0FBQUE7QUFBQSxJQUVGLFNBQVM7QUFBQSxNQUNMLFVBQVU7QUFBQSxJQUNkO0FBQUEsSUFDQSxhQUFhO0FBQUEsRUFDakI7QUFDSixDQUFDOyIsCiAgIm5hbWVzIjogW10KfQo=
