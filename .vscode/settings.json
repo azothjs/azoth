@@ -45,4 +45,11 @@
     "vitest.showFailMessages": true,
     "vitest.watchOnStartup": true,
     "vitest.commandLine": "npx vitest --dom --",
+    "search.exclude": {
+        "pnpm-lock.yaml": true
+    },
+    "npm.packageManager": "pnpm",
+    "explorer.fileNesting.patterns": {
+        "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb, pnpm-workspace.yaml"
+    },
 }

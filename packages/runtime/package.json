@@ -27,8 +27,8 @@
         "**/!(*test|*config).js"
     ],
     "exports": {
-        ".": "./index.js",
-        "./compose": "./compose/index.js"
+        "./compose": "./compose/index.js",
+        "./renderer": "./renderer/index.js"
     },
     "scripts": {
         "test": "vitest"

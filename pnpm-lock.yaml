@@ -4,6 +4,17 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+dependencies:
+  '@azoth-web/compiler':
+    specifier: workspace:^
+    version: link:packages/compiler
+  '@azoth-web/runtime':
+    specifier: workspace:^
+    version: link:packages/runtime
+  '@azoth-web/vite-plugin':
+    specifier: workspace:^
+    version: link:packages/vite-plugin
+
 devDependencies:
   '@vitest/browser':
     specifier: ^1.3.1
