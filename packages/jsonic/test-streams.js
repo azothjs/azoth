@@ -1,4 +1,4 @@
-import 'test-utils/with-resolvers-polyfill.js';
+import 'test-utils/with-resolvers-polyfill';
 import { createReadStream } from 'node:fs';
 
 export class ReadJSONFile extends ReadableStream {
