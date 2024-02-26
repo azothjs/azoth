@@ -4,8 +4,11 @@ import { Generator, writeNextLine } from './GeneratorBase.js';
 import { isValidESIdentifier } from 'is-valid-es-identifier';
 import { Analyzer } from './Analyzer.js';
 
+export const templateModule = `virtual:azoth-templates`;
+
 export class TemplateGenerator extends Generator {
     templates = [];
+    uniqueIds = new Set();
 
     constructor() {
         super();
@@ -13,10 +16,42 @@ export class TemplateGenerator extends Generator {
         this.htmlGenerator = node => generate(node, { generator });
     }
 
-    // Program(node, state) {
-    //     console.log('Program');
-    //     super.Program(node, state);
-    // }
+    Program(node, state) {
+        // "import" line placeholders added for sourcemap convenience
+        state.write('\n');
+        state.write('\n');
+
+        super.Program(node, state);
+
+        const imports = this.getImports();
+        if(imports.length === 2) state.output = state.output.replace('\n\n', imports.join(''));
+        if(imports.length === 1) state.output = state.output.replace('\n\n', imports[0] + '\n');
+    }
+
+    getImports() {
+        const { templates, uniqueIds } = this;
+        const namedImports = new Set();
+
+        for(let template of templates) {
+            for(let namedImport of template.imports) {
+                namedImports.add(`__${namedImport}`);
+            }
+        }
+
+        const imports = [];
+        if(namedImports.size) {
+            imports.push(`import { ${[...namedImports].join(', ')} } from 'azoth/runtime';\n`);
+        }
+
+        if(uniqueIds.size) {
+            const ids = [...uniqueIds];
+            const params = new URLSearchParams(ids.map(id => ['id', id]));
+            const names = ids.map(id => `t${id}`).join(', ');
+            imports.push(`import { ${names} } from '${templateModule}?${params.toString()}';\n`);
+        }
+
+        return imports;
+    }
 
     JSXFragment(node, state) {
         this.JSXTemplate(node, state);
@@ -29,7 +64,10 @@ export class TemplateGenerator extends Generator {
     JSXTemplate(node, state) {
         const analyzer = new Analyzer(node);
         const template = analyzer.generateTemplate(this.htmlGenerator);
-        this.templates.push(template);
+
+        const { templates, uniqueIds } = this;
+        templates.push(template);
+        if(template.id && !uniqueIds.has(template.id)) uniqueIds.add(template.id);
 
         // Short-circuit templates
         const { isStatic, node: root } = template;

@@ -35,7 +35,9 @@ describe('JSX dom literals', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const t = (() => {
+          "import { __compose } from 'azoth/runtime';
+          import { tfdd1a869cf } from 'virtual:azoth-templates?id=fdd1a869cf';
+          const t = (() => {
               const [__root, __targets] = tfdd1a869cf();
               const __target0 =__targets[0];
               const __target1 =__targets[1];
@@ -106,7 +108,9 @@ describe('JSX dom literals', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const t = (() => {
+          "import { t10073da0ec } from 'virtual:azoth-templates?id=10073da0ec';
+
+          const t = (() => {
               const __root = t10073da0ec()[0];
               __root.className = ("className");
               __root.name = ("name");
@@ -139,7 +143,9 @@ describe('nested context', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "(() => {
+          "import { __compose } from 'azoth/runtime';
+          import { t8dae88052a, t1a78cbe949 } from 'virtual:azoth-templates?id=8dae88052a&id=1a78cbe949';
+          (() => {
               const __root = t8dae88052a()[0];
               const __child0 = __root.childNodes[0];
               __compose(__child0, t1a78cbe949()[0]);
@@ -181,7 +187,9 @@ describe('template optimizations', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const template = t5bf3d2f523()[0];
+          "import { t5bf3d2f523 } from 'virtual:azoth-templates?id=5bf3d2f523';
+
+          const template = t5bf3d2f523()[0];
           "
         `);
 
@@ -210,7 +218,9 @@ describe('surrounding code integration', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const template = text => {
+          "import { __compose } from 'azoth/runtime';
+          import { t904ca237ee } from 'virtual:azoth-templates?id=904ca237ee';
+          const template = text => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
               __compose(__child0, text);
@@ -246,7 +256,9 @@ describe('surrounding code integration', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "function template(text) {
+          "import { __compose } from 'azoth/runtime';
+          import { t904ca237ee } from 'virtual:azoth-templates?id=904ca237ee';
+          function template(text) {
               const format = 'text' + '!';
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
@@ -286,7 +298,9 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const fragment = tc203fe7dcd(true)[0];
+          "import { __compose } from 'azoth/runtime';
+          import { tc203fe7dcd, t1a78cbe949, tc084de4382, t1cb251ec0d } from 'virtual:azoth-templates?id=c203fe7dcd&id=1a78cbe949&id=c084de4382&id=1cb251ec0d';
+          const fragment = tc203fe7dcd(true)[0];
           const single = t1a78cbe949()[0];
           const fragInFrag = t1a78cbe949()[0];
           const fragInFragCompose = (() => {
@@ -403,7 +417,9 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const fragment = tc203fe7dcd(true)[0];
+          "import { __compose } from 'azoth/runtime';
+          import { tc203fe7dcd, t1a78cbe949, tc084de4382, t6c72de769d } from 'virtual:azoth-templates?id=c203fe7dcd&id=1a78cbe949&id=c084de4382&id=6c72de769d';
+          const fragment = tc203fe7dcd(true)[0];
           const single = t1a78cbe949()[0];
           const fragInFrag = t1a78cbe949()[0];
           const fragInFragCompose = (() => {
@@ -506,7 +522,9 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const start = t1a78cbe949()[0];
+          "import { __compose } from 'azoth/runtime';
+          import { t1a78cbe949, tc084de4382 } from 'virtual:azoth-templates?id=1a78cbe949&id=c084de4382';
+          const start = t1a78cbe949()[0];
           const end = t1a78cbe949()[0];
           const composeStart = (() => {
               const __root = tc084de4382(true)[0];
@@ -577,7 +595,9 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const fragment = t653a3aad80(true)[0];
+          "import { __compose } from 'azoth/runtime';
+          import { t653a3aad80, tdcaa233028, t2dc1738d5c, t0cf31b2c28, t5bc2a159b1 } from 'virtual:azoth-templates?id=653a3aad80&id=dcaa233028&id=2dc1738d5c&id=0cf31b2c28&id=5bc2a159b1';
+          const fragment = t653a3aad80(true)[0];
           const single = tdcaa233028(true)[0];
           const fragInFrag = t2dc1738d5c(true)[0];
           const spaces = t0cf31b2c28(true)[0];
@@ -646,7 +666,9 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const fragment = (() => {
+          "import { __compose } from 'azoth/runtime';
+          import { tfaf808e6cc } from 'virtual:azoth-templates?id=faf808e6cc';
+          const fragment = (() => {
               const __root = tfaf808e6cc(true)[0];
               const __child0 = __root.childNodes[1];
               __compose(__child0, "two");
@@ -685,7 +707,9 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const extraneous = tccaa44c114()[0];
+          "import { __compose } from 'azoth/runtime';
+          import { tccaa44c114, t681310be49 } from 'virtual:azoth-templates?id=ccaa44c114&id=681310be49';
+          const extraneous = tccaa44c114()[0];
           const childNodeIndex = (() => {
               const __root = t681310be49()[0];
               const __child0 = __root.childNodes[3];
@@ -729,7 +753,9 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const App = (() => {
+          "import { __compose } from 'azoth/runtime';
+          import { tef691fa27a } from 'virtual:azoth-templates?id=ef691fa27a';
+          const App = (() => {
               const [__root, __targets] = tef691fa27a(true);
               const __target0 =__targets[0];
               const __child0 = __root.childNodes[0];
@@ -769,7 +795,9 @@ describe('template root', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const div = (() => {
+          "import { __compose } from 'azoth/runtime';
+          import { t8dae88052a } from 'virtual:azoth-templates?id=8dae88052a';
+          const div = (() => {
               const __root = t8dae88052a()[0];
               const __child0 = __root.childNodes[0];
               __compose(__child0, hello);
@@ -805,7 +833,9 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "document.body.append((() => {
+          "import { t1cdf0d646f } from 'virtual:azoth-templates?id=1cdf0d646f';
+
+          document.body.append((() => {
               const __root = t1cdf0d646f()[0];
               __root.prop = (prop);
               return __root;
@@ -836,7 +866,9 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const c = __createElement(Component);
+          "import { __createElement } from 'azoth/runtime';
+
+          const c = __createElement(Component);
           const cProps = __createElement(Component, { prop: value, attr: "static", });
           "
         `);
@@ -876,7 +908,9 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const component = (() => {
+          "import { __composeElement, __compose } from 'azoth/runtime';
+          import { t2288998344 } from 'virtual:azoth-templates?id=2288998344';
+          const component = (() => {
               const __root = t2288998344()[0];
               const __child0 = __root.childNodes[1];
               const __child1 = __root.childNodes[3];
@@ -919,7 +953,9 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const $A = __createElement(A);
+          "import { __createElement, __compose } from 'azoth/runtime';
+          import { t2288998344 } from 'virtual:azoth-templates?id=2288998344';
+          const $A = __createElement(A);
           const $B = __createElement(B);
           const dom = (() => {
               const __root = t2288998344()[0];
@@ -984,7 +1020,9 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "function Surprise() {
+          "import { t92cc583556 } from 'virtual:azoth-templates?id=92cc583556';
+
+          function Surprise() {
               return t92cc583556()[0];
           }
           "
@@ -1026,7 +1064,9 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const c = __createElement(Component, null, (() => {
+          "import { __createElement, __compose } from 'azoth/runtime';
+          import { t904ca237ee, t1cb251ec0d, t9b045328fb } from 'virtual:azoth-templates?id=904ca237ee&id=1cb251ec0d&id=9b045328fb';
+          const c = __createElement(Component, null, (() => {
               const __root = t904ca237ee()[0];
               const __child0 = __root.childNodes[0];
               __compose(__child0, "test");
@@ -1201,7 +1241,9 @@ describe('render and composition cases', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const Item = name => {
+          "import { __compose } from 'azoth/runtime';
+          import { t62831a5152, t8dc93cc914 } from 'virtual:azoth-templates?id=62831a5152&id=8dc93cc914';
+          const Item = name => {
               const __root = t62831a5152()[0];
               const __child0 = __root.childNodes[0];
               __compose(__child0, name);
@@ -1252,7 +1294,9 @@ describe('render and composition cases', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const render = () => {
+          "import { __compose } from 'azoth/runtime';
+          import { t2b440f4741 } from 'virtual:azoth-templates?id=2b440f4741';
+          const render = () => {
               const __root = t2b440f4741()[0];
               const __child1 = __root.childNodes[1];
               __root.className = (category);
@@ -1289,7 +1333,9 @@ describe('render and composition cases', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "const Emoji = ({name}) => {
+          "import { __compose } from 'azoth/runtime';
+          import { t62831a5152, t25ec157413 } from 'virtual:azoth-templates?id=62831a5152&id=25ec157413';
+          const Emoji = ({name}) => {
               const __root = t62831a5152()[0];
               const __child0 = __root.childNodes[0];
               __compose(__child0, name);

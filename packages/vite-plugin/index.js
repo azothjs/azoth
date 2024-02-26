@@ -1,9 +1,8 @@
-import { compile } from '../compiler/index.js';
+import { compile, templateModule } from '../compiler/index.js';
 import { createFilter } from '@rollup/pluginutils';
 import { SourceNode, SourceMapConsumer } from 'source-map';
 import path from 'node:path';
 
-const templateModule = `virtual:azoth-templates`;
 const resolvedTemplateModule = '\0' + templateModule;
 
 export default function azothPlugin(options) {
@@ -69,54 +68,13 @@ export default function azothPlugin(options) {
                 return { code, map: null };
             }
 
-            const moduleTemplates = new Set();
-            const importSet = new Set();
-
             for(let template of templates) {
-                const { id, html, imports } = template;
-
-                for(let namedImport of imports) {
-                    importSet.add(`__${namedImport}`);
-                }
-
-                if(!html) continue;
-
-                if(moduleTemplates.has(id)) continue;
-                moduleTemplates.add(id);
-
-                if(programTemplates.has(id)) continue;
-                programTemplates.set(id, template);
+                if(programTemplates.has(template.id)) continue;
+                programTemplates.set(template.id, template);
             }
 
-            const runtimeImports = [];
-            if(importSet.size) {
-                runtimeImports.push(`import { ${[...importSet].join(', ')} } from 'azoth/runtime';\n`);
-            }
-
-            if(moduleTemplates.size) {
-                const uniqueIds = [...moduleTemplates];
-                const params = new URLSearchParams(uniqueIds.map(id => ['id', id]));
-                const names = uniqueIds.map(id => `t${id}`).join(', ');
-                runtimeImports.push(`import { ${names} } from '${templateModule}?${params.toString()}';\n`);
-            }
-
-            // TODO: find a better way to add imports while maintaining sourcemaps,
-            // it shouldn't need to be async...
-            if(!runtimeImports.length) return { code, map };
-
-            return SourceMapConsumer.with(
-                map,
-                null,
-                async consumer => {
-                    const node = SourceNode.fromStringWithSourceMap(code, consumer);
-                    node.prepend(runtimeImports);
-                    const { map, code: newCode } = node.toStringWithSourceMap();
-                    return {
-                        code: newCode,
-                        map: map.toJSON()
-                    };
-                });
-        },
+            return { code, map };
+        }
     };
 
     const TEMPLATE_COMMENT = '<!--azoth-templates-->';
