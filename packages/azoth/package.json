@@ -1,0 +1,51 @@
+{
+    "name": "azoth",
+    "version": "1.0.3",
+    "description": "Azoth JSX hypermedia",
+    "author": "Marty Nelson",
+    "license": "MIT",
+    "keywords": [
+        "azoth",
+        "azoth-jsx",
+        "azothjsx",
+        "azoth jsx",
+        "javascript framework",
+        "javascript library",
+        "js library",
+        "js framework",
+        "ui library",
+        "ui framework",
+        "hypermedia"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/azoth-web/azoth.git"
+    },
+    "type": "module",
+    "files": [
+        "lib/*.js"
+    ],
+    "exports": {
+        "./runtime": "./lib/runtime.js",
+        "./composition": "./lib/composition.js",
+        "./vite-plugin": "./lib/vite-plugin.js"
+    },
+    "scripts": {
+        "publint": "pnpm -r run publint"
+    },
+    "devDependencies": {
+        "@vitest/browser": "^1.3.1",
+        "eslint": "^8.57.0",
+        "globals": "^13.24.0",
+        "happy-dom": "^13.6.2",
+        "publint": "^0.2.7",
+        "vite": "^5.1.4",
+        "vite-plugin-inspect": "^0.8.3",
+        "vitest": "^1.3.1"
+    },
+    "packageManager": "^pnpm@8.15.1",
+    "dependencies": {
+        "@azoth-web/runtime": "workspace:^",
+        "@azoth-web/vite-plugin": "workspace:^"
+    }
+}
