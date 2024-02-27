@@ -20,10 +20,10 @@
         "directory": "packages/jsonic"
     },
     "type": "module",
-    "main": "./index.js",
+    "main": "./json-stream.js",
     "files": [],
     "exports": {
-        ".": "./index.js"
+        ".": "./json-stream.js"
     },
     "scripts": {
         "test": "vitest"

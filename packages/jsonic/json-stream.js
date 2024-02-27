@@ -12,20 +12,13 @@ class Transform {
     #buffer = '';
     #count = 0;
     #batch_size = 1;
-    #key = '';
-    #data_path = null;
+    #last_char = '';
+    #should_add = false;
 
     constructor(options) {
-        const path = options?.dataPath || '';
         const batch_size = options?.batchSize || 1;
-
-        if(path) {
-            const split = path.split(/[^\w]/);
-            this.#data_path = split.filter(s => s).reverse();
-        }
-
         if(batch_size) {
-            this.#batch_size = batch_size;
+            this.#batch_size = Math.max(batch_size, 1);
         }
     }
 
@@ -44,15 +37,13 @@ class Transform {
         const stack = this.#stack;
         const batch_size = this.#batch_size;
         // track escape sequence: \"
-        let last_char = '';
-        let should_add = false;
-        let char = '';
+        let last_char = this.#last_char;
+        // this.#last_char = last_char;
+        // happens at the very end of the method
 
         for(let i = 0; i < chunk.length; i++) {
-            if(should_add) this.#buffer += char;
-            last_char = char;
-            char = chunk[i];
-            should_add = true;
+            let should_add = true;
+            let char = chunk[i];
 
             const context = this.#context;
             let new_context = char;
@@ -177,6 +168,11 @@ class Transform {
                     }
                 }
             }
+
+            if(should_add) this.#buffer += char;
+            last_char = char;
         }
+
+        this.#last_char = last_char;
     }
 }

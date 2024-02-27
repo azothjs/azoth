@@ -122,4 +122,93 @@ test('ignores context tokens in strings', async ({ expect, writeStream, wrote })
     `);
 });
 
-test.todo('unicode specials from https://github.com/juanjoDiaz/streamparser-json');
+function findStart(chars, path) {
+    const stack = [];
+    let context = '';
+    let last_char = '';
+    let char = '';
+    let key = '';
+    const parts = path.split('.');
+    let pathPart = parts.shift();
+
+    for(let i = 0; i < chars.length; i++) {
+        last_char = char;
+        char = chars[i];
+
+        if(pathPart === '$') {
+            if(char === '{') {
+                pathPart = parts.shift();
+                stack.push(context);
+                context = 'P';
+            }
+            continue;
+        }
+
+        if(context === 'P') {
+            if(char === '"') {
+                stack.push(context);
+                context = '"';
+                key = '';
+            }
+            continue;
+        }
+
+        if(context === '"') {
+            if(char === '"' & last_char !== '\\') {
+                if(key === pathPart) {
+                    if(!parts.length) {
+                        // context = '$';
+                        return i;
+                    }
+                    else {
+                        // more parts
+                        pathPart = parts.shift();
+                        context = 'P';
+                    }
+                }
+                else {
+                    context = 'SKIP';
+                }
+            }
+            else {
+                key += char;
+            }
+        }
+
+
+
+    }
+
+
+}
+
+
+
+test('find single property', ({ expect }) => {
+    const json = `{
+        "data": []
+    }`;
+    const index = findStart(json, '$.data');
+    expect(index).toBe(15);
+});
+
+test('find two-level property', ({ expect }) => {
+    const json = `{
+        "response": {
+            "data": []
+        }
+    }`;
+    const index = findStart(json, '$.response.data');
+    expect(index).toBe(41);
+});
+
+test.todo('skip property', ({ expect }) => {
+    const json = `{
+        "foo": {
+            "bar": "qux"
+        }
+        "data": []
+    }`;
+    const index = findStart(json, '$.data');
+    expect(index).toBe(42);
+});
