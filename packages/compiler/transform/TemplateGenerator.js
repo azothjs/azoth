@@ -6,6 +6,16 @@ import { Analyzer } from './Analyzer.js';
 
 export const templateModule = `virtual:azoth-templates`;
 
+const OPENING_PROP = {
+    JSXElement: 'openingElement',
+    JSXFragment: 'openingFragment',
+};
+
+const IS_OPENING = {
+    JSXOpeningElement: true,
+    JSXOpeningFragment: true,
+};
+
 export class TemplateGenerator extends Generator {
     templates = [];
     uniqueIds = new Set();
@@ -184,10 +194,20 @@ export class TemplateGenerator extends Generator {
             const { queryIndex } = element;
             if(type !== 'child') continue;
             const varName = queryIndex === -1 ? `__root` : `__target${queryIndex}`;
-            const opening = element.openingElement ?? element.openingFragment;
+
+            let opening = null;
+            if(IS_OPENING[element.type]) opening = element;
+            else {
+                const prop = OPENING_PROP[element.type];
+                if(prop) opening = element[prop];
+                else {
+                    throw new TypeError(`Unexpected binding node type "${node.type}"`);
+                }
+            }
+
             writeNextLine(state);
             state.write(`const __child${i} = `);
-            state.write(`${varName}.childNodes`, opening.name ?? opening);
+            state.write(`${varName}.childNodes`, opening.name);
             state.write(`[${index}]`, node);
             state.write(`;`);
         }

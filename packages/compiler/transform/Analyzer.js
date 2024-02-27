@@ -155,6 +155,7 @@ export class Analyzer {
                     type: 'JSXFragment',
                     children: node.children,
                     openingFragment: {
+                        type: 'JSXOpeningFragment',
                         attributes: []
                     }
                 };
