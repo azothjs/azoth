@@ -7,7 +7,7 @@ settings:
 dependencies:
   '@azoth-web/compiler':
     specifier: workspace:*
-    version: link:../../packages/compiler
+    version: link:../packages/compiler
   '@rollup/pluginutils':
     specifier: ^5.1.0
     version: 5.1.0
@@ -18,7 +18,7 @@ dependencies:
 devDependencies:
   '@azoth-web/runtime':
     specifier: workspace:*
-    version: link:../../packages/runtime
+    version: link:../packages/runtime
   vite:
     specifier: ^5.1.4
     version: 5.1.4

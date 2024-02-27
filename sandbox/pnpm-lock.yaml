@@ -4,27 +4,52 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-dependencies:
-  azoth:
-    specifier: workspace:^
-    version: link:../packages/azoth
-  npm:
-    specifier: ^10.4.0
-    version: 10.4.0
-  page:
-    specifier: ^1.11.6
-    version: 1.11.6
+importers:
 
-devDependencies:
-  vite:
-    specifier: ^5.1.4
-    version: 5.1.4
-  vite-plugin-inspect:
-    specifier: ^0.8.3
-    version: 0.8.3(vite@5.1.4)
-  vitest:
-    specifier: ^1.3.1
-    version: 1.3.1
+  .:
+    dependencies:
+      azoth:
+        specifier: workspace:^
+        version: link:../packages/azoth
+      jsonic:
+        specifier: workspace:^
+        version: link:../packages/jsonic
+      npm:
+        specifier: ^10.4.0
+        version: 10.4.0
+      page:
+        specifier: ^1.11.6
+        version: 1.11.6
+    devDependencies:
+      vite:
+        specifier: ^5.1.4
+        version: 5.1.4
+      vite-plugin-inspect:
+        specifier: ^0.8.3
+        version: 0.8.3(vite@5.1.4)
+      vitest:
+        specifier: ^1.3.1
+        version: 1.3.1
+
+  ..: {}
+
+  ../docs: {}
+
+  ../packages/azoth: {}
+
+  ../packages/channels: {}
+
+  ../packages/compiler: {}
+
+  ../packages/jsonic: {}
+
+  ../packages/runtime: {}
+
+  ../packages/vite-plugin: {}
+
+  ../test-utils: {}
+
+  ../vite-test: {}
 
 packages:
 

@@ -15,6 +15,7 @@
     "license": "ISC",
     "dependencies": {
         "azoth": "workspace:^",
+        "jsonic": "workspace:^",
         "npm": "^10.4.0",
         "page": "^1.11.6"
     },
