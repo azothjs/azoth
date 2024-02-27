@@ -1,0 +1,37 @@
+{
+    "name": "@azoth-web/channels",
+    "version": "0.0.1",
+    "description": "Asynchronous layout channels",
+    "author": "Marty Nelson",
+    "license": "MIT",
+    "keywords": [
+        "data",
+        "streaming",
+        "asynchronous",
+        "layout channels",
+        "channels",
+        "azoth",
+        "azoth channels"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/azoth-web/azoth.git",
+        "directory": "packages/channels"
+    },
+    "type": "module",
+    "main": "./channels.js",
+    "files": [],
+    "exports": {
+        ".": "./channels.js"
+    },
+    "scripts": {
+        "test": "vitest"
+    },
+    "dependencies": {
+        "vitest": "^1.3.1"
+    },
+    "devDependencies": {
+        "happy-dom": "^13.6.2",
+        "test-utils": "workspace:*"
+    }
+}
