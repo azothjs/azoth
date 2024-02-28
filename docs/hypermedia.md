@@ -1,16 +1,167 @@
-# Hypermedia for the Web
+# Web Architecture with Hypermedia 
 
-Azoth is a UI/X library for building hypermedia apps on the web platform.
+[Hypermedia](https://en.wikipedia.org/wiki/Hypermedia) is rich ui content that provides interactivity to enhance and modify the media itself. It provides many advantages when applied to modern web architecture. If you are using any server-rendering, you already are adapting to hypermedia!
 
-## Hypermedia
+This article is requires an advanced understanding of modern JavaScript frameworks and the web in general. If you have topic of interest let me know, there's a lot to learn
+- presented in strong opinions loosely held. Like web and js. there's a good chance i made a mistake and was wrong about some things.
+- pirate javascript ... calcified ecosystem
 
-Azoth views [Hypermedia](https://en.wikipedia.org/wiki/Hypermedia) through the lens of active web pages that exhibit rich ui content _and_ provide interactivity to enhance and modify the media itself. Unlike state-driven `ui = fn(state)` architectures, in hypermedia apps the active ui _is_ the source of truth:
+> What about htmX and Hypermedia Driven Application (HDA) architecture?
+
+[HDA](https://htmx.org/essays/hypermedia-driven-applications/) has very specific implementation requirements on where and how html is generated and delivered to the client. 
+
+The shift to SSR has proven that hypermedia has already won, the server-client dichotomy is real. But it can be used more flexibly by extending the architecture into the client. In a decidedly more JavaScript-friendly approach, the DOM is the component interface regardless of how and when the html is produced. 
+
+On the other end of the spectrum, rich client experiences are only going to get richer. Streaming generative AI will deliver media and experiences like never before. WASM is bringing a whole new level of experiences through things like WebContainers, a whole mini-fullstack in the browser.
+
+Whether you agree or disagree, there's something to be learned by looking more closely at Hypermedia architectures. 
+
+## Key Characteristics
+
+Hypermedia is fundamentally different from state-driven architectures:
+
+1. The **content media** is the source of truth: the active DOM defines the ui explicitly because it _is_ the ui
+1. Hypermedia works in iterative changes triggered by actions
+1. Changes to the ui occur in units of ui
+
+The focus in hypermedia is on layout (ui) changes, not state changes. 
+
+## No State?
+
+State-first architectures necessitate client state as a precursor to producing ui. No state, no ui.
+
+<img width="325" style="margin: 0 auto;" alt="How can you have any UI if you don't set your state" src="https://i.imgflip.com/8h96lh.jpg">
+
+State here means buffering data into memory on the client so the framework can use that to layout the ui. Transactional data from a server is still "application state". The trend of pushing state management onto the server in full stack JavaScript frameworks is real and will continue.
+
+State _is_ a useful tool _when needed_: local UI state, extended domain information, caching efficiencies, etc. That's different than a fundamental architectural requirement.
+
+## It's About Time
+
+State-driven architectures are often represented as `ui = fn(state)`. This core state-first requirement is an architecture feature that says to the developer:
+
+> Write `fn` such that it handles all possible states, and it should work at any time.
+
+It's a cool design idea. But also worth thinking about the trade-offs:
+- Increased time complexity shows up in effect functions and state management
+- Converse template complexity due to time ambiguity: what data do I have right now?
+- Impact on ceiling of UX due to canonical loss of direct ui control
+- Performance and complexity in limiting rendering due to undifferentiated state change (fine-grained updates address this)
+
+## Time in Hypermedia
+
+Hypermedia consist of iterative changes, each of which occurs at it's own time:
 
 <pre>
 ui<sub>n</sub> = ui<sub>n-1</sub> + Δ
 </pre>
 
-The UI is the prior state of the UI plus the delta applied by the last interaction. 
+> The UI is the prior state of the UI plus the delta applied by the last interaction
+
+Conceptually changes are made in compatible units of ui. This is the "swap" in htmX, always html for html. 
+
+Again, because the UI is the source of truth, state is removed from the equation.
+
+## Hypermedia is Already Here
+
+To make this less abstract and more concrete, the current industry adaption of ui<sub>n</sub> = ui<sub>n-1</sub> + Δ is:
+
+```
+ui = SSR + islands
+```
+
+Those are `ui = fn(state)` islands, but the advantages of a differentiated first render are clear.
+
+
+## Concrete Example
+
+Heady stuff, time for some code! The examples use React and Azoth. Azoth is a new experimental JavaScript ~~framework~~ library that adheres to a hypermedia architecture.
+
+Below is a data fetch in React
+
+```jsx
+import { useEffect, useState } from 'react';
+import './style.css';
+
+// emoji service
+const EMOJI_URL = 'https://emojihub.yurace.pro/api/all';
+async function fetchEmojis() {
+  const res = await fetch(EMOJI_URL);
+  return await res.json();
+}
+
+export default function App() {
+  const [emojis, setEmojis] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      const emojis = await fetchEmojis();
+      setEmojis(emojis);
+    })();
+  }, []);
+
+  return (
+    <>
+      <h1>Emojis for Everyone</h1>
+      <ul className="emojis">
+        {emojis.map(({ name, htmlCode }) => (
+          <Emoji name={name} htmlCode={htmlCode} />
+        ))}
+      </ul>
+    </>
+  );
+}
+
+function Emoji({ name, htmlCode }) {
+  return (
+    <li title={name} dangerouslySetInnerHTML={{ __html: htmlCode.join('') }} />
+  );
+}
+```
+
+TODO: point out timelines
+
+Azoth!
+
+```jsx
+import './style.css';
+
+// emoji service
+const EMOJI_URL = 'https://emojihub.yurace.pro/api/all';
+async function fetchEmojis() {
+  const res = await fetch(EMOJI_URL);
+  return await res.json();
+}
+
+export default function App() {
+
+  async function EmojiChannel() {
+    const emojis = await fetchEmojis();
+    return emojis.map(({ name, htmlCode }) => (
+      <Emoji name={name} htmlCode={htmlCode} />
+    ));
+  }
+
+  return (
+    <>
+      <h1>Emojis for Everyone</h1>
+      <ul class="emojis">
+        {EmojiChannel()}
+      </ul>
+    </>
+  );
+}
+
+function Emoji({ name, htmlCode }) {
+  return <li title={name} innerHTML={htmlCode.join('')} />;
+}
+
+
+
+
+
+
+
 
 ## Timely
 

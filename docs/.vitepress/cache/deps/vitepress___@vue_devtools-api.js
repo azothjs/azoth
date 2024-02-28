@@ -2,9 +2,9 @@ import {
   isReactive,
   isRef,
   toRaw
-} from "./chunk-26GTCIUS.js";
+} from "./chunk-3Q734JMC.js";
 
-// node_modules/.pnpm/@vue+devtools-shared@7.0.14/node_modules/@vue/devtools-shared/dist/index.js
+// node_modules/.pnpm/@vue+devtools-shared@7.0.15/node_modules/@vue/devtools-shared/dist/index.js
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -34,7 +34,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
   mod
 ));
 var init_esm_shims = __esm({
-  "../../node_modules/.pnpm/tsup@8.0.1_postcss@8.4.33_typescript@5.3.3/node_modules/tsup/assets/esm_shims.js"() {
+  "../../node_modules/.pnpm/tsup@8.0.2_postcss@8.4.35_typescript@5.3.3/node_modules/tsup/assets/esm_shims.js"() {
     "use strict";
   }
 });
@@ -257,82 +257,6 @@ var import_rfdc = __toESM(require_rfdc(), 1);
 var deepClone = (0, import_rfdc.default)({ circles: true });
 init_esm_shims();
 
-// node_modules/.pnpm/@vue+devtools-schema@7.0.14/node_modules/@vue/devtools-schema/dist/index.js
-var DevToolsHooks = ((DevToolsHooks2) => {
-  DevToolsHooks2["APP_INIT"] = "app:init";
-  DevToolsHooks2["APP_UNMOUNT"] = "app:unmount";
-  DevToolsHooks2["COMPONENT_UPDATED"] = "component:updated";
-  DevToolsHooks2["COMPONENT_ADDED"] = "component:added";
-  DevToolsHooks2["COMPONENT_REMOVED"] = "component:removed";
-  DevToolsHooks2["COMPONENT_EMIT"] = "component:emit";
-  DevToolsHooks2["PERFORMANCE_START"] = "perf:start";
-  DevToolsHooks2["PERFORMANCE_END"] = "perf:end";
-  DevToolsHooks2["ADD_ROUTE"] = "router:add-route";
-  DevToolsHooks2["REMOVE_ROUTE"] = "router:remove-route";
-  DevToolsHooks2["RENDER_TRACKED"] = "render:tracked";
-  DevToolsHooks2["RENDER_TRIGGERED"] = "render:triggered";
-  DevToolsHooks2["APP_CONNECTED"] = "app:connected";
-  DevToolsHooks2["SETUP_DEVTOOLS_PLUGIN"] = "devtools-plugin:setup";
-  return DevToolsHooks2;
-})(DevToolsHooks || {});
-
-// node_modules/.pnpm/perfect-debounce@1.0.0/node_modules/perfect-debounce/dist/index.mjs
-var DEBOUNCE_DEFAULTS = {
-  trailing: true
-};
-function debounce(fn, wait = 25, options = {}) {
-  options = { ...DEBOUNCE_DEFAULTS, ...options };
-  if (!Number.isFinite(wait)) {
-    throw new TypeError("Expected `wait` to be a finite number");
-  }
-  let leadingValue;
-  let timeout;
-  let resolveList = [];
-  let currentPromise;
-  let trailingArgs;
-  const applyFn = (_this, args) => {
-    currentPromise = _applyPromised(fn, _this, args);
-    currentPromise.finally(() => {
-      currentPromise = null;
-      if (options.trailing && trailingArgs && !timeout) {
-        const promise = applyFn(_this, trailingArgs);
-        trailingArgs = null;
-        return promise;
-      }
-    });
-    return currentPromise;
-  };
-  return function(...args) {
-    if (currentPromise) {
-      if (options.trailing) {
-        trailingArgs = args;
-      }
-      return currentPromise;
-    }
-    return new Promise((resolve) => {
-      const shouldCallNow = !timeout && options.leading;
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        timeout = null;
-        const promise = options.leading ? leadingValue : applyFn(this, args);
-        for (const _resolve of resolveList) {
-          _resolve(promise);
-        }
-        resolveList = [];
-      }, wait);
-      if (shouldCallNow) {
-        leadingValue = applyFn(this, args);
-        resolve(leadingValue);
-      } else {
-        resolveList.push(resolve);
-      }
-    });
-  };
-}
-async function _applyPromised(fn, _this, args) {
-  return await fn.apply(_this, args);
-}
-
 // node_modules/.pnpm/hookable@5.5.3/node_modules/hookable/dist/index.mjs
 function flatHooks(configHooks, hooks = {}, parentName) {
   for (const key in configHooks) {
@@ -538,7 +462,64 @@ function createHooks() {
   return new Hookable();
 }
 
-// node_modules/.pnpm/@vue+devtools-kit@7.0.14/node_modules/@vue/devtools-kit/dist/index.js
+// node_modules/.pnpm/perfect-debounce@1.0.0/node_modules/perfect-debounce/dist/index.mjs
+var DEBOUNCE_DEFAULTS = {
+  trailing: true
+};
+function debounce(fn, wait = 25, options = {}) {
+  options = { ...DEBOUNCE_DEFAULTS, ...options };
+  if (!Number.isFinite(wait)) {
+    throw new TypeError("Expected `wait` to be a finite number");
+  }
+  let leadingValue;
+  let timeout;
+  let resolveList = [];
+  let currentPromise;
+  let trailingArgs;
+  const applyFn = (_this, args) => {
+    currentPromise = _applyPromised(fn, _this, args);
+    currentPromise.finally(() => {
+      currentPromise = null;
+      if (options.trailing && trailingArgs && !timeout) {
+        const promise = applyFn(_this, trailingArgs);
+        trailingArgs = null;
+        return promise;
+      }
+    });
+    return currentPromise;
+  };
+  return function(...args) {
+    if (currentPromise) {
+      if (options.trailing) {
+        trailingArgs = args;
+      }
+      return currentPromise;
+    }
+    return new Promise((resolve) => {
+      const shouldCallNow = !timeout && options.leading;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        timeout = null;
+        const promise = options.leading ? leadingValue : applyFn(this, args);
+        for (const _resolve of resolveList) {
+          _resolve(promise);
+        }
+        resolveList = [];
+      }, wait);
+      if (shouldCallNow) {
+        leadingValue = applyFn(this, args);
+        resolve(leadingValue);
+      } else {
+        resolveList.push(resolve);
+      }
+    });
+  };
+}
+async function _applyPromised(fn, _this, args) {
+  return await fn.apply(_this, args);
+}
+
+// node_modules/.pnpm/@vue+devtools-kit@7.0.15_vue@3.4.20/node_modules/@vue/devtools-kit/dist/index.js
 var __create2 = Object.create;
 var __defProp2 = Object.defineProperty;
 var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
@@ -559,16 +540,16 @@ var __copyProps2 = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM2 = (mod, isNodeMode, target8) => (target8 = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
+var __toESM2 = (mod, isNodeMode, target9) => (target9 = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
   // If the importer is in node compatibility mode or this is not an ESM
   // file that has been converted to a CommonJS file using a Babel-
   // compatible transform (i.e. "__esModule" has not been set), then set
   // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp2(target8, "default", { value: mod, enumerable: true }) : target8,
+  isNodeMode || !mod || !mod.__esModule ? __defProp2(target9, "default", { value: mod, enumerable: true }) : target9,
   mod
 ));
 var init_esm_shims2 = __esm2({
-  "../../node_modules/.pnpm/tsup@8.0.1_postcss@8.4.33_typescript@5.3.3/node_modules/tsup/assets/esm_shims.js"() {
+  "../../node_modules/.pnpm/tsup@8.0.2_postcss@8.4.35_typescript@5.3.3/node_modules/tsup/assets/esm_shims.js"() {
     "use strict";
   }
 });
@@ -2112,227 +2093,111 @@ init_esm_shims2();
 init_esm_shims2();
 init_esm_shims2();
 init_esm_shims2();
+init_esm_shims2();
+init_esm_shims2();
+init_esm_shims2();
+init_esm_shims2();
 var _a;
 var _b;
 var devtoolsHooks = (_b = (_a = target).__VUE_DEVTOOLS_HOOK) != null ? _b : _a.__VUE_DEVTOOLS_HOOK = createHooks();
 var on = {
   vueAppInit(fn) {
-    devtoolsHooks.hook(DevToolsHooks.APP_INIT, fn);
+    devtoolsHooks.hook("app:init", fn);
   },
   vueAppConnected(fn) {
-    devtoolsHooks.hook(DevToolsHooks.APP_CONNECTED, fn);
+    devtoolsHooks.hook("app:connected", fn);
   },
   componentAdded(fn) {
-    return devtoolsHooks.hook(DevToolsHooks.COMPONENT_ADDED, fn);
+    return devtoolsHooks.hook("component:added", fn);
   },
   componentUpdated(fn) {
-    return devtoolsHooks.hook(DevToolsHooks.COMPONENT_UPDATED, fn);
+    return devtoolsHooks.hook("component:updated", fn);
   },
   componentRemoved(fn) {
-    return devtoolsHooks.hook(DevToolsHooks.COMPONENT_REMOVED, fn);
+    return devtoolsHooks.hook("component:removed", fn);
   },
   setupDevtoolsPlugin(fn) {
-    devtoolsHooks.hook(DevToolsHooks.SETUP_DEVTOOLS_PLUGIN, fn);
+    devtoolsHooks.hook("devtools-plugin:setup", fn);
   }
 };
 var hook = {
-  on
+  on,
+  setupDevToolsPlugin(pluginDescriptor, setupFn) {
+    return devtoolsHooks.callHook("devtools-plugin:setup", pluginDescriptor, setupFn);
+  }
 };
-var RouterInfoKey = "__VUE_DEVTOOLS_ROUTER_INFO__";
-var RouterKey = "__VUE_DEVTOOLS_ROUTER__";
+init_esm_shims2();
+init_esm_shims2();
+init_esm_shims2();
+init_esm_shims2();
+init_esm_shims2();
+init_esm_shims2();
+init_esm_shims2();
+var import_speakingurl = __toESM2(require_speakingurl2(), 1);
+init_esm_shims2();
+init_esm_shims2();
+init_esm_shims2();
 var _a2;
 var _b2;
-(_b2 = (_a2 = target)[RouterInfoKey]) != null ? _b2 : _a2[RouterInfoKey] = {
-  currentRoute: null,
-  routes: [],
-  router: null
-};
-var _a3;
-var _b3;
-(_b3 = (_a3 = target)[RouterKey]) != null ? _b3 : _a3[RouterKey] = null;
-var devtoolsRouterInfo = new Proxy(target[RouterInfoKey], {
-  get(target8, property) {
-    return target[RouterInfoKey][property];
+var apiHooks = (_b2 = (_a2 = target).__VUE_DEVTOOLS_API_HOOK) != null ? _b2 : _a2.__VUE_DEVTOOLS_API_HOOK = createHooks();
+function getRoutes(router) {
+  const routesMap = /* @__PURE__ */ new Map();
+  return ((router == null ? void 0 : router.getRoutes()) || []).filter((i) => !routesMap.has(i.path) && routesMap.set(i.path, 1));
+}
+function filterRoutes(routes) {
+  return routes.map((item) => {
+    let { path, name, children } = item;
+    if (children == null ? void 0 : children.length)
+      children = filterRoutes(children);
+    return {
+      path,
+      name,
+      children
+    };
+  });
+}
+function filterCurrentRoute(route) {
+  if (route) {
+    const { fullPath, hash, href, path, name, matched, params, query } = route;
+    return {
+      fullPath,
+      hash,
+      href,
+      path,
+      name,
+      params,
+      query,
+      matched: filterRoutes(matched)
+    };
   }
-});
+  return route;
+}
 function normalizeRouterInfo(appRecord) {
-  const getRoutes = (router) => {
-    const routesMap = /* @__PURE__ */ new Map();
-    return ((router == null ? void 0 : router.getRoutes()) || []).filter((i) => !routesMap.has(i.path) && routesMap.set(i.path, 1));
-  };
-  function filterRoutes(routes) {
-    return routes.map((item) => {
-      let { path, name, children } = item;
-      if (children == null ? void 0 : children.length)
-        children = filterRoutes(children);
-      return {
-        path,
-        name,
-        children
-      };
-    });
-  }
-  function filterCurrentRoute(route) {
-    if (route) {
-      const { fullPath, hash, href, path, name, matched, params, query } = route;
-      return {
-        fullPath,
-        hash,
-        href,
-        path,
-        name,
-        params,
-        query,
-        matched: filterRoutes(matched)
-      };
-    }
-    return route;
-  }
   function init() {
-    var _a9;
-    const router = (_a9 = appRecord.app) == null ? void 0 : _a9.config.globalProperties.$router;
+    var _a10;
+    const router = (_a10 = appRecord.app) == null ? void 0 : _a10.config.globalProperties.$router;
     const currentRoute = filterCurrentRoute(router == null ? void 0 : router.currentRoute.value);
     const routes = filterRoutes(getRoutes(router));
     const c = console.warn;
     console.warn = () => {
     };
-    target[RouterInfoKey] = {
+    target[ROUTER_INFO_KEY] = {
       currentRoute: currentRoute ? deepClone(currentRoute) : {},
       routes: deepClone(routes)
     };
-    target[RouterKey] = router;
+    target[ROUTER_KEY] = router;
     console.warn = c;
   }
   init();
   hook.on.componentUpdated(debounce(() => {
     init();
-    apiHooks.callHook("router-info:updated", target[RouterInfoKey]);
+    apiHooks.callHook("router-info:updated", target[ROUTER_INFO_KEY]);
   }, 200));
 }
-var StateKey = "__VUE_DEVTOOLS_GLOBAL_STATE__";
-var ContextKey = "__VUE_DEVTOOLS_CONTEXT__";
-var DefaultContext = {
-  appRecord: null,
-  api: null,
-  inspector: [],
-  timelineLayer: [],
-  routerInfo: {},
-  router: null,
-  activeInspectorTreeId: "",
-  componentPluginHookBuffer: []
-};
-var _a4;
-var _b4;
-(_b4 = (_a4 = target)[StateKey]) != null ? _b4 : _a4[StateKey] = {
-  connected: false,
-  clientConnected: false,
-  appRecords: [],
-  activeAppRecord: null,
-  selectedComponentId: null,
-  pluginBuffer: [],
-  tabs: [],
-  commands: [],
-  vitePluginDetected: false,
-  activeAppRecordId: null
-};
-var _a5;
-var _b5;
-(_b5 = (_a5 = target)[ContextKey]) != null ? _b5 : _a5[ContextKey] = deepClone(DefaultContext);
-var callStateUpdatedHook = debounce((state, oldState) => {
-  apiHooks.callHook("devtools:state-updated", state, oldState);
-}, 80);
-var callConnectedUpdatedHook = debounce((state, oldState) => {
-  apiHooks.callHook("devtools:connected-updated", state, oldState);
-}, 80);
-var devtoolsState = new Proxy(target[StateKey], {
-  get(target8, property) {
-    return target[StateKey][property];
-  },
-  set(target8, property, value) {
-    var _a9;
-    const oldState = { ...target[StateKey] };
-    target8[property] = value;
-    target[StateKey][property] = value;
-    if (property === "activeAppRecord") {
-      target[ContextKey].appRecord = value;
-      target[ContextKey].api = value.api;
-      target[ContextKey].inspector = (_a9 = value.inspector) != null ? _a9 : [];
-      normalizeRouterInfo(value);
-      target[ContextKey].routerInfo = devtoolsRouterInfo;
-    }
-    callStateUpdatedHook(target[StateKey], oldState);
-    if (["connected", "clientConnected"].includes(property.toString()) && oldState[property] !== value)
-      callConnectedUpdatedHook(target[StateKey], oldState);
-    return true;
-  },
-  deleteProperty(target8, property) {
-    delete target8[property];
-    return true;
-  }
-});
-Object.defineProperty(devtoolsState.tabs, "push", {
-  configurable: true,
-  value(...items) {
-    const result = Array.prototype.push.apply(this, items);
-    devtoolsState.tabs = this;
-    apiHooks.callHook("custom-tabs:updated", this);
-    return result;
-  }
-});
-["push", "splice"].forEach((method) => {
-  Object.defineProperty(devtoolsState.commands, method, {
-    configurable: true,
-    value(...args) {
-      const result = Array.prototype[method].apply(this, args);
-      devtoolsState.commands = this;
-      apiHooks.callHook("custom-commands:updated", this);
-      return result;
-    }
-  });
-});
-var devtoolsContext = new Proxy(target[ContextKey], {
-  get(target8, property) {
-    if (property === "router")
-      return target[RouterKey];
-    else if (property === "clear")
-      return clearDevToolsContext;
-    return target[ContextKey][property];
-  },
-  set(target8, property, value) {
-    if (property === "componentPluginHookBuffer")
-      target[ContextKey][property] = value;
-    return true;
-  }
-});
-function clearDevToolsContext() {
-  target[ContextKey] = deepClone(DefaultContext);
+function setupDevToolsPlugin(pluginDescriptor, setupFn) {
+  return hook.setupDevToolsPlugin(pluginDescriptor, setupFn);
 }
 init_esm_shims2();
-init_esm_shims2();
-init_esm_shims2();
-init_esm_shims2();
-var UNDEFINED = "__vue_devtool_undefined__";
-var INFINITY = "__vue_devtool_infinity__";
-var NEGATIVE_INFINITY = "__vue_devtool_negative_infinity__";
-var NAN = "__vue_devtool_nan__";
-init_esm_shims2();
-init_esm_shims2();
-init_esm_shims2();
-init_esm_shims2();
-init_esm_shims2();
-var tokenMap = {
-  [UNDEFINED]: "undefined",
-  [NAN]: "NaN",
-  [INFINITY]: "Infinity",
-  [NEGATIVE_INFINITY]: "-Infinity"
-};
-var reversedTokenMap = Object.entries(tokenMap).reduce((acc, [key, value]) => {
-  acc[value] = key;
-  return acc;
-}, {});
-init_esm_shims2();
-init_esm_shims2();
-var MAX_SERIALIZED_SIZE = 512 * 1024;
 init_esm_shims2();
 init_esm_shims2();
 init_esm_shims2();
@@ -2349,7 +2214,10 @@ var StateEditor = class {
     const markRef = false;
     while (sections.length > 1) {
       const section = sections.shift();
-      object = object[section];
+      if (object instanceof Map)
+        object = object.get(section);
+      else
+        object = object[section];
       if (this.refEditor.isRef(object))
         object = this.refEditor.get(object);
     }
@@ -2369,7 +2237,10 @@ var StateEditor = class {
   get(object, path) {
     const sections = Array.isArray(path) ? path : path.split(".");
     for (let i = 0; i < sections.length; i++) {
-      object = object[sections[i]];
+      if (object instanceof Map)
+        object = object.get(sections[i]);
+      else
+        object = object[sections[i]];
       if (this.refEditor.isRef(object))
         object = this.refEditor.get(object);
       if (!object)
@@ -2395,17 +2266,19 @@ var StateEditor = class {
       if (state.remove || state.newKey) {
         if (Array.isArray(object))
           object.splice(field, 1);
-        else if (toRaw(object) instanceof Map && typeof value === "object" && value && "key" in value)
-          object.delete(value.key);
+        else if (toRaw(object) instanceof Map)
+          object.delete(field);
         else if (toRaw(object) instanceof Set)
           object.delete(value);
         else
           Reflect.deleteProperty(object, field);
       }
       if (!state.remove) {
-        const target8 = object[state.newKey || field];
-        if (this.refEditor.isRef(target8))
-          this.refEditor.set(target8, value);
+        const target9 = object[state.newKey || field];
+        if (this.refEditor.isRef(target9))
+          this.refEditor.set(target9, value);
+        else if (toRaw(object) instanceof Map)
+          object.set(state.newKey || field, value);
         else
           object[state.newKey || field] = value;
       }
@@ -2417,15 +2290,13 @@ var RefStateEditor = class {
     if (isRef(ref)) {
       ref.value = value;
     } else {
-      const previousKeys = Object.keys(ref);
+      const previousKeysSet = new Set(Object.keys(ref));
       const currentKeys = Object.keys(value);
-      if (previousKeys.length > currentKeys.length) {
-        const diffKeys = previousKeys.filter((key) => !currentKeys.includes(key));
-        diffKeys.forEach((key) => Reflect.deleteProperty(ref, key));
-      }
       currentKeys.forEach((key) => {
         Reflect.set(ref, key, Reflect.get(value, key));
+        previousKeysSet.delete(key);
       });
+      previousKeysSet.forEach((key) => Reflect.deleteProperty(ref, key));
     }
   }
   get(ref) {
@@ -2439,20 +2310,33 @@ var stateEditor = new StateEditor();
 init_esm_shims2();
 init_esm_shims2();
 init_esm_shims2();
+var UNDEFINED = "__vue_devtool_undefined__";
+var INFINITY = "__vue_devtool_infinity__";
+var NEGATIVE_INFINITY = "__vue_devtool_negative_infinity__";
+var NAN = "__vue_devtool_nan__";
 init_esm_shims2();
 init_esm_shims2();
-function setupDevToolsPlugin(pluginDescriptor, setupFn) {
-  return devtoolsHooks.callHook(DevToolsHooks.SETUP_DEVTOOLS_PLUGIN, pluginDescriptor, setupFn);
-}
+var tokenMap = {
+  [UNDEFINED]: "undefined",
+  [NAN]: "NaN",
+  [INFINITY]: "Infinity",
+  [NEGATIVE_INFINITY]: "-Infinity"
+};
+var reversedTokenMap = Object.entries(tokenMap).reduce((acc, [key, value]) => {
+  acc[value] = key;
+  return acc;
+}, {});
 init_esm_shims2();
 init_esm_shims2();
 init_esm_shims2();
 init_esm_shims2();
 init_esm_shims2();
 init_esm_shims2();
-var _a6;
-var _b6;
-var apiHooks = (_b6 = (_a6 = target).__VUE_DEVTOOLS_API_HOOK) != null ? _b6 : _a6.__VUE_DEVTOOLS_API_HOOK = createHooks();
+init_esm_shims2();
+var MAX_SERIALIZED_SIZE = 512 * 1024;
+init_esm_shims2();
+init_esm_shims2();
+init_esm_shims2();
 init_esm_shims2();
 function addCustomTab(tab) {
   if (devtoolsState.tabs.some((t) => t.name === tab.name))
@@ -2472,18 +2356,167 @@ function removeCustomCommand(actionId) {
   devtoolsState.commands.splice(index, 1);
 }
 init_esm_shims2();
+var _a3;
+var _b3;
+(_b3 = (_a3 = target).__VUE_DEVTOOLS_COMPONENT_INSPECTOR_ENABLED__) != null ? _b3 : _a3.__VUE_DEVTOOLS_COMPONENT_INSPECTOR_ENABLED__ = true;
+init_esm_shims2();
+init_esm_shims2();
+init_esm_shims2();
+var STATE_KEY = "__VUE_DEVTOOLS_GLOBAL_STATE__";
+function initStateFactory() {
+  return {
+    connected: false,
+    clientConnected: false,
+    appRecords: [],
+    activeAppRecord: null,
+    selectedComponentId: null,
+    pluginBuffer: [],
+    tabs: [],
+    commands: [],
+    vitePluginDetected: false,
+    activeAppRecordId: null
+  };
+}
+var _a4;
+var _b4;
+(_b4 = (_a4 = target)[STATE_KEY]) != null ? _b4 : _a4[STATE_KEY] = initStateFactory();
+var callStateUpdatedHook = debounce((state, oldState) => {
+  apiHooks.callHook("devtools:state-updated", state, oldState);
+}, 80);
+var callConnectedUpdatedHook = debounce((state, oldState) => {
+  apiHooks.callHook("devtools:connected-updated", state, oldState);
+}, 80);
+var devtoolsState = new Proxy(target[STATE_KEY], {
+  get(target9, property) {
+    return target[STATE_KEY][property];
+  },
+  deleteProperty(target9, property) {
+    delete target9[property];
+    return true;
+  },
+  set(target9, property, value) {
+    const oldState = { ...target[STATE_KEY] };
+    target9[property] = value;
+    target[STATE_KEY][property] = value;
+    callStateUpdatedHook(target[STATE_KEY], oldState);
+    if (["connected", "clientConnected"].includes(property.toString()) && oldState[property] !== value)
+      callConnectedUpdatedHook(target[STATE_KEY], oldState);
+    return true;
+  }
+});
+Object.defineProperty(devtoolsState.tabs, "push", {
+  configurable: true,
+  value(...items) {
+    const result = Array.prototype.push.apply(this, items);
+    devtoolsState.tabs = this;
+    apiHooks.callHook("custom-tabs:updated", this);
+    return result;
+  }
+});
+["push", "splice"].forEach((method) => {
+  Object.defineProperty(devtoolsState.commands, method, {
+    configurable: true,
+    value(...args) {
+      const result = Array.prototype[method].apply(this, args);
+      devtoolsState.commands = this;
+      apiHooks.callHook("custom-commands:updated", this);
+      return result;
+    }
+  });
+});
+init_esm_shims2();
+init_esm_shims2();
+var ROUTER_KEY = "__VUE_DEVTOOLS_ROUTER__";
+var ROUTER_INFO_KEY = "__VUE_DEVTOOLS_ROUTER_INFO__";
+var _a5;
+var _b5;
+(_b5 = (_a5 = target)[ROUTER_INFO_KEY]) != null ? _b5 : _a5[ROUTER_INFO_KEY] = {
+  currentRoute: null,
+  routes: []
+};
+var _a6;
+var _b6;
+(_b6 = (_a6 = target)[ROUTER_KEY]) != null ? _b6 : _a6[ROUTER_KEY] = null;
+var devtoolsRouterInfo = new Proxy(target[ROUTER_INFO_KEY], {
+  get(target9, property) {
+    return target[ROUTER_INFO_KEY][property];
+  }
+});
+init_esm_shims2();
+var CONTEXT_KEY = "__VUE_DEVTOOLS_CONTEXT__";
+function initContextFactory() {
+  return {
+    appRecord: null,
+    api: null,
+    inspector: [],
+    timelineLayer: [],
+    routerInfo: {},
+    router: null,
+    activeInspectorTreeId: "",
+    componentPluginHookBuffer: []
+  };
+}
 var _a7;
 var _b7;
-(_b7 = (_a7 = target).__VUE_DEVTOOLS_COMPONENT_INSPECTOR_ENABLED__) != null ? _b7 : _a7.__VUE_DEVTOOLS_COMPONENT_INSPECTOR_ENABLED__ = true;
-init_esm_shims2();
-init_esm_shims2();
-init_esm_shims2();
-var import_speakingurl = __toESM2(require_speakingurl2(), 1);
+(_b7 = (_a7 = target)[CONTEXT_KEY]) != null ? _b7 : _a7[CONTEXT_KEY] = initContextFactory();
+function resetDevToolsContext() {
+  target[CONTEXT_KEY] = initContextFactory();
+}
+var devtoolsContext = new Proxy(target[CONTEXT_KEY], {
+  get(target9, property) {
+    if (property === "router")
+      return target[ROUTER_KEY];
+    else if (property === "clear")
+      return resetDevToolsContext;
+    return target[CONTEXT_KEY][property];
+  },
+  set(target9, property, value) {
+    target[CONTEXT_KEY][property] = value;
+    return true;
+  }
+});
+var devtoolsAppRecords = new Proxy(devtoolsState.appRecords, {
+  get(_, property) {
+    if (property === "value")
+      return devtoolsState.appRecords;
+    else if (property === "active")
+      return devtoolsState.activeAppRecord;
+    else if (property === "activeId")
+      return devtoolsState.activeAppRecordId;
+  },
+  set(target9, property, value) {
+    var _a10;
+    const oldState = { ...devtoolsState };
+    if (property === "value") {
+      devtoolsState.appRecords = value;
+    } else if (property === "active") {
+      const _value = value;
+      devtoolsState.activeAppRecord = _value;
+      devtoolsContext.appRecord = _value;
+      devtoolsContext.api = _value.api;
+      devtoolsContext.inspector = (_a10 = _value.inspector) != null ? _a10 : [];
+      normalizeRouterInfo(value);
+      devtoolsContext.routerInfo = devtoolsRouterInfo;
+    } else if (property === "activeId") {
+      devtoolsState.activeAppRecordId = value;
+    }
+    callStateUpdatedHook(devtoolsState, oldState);
+    if (["connected", "clientConnected"].includes(property.toString()) && oldState[property] !== value)
+      callConnectedUpdatedHook(devtoolsState, oldState);
+    return true;
+  }
+});
 var _a8;
 var _b8;
 var appRecordInfo = (_b8 = (_a8 = target).__VUE_DEVTOOLS_APP_RECROD_INFO__) != null ? _b8 : _a8.__VUE_DEVTOOLS_APP_RECROD_INFO__ = {
   id: 0,
   appIds: /* @__PURE__ */ new Set()
+};
+init_esm_shims2();
+var _a9;
+var _b9;
+(_b9 = (_a9 = target).__VUE_DEVTOOLS_ENV__) != null ? _b9 : _a9.__VUE_DEVTOOLS_ENV__ = {
+  vitePluginDetected: false
 };
 function onDevToolsConnected(fn) {
   return new Promise((resolve) => {
