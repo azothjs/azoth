@@ -13,8 +13,10 @@
                 "<node_internals>/**",
                 "off/node_modules/**"
             ],
-            "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
+            "program": "${workspaceRoot}/vite-test/node_modules/vitest/vitest.mjs",
             "args": [
+                "-r",
+                "${relativeFileDirname}",
                 "run",
                 "${relativeFile}"
             ],

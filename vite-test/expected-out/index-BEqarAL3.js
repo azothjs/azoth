@@ -188,39 +188,39 @@ async function fetchEmojis() {
     return emojis;
 }
 
-const List = fetchEmojis().then((emojis) => EmojiList({
+const List = fetchEmojis().then(emojis => EmojiList({
   emojis
 }));
 const App = (() => {
   const [__root, __targets] = t14720b3874(true);
-  const __target0 = __targets[0];
+  const __target0 =__targets[0];
   const __child0 = __target0.childNodes[3];
   compose(__child0, List);
   return __root;
 })();
 document.body.append(App);
-function EmojiList({ emojis }) {
+function EmojiList({emojis}) {
   const __root = ta51edaabfe()[0];
   const __child0 = __root.childNodes[1];
   compose(__child0, emojis.map(Emoji));
   return __root;
 }
-function Emoji({ name, unicode, htmlCode }) {
+function Emoji({name, unicode, htmlCode}) {
   const __root = t880311674b()[0];
   const __child0 = __root.childNodes[1];
   const __child1 = __root.childNodes[3];
   const __child2 = __root.childNodes[5];
   compose(__child0, InnerHtml({
-    html: htmlCode.join("")
+    html: htmlCode.join('')
   }));
   compose(__child1, name);
   compose(__child2, unicode);
   return __root;
 }
-function InnerHtml({ html, className = "" }) {
+function InnerHtml({html, className = ''}) {
   const rawEmoji = (() => {
     const __root = tdfc9870d38()[0];
-    __root.className = className ?? "";
+    __root.className = (className ?? '');
     return __root;
   })();
   rawEmoji.firstChild.innerHTML = html;

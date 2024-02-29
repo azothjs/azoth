@@ -1,11 +1,13 @@
 import { defineConfig } from 'vite';
-import azothPlugin from '../index.js';
+import azothPlugin from 'azoth/vite-plugin';
 
 export default defineConfig({
-    root: './test',
     plugins: [
         azothPlugin(),
     ],
+    esbuild: {
+        exclude: '**/*.jsx',
+    },
     build: {
         target: 'esnext',
         minify: false,

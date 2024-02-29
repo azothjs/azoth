@@ -16,7 +16,7 @@
     "dependencies": {
         "azoth": "workspace:^",
         "jsonic": "workspace:^",
-        "npm": "^10.4.0",
+        "npm": "^10.5.0",
         "page": "^1.11.6"
     },
     "devDependencies": {
