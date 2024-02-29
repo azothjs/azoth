@@ -134,4 +134,6 @@ describe('async', () => {
           </div>
         `);
     });
+
+    test.todo('generator function is called');
 });

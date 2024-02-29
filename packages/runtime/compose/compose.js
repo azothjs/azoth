@@ -180,6 +180,9 @@ function createConstructed(Constructor, props, slottable) {
     if(typeof Constructor === 'function') {
         return create(Constructor(props, slottable));
     }
+    // if(!!Constructor[Symbol.asyncIterator]) {
+    //     return create(Constructor(props))
+    // }
     if(Constructor instanceof Promise) {
         const anchor = document.createComment('0');
         Constructor.then(input => {

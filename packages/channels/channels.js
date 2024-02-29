@@ -1,4 +1,4 @@
-import { subject } from './generators.js';
+// import { subject } from './generators.js';
 import 'test-utils/with-resolvers-polyfill';
 
 function throwMoreArgumentsNeeded() {
@@ -18,20 +18,29 @@ export class Channel {
     static from = from;
 }
 
-export function from(asyncSource, transform, options) {
-    if(!options && typeof transform === 'object') {
-        options = transform;
-        transform = null;
+function processArguments(transforms) {
+    let options = null;
+    if(transforms.length) {
+        const maybeOptions = transforms.at(-1);
+        if(typeof maybeOptions === 'object') {
+            options = maybeOptions;
+            transforms.length--;
+        }
     }
+    return [transforms, options];
+}
 
+export function from(asyncSource, ...args) {
+    const [transforms, options] = processArguments(args);
     const type = typeof asyncSource;
 
     switch(true) {
         case asyncSource instanceof Promise:
-            return fromPromise(asyncSource, transform, options);
+            return transforms.length < 2
+                ? fromPromise(asyncSource, transforms[0], options)
+                : branchPromise(asyncSource, transforms, options);
         default:
             throwAsyncSourceTypeError(type);
-
     }
 }
 
@@ -41,6 +50,15 @@ function fromPromise(promise, transform, options) {
         return [fromPromiseStartWith(promise, transform, startWith)];
     }
     return [transform ? promise.then(transform) : promise];
+}
+
+function branchPromise(promise, transforms) {
+    return transforms.map(transform => {
+        if(Array.isArray(transform)) {
+            return fromPromiseStartWith(promise, transform[0], transform[1]);
+        }
+        return promise.then(transform);
+    });
 }
 
 async function* fromPromiseStartWith(promise, transform, startWith) {
