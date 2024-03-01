@@ -1,0 +1,61 @@
+@font-face {
+    font-family: century-gothic;
+    src: url(/century-gothic/CenturyGothic.ttf);
+}
+
+
+:root {
+    --vp-c-brand-1: #038fc5;
+    --vp-c-brand-2: #B96D9C;
+    /* --vp-c-brand-2: #038fc5; */
+
+    /* normal text font */
+    --vp-font-family-base: 'Open Sans';
+    /* --vp-font-family-base: 'Noto Sans Display'; */
+
+    /* code font */
+    --vp-font-family-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco,
+        Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+:root {
+    --vp-c-white: white;
+    --vp-c-black: black;
+
+    --vp-c-neutral: var(--vp-c-black);
+    --vp-c-neutral-inverse: var(--vp-c-white);
+}
+
+.dark {
+    --vp-c-neutral: var(--vp-c-white);
+    --vp-c-neutral-inverse: var(--vp-c-black);
+}
+
+/**
+ * Colors: Background
+ *
+ * - `bg`: The bg color used for main screen.
+ *
+ * - `bg-alt`: The alternative bg color used in places such as "sidebar",
+ *   or "code block".
+ *
+ * - `bg-elv`: The elevated bg color. This is used at parts where it "floats",
+ *   such as "dialog".
+ *
+ * - `bg-soft`: The bg color to slightly distinguish some components from
+ *   the page. Used for things like "carbon ads" or "table".
+ * -------------------------------------------------------------------------- */
+
+:root {
+    --vp-c-bg: #ffffff;
+    --vp-c-bg-alt: #f6f6f7;
+    --vp-c-bg-elv: #ffffff;
+    --vp-c-bg-soft: #f6f6f7;
+}
+
+.dark {
+    --vp-c-bg: #1b1b1f;
+    --vp-c-bg-alt: #161618;
+    --vp-c-bg-elv: #202127;
+    --vp-c-bg-soft: #202127;
+}

@@ -5,17 +5,21 @@ export default defineConfig({
     title: "Azoth",
     description: "Azoth UI library documentation",
     lastUpdated: true,
-    head: [['link', { rel: 'icon', href: '/azothjsx-ico.png' }]],
+    head: [
+        ['link', { rel: 'icon', href: '/azoth-logo.png' }],
+        ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
+        ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOriginIsolated: true }],
+        ['link', { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap' }],
+    ],
     themeConfig: {
         outline: {
             level: [2, 4],
-            label: 'Async FTW'
         },
-        logo: '/azothjsx-ico.png',
+        logo: '/azoth-logo.png',
         nav: [
-            { text: 'Home', link: '/' },
-            { text: 'JSX', link: '/jsx-dom' },
-            { text: 'Examples', link: '/markdown-examples' }
+            { text: 'Arcanum', link: '/intro' },
+            { text: 'About', link: '/about' },
+            { text: 'Examples', link: '/examples' }
         ],
 
         // sidebar: [
@@ -29,7 +33,7 @@ export default defineConfig({
         // ],
 
         socialLinks: [
-            { icon: 'github', link: 'https://github.com/azothjsx/azoth' }
+            { icon: 'github', link: 'https://github.com/azoth-web/azoth' }
         ]
     }
 })
