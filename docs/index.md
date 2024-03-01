@@ -3,9 +3,9 @@
 layout: home
 
 hero:
-  name: "Azoth"
-#   text: "Familiar Syntax, Infinite Possibilities"
-  tagline: "Hypermedia UI/X Library for the Web Platform"
+  name: Freedom
+  text: Every Web API at your finger tips, a rush of raw power.
+  tagline: No&nbsp;State. No&nbsp;Renderer. No&nbsp;Context. No&nbsp;Framework. No&nbsp;Render&nbsp;Tree. No&nbsp;DSL. No&nbsp;Limits...
 #   tagline: The web is fun again
   actions:
     - theme: brand
@@ -19,22 +19,29 @@ hero:
       link: /docs
 
 features:
-  - title: The Web is the API
-    details: JSX is DOM. Use any Web Standard API and all of JavaScript without having to wrap or reinterpret like with vdom and state-driven paradigms
-  - title: Consistent with JavaScript
-    details: No idiosyncrasies, anomalies, or other weird compiler limitations. Literal DOM types plus composition with standard synchronous and asynchronous JavaScript
-  - title: More Developer Control
-    details: Compiles to self-rendering code without any controlling framework. No black box and no abstraction to think through.
-  - title: Code How You Like
-    details: "Pick the right tool for the context, not what your framework needs: imperative, declarative, functional, object-oriented, stateful, immutable."
-  - title: Any asynchronous provider
-    details: Use existing solutions like RxJS, MobX, and Apollo client - or don't. Promises, observables, signals, streams, async generators - any async JavaScript data structure can be used.
-  - title: State management is optional
-    details: Yep. You don't need to buffer everything into memory just to puppeteer the UI. You can maintain state when needed, but it's not an essential part of the UI.
-  - title: Hyper-optimized compilation
-    details: Fast and small in both time and space. JSX is deconstructed into HTML processed by the browser and the minimal required JS execution code.
+  - title: JSX is DOM
+    details: Works with every Web API and DOM-based library. All JavaScripts, mutable and imperative too.
+  - title: Asynchronous Components
+    details: "Unlock a new template dimension: Promise. ReadableStream. AsyncGenerator. anything with a .subscribe()."
+  - title: Ridiculously Minimal
+    details: Compile-time SSG of all JSX templates. Rendering as a Service. Fast by not doing.
+
+
 ---
 
-Mandatory state management is unnecessary complexity
 
-Hypermedia works in alignment with the web
+- title: Cruft-free Stateless Render
+- details: Directly layout data, promises, streams, and more without needing to use state to render
+- title: Best of bread architecture
+- details: No costly render functions Single-pass render
+
+  text: "Familiar Syntax, Infinite Possibilities"
+
+
+Lose the framework cruft. Gain the Web Platform.
+
+No State. No Renderer. No Context. No Render Tree. No Framework. No DSL. No Limits...
+
+Freedom.
+
+Every Web API at your fingertips. A rush of raw power.

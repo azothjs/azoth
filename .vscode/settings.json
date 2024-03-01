@@ -25,6 +25,7 @@
         "pluginutils",
         "pokedex",
         "quasis",
+        "slotable",
         "stimpy",
         "templating",
         "templatize",
