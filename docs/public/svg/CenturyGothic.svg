@@ -1,0 +1,46 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
+<metadata>
+Created by FontForge 20200511 at Thu Nov 12 14:45:52 1998
+ By convertio
+Typeface (c) The Monotype Corporation plc. Data (c) The Monotype Corporation plc / Type Solutions Inc. 1990-91 All Rights Reserved
+</metadata>
+<defs>
+<font id="CenturyGothic" horiz-adv-x="1460" >
+  <font-face 
+    font-family="Century Gothic"
+    font-weight="400"
+    font-stretch="normal"
+    units-per-em="2048"
+    panose-1="2 11 5 2 2 2 2 2 2 4"
+    ascent="1638"
+    descent="-410"
+    x-height="1088"
+    cap-height="1471"
+    bbox="-347 -628 2360 2170"
+    underline-thickness="119"
+    underline-position="-374"
+    unicode-range="U+0020-F108"
+  />
+<missing-glyph horiz-adv-x="1536" 
+d="M256 0v1280h1024v-1280h-1024zM288 32h960v1216h-960v-1216z" />
+
+    <glyph glyph-name="A" unicode="A" horiz-adv-x="1515" 
+d="M780 1471l686 -1471h-158l-231 484h-634l-230 -484h-164l695 1471h36zM762 1159l-253 -533h503z" />
+    
+    <glyph glyph-name="Z" unicode="Z" horiz-adv-x="983" 
+d="M122 1329v142h776l-615 -1328h584v-143h-811l619 1329h-553z" />
+    
+    <glyph glyph-name="O" unicode="O" horiz-adv-x="1780" 
+d="M880 1508q334 0 559 -223t225 -549q0 -323 -224.5 -548t-547.5 -225q-327 0 -552 224t-225 542q0 212 102.5 393t279.5 283.5t383 102.5zM887 1364q-163 0 -309 -85t-228 -229t-82 -321q0 -262 181.5 -442.5t437.5 -180.5q171 0 316.5 83t227 227t81.5 320
+q0 175 -81.5 316.5t-229.5 226.5t-314 85z" />
+    
+    <glyph glyph-name="T" unicode="T" horiz-adv-x="872" 
+d="M33 1328v143h807v-143h-328v-1328h-150v1328h-329z" />
+    
+    <glyph glyph-name="H" unicode="H" horiz-adv-x="1399" 
+d="M177 1471h148v-617h748v617h148v-1471h-148v710h-748v-710h-148v1471z" />
+    
+  </font>
+</defs>

@@ -97,15 +97,10 @@ Use built-in DOM event properties to register handlers:
 ```
 
 
-
 - Interpolation (mixing in JavaScript values and expressions)
-
 
 - Composing with JavaScript
 - Composing with Elements (custom elements and components)
-
-
-
 
 ```jsx
 const pinkPanther = <li>Pink Panther</li>;

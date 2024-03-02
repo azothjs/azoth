@@ -5,9 +5,12 @@
 
 
 :root {
-    --vp-c-brand-1: #038fc5;
-    --vp-c-brand-2: #B96D9C;
-    /* --vp-c-brand-2: #038fc5; */
+    --vp-c-brand-1: #008EC0;
+
+    --vp-c-indigo-1: #4D5A6E;
+    --vp-c-indigo-2: #5E647E;
+    --vp-c-indigo-3: #008EC0;
+    --vp-c-indigo-soft: #746d8c5b;
 
     /* normal text font */
     --vp-font-family-base: 'Open Sans';
@@ -18,6 +21,7 @@
         Consolas, 'Liberation Mono', 'Courier New', monospace;
 }
 
+/*
 :root {
     --vp-c-white: white;
     --vp-c-black: black;
@@ -30,7 +34,7 @@
     --vp-c-neutral: var(--vp-c-white);
     --vp-c-neutral-inverse: var(--vp-c-black);
 }
-
+*/
 /**
  * Colors: Background
  *
@@ -47,7 +51,7 @@
  * -------------------------------------------------------------------------- */
 
 :root {
-    --vp-c-bg: #ffffff;
+    --vp-c-bg: #fdfdfd;
     --vp-c-bg-alt: #f6f6f7;
     --vp-c-bg-elv: #ffffff;
     --vp-c-bg-soft: #f6f6f7;
@@ -58,4 +62,28 @@
     --vp-c-bg-alt: #161618;
     --vp-c-bg-elv: #202127;
     --vp-c-bg-soft: #202127;
+}
+
+
+/**
+ * Colors: Text
+ *
+ * - `text-1`: Used for primary text.
+ *
+ * - `text-2`: Used for muted texts, such as "inactive menu" or "info texts".
+ *
+ * - `text-3`: Used for subtle texts, such as "placeholders" or "caret icon".
+ * -------------------------------------------------------------------------- */
+
+:root {
+    --vp-c-text-1: #384955;
+    --vp-c-text-2: rgba(56, 73, 85, 0.78);
+    --vp-c-text-3: rgba(56, 73, 85, 0.56);
+}
+
+.dark {
+    --vp-c-text-1: #fdfdfd;
+    /* --vp-c-text-1: rgba(255, 255, 245, 0.86); */
+    --vp-c-text-2: rgba(235, 235, 245, 0.6);
+    --vp-c-text-3: rgba(235, 235, 245, 0.38);
 }

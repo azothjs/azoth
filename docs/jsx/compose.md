@@ -24,20 +24,19 @@ Data structures and service updates need to be processed into presentation layou
 
 At runtime, the supplied expression value is evaluated in the following order:
 
-test | action (+recurse)
----|---
-value `undefined`, `null`, `true`, `false`, or `''` | ignore
-type `string` or `number` | append
-instance `Node` | append
-type `function` | call+
-instance `Promise` | then+
-value `Array.isArray` | map+
-**type `object` and...** | 
-has `[Symbol.asyncIterator]` | replace+
-instance `ReadableStream` | add+
-has `.subscribe` | replace+
-has `.on` | replace+
-**no match** | throw
+test by | target | action (+recurse)
+---|---|---
+value | `undefined`, `null`, `true`, `false`, or `''` | ignore\|remove
+type | `string` or `number` | append
+instance | `Node` | append
+type | `function` | call+
+instance | `Promise` | then+
+value | `Array.isArray` | map+
+**type** | **`object`** | **and...** 
+has | `[Symbol.asyncIterator]` | iterate+
+instance | `ReadableStream` | write+
+has | `.subscribe` | observe+
+**no match** | | throw
 
 ## Text and Raw HTML
 

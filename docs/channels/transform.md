@@ -41,7 +41,7 @@ syntax accept asynchronous data sources. Either of these syntaxes do more or les
 Except the later can accept child slottable content and layout props.
 
 ::: tip Channel output needs to be DOM
-Any content that works with `node.append()`, or an array such values. See the core JSX [compose](../compose) docs for more details.
+Any content that works with `node.append()`, or an array such values. See the core JSX [compose](../jsx/compose) docs for more details.
 :::
 
 ::: warning Props do not resolve async values
