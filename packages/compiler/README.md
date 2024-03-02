@@ -1,6 +1,4 @@
-# Thoth
-
-**Azoth Compiler**
+# **Thoth** - Azoth Compiler
 
 <img src="thoth.webp" alt="Thoth the Azoth Compiler" width="512">
 

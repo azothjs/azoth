@@ -1,6 +1,4 @@
-# Azoth Runtime
-
-**Maya**
+# **Maya** - Azoth Runtime
 
 <img src="maya.webp" alt="Maya the Azoth Runtime" width="512">
 
