@@ -28,13 +28,25 @@ The focus in hypermedia is on layout (ui) changes, not state changes.
 
 ## No State?
 
-State-first architectures necessitate client state as a precursor to producing ui. No state, no ui.
+State-driven frameworks use a "state" api as **the** means to introduce
+new data as well as trigger and produce ui layout. Data must be buffered into memory
+lifetime of the ui in which it is used.
 
-<img width="325" style="margin: 0 auto;" alt="How can you have any UI if you don't set your state" src="https://i.imgflip.com/8h96lh.jpg">
+State is the source of truth and ui follows state, `ui = fn(state)`. No State. No UI
 
-State here means buffering data into memory on the client so the framework can use that to layout the ui. Transactional data from a server is still "application state". The trend of pushing state management onto the server in full stack JavaScript frameworks is real and will continue.
+<img width="325" alt="How can you have any UI if you don't set your state" src="https://i.imgflip.com/8h96lh.jpg">
 
-State _is_ a useful tool _when needed_: local UI state, extended domain information, caching efficiencies, etc. That's different than a fundamental architectural requirement.
+But state as truth is anathema to hypermedia. The Web Platform UI is the medium _and_ the means. Wrapping a virtual paradigm around it adds complexity and cruft, and isolates the developer from access to the Web Platform.
+
+> We don't need reconciliation  
+We don't need no dom control  
+No dark useEffect in the render  
+useState, leave them UIs alone  
+_queue mounting guitar rhythm_  
+Hey, useState, leave them UIs alone
+
+State here means buffering data into memory on the client so the framework can use that to layout the ui. 
+
 
 ## It's About Time
 
@@ -156,7 +168,7 @@ function Emoji({ name, htmlCode }) {
   return <li title={name} innerHTML={htmlCode.join('')} />;
 }
 
-
+```
 
 
 

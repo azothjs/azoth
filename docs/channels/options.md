@@ -27,8 +27,7 @@ function Cat({ name, image, blurb }) {
 
 ## Using Channels in JSX
 
-Channels can be:
-- Passed to child node `{Channel}` expression containers, or used as components via `<Channel/>`
+Both the child node `{...}` expression container and the `<Component/>`
 syntax accept asynchronous data sources. Either of these syntaxes do more or less the same thing:
 
 ```jsx

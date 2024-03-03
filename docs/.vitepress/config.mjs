@@ -6,36 +6,6 @@ export default defineConfig({
     description: "Azoth documentation",
     lastUpdated: true,
     head: [
-        // Icons on safari use "maskable icons" which are a thing
-        // Going to put in issue and move on for now...
-        // ['link', {
-        //     rel: 'icon',
-        //     href: '/azoth-circle-black-on-white.png',
-        //     type: "image/png",
-        //     media: '(prefers-color-scheme: light)',
-
-        // }],
-        // ['link', {
-        //     rel: 'mask-icon',
-        //     href: '/azoth-circle-black-on-white.png',
-        //     type: "image/png",
-        //     color: '#fdfdfd',
-        //     media: '(prefers-color-scheme: light)',
-
-        // }],
-        // ['link', {
-        //     rel: 'icon',
-        //     href: '/azoth-circle-white-on-black.png',
-        //     type: "image/png",
-        //     media: '(prefers-color-scheme: dark)',
-        // }],
-        // ['link', {
-        //     rel: 'mask-icon',
-        //     href: '/azoth-circle-white-on-black.png',
-        //     type: "image/png",
-        //     color: '#fdfdfd',
-        //     media: '(prefers-color-scheme: dark)',
-        // }],
         ['link', {
             rel: 'icon',
             href: '/azoth-logo-black.svg',
@@ -87,6 +57,8 @@ export default defineConfig({
                     { text: 'About Channels', link: '/channels/about' },
                     { text: 'Async Data Providers', link: '/channels/async' },
                     { text: 'Transform Functions', link: '/channels/transform' },
+                    { text: 'Branch & Layer', link: '/channels/branch-and-layer' },
+                    { text: 'Track State', link: '/channels/state' },
                 ]
             }
         ],

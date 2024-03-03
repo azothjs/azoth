@@ -1,59 +1,37 @@
-# Transform
-
-Channel transform functions process one or more values received from an asynchronous data source.
-
-```jsx
-function Cats() {
-    // `fetchCats` returns a `promise<Array>`
-    const [CatsChannel] = use(fetchCats(), cats => {
-        return cats.map(({ name, image, blurb }) => (
-            <Cat name={name} image={image} blurb={blurb}/>
-        );
-    });
-
-    // Initial render is <ul></ul>
-    // CatsChannel promise resolves when data arrives
-    return <ul>{CatsChannel}</ul>;
-}
-
-function Cat({ name, image, blurb }) {
-    return <li>
-        <h2>{name}</h2>;
-        <img src={image} alt={blurb}/>
-        <p>{blurb}</p>
-    </li>
-}
-```
-
-## Using Channels in JSX
+# Using Channels in JSX
 
 Channels can be:
-- Passed to child node `{Channel}` expression containers, or used as components via `<Channel/>`
-syntax accept asynchronous data sources. Either of these syntaxes do more or less the same thing:
+- Passed to a child node `{Channel}` expression container, or
+- used as components via `<Channel/>`
 
-```jsx
-<ul>{CatsChannel}</ul>;
-```
-
-```jsx
-<ul><CatsChannel/></ul>;
-```
-
-Except the later can accept child slottable content and layout props.
-
-::: tip Channel output needs to be DOM
-Any content that works with `node.append()`, or an array such values. See the core JSX [compose](../jsx/compose) docs for more details.
+::: tip Channel output needs to be DOM, not raw data
+Output content needs to be passable `node.append()`, or be resolvable to a value that can be appended (e.g. an Array gets mapped). See [compose](../jsx/compose) docs for more details.
 :::
 
+```jsx
+
+<h2>{Count} Cats</h2>;
+
+<ul><Cats/></ul>;
+
+```
+
+As subjective guidance, you could use the `{...}` syntax when using strings and numbers, and the Component syntax when placing more substantial object and array data. But organize it however you like.
+
+Objectively, the one differences is that the component syntax supports slottable content and layout props. These are assigned to _each_ **output** of your channel, assuming the data type supports properties.
+
 ::: warning Props do not resolve async values
+
 Because property expressions can be used to pass _any_ data type to a component,
 they will not resolve to values at the property boundary: 
+
 ```jsx
 const [CatsChannel] = use(fetchCats());
 <MyComponent cats={CatsChannel}/>
 ```
-The channel itself is passed through to the component and can be used accordingly _inside
-the component code_. 
+
+The channel itself is passed through as the value to the component. If expected, it could be passed to JSX inside the component code. 
+
 :::
 
 ## Cleaner Code
