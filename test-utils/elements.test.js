@@ -42,7 +42,7 @@ export function elementWithAnchorText() {
     return { dom, anchor: dom.firstChild };
 }
 
-describe('element helpers initial anchor and html', () => {
+describe('test util elements', () => {
 
     test('text-anchor', ({ expect }) => {
         expect(elementWithTextAnchorText()).toMatchInlineSnapshot(`
@@ -92,5 +92,4 @@ describe('element helpers initial anchor and html', () => {
       }
     `);
     });
-
 });
