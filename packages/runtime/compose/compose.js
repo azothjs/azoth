@@ -1,4 +1,4 @@
-/* exported compose entry points */
+/* compose, composeElement, create, createElement */
 
 export function compose(anchor, input, keepLast = false) {
     const type = typeof input;
@@ -8,12 +8,14 @@ export function compose(anchor, input, keepLast = false) {
         case input === true:
         case input === false:
         case input === '':
-            if(!keepLast) removePrior(anchor);
+            if(!keepLast) clear(anchor);
             break;
-        case type === 'string':
         case type === 'number':
+            input = `${input}`;
+        // eslint-disable-next-line no-fallthrough
+        case type === 'string':
         case input instanceof Node:
-            insert(anchor, input, keepLast);
+            replace(anchor, input, keepLast);
             break;
         case type === 'function':
             compose(anchor, input(), keepLast);
@@ -22,7 +24,7 @@ export function compose(anchor, input, keepLast = false) {
             input.then(value => compose(anchor, value, keepLast));
             break;
         case Array.isArray(input):
-            if(!keepLast) removePrior(anchor);
+            if(!keepLast) clear(anchor);
             composeArray(anchor, input, keepLast);
             break;
         case type === 'object': {
@@ -40,23 +42,15 @@ export function composeElement(anchor, Constructor, props, slottable) {
     compose(anchor, dom);
 }
 
-export function createElement(Constructor, props, slottable) {
-    const result = create(Constructor, props, slottable);
-    const type = typeof result;
-    if(type === 'string' || type === 'number') {
-        return document.createTextNode(result);
-    }
-    return result;
-}
-
-// + create main recursive function
+// main create recursive cascade function
 function create(input, props, slottable) {
     const type = typeof input;
     switch(true) {
         case input instanceof Node:
         case type === 'string':
-        case type === 'number':
             return input;
+        case type === 'number':
+            return `${input}`;
         case input === undefined:
         case input === null:
         case input === true:
@@ -64,6 +58,7 @@ function create(input, props, slottable) {
         case input === '':
             return null;
         case !!input.prototype?.constructor:
+            // eslint-disable-next-line new-cap
             return create(new input(props, slottable));
         case type === 'function':
             return create(input(props, slottable));
@@ -85,7 +80,7 @@ function create(input, props, slottable) {
         }
         case type === 'object': {
             const anchor = document.createComment('0');
-            compose(anchor, input);
+            composeObject(anchor, input);
             return anchor;
         }
         default: {
@@ -94,23 +89,26 @@ function create(input, props, slottable) {
     }
 }
 
-/* insert and remove */
-
-function insert(anchor, input, keepLast) {
-    if(!keepLast) removePrior(anchor);
-
-    // happy-dom bug
-    const type = typeof input;
-    const isDomNode = input instanceof Node;
-    if(type !== 'string' && !isDomNode) {
-        input = `${input}`;
+// createElement wraps create() changing 
+// string or num result into TextNode
+export function createElement(Constructor, props, slottable) {
+    const result = create(Constructor, props, slottable);
+    const type = typeof result;
+    if(type === 'string' || type === 'number') {
+        return document.createTextNode(result);
     }
+    return result;
+}
 
+/* replace and clear */
+
+function replace(anchor, input, keepLast) {
+    if(!keepLast) clear(anchor);
     anchor.before(input);
     anchor.data = ++anchor.data;
 }
 
-function removePrior(anchor) {
+function clear(anchor) {
     let node = anchor;
     let count = +anchor.data;
 
@@ -120,21 +118,29 @@ function removePrior(anchor) {
 
         if(previousSibling.nodeType === Node.COMMENT_NODE) {
             // TODO: how to guard for azoth comments only?
-            removePrior(previousSibling);
+            clear(previousSibling);
         }
 
-        removePrior(previousSibling);
+        clear(previousSibling);
         previousSibling.remove();
     }
 
     anchor.data = 0;
 }
 
-/* cascade functions */
+
+/* complex types */
+
+function composeArray(anchor, array) {
+    // TODO: optimize arrays here if Node[]
+    for(let i = 0; i < array.length; i++) {
+        compose(anchor, array[i], true);
+    }
+}
 
 function composeObject(anchor, object, keepLast) {
     // TODO: distribute below:
-    // if(!keepLast) removePrior(anchor);
+    // if(!keepLast) clear(anchor);
 
     switch(true) {
         case object instanceof ReadableStream:
@@ -157,30 +163,30 @@ function composeObject(anchor, object, keepLast) {
     }
 }
 
-function composeArray(anchor, array) {
-    // TODO: optimize arrays here if Node[]
-    for(let i = 0; i < array.length; i++) {
-        compose(anchor, array[i], true);
-    }
-}
-
 async function composeStream(anchor, stream, keepLast) {
-    const writeable = new WritableStream({
+    stream.pipeTo(new WritableStream({
         write(chunk) {
             compose(anchor, chunk, keepLast);
         }
-    });
-    stream.pipeTo(writeable);
+    }));
 }
 
 async function composeAsyncIterator(anchor, iterator, keepLast) {
-    // TODO: use iterator and intercept
+    // TODO: use iterator and intercept system messages
     for await(const value of iterator) {
         compose(anchor, value, keepLast);
     }
 }
 
-/* throw errors */
+
+/* thrown errors */
+
+function throwTypeError(input, type, footer = '') {
+    throw new TypeError(`\
+Invalid compose {...} input type "${type}", value ${input}.\
+${footer}`
+    );
+}
 
 function throwTypeErrorForObject(obj) {
     let message = '';
@@ -194,9 +200,3 @@ function throwTypeErrorForObject(obj) {
     throwTypeError(obj, 'object', message);
 }
 
-function throwTypeError(input, type, footer = '') {
-    throw new TypeError(`\
-Invalid {...} compose input type "${type}", \
-value ${input}.${footer}`
-    );
-}

@@ -19,8 +19,6 @@ class ClassComp {
     }
 }
 
-// async render
-
 function ComponentP({ name }) {
     return Promise.resolve(runCompose(name, elementWithAnchor));
 }

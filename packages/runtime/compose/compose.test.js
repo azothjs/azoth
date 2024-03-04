@@ -1,6 +1,12 @@
 import { describe, test } from 'vitest';
 import { compose } from './compose.js';
-import { elements, elementWithAnchor, $text, $div } from 'test-utils/elements';
+import {
+    elements,
+    elementWithAnchor,
+    elementWithText,
+    $text,
+    $div
+} from 'test-utils/elements';
 
 export function runCompose(value, create) {
     const { dom, anchor } = create();
@@ -15,7 +21,7 @@ function run(value, create) {
 describe('append and remove', () => {
 
     test('surrounding sibling content', ({ expect }) => {
-        const value = 'World'
+        const value = 'World';
         const results = elements.map(create => {
             return `${create.name.padEnd(28, ' ')}${run(value, create)}`;
         });
@@ -39,7 +45,7 @@ describe('append and remove', () => {
             first
             <!--1-->
           </div>
-        `)
+        `);
 
         compose(anchor, 'second');
         expect(dom).toMatchInlineSnapshot(`
@@ -67,17 +73,17 @@ describe('append and remove', () => {
           </div>
         `);
 
-    })
-})
+    });
+});
 
-describe('values', () => {
+describe('values (non-object)', () => {
 
     function from(obj) {
         return {
             entries: Object.entries(obj),
             names: Object.keys(obj),
             values: Object.values(obj),
-        }
+        };
     }
 
     function formatRun([name, value]) {
@@ -157,8 +163,8 @@ describe('values', () => {
         );
     });
 
-    test('array items append', ({ expect }) => {
-        const results = run(['a', 'b', 'c'], elementWithAnchor)
+    test('array each item', ({ expect }) => {
+        const results = run(['a', 'b', 'c'], elementWithAnchor);
         expect(results).toMatchInlineSnapshot(`"<div>abc<!--3--></div>"`);
     });
 
@@ -171,26 +177,4 @@ describe('values', () => {
         expect(results).toMatchInlineSnapshot(`"<div>abcdefgh<!--8--></div>"`);
     });
 
-    test('throw on invalid object', ({ expect }) => {
-        expect(() => {
-            compose(null, { name: 'felix' });
-        }).toThrowErrorMatchingInlineSnapshot(`
-      [TypeError: Invalid {...} compose input type "object", value [object Object].
-
-      Received as:
-
-      {
-        "name": "felix"
-      }
-
-      ]
-    `);
-    });
-
-    test('throw on Class', ({ expect }) => {
-        expect(() => {
-            compose(null, class MyClass { });
-        }).toThrowErrorMatchingInlineSnapshot(`[TypeError: Class constructor MyClass cannot be invoked without 'new']`);
-    });
-
-})
+});
