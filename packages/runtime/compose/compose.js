@@ -1,3 +1,5 @@
+/* exported compose entry points */
+
 export function compose(anchor, input, keepLast = false) {
     const type = typeof input;
     switch(true) {
@@ -11,7 +13,7 @@ export function compose(anchor, input, keepLast = false) {
         case type === 'string':
         case type === 'number':
         case input instanceof Node:
-            inject(anchor, input, keepLast);
+            insert(anchor, input, keepLast);
             break;
         case type === 'function':
             compose(anchor, input(), keepLast);
@@ -33,113 +35,9 @@ export function compose(anchor, input, keepLast = false) {
     }
 }
 
-function composeObject(anchor, object, keepLast) {
-    // TODO: distribute below:
-    // if(!keepLast) removePrior(anchor);
-
-    switch(true) {
-        case object instanceof ReadableStream:
-            composeStream(anchor, object, true);
-            break;
-        // w/o the !! this causes intermittent failures :p
-        // maybe vitest/node thing?
-        case !!object[Symbol.asyncIterator]:
-            composeAsyncIterator(anchor, object, keepLast);
-            break;
-        case !!object.render:
-            compose(anchor, object.render(), keepLast);
-            break;
-        // TODO:
-        case !!object.subscribe:
-        case !!object.on:
-        default: {
-            throwTypeErrorForObject(object);
-        }
-    }
-}
-
-function throwTypeErrorForObject(obj) {
-    let message = '';
-    try {
-        const json = JSON.stringify(obj, null, 2);
-        message = `\n\nReceived as:\n\n${json}\n\n`;
-    }
-    catch(ex) {
-        /* no-op */
-    }
-    throwTypeError(obj, 'object', message);
-}
-
-async function composeStream(anchor, stream, keepLast) {
-    const writeable = new WritableStream({
-        write(chunk) {
-            compose(anchor, chunk, keepLast);
-        }
-    });
-    stream.pipeTo(writeable);
-}
-
 export function composeElement(anchor, Constructor, props, slottable) {
     const dom = create(Constructor, props, slottable);
     compose(anchor, dom);
-}
-
-function composeArray(anchor, array) {
-    // TODO: optimize arrays here if Node[]
-    for(let i = 0; i < array.length; i++) {
-        compose(anchor, array[i], true);
-    }
-}
-
-async function composeAsyncIterator(anchor, iterator, keepLast) {
-    // TODO: use iterator and intercept
-    for await(const value of iterator) {
-        compose(anchor, value, keepLast);
-    }
-}
-
-function inject(anchor, input, keepLast) {
-    if(!keepLast) removePrior(anchor);
-
-    // happy-dom bug
-    const type = typeof input;
-    const isDomNode = input instanceof Node;
-    if(type !== 'string' && !isDomNode) {
-        input = `${input}`;
-    }
-
-    anchor.before(input);
-    anchor.data = ++anchor.data;
-}
-
-
-
-// need to walk additional comments
-function removePrior(anchor) {
-    let node = anchor;
-    let count = +anchor.data;
-
-    while(count--) {
-        const { previousSibling } = node;
-        if(!previousSibling) break;
-
-        if(previousSibling.nodeType === Node.COMMENT_NODE) {
-            // TODO: how to guard for azoth comments only?
-            removePrior(previousSibling);
-        }
-
-        removePrior(previousSibling);
-        previousSibling.remove();
-    }
-
-    anchor.data = 0;
-}
-
-function throwTypeError(input, type, footer = '') {
-    throw new TypeError(`\
-Invalid {...} compose input type "${type}", \
-value ${input}.${footer}`
-    );
 }
 
 export function createElement(Constructor, props, slottable) {
@@ -151,6 +49,7 @@ export function createElement(Constructor, props, slottable) {
     return result;
 }
 
+// + create main recursive function
 function create(input, props, slottable) {
     const type = typeof input;
     switch(true) {
@@ -193,4 +92,111 @@ function create(input, props, slottable) {
             throwTypeError(input, type);
         }
     }
+}
+
+/* insert and remove */
+
+function insert(anchor, input, keepLast) {
+    if(!keepLast) removePrior(anchor);
+
+    // happy-dom bug
+    const type = typeof input;
+    const isDomNode = input instanceof Node;
+    if(type !== 'string' && !isDomNode) {
+        input = `${input}`;
+    }
+
+    anchor.before(input);
+    anchor.data = ++anchor.data;
+}
+
+function removePrior(anchor) {
+    let node = anchor;
+    let count = +anchor.data;
+
+    while(count--) {
+        const { previousSibling } = node;
+        if(!previousSibling) break;
+
+        if(previousSibling.nodeType === Node.COMMENT_NODE) {
+            // TODO: how to guard for azoth comments only?
+            removePrior(previousSibling);
+        }
+
+        removePrior(previousSibling);
+        previousSibling.remove();
+    }
+
+    anchor.data = 0;
+}
+
+/* cascade functions */
+
+function composeObject(anchor, object, keepLast) {
+    // TODO: distribute below:
+    // if(!keepLast) removePrior(anchor);
+
+    switch(true) {
+        case object instanceof ReadableStream:
+            composeStream(anchor, object, true);
+            break;
+        // w/o the !! this causes intermittent failures :p
+        // maybe vitest/node thing?
+        case !!object[Symbol.asyncIterator]:
+            composeAsyncIterator(anchor, object, keepLast);
+            break;
+        case !!object.render:
+            compose(anchor, object.render(), keepLast);
+            break;
+        // TODO:
+        case !!object.subscribe:
+        case !!object.on:
+        default: {
+            throwTypeErrorForObject(object);
+        }
+    }
+}
+
+function composeArray(anchor, array) {
+    // TODO: optimize arrays here if Node[]
+    for(let i = 0; i < array.length; i++) {
+        compose(anchor, array[i], true);
+    }
+}
+
+async function composeStream(anchor, stream, keepLast) {
+    const writeable = new WritableStream({
+        write(chunk) {
+            compose(anchor, chunk, keepLast);
+        }
+    });
+    stream.pipeTo(writeable);
+}
+
+async function composeAsyncIterator(anchor, iterator, keepLast) {
+    // TODO: use iterator and intercept
+    for await(const value of iterator) {
+        compose(anchor, value, keepLast);
+    }
+}
+
+/* throw errors */
+
+function throwTypeErrorForObject(obj) {
+    let message = '';
+    try {
+        const json = JSON.stringify(obj, null, 2);
+        message = `\n\nReceived as:\n\n${json}\n\n`;
+    }
+    catch(ex) {
+        /* no-op */
+    }
+    throwTypeError(obj, 'object', message);
+}
+
+function throwTypeError(input, type, footer = '') {
+    throw new TypeError(`\
+Invalid {...} compose input type "${type}", \
+value ${input}.${footer}`
+    );
 }

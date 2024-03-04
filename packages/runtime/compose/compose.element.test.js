@@ -38,13 +38,13 @@ class ClassCompP {
 
 describe('create element', () => {
 
-    test('pin JavaScript constructors: function, arrow fn, class', ({ expect }) => {
+    test('pin .prototype.constructor for function, arrow fn, class', ({ expect }) => {
         expect(Component.prototype.constructor).toBeDefined();
         expect(ClassComp.prototype.constructor).toBeDefined();
         expect(ArrowComp.prototype?.constructor).not.toBeDefined();
     });
 
-    test('functions with props', ({ expect }) => {
+    test('with props', ({ expect }) => {
         const dom = createElement(Component, { name: 'felix' });
         const domClass = createElement(ClassComp, { name: 'felix' });
         const domArrow = createElement(ArrowComp, { name: 'felix' });
@@ -60,7 +60,7 @@ describe('create element', () => {
         expect(domArrow).toMatchInlineSnapshot(expected);
     });
 
-    test('secondary instance', async ({ except }) => {
+    test('create appends', async ({ except }) => {
         const div = $div();
         const divClass = $div();
         const divArrow = $div();
@@ -113,7 +113,7 @@ describe('compose element', () => {
         expect(domArrow).toMatchInlineSnapshot(expected);
     });
 
-    test('secondary instance', async ({ except }) => {
+    test('creates composed', async ({ except }) => {
         const { dom, anchor } = elementWithAnchor();
         const { dom: domClass, anchor: anchorClass } = elementWithAnchor();
         const { dom: domArrow, anchor: anchorArrow } = elementWithAnchor();
