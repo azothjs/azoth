@@ -37,3 +37,9 @@ There's an intentional ambiguity in this template: Is it _waiting_ for items? Or
 This is intended as a DX feature, part and parcel of thinking in `ui = fn(state)`.
 
 But is that the best way to think about it?
+
+
+
+---
+
+thinking in time slices

@@ -1,195 +1,105 @@
-# Transform
+# Channel and Provider Options
 
-Channel transform functions process one or more values received from an asynchronous data source.
+## Channel Options
 
-```jsx
-function Cats() {
-    // `fetchCats` returns a `promise<Array>`
-    const [CatsChannel] = use(fetchCats(), cats => {
-        return cats.map(({ name, image, blurb }) => (
-            <Cat name={name} image={image} blurb={blurb}/>
-        );
-    });
+Assuming a channel of type `Channel<Input, Output>`:
 
-    // Initial render is <ul></ul>
-    // CatsChannel promise resolves when data arrives
-    return <ul>{CatsChannel}</ul>;
-}
+Option | Value | Description
+---|---|---
+`startWith` | `Output` of `Channel<I,O>` | Value used as starting output emitted by the channel on creation
+`map` | `true` | `Input` is an `Array`, Transform function used as array _map_ to produce output
+`initialValue` | `Input` of `Channel<I,O>` | Value passed to transform function with return value emitted by the channel on creation.
 
-function Cat({ name, image, blurb }) {
-    return <li>
-        <h2>{name}</h2>;
-        <img src={image} alt={blurb}/>
-        <p>{blurb}</p>
-    </li>
-}
-```
+## Data Mapping
 
-## Using Channels in JSX
+### `map: true`
 
-Both the child node `{...}` expression container and the `<Component/>`
-syntax accept asynchronous data sources. Either of these syntaxes do more or less the same thing:
+Given the prevalence of data arrays, the `map: true` option exists to reduce  
+mapping boilerplate:
 
 ```jsx
-<ul>{CatsChannel}</ul>;
-```
-
-```jsx
-<ul><CatsChannel/></ul>;
-```
-
-Except the later can accept child slottable content and layout props.
-
-::: tip Channel output needs to be DOM
-Any content that works with `node.append()`, or an array such values. See the core JSX [compose](../jsx/compose) docs for more details.
-:::
-
-::: warning Props do not resolve async values
-Because property expressions can be used to pass _any_ data type to a component,
-they will not resolve to values at the property boundary: 
-```jsx
-const [CatsChannel] = use(fetchCats());
-<MyComponent cats={CatsChannel}/>
-```
-The channel itself is passed through to the component and can be used accordingly _inside
-the component code_. 
-:::
-
-## Cleaner Code
-
-There are a few techniques when using channels that can help to reduce the amount of boilerplate code:
-- [Data Mapping](#data-mapping)
-- [Mapping to Components](#mapping-to-components)
-- [Clean Data](#clean-data)
-
-### Data Mapping
-
-Given that arrays of data are so prevalent, the `map: true` option exists to auto map the resolved array value to the transformation function. 
-
-```jsx{4,5}
-const [CatsChannel] = use(
-    fetchCats(),
-    // directly use an item-level map transform function:
-    ({ name, image, blurb }) => <Cat name={name} image={image}, blurb={blurb}/ >,
-}, { map: true }); 
+const [Cats] = use(fetchCats(), 
+    cats => cats.map(cat => <Cat {...cat}/>), // [!code --]
+    cat => <Cat {...cat}/>, // [!code ++]
+    { map: true }, // [!code ++]
+);
 ```
 
 ### Mapping to Components
 
-When creating domain components, one design dilemma that always crops up is whether to use:
+Because components are used broadly for composition in Azoth, the input parameter 
+design for functions should consider use outside of prop passing. 
+
+For example, one dilemma (or design preference) in components is whether to use:
 
 ```jsx
-// dedicated prop for cat object
+// 1) dedicated prop for cat object
 cat => <Cat cat={cat} />
 
-// use obj destructure and apply props
+// 2) Apply props from object
 ({ name, image, blurb }) => <Cat name={name} image={image} blurb={blurb}/>
 
-// same thing, nicer spread api - not yet supported :(
+// same prop api as #2, nicer spread syntax
 cat => <Cat {...cat} />
-
-// ¯\_(ツ)_/¯
 ```
 
-Ultimately the answer is "it depends" :) 
-
-However, there are design benefits to using the later choice with mapped components that directly received domain object data. When the component _is_ the transform function it can be more concise and it removes a wrapper function:
+In channels, designing components to directly received their domain object offers
+a shorthand opportunity to use the component _as_ the transform function for the 
+most simple baseline cases:
 
 ```jsx
-const [CatsChannel] = use( // [!code --]
-    fetchCats(), // [!code --]
-    ({ name, image, blurb }) => <Cat name={name} image={image} blurb={blurb} />, // [!code --]
-}, { map: true }); // [!code --]
-// The function above really means: 
-// ({ name, image, blurb }) => { 
-//    return Cat({ name, image, blurb }), 
-// } 
-// Wowsa! just let Cat(cat) happen  // [!code ++]
-const [CatsChannel] = use(fetchCats(), Cat, { map: true }); // [!code ++]
+const [Cats] = use(fetchCats(), // [!code --]
+    cat => <Cat {...cat}/>, // [!code --]
+    { map: true }, // [!code --]
+); // [!code --]
+const [Cats] = use(fetchCats(), Cat, { map: true }); // [!code ++]
 ```
-
-This technique only works when there isn't additional work to do in the transform function. It
-covers the common base case of passing each object in an array to a component.
-
-Expanded component use, like slottable child content, still always requires explicit `<Component>` syntax:
-
-```jsx{3-5}
-const [Channel] = use(
-    fetchToys(), 
-    ({ name, category, image }) => <Toy name={name} image={image}> 
-        <HolidayBanner category="category"/>
-    </Toy>,
-    { map: true }
-);
-```
-
-### Clean Data
-
-Avoid having layout transform functions also do data refinement or cleanup:
-
-```jsx{3}
-const [DogsChannel] = use(
-    fetchDogs(),
-    ({ data }) => data.results.map(({ name, image }) => {
-        return <Dog name={name} image={image} / >
-    }),
-});
-```
-
-Aim for service providers to give the UI immediately usable data in the format it expects:
-
-```jsx
-// dog-service.js
-export async function fetchDogs()
-    const response = await fetch(DOGS_URL);
-    const json = await res.json();
-    // adjust data for the ui layer
-    return json.data.response;
-}
-
-// simplified UI code
-const [DogsChannel] = use(fetchDogs(), Dog, { map: true });
-
-```
-
-This keeps your UI channels code clean and focused on layout management.
 
 ## Start With
 
+The `startWith` option specifies a first value to output from the channel
+on creation prior to receiving asynchronous input into the channel.
+
+For example, providing a loading component prior to displaying a
+list:
+
+```jsx
+const [Cats] = use(fetchCats(), Cat, { startWith: <Loading/> });
+```
+
+It keeps the layout logic within the channel for the UI it controls, and
+keeps the host and channel strongly decoupled:
+
+```jsx
+return <ul>
+    <!-- No coupling to what happens here: -->
+    {Cats} 
+</ul>
+```
 
 ## Initial Value
 
+The `initialValue` option specifies a value to pass to the transform
+function, which is used to provide output from the channel on creation prior to receiving asynchronous input into the channel.
 
-## Branching
-
-The async source can be branched into multiple channels by supplying additional transform functions. 
-
-```jsx
-const [CatsChannel, CountChannel] = use(fetchCatProfile(),
-    // Gets array length and creates <CatsCount/>
-    ({ length }) => <CatsCount count={length}/>,
-    // Maps array to Cat components, notice tuple syntax
-    [Cat, { map: true }],
-);
-
-return <>
-    <h1>{CountChannel} Cats</h1>
-    <ul>
-        <CatsChannel/>
-    </ul>;
-</>;
-```
-
-With a single transform function, the third argument is used for transform options.
-Because transform options like `map` and `startWith` are _per_ transformation, group
-functions with their options using an array tuple:
+For example, a counter button:
 
 ```jsx
-// use map and loading:
-[cats => <CatCount count={cats.length} />, { 
-    map: true,
-    startWith: <Loading/> 
-}],
-// simple transform with number/string values:
-[({ length }) => length, { startWith: '...'}]
+let count = 0;
+const [CountChannel, dispatch] = use(() => ++count, { startWith: count });
 ```
+
+::: info Difference between `startWith` and `initialValue`
+
+The `startWith` option does **not** use the transform function. It is 
+able to provide an alternative first output decoupled from the expected 
+data and transform logic used in the channel.
+
+In contrast, the `initialValue` option is _always_ passed to the transform
+function. It is generally used for state management with channels when 
+the channel as intimate knowledge of the changing source data.
+
+These two options are mutually exclusive and `use` will throw an error 
+if both are provided.
+
+:::

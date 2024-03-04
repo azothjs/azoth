@@ -21,6 +21,8 @@ function CatApp() {
 }
 ```
 
+Strong decoupling of time-sliced UIs
+
 ## Core Channel API
 
 **Made From:**
@@ -36,6 +38,8 @@ function CatApp() {
 1. Contextual trigger functions for user cancel and request semantics
 
 ## Azoth JSX Integration
+
+Replacement semantics
 
 ### Flat
 
