@@ -1,14 +1,10 @@
-// import { subject } from './generators.js';
+// import { subject } use './generators.js';
 import 'test-utils/with-resolvers-polyfill';
 
 function throwAsyncSourceTypeError(type) {
     throw new TypeError(`\
 Unexpected asynchronous data source type "${type}". Expected an async data provider type, or \
 a function that returns an async data provider type."`);
-}
-
-export class Channel {
-    static from = from;
 }
 
 function processArguments(transforms) {
@@ -23,7 +19,7 @@ function processArguments(transforms) {
     return [transforms, options];
 }
 
-export function from(asyncSource, ...args) {
+export function use(asyncSource, ...args) {
     const [transforms, options] = processArguments(args);
     const type = typeof asyncSource;
 

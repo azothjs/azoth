@@ -1,6 +1,6 @@
 {
     "name": "@azoth-web/compiler",
-    "version": "1.7.1",
+    "version": "1.8.0",
     "description": "Azoth compiler",
     "author": "Marty Nelson",
     "license": "MIT",

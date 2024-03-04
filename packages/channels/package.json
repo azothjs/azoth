@@ -1,6 +1,6 @@
 {
     "name": "@azoth-web/channels",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "description": "Asynchronous layout channels",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -19,10 +19,10 @@
         "directory": "packages/channels"
     },
     "type": "module",
-    "main": "./channels.js",
+    "main": "./index.js",
     "files": [],
     "exports": {
-        ".": "./channels.js"
+        ".": "./index.js"
     },
     "scripts": {
         "test": "vitest"

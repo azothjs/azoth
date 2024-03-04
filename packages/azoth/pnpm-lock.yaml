@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@azoth-web/channels':
+    specifier: workspace:^
+    version: link:../channels
   '@azoth-web/runtime':
     specifier: workspace:^
     version: link:../runtime
