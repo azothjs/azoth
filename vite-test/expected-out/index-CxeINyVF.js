@@ -1,3 +1,5 @@
+/* compose, composeElement, create, createElement */
+
 function compose(anchor, input, keepLast = false) {
     const type = typeof input;
     switch(true) {
@@ -6,12 +8,14 @@ function compose(anchor, input, keepLast = false) {
         case input === true:
         case input === false:
         case input === '':
-            if(!keepLast) removePrior(anchor);
+            if(!keepLast) clear(anchor);
             break;
-        case type === 'string':
         case type === 'number':
+            input = `${input}`;
+        // eslint-disable-next-line no-fallthrough
+        case type === 'string':
         case input instanceof Node:
-            inject(anchor, input, keepLast);
+            replace(anchor, input, keepLast);
             break;
         case type === 'function':
             compose(anchor, input(), keepLast);
@@ -20,6 +24,7 @@ function compose(anchor, input, keepLast = false) {
             input.then(value => compose(anchor, value, keepLast));
             break;
         case Array.isArray(input):
+            if(!keepLast) clear(anchor);
             composeArray(anchor, input);
             break;
         case type === 'object': {
@@ -32,7 +37,48 @@ function compose(anchor, input, keepLast = false) {
     }
 }
 
+/* replace and clear */
+
+function replace(anchor, input, keepLast) {
+    if(!keepLast) clear(anchor);
+    anchor.before(input);
+    anchor.data = ++anchor.data;
+}
+
+function clear(anchor) {
+    let node = anchor;
+    let count = +anchor.data;
+
+    while(count--) {
+        const { previousSibling } = node;
+        if(!previousSibling) break;
+
+        if(previousSibling.nodeType === Node.COMMENT_NODE) {
+            // TODO: how to guard for azoth comments only?
+            clear(previousSibling);
+        }
+
+        clear(previousSibling);
+        previousSibling.remove();
+    }
+
+    anchor.data = 0;
+}
+
+
+/* complex types */
+
+function composeArray(anchor, array) {
+    // TODO: optimize arrays here if Node[]
+    for(let i = 0; i < array.length; i++) {
+        compose(anchor, array[i], true);
+    }
+}
+
 function composeObject(anchor, object, keepLast) {
+    // TODO: distribute below:
+    // if(!keepLast) clear(anchor);
+
     switch(true) {
         case object instanceof ReadableStream:
             composeStream(anchor, object, true);
@@ -54,6 +100,31 @@ function composeObject(anchor, object, keepLast) {
     }
 }
 
+async function composeStream(anchor, stream, keepLast) {
+    stream.pipeTo(new WritableStream({
+        write(chunk) {
+            compose(anchor, chunk, keepLast);
+        }
+    }));
+}
+
+async function composeAsyncIterator(anchor, iterator, keepLast) {
+    // TODO: use iterator and intercept system messages
+    for await(const value of iterator) {
+        compose(anchor, value, keepLast);
+    }
+}
+
+
+/* thrown errors */
+
+function throwTypeError(input, type, footer = '') {
+    throw new TypeError(`\
+Invalid compose {...} input type "${type}", value ${input}.\
+${footer}`
+    );
+}
+
 function throwTypeErrorForObject(obj) {
     let message = '';
     try {
@@ -64,69 +135,6 @@ function throwTypeErrorForObject(obj) {
         /* no-op */
     }
     throwTypeError(obj, 'object', message);
-}
-
-async function composeAsyncIterator(anchor, iterator, keepLast) {
-    // TODO: use iterator and intercept
-    for await(const value of iterator) {
-        compose(anchor, value, keepLast);
-    }
-}
-
-async function composeStream(anchor, stream, keepLast) {
-    const writeable = new WritableStream({
-        write(chunk) {
-            compose(anchor, chunk, keepLast);
-        }
-    });
-    stream.pipeTo(writeable);
-}
-
-function composeArray(anchor, array) {
-    // TODO: optimize arrays here if Node[]
-    for(let i = 0; i < array.length; i++) {
-        compose(anchor, array[i], true);
-    }
-}
-
-function inject(anchor, input, keepLast) {
-    let count = +anchor.data;
-    if(!keepLast && count > 0 && tryRemovePrior(anchor)) count--;
-
-    // happy-dom bug
-    const type = typeof input;
-    const isDomNode = input instanceof Node;
-    if(type !== 'string' && !isDomNode) {
-        input = `${input}`;
-    }
-
-    anchor.before(input);
-    anchor.data = `${count + 1}`;
-}
-
-function removePrior(anchor) {
-    const count = +anchor.data;
-    if(!count) return;
-    if(tryRemovePrior(anchor)) anchor.data = `${count - 1}`;
-}
-
-// need to walk additional comments
-function tryRemovePrior({ previousSibling }) {
-    if(!previousSibling) return false;
-    // TODO: isn't type 8?
-    if(previousSibling.nodeType !== 3 /* comment */) {
-        // TODO: id azoth comments only!
-        removePrior(previousSibling);
-    }
-    previousSibling.remove();
-    return true;
-}
-
-function throwTypeError(input, type, footer = '') {
-    throw new TypeError(`\
-Invalid {...} compose input type "${type}", \
-value ${input}.${footer}`
-    );
 }
 
 const templates = new Map();
