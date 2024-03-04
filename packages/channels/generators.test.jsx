@@ -1,6 +1,5 @@
 import { beforeEach, test } from 'vitest';
 import { subject } from './generators.js';
-import 'test-utils/with-resolvers-polyfill';
 import { screen } from '@testing-library/dom';
 
 beforeEach(async context => {

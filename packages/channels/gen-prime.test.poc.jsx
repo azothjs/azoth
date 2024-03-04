@@ -1,7 +1,6 @@
 import { beforeEach, test } from 'vitest';
 import { findByText } from '@testing-library/dom';
 import { elementWithAnchor, runCompose } from '../test-utils/elements.test.js';
-import '../test-utils/with-resolvers-polyfill.js';
 import { subject } from './generators.js';
 
 beforeEach(() => document.body.innerHTML = '');
