@@ -20,6 +20,7 @@ export function compose(anchor, input, keepLast = false) {
             input.then(value => compose(anchor, value, keepLast));
             break;
         case Array.isArray(input):
+            if(!keepLast) removePrior(anchor);
             composeArray(anchor, input, keepLast);
             break;
         case type === 'object': {
@@ -33,6 +34,9 @@ export function compose(anchor, input, keepLast = false) {
 }
 
 function composeObject(anchor, object, keepLast) {
+    // TODO: distribute below:
+    // if(!keepLast) removePrior(anchor);
+
     switch(true) {
         case object instanceof ReadableStream:
             composeStream(anchor, object, true);
@@ -66,13 +70,6 @@ function throwTypeErrorForObject(obj) {
     throwTypeError(obj, 'object', message);
 }
 
-async function composeAsyncIterator(anchor, iterator, keepLast) {
-    // TODO: use iterator and intercept
-    for await(const value of iterator) {
-        compose(anchor, value, keepLast);
-    }
-}
-
 async function composeStream(anchor, stream, keepLast) {
     const writeable = new WritableStream({
         write(chunk) {
@@ -83,7 +80,7 @@ async function composeStream(anchor, stream, keepLast) {
 }
 
 export function composeElement(anchor, Constructor, props, slottable) {
-    const dom = createConstructed(Constructor, props, slottable);
+    const dom = create(Constructor, props, slottable);
     compose(anchor, dom);
 }
 
@@ -94,9 +91,15 @@ function composeArray(anchor, array) {
     }
 }
 
+async function composeAsyncIterator(anchor, iterator, keepLast) {
+    // TODO: use iterator and intercept
+    for await(const value of iterator) {
+        compose(anchor, value, keepLast);
+    }
+}
+
 function inject(anchor, input, keepLast) {
-    let count = +anchor.data;
-    if(!keepLast && count > 0 && tryRemovePrior(anchor)) count--;
+    if(!keepLast) removePrior(anchor);
 
     // happy-dom bug
     const type = typeof input;
@@ -106,25 +109,30 @@ function inject(anchor, input, keepLast) {
     }
 
     anchor.before(input);
-    anchor.data = `${count + 1}`;
+    anchor.data = ++anchor.data;
 }
 
-function removePrior(anchor) {
-    const count = +anchor.data;
-    if(!count) return;
-    if(tryRemovePrior(anchor)) anchor.data = `${count - 1}`;
-}
+
 
 // need to walk additional comments
-function tryRemovePrior({ previousSibling }) {
-    if(!previousSibling) return false;
-    // TODO: isn't type 8?
-    if(previousSibling.nodeType !== 3 /* comment */) {
-        // TODO: id azoth comments only!
+function removePrior(anchor) {
+    let node = anchor;
+    let count = +anchor.data;
+
+    while(count--) {
+        const { previousSibling } = node;
+        if(!previousSibling) break;
+
+        if(previousSibling.nodeType === Node.COMMENT_NODE) {
+            // TODO: how to guard for azoth comments only?
+            removePrior(previousSibling);
+        }
+
         removePrior(previousSibling);
+        previousSibling.remove();
     }
-    previousSibling.remove();
-    return true;
+
+    anchor.data = 0;
 }
 
 function throwTypeError(input, type, footer = '') {
@@ -134,7 +142,16 @@ value ${input}.${footer}`
     );
 }
 
-function create(input) {
+export function createElement(Constructor, props, slottable) {
+    const result = create(Constructor, props, slottable);
+    const type = typeof result;
+    if(type === 'string' || type === 'number') {
+        return document.createTextNode(result);
+    }
+    return result;
+}
+
+function create(input, props, slottable) {
     const type = typeof input;
     switch(true) {
         case input instanceof Node:
@@ -147,12 +164,26 @@ function create(input) {
         case input === false:
         case input === '':
             return null;
+        case !!input.prototype?.constructor:
+            return create(new input(props, slottable));
         case type === 'function':
-            return create(input());
+            return create(input(props, slottable));
         case type === 'object' && input.render && typeof input.render === 'function':
-            return create(input.render());
-        case Array.isArray(input):
-        case input instanceof Promise:
+            return create(input.render(props, slottable));
+        case input instanceof Promise: {
+            const anchor = document.createComment('0');
+            input.then(value => {
+                if(props) Object.assign(value, props);
+                if(slottable) value.slottable = slottable;
+                compose(anchor, value);
+            });
+            return anchor;
+        }
+        case Array.isArray(input): {
+            const anchor = document.createComment('0');
+            compose(anchor, input);
+            return anchor;
+        }
         case type === 'object': {
             const anchor = document.createComment('0');
             compose(anchor, input);
@@ -162,35 +193,4 @@ function create(input) {
             throwTypeError(input, type);
         }
     }
-}
-
-export function createElement(Constructor, props, slottable) {
-    const result = createConstructed(Constructor, props, slottable);
-    const type = typeof result;
-    if(type === 'string' || type === 'number') {
-        return document.createTextNode(result);
-    }
-    return result;
-}
-
-function createConstructed(Constructor, props, slottable) {
-    if(Constructor.prototype?.constructor) {
-        return create(new Constructor(props, slottable));
-    }
-    if(typeof Constructor === 'function') {
-        return create(Constructor(props, slottable));
-    }
-    // if(!!Constructor[Symbol.asyncIterator]) {
-    //     return create(Constructor(props))
-    // }
-    if(Constructor instanceof Promise) {
-        const anchor = document.createComment('0');
-        Constructor.then(input => {
-            if(props) Object.assign(input, props);
-            if(slottable) input.slottable = slottable;
-            compose(anchor, input);
-        });
-        return anchor;
-    }
-    throw new Error(`Unexpected Component type ${Constructor}`);
 }

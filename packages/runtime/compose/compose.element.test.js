@@ -4,7 +4,6 @@ import { $anchor, $div, elementWithAnchor, elementWithText, elementWithTextAncho
 import { runCompose } from './compose.test.js';
 
 // <div>{name}</div>
-
 function Component({ name }) {
     return runCompose(name, elementWithAnchor);
 }
@@ -141,9 +140,8 @@ describe('compose element', () => {
     });
 
     test('nested anchors', ({ expect }) => {
-        // <!--0-->
-        const anchor = $anchor();
         const { dom, anchor: parent } = elementWithAnchor();
+        const anchor = $anchor();
         compose(parent, anchor);
 
         expect(dom).toMatchInlineSnapshot(`
@@ -154,7 +152,6 @@ describe('compose element', () => {
         `);
 
         compose(anchor, elementWithText().dom);
-
         expect(dom).toMatchInlineSnapshot(`
           <div>
             <div>

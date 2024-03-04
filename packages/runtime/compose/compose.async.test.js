@@ -9,45 +9,18 @@ beforeEach(context => {
     context.fixture = document.body;
 });
 
-describe('async', () => {
+describe('async values', () => {
 
-    test('Promise', async ({ expect }) => {
-        const promises = [];
-        const getAsyncText = (text) => {
-            const promise = Promise.resolve(text);
-            promises.push(promise);
-            return promise;
-        };
-
-        async function testArray(value) {
-            return await Promise.all(
-                elements.map(async create => {
-                    const promise = getAsyncText(value);
-                    const dom = runCompose(promise, create);
-                    await promise;
-                    return `${create.name.padEnd(25, ' ')}: ${dom.outerHTML}`;
-                })
-            );
-        }
-
-        expect(await testArray('promise?')).toMatchInlineSnapshot(`
-          [
-            "elementWithTextAnchor    : <div>Hellopromise?<!--1--></div>",
-            "elementWithTextAnchorText: <div>Hellopromise?<!--1-->Hello</div>",
-            "elementWithAnchor        : <div>promise?<!--1--></div>",
-            "elementWithAnchorText    : <div>promise?<!--1-->Hello</div>",
-          ]
+    test('promise', async ({ expect, fixture }) => {
+        const dom = runCompose(Promise.resolve('hi'), elementWithAnchor);
+        fixture.append(dom);
+        await screen.findByText('hi');
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            hi
+            <!--1-->
+          </div>
         `);
-
-        expect(await testArray([42, 11, 7])).toMatchInlineSnapshot(`
-          [
-            "elementWithTextAnchor    : <div>Hello42117<!--3--></div>",
-            "elementWithTextAnchorText: <div>Hello42117<!--3-->Hello</div>",
-            "elementWithAnchor        : <div>42117<!--3--></div>",
-            "elementWithAnchorText    : <div>42117<!--3-->Hello</div>",
-          ]
-        `);
-
     });
 
     test('array of promises', async ({ expect, fixture }) => {
@@ -56,10 +29,9 @@ describe('async', () => {
             Promise.resolve('b'),
             Promise.resolve('c'),
         ];
-
         const dom = runCompose(futureLetters, elementWithAnchor);
         fixture.append(dom);
-        await screen.findByText('c', { exact: false });
+        await screen.findByText('abc');
         expect(dom).toMatchInlineSnapshot(`
           <div>
             a
@@ -70,7 +42,7 @@ describe('async', () => {
         `);
     });
 
-    test('generators (async)', async ({ expect, fixture }) => {
+    test('async generator', async ({ expect, fixture }) => {
         let resolve = null;
         const doAsync = async (value) => {
             const { promise, resolve: res } = Promise.withResolvers();
@@ -84,56 +56,70 @@ describe('async', () => {
             yield doAsync('three');
         }
 
-        const numbersDom = runCompose(numbers(), elementWithTextAnchor);
+        const numbersDom = runCompose(numbers(), elementWithAnchor);
         fixture.append(numbersDom);
         // initial render
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
-            Hello
             <!--0-->
           </div>
         `);
 
         resolve();
-        await screen.findByText('one', { exact: false });
+        await screen.findByText('one');
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
-            Hello
             one
             <!--1-->
           </div>
         `);
 
         resolve();
-        await screen.findByText('two', { exact: false });
+        await screen.findByText('two');
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
-            Hello
             two
             <!--1-->
           </div>
         `);
 
         resolve();
-        await screen.findByText('three', { exact: false });
+        await screen.findByText('three');
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
-            Hello
             three
             <!--1-->
           </div>
         `);
 
         resolve();
-        await screen.findByText('three', { exact: false });
+        await screen.findByText('three');
         expect(numbersDom).toMatchInlineSnapshot(`
           <div>
-            Hello
             three
             <!--1-->
           </div>
         `);
     });
 
-    test.todo('generator function is called');
+    test('generator called', async ({ expect, fixture }) => {
+        const { promise, resolve } = Promise.withResolvers();
+
+        async function* generator() {
+            yield promise;
+        }
+
+        const numbersDom = runCompose(generator, elementWithAnchor);
+        fixture.append(numbersDom);
+        resolve('yielded');
+        await screen.findByText('yielded');
+        expect(numbersDom).toMatchInlineSnapshot(`
+          <div>
+            yielded
+            <!--1-->
+          </div>
+        `);
+
+
+    });
 });

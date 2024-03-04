@@ -1,6 +1,6 @@
-import { describe, test, expect } from 'vitest';
+import { describe, test } from 'vitest';
 import { compose } from './compose.js';
-import { elements, $text, $div } from 'test-utils/elements';
+import { elements, elementWithAnchor, $text, $div } from 'test-utils/elements';
 
 export function runCompose(value, create) {
     const { dom, anchor } = create();
@@ -12,9 +12,82 @@ function run(value, create) {
     return runCompose(value, create).outerHTML;
 }
 
-describe('no-op values not appended', () => {
+describe('append and remove', () => {
 
-    const noValues = () => Object.entries({
+    test('surrounding sibling content', ({ expect }) => {
+        const value = 'World'
+        const results = elements.map(create => {
+            return `${create.name.padEnd(28, ' ')}${run(value, create)}`;
+        });
+
+        expect(results).toMatchInlineSnapshot(`
+          [
+            "elementWithTextAnchor       <div>HelloWorld<!--1--></div>",
+            "elementWithTextAnchorText   <div>HelloWorld<!--1-->Hello</div>",
+            "elementWithAnchor           <div>World<!--1--></div>",
+            "elementWithAnchorText       <div>World<!--1-->Hello</div>",
+          ]
+        `);
+    });
+
+    test('compose replaces prior', ({ expect }) => {
+        const { dom, anchor } = elementWithAnchor();
+
+        compose(anchor, 'first');
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            first
+            <!--1-->
+          </div>
+        `)
+
+        compose(anchor, 'second');
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            second
+            <!--1-->
+          </div>
+        `);
+
+        compose(anchor, ['third', 'fourth', 'fifth']);
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            third
+            fourth
+            fifth
+            <!--3-->
+          </div>
+        `);
+
+        compose(anchor, 'sixth');
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            sixth
+            <!--1-->
+          </div>
+        `);
+
+    })
+})
+
+describe('values', () => {
+
+    function from(obj) {
+        return {
+            entries: Object.entries(obj),
+            names: Object.keys(obj),
+            values: Object.values(obj),
+        }
+    }
+
+    function formatRun([name, value]) {
+        return name.padEnd(15, ' ') +
+            `${value}`.padEnd(15, ' ') +
+            run(value, elementWithAnchor);
+    }
+
+
+    const NOOP = from({
         undefined: undefined,
         null: null,
         true: true,
@@ -22,193 +95,102 @@ describe('no-op values not appended', () => {
         empty: '',
     });
 
-    const getKeyList = list => list.map(([key]) => key).join(', ');
-
-    test(getKeyList(noValues()), () => {
-        const results = elements.flatMap(create => {
-            return [
-                `${create.name}`,
-                ...noValues().map(([type, value], i) => {
-                    return `\t${`${type}(${value})`.padEnd(35, ' ')} ${run(value, create)}`;
-                }),
-                '\n'
-            ];
-        });
+    test(NOOP.names.join(), ({ expect }) => {
+        const results = NOOP.entries.map(formatRun);
 
         expect(results).toMatchInlineSnapshot(`
           [
-            "elementWithTextAnchor",
-            "	undefined(undefined)                <div>Hello<!--0--></div>",
-            "	null(null)                          <div>Hello<!--0--></div>",
-            "	true(true)                          <div>Hello<!--0--></div>",
-            "	false(false)                        <div>Hello<!--0--></div>",
-            "	empty()                             <div>Hello<!--0--></div>",
-            "
-          ",
-            "elementWithTextAnchorText",
-            "	undefined(undefined)                <div>Hello<!--0-->Hello</div>",
-            "	null(null)                          <div>Hello<!--0-->Hello</div>",
-            "	true(true)                          <div>Hello<!--0-->Hello</div>",
-            "	false(false)                        <div>Hello<!--0-->Hello</div>",
-            "	empty()                             <div>Hello<!--0-->Hello</div>",
-            "
-          ",
-            "elementWithAnchor",
-            "	undefined(undefined)                <div><!--0--></div>",
-            "	null(null)                          <div><!--0--></div>",
-            "	true(true)                          <div><!--0--></div>",
-            "	false(false)                        <div><!--0--></div>",
-            "	empty()                             <div><!--0--></div>",
-            "
-          ",
-            "elementWithAnchorText",
-            "	undefined(undefined)                <div><!--0-->Hello</div>",
-            "	null(null)                          <div><!--0-->Hello</div>",
-            "	true(true)                          <div><!--0-->Hello</div>",
-            "	false(false)                        <div><!--0-->Hello</div>",
-            "	empty()                             <div><!--0-->Hello</div>",
-            "
-          ",
+            "undefined      undefined      <div><!--0--></div>",
+            "null           null           <div><!--0--></div>",
+            "true           true           <div><!--0--></div>",
+            "false          false          <div><!--0--></div>",
+            "empty                         <div><!--0--></div>",
           ]
         `);
     });
-});
 
-describe(`accepted values appended`, () => {
+    test('noop still replaces', ({ expect }) => {
+        const { dom, anchor } = elementWithAnchor();
 
-    const accepted = () => Object.entries({
-        string: 'Text',
+        compose(anchor, 'initial');
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            initial
+            <!--1-->
+          </div>
+        `);
+
+        compose(anchor, undefined);
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            <!--0-->
+          </div>
+        `);
+    });
+
+    const ACCEPTED = from({
+        string: 'text',
         number: 42,
-        TextNode: $text('TextNode'),
+        TextNode: $text('node'),
         Element: $div(),
     });
 
-    test('string, number, TextNode, Element', () => {
-        const results = elements.flatMap(create => {
-            return [
-                `${create.name}`,
-                ...accepted().map(([type, value], i) => {
-                    return `\t${`${type}(${value})`.padEnd(35, ' ')} ${run(value, create)}`;
-                }),
-                '\n'
-            ];
-        });
-
+    test(ACCEPTED.names.join(), ({ expect }) => {
+        const results = ACCEPTED.entries.map(formatRun);
         expect(results).toMatchInlineSnapshot(`
           [
-            "elementWithTextAnchor",
-            "	string(Text)                        <div>HelloText<!--1--></div>",
-            "	number(42)                          <div>Hello42<!--1--></div>",
-            "	TextNode([object Text])             <div>HelloTextNode<!--1--></div>",
-            "	Element(<div></div>)                <div>Hello<div></div><!--1--></div>",
-            "
-          ",
-            "elementWithTextAnchorText",
-            "	string(Text)                        <div>HelloText<!--1-->Hello</div>",
-            "	number(42)                          <div>Hello42<!--1-->Hello</div>",
-            "	TextNode([object Text])             <div>HelloTextNode<!--1-->Hello</div>",
-            "	Element(<div></div>)                <div>Hello<div></div><!--1-->Hello</div>",
-            "
-          ",
-            "elementWithAnchor",
-            "	string(Text)                        <div>Text<!--1--></div>",
-            "	number(42)                          <div>42<!--1--></div>",
-            "	TextNode([object Text])             <div>TextNode<!--1--></div>",
-            "	Element(<div></div>)                <div><div></div><!--1--></div>",
-            "
-          ",
-            "elementWithAnchorText",
-            "	string(Text)                        <div>Text<!--1-->Hello</div>",
-            "	number(42)                          <div>42<!--1-->Hello</div>",
-            "	TextNode([object Text])             <div>TextNode<!--1-->Hello</div>",
-            "	Element(<div></div>)                <div><div></div><!--1-->Hello</div>",
-            "
-          ",
+            "string         text           <div>text<!--1--></div>",
+            "number         42             <div>42<!--1--></div>",
+            "TextNode       [object Text]  <div>node<!--1--></div>",
+            "Element        <div></div>    <div><div></div><!--1--></div>",
           ]
         `);
     });
 
-});
-
-describe('function called, result appended', () => {
-
-    test('return value composed', ({ expect }) => {
-
-        function testFunction(fn) {
-            return elements.map(create => {
-                return `${create.name.padEnd(25, ' ')}: ${run(fn, create)}`;
-            });
-        }
-
-        expect(testFunction($div)).toMatchInlineSnapshot(`
-          [
-            "elementWithTextAnchor    : <div>Hello<div></div><!--1--></div>",
-            "elementWithTextAnchorText: <div>Hello<div></div><!--1-->Hello</div>",
-            "elementWithAnchor        : <div><div></div><!--1--></div>",
-            "elementWithAnchorText    : <div><div></div><!--1-->Hello</div>",
-          ]
-        `);
-
-        expect(testFunction(() => 'function')).toMatchInlineSnapshot(`
-          [
-            "elementWithTextAnchor    : <div>Hellofunction<!--1--></div>",
-            "elementWithTextAnchorText: <div>Hellofunction<!--1-->Hello</div>",
-            "elementWithAnchor        : <div>function<!--1--></div>",
-            "elementWithAnchorText    : <div>function<!--1-->Hello</div>",
-          ]
-        `);
-
-    });
-});
-
-describe('array appended', () => {
-    test('each child item', ({ expect }) => {
-        const results = elements.map(create => {
-            return `${create.name.padEnd(25, ' ')} ${run(['a', 'b', 'c'], create)}`;
-        });
-        expect(results).toMatchInlineSnapshot(`
-          [
-            "elementWithTextAnchor     <div>Helloabc<!--3--></div>",
-            "elementWithTextAnchorText <div>Helloabc<!--3-->Hello</div>",
-            "elementWithAnchor         <div>abc<!--3--></div>",
-            "elementWithAnchorText     <div>abc<!--3-->Hello</div>",
-          ]
-        `);
+    test('function call composed', ({ expect }) => {
+        const runFn = fn => run(fn, elementWithAnchor);
+        expect(runFn($div)).toMatchInlineSnapshot(
+            `"<div><div></div><!--1--></div>"`
+        );
+        expect(runFn(() => 'text from function')).toMatchInlineSnapshot(
+            `"<div>text from function<!--1--></div>"`
+        );
     });
 
-    test('nested arrays', async ({ expect }) => {
-        const results = elements.map(create => {
-            return `${create.name.padEnd(25, ' ')} ${run([
-                ['a', 'b', ['c', 'd', 'e']],
-                [() => 'f', { render: () => 'g' }, function() { return 'h'; }],
-            ], create)}`;
-        });
-        expect(results).toMatchInlineSnapshot(`
-          [
-            "elementWithTextAnchor     <div>Helloabcdefgh<!--8--></div>",
-            "elementWithTextAnchorText <div>Helloabcdefgh<!--8-->Hello</div>",
-            "elementWithAnchor         <div>abcdefgh<!--8--></div>",
-            "elementWithAnchorText     <div>abcdefgh<!--8-->Hello</div>",
-          ]
-        `);
+    test('array items append', ({ expect }) => {
+        const results = run(['a', 'b', 'c'], elementWithAnchor)
+        expect(results).toMatchInlineSnapshot(`"<div>abc<!--3--></div>"`);
     });
-});
 
-describe('invalid throw', () => {
-    test('object', () => {
+    test('nested arrays with functions', async ({ expect }) => {
+        const results = run([
+            ['a', 'b', ['c', 'd', 'e']],
+            [() => 'f', { render: () => 'g' }, function() { return 'h'; }],
+        ], elementWithAnchor);
+
+        expect(results).toMatchInlineSnapshot(`"<div>abcdefgh<!--8--></div>"`);
+    });
+
+    test('throw on invalid object', ({ expect }) => {
         expect(() => {
             compose(null, { name: 'felix' });
         }).toThrowErrorMatchingInlineSnapshot(`
-          [TypeError: Invalid {...} compose input type "object", value [object Object].
+      [TypeError: Invalid {...} compose input type "object", value [object Object].
 
-          Received as:
+      Received as:
 
-          {
-            "name": "felix"
-          }
+      {
+        "name": "felix"
+      }
 
-          ]
-        `);
+      ]
+    `);
     });
-});
 
+    test('throw on Class', ({ expect }) => {
+        expect(() => {
+            compose(null, class MyClass { });
+        }).toThrowErrorMatchingInlineSnapshot(`[TypeError: Class constructor MyClass cannot be invoked without 'new']`);
+    });
+
+})
