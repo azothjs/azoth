@@ -119,7 +119,5 @@ describe('async values', () => {
             <!--1-->
           </div>
         `);
-
-
     });
 });
