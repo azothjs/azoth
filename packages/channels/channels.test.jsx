@@ -34,18 +34,19 @@ test('transform, { startWith }', async ({ fixture, find, expect }) => {
         startWith: <Loading />
     });
     fixture.append(<>{LayoutChannel}</>);
-    let dom = null;
 
-    dom = await find('loading...');
-    expect(dom.outerHTML).toMatchInlineSnapshot(`"<p>loading...</p>"`);
+    await find('loading...');
+    expect(fixture.innerHTML).toMatchInlineSnapshot(
+        `"<p>loading...</p><!--1-->"`
+    );
 
-    // we delay promise resolution and trigger here to not miss the
-    // intermediate "loading...", async testing-library "find"
-    // pushes it out too far and it picks up the the "felix".
+    // trigger promise resolution post-loading
     resolve({ name: 'felix' });
 
-    dom = await find('felix');
-    expect(dom.outerHTML).toMatchInlineSnapshot(`"<p>felix<!--1--></p>"`);
+    await find('felix');
+    expect(fixture.innerHTML).toMatchInlineSnapshot(
+        `"<p>felix<!--1--></p><!--1-->"`
+    );
 });
 
 test('fast resolve with { startWith }', async ({ fixture, find, expect }) => {
@@ -72,16 +73,29 @@ test('branch ...transforms', async ({ fixture, find, expect }) => {
     expect(count.outerHTML).toMatchInlineSnapshot(`"<p>3<!--1--> cats</p>"`);
 });
 
-test.todo('branch [transform, { startWith }], transform', async ({ fixture, find, expect }) => {
-    const promise = Promise.resolve(['felix', 'duchess', 'stimpy']);
-    const [CountChannel, ListChannel] = Channel.from(
+test('branch [transform, { startWith }], transform', async ({ fixture, find, expect }) => {
+    const { promise, resolve } = Promise.withResolvers();
+    const [ListChannel, CountChannel] = Channel.from(
         promise,
         [CatList, { startWith: <Loading /> }],
         CatCount
     );
-    fixture.append(<CountChannel />, <ListChannel />);
 
-    const [felix, count] = await Promise.all([find('felix'), find('3 cats')]);
-    expect(felix.outerHTML).toMatchInlineSnapshot(`"<ul><p>felix<!--1--></p><p>duchess<!--1--></p><p>stimpy<!--1--></p><!--3--></ul>"`);
-    expect(count.outerHTML).toMatchInlineSnapshot(`"<p>3<!--1--> cats</p>"`);
+    fixture.append(<CountChannel />, <ListChannel />);
+    expect(fixture.innerHTML).toMatchInlineSnapshot(
+        `"<!--0--><!--0-->"`
+    );
+
+    await find('loading...');
+    expect(fixture.innerHTML).toMatchInlineSnapshot(
+        `"<!--0--><p>loading...</p><!--1-->"`
+    );
+
+    // trigger promise resolution post-loading
+    resolve(['felix', 'duchess', 'stimpy']);
+
+    await Promise.all([find('felix'), find('3 cats')]);
+    expect(fixture.innerHTML).toMatchInlineSnapshot(
+        `"<p>3<!--1--> cats</p><!--1--><ul><p>felix<!--1--></p><p>duchess<!--1--></p><p>stimpy<!--1--></p><!--3--></ul><!--1-->"`
+    );
 });

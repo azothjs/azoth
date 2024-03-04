@@ -1,17 +1,10 @@
 // import { subject } from './generators.js';
 import 'test-utils/with-resolvers-polyfill';
 
-function throwMoreArgumentsNeeded() {
-    throw new TypeError(`\
-"Channel.from(promise)" requires more arguments, \
-expected a transform option or channel options. \
-Use "promise.then(transform)" for creating a channel from a single promise`);
-}
-
 function throwAsyncSourceTypeError(type) {
     throw new TypeError(`\
-Unexpected async source type "${type}". Expected an asynchronous data provider type, or \
-a function that returns an asynchronous data provider type."`);
+Unexpected asynchronous data source type "${type}". Expected an async data provider type, or \
+a function that returns an async data provider type."`);
 }
 
 export class Channel {
@@ -37,7 +30,7 @@ export function from(asyncSource, ...args) {
     switch(true) {
         case asyncSource instanceof Promise:
             return transforms.length < 2
-                ? fromPromise(asyncSource, transforms[0], options)
+                ? [fromPromise(asyncSource, transforms[0], options)]
                 : branchPromise(asyncSource, transforms, options);
         default:
             throwAsyncSourceTypeError(type);
@@ -47,15 +40,15 @@ export function from(asyncSource, ...args) {
 function fromPromise(promise, transform, options) {
     const startWith = options?.startWith;
     if(startWith) {
-        return [fromPromiseStartWith(promise, transform, startWith)];
+        return fromPromiseStartWith(promise, transform, startWith);
     }
     return [transform ? promise.then(transform) : promise];
 }
 
 function branchPromise(promise, transforms) {
     return transforms.map(transform => {
-        if(Array.isArray(transform)) {
-            return fromPromiseStartWith(promise, transform[0], transform[1]);
+        if(Array.isArray(transform)) {       // [transform,    options]
+            return fromPromise(promise, transform[0], transform[1]);
         }
         return promise.then(transform);
     });
