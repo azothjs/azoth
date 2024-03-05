@@ -68,7 +68,8 @@ export function multicast(iterator) {
 }
 
 export class Multicast {
-    consumers = [];
+    #consumers = [];
+
     constructor(subject) {
         this.subject = subject;
         this.#start();
@@ -76,7 +77,7 @@ export class Multicast {
 
     async #start() {
         for await(let value of this.subject) {
-            for(let consumer of this.consumers) {
+            for(let consumer of this.#consumers) {
                 consumer(value);
             }
         }
@@ -84,7 +85,7 @@ export class Multicast {
 
     subscriber(transform, options) {
         const [iterator, dispatch] = subject(transform, options);
-        this.consumers.push(dispatch);
+        this.#consumers.push(dispatch);
         return iterator;
     }
 }
