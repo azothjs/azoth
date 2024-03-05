@@ -1,7 +1,9 @@
 /* compose, composeElement, create, createElement */
 
-export function compose(anchor, input, keepLast = false) {
+export function compose(anchor, input, keepLast, props, slottable) {
+    if(keepLast !== true) keepLast = false;
     const type = typeof input;
+
     switch(true) {
         case input === undefined:
         case input === null:
@@ -11,94 +13,130 @@ export function compose(anchor, input, keepLast = false) {
             if(!keepLast) clear(anchor);
             break;
         case type === 'number':
+        case type === 'bigint':
+        case type === 'symbol':
             input = `${input}`;
         // eslint-disable-next-line no-fallthrough
         case type === 'string':
-        case input instanceof Node:
             replace(anchor, input, keepLast);
             break;
-        case type === 'function':
-            compose(anchor, input(), keepLast);
+        case input instanceof Node:
+            if(props) Object.assign(input, props);
+            if(slottable) input.slottable = slottable;
+            replace(anchor, input, keepLast);
             break;
+        case type === 'function': {
+            // will throw if function is class,
+            // unlike create or compose element
+            let out = slottable
+                ? input(props, slottable)
+                : props ? input(props) : input();
+            compose(anchor, out, keepLast);
+            break;
+        }
+        case type !== 'object': {
+            // ES2023: no JavaScript types that trigger this  
+            throwTypeError(input, type);
+            break;
+        }
         case input instanceof Promise:
-            input.then(value => compose(anchor, value, keepLast));
+            input.then(value => compose(anchor, value, keepLast, props, slottable));
             break;
         case Array.isArray(input):
-            if(!keepLast) clear(anchor);
             composeArray(anchor, input, keepLast);
             break;
-        case type === 'object': {
-            composeObject(anchor, input, keepLast);
+        // w/o the !! this causes intermittent failures :p maybe vitest/node thing?
+        case !!input[Symbol.asyncIterator]:
+            composeAsyncIterator(anchor, input, keepLast, props, slottable);
+            break;
+        case input instanceof ReadableStream:
+            // no props and slottable propagation on streams
+            composeStream(anchor, input, true);
+            break;
+        case isRenderObject(input): {
+            let out = slottable
+                ? input.render(props, slottable)
+                : props ? input.render(props) : input.render();
+            compose(anchor, out, keepLast);
             break;
         }
+        // TODO:
+        case !!input.subscribe:
+        case !!input.on:
         default: {
-            throwTypeError(input, type);
+            throwTypeErrorForObject(input);
         }
     }
 }
+
+const isRenderObject = obj => obj && typeof obj === 'object' && obj.render && typeof obj.render === 'function';
 
 export function composeElement(anchor, Constructor, props, slottable) {
-    const dom = create(Constructor, props, slottable);
-    compose(anchor, dom);
+    create(Constructor, props, slottable, anchor);
 }
 
-// main create recursive cascade function
-function create(input, props, slottable) {
-    const type = typeof input;
-    switch(true) {
-        case input instanceof Node:
-        case type === 'string':
-            return input;
-        case type === 'number':
-            return `${input}`;
-        case input === undefined:
-        case input === null:
-        case input === true:
-        case input === false:
-        case input === '':
-            return null;
-        case !!input.prototype?.constructor:
-            // eslint-disable-next-line new-cap
-            return create(new input(props, slottable));
-        case type === 'function':
-            return create(input(props, slottable));
-        case type === 'object' && input.render && typeof input.render === 'function':
-            return create(input.render(props, slottable));
-        case input instanceof Promise: {
-            const anchor = document.createComment('0');
-            input.then(value => {
-                if(props) Object.assign(value, props);
-                if(slottable) value.slottable = slottable;
-                compose(anchor, value);
-            });
-            return anchor;
-        }
-        case Array.isArray(input): {
-            const anchor = document.createComment('0');
-            compose(anchor, input);
-            return anchor;
-        }
-        case type === 'object': {
-            const anchor = document.createComment('0');
-            composeObject(anchor, input);
-            return anchor;
-        }
-        default: {
-            throwTypeError(input, type);
-        }
-    }
-}
-
-// createElement wraps create() changing 
-// string or num result into TextNode
 export function createElement(Constructor, props, slottable) {
     const result = create(Constructor, props, slottable);
+    // result is returned to caller, force to be of type Node
+    // and convert strings and numbers into text nodes
     const type = typeof result;
     if(type === 'string' || type === 'number') {
         return document.createTextNode(result);
     }
     return result;
 }
+
+function create(input, props, slottable, anchor) {
+    const type = typeof input;
+    switch(true) {
+        case input instanceof Node:
+            if(props) Object.assign(input, props);
+        // eslint-disable-next-line no-fallthrough
+        case type === 'string':
+        case type === 'number':
+        case input === undefined:
+        case input === null:
+        case input === true:
+        case input === false:
+        case input === '':
+            return anchor ? void compose(anchor, input) : input;
+        case !!(input.prototype?.constructor): {
+            // eslint-disable-next-line new-cap
+            const created = new input(props, slottable);
+            return isRenderObject(created)
+                ? create(created, props, slottable, anchor)
+                : create(created, null, null, anchor);
+        }
+        case type === 'function':
+            return create(input(props, slottable), null, null, anchor);
+        case type !== 'object': {
+            throwTypeError(input, type);
+            break;
+        }
+        case !!input[Symbol.asyncIterator]:
+            if(!anchor) anchor = document.createComment('0');
+            composeAsyncIterator(anchor, input, false, props, slottable);
+            return anchor;
+        case isRenderObject(input):
+            return create(input.render(props, slottable), null, null, anchor);
+        case input instanceof Promise: {
+            if(!anchor) anchor = document.createComment('0');
+            input.then(value => {
+                create(value, props, slottable, anchor);
+            });
+            return anchor;
+        }
+        case Array.isArray(input): {
+            const anchor = document.createComment('0');
+            compose(anchor, input, false);
+            return anchor;
+        }
+        default: {
+            throwTypeErrorForObject(input, type);
+        }
+    }
+}
+
 
 /* replace and clear */
 
@@ -131,35 +169,11 @@ function clear(anchor) {
 
 /* complex types */
 
-function composeArray(anchor, array) {
+function composeArray(anchor, array, keepLast) {
+    if(!keepLast) clear(anchor);
     // TODO: optimize arrays here if Node[]
     for(let i = 0; i < array.length; i++) {
         compose(anchor, array[i], true);
-    }
-}
-
-function composeObject(anchor, object, keepLast) {
-    // TODO: distribute below:
-    // if(!keepLast) clear(anchor);
-
-    switch(true) {
-        case object instanceof ReadableStream:
-            composeStream(anchor, object, true);
-            break;
-        // w/o the !! this causes intermittent failures :p
-        // maybe vitest/node thing?
-        case !!object[Symbol.asyncIterator]:
-            composeAsyncIterator(anchor, object, keepLast);
-            break;
-        case !!object.render:
-            compose(anchor, object.render(), keepLast);
-            break;
-        // TODO:
-        case !!object.subscribe:
-        case !!object.on:
-        default: {
-            throwTypeErrorForObject(object);
-        }
     }
 }
 
@@ -171,13 +185,12 @@ async function composeStream(anchor, stream, keepLast) {
     }));
 }
 
-async function composeAsyncIterator(anchor, iterator, keepLast) {
+async function composeAsyncIterator(anchor, iterator, keepLast, props, slottable) {
     // TODO: use iterator and intercept system messages
     for await(const value of iterator) {
-        compose(anchor, value, keepLast);
+        compose(anchor, value, keepLast, props, slottable);
     }
 }
-
 
 /* thrown errors */
 

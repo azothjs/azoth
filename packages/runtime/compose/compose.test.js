@@ -1,11 +1,8 @@
 import { describe, test } from 'vitest';
 import { compose } from './compose.js';
 import {
-    elements,
-    elementWithAnchor,
-    elementWithText,
-    $text,
-    $div
+    elements, elementWithAnchor, elementWithText,
+    $text, $div, $anchor
 } from 'test-utils/elements';
 
 export function runCompose(value, create) {
@@ -74,9 +71,54 @@ describe('append and remove', () => {
         `);
 
     });
+
+    test('nested anchors', ({ expect }) => {
+        const { dom, anchor: parent } = elementWithAnchor();
+        const anchor = $anchor();
+        compose(parent, anchor);
+
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            <!--0-->
+            <!--1-->
+          </div>
+        `);
+
+        compose(anchor, elementWithText().dom);
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            <div>
+              hello
+            </div>
+            <!--1-->
+            <!--1-->
+          </div>
+        `);
+
+        const anchor2 = $anchor();
+        compose(parent, anchor2);
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            <!--0-->
+            <!--1-->
+          </div>
+        `);
+
+        compose(anchor2, elementWithText('goodbye').dom);
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            <div>
+              goodbye
+            </div>
+            <!--1-->
+            <!--1-->
+          </div>
+        `);
+
+    });
 });
 
-describe('values (non-object)', () => {
+describe('values (non-async)', () => {
 
     function from(obj) {
         return {
@@ -91,7 +133,6 @@ describe('values (non-object)', () => {
             `${value}`.padEnd(15, ' ') +
             run(value, elementWithAnchor);
     }
-
 
     const NOOP = from({
         undefined: undefined,
@@ -177,4 +218,41 @@ describe('values (non-object)', () => {
         expect(results).toMatchInlineSnapshot(`"<div>abcdefgh<!--8--></div>"`);
     });
 
+
+    test('object.render', ({ expect }) => {
+        const results = run({
+            render() {
+                return elementWithText('made with .render()').dom;
+            }
+        }, elementWithAnchor);
+        expect(results).toMatchInlineSnapshot(
+            `"<div><div>made with .render()</div><!--1--></div>"`
+        );
+    });
+
+});
+
+describe('throws on invalid types', () => {
+
+    test('throw on invalid object', ({ expect }) => {
+        expect(() => {
+            compose(null, { name: 'felix' });
+        }).toThrowErrorMatchingInlineSnapshot(`
+      [TypeError: Invalid compose {...} input type "object", value [object Object].
+
+      Received as:
+
+      {
+        "name": "felix"
+      }
+
+      ]
+    `);
+    });
+
+    test('throw on non-render object new Class', ({ expect }) => {
+        expect(() => {
+            compose(null, class MyClass { });
+        }).toThrowErrorMatchingInlineSnapshot(`[TypeError: Class constructor MyClass cannot be invoked without 'new']`);
+    });
 });
