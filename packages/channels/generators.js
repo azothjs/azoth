@@ -67,7 +67,7 @@ export function multicast(iterator) {
     return new Multicast(iterator);
 }
 
-class Multicast {
+export class Multicast {
     consumers = [];
     constructor(subject) {
         this.subject = subject;
@@ -83,7 +83,7 @@ class Multicast {
     }
 
     subscriber(transform, options) {
-        const [dispatch, iterator] = subject(transform, options);
+        const [iterator, dispatch] = subject(transform, options);
         this.consumers.push(dispatch);
         return iterator;
     }

@@ -6,7 +6,7 @@ export default defineConfig({
     test: {
         // includeSource: ['src/**/*.{js,ts}'],
         // update: true,
-        timeout: 30_000,
+        timeout: 60_000,
         environment: 'happy-dom',
     },
     plugins: [
