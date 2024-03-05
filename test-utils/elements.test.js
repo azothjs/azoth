@@ -8,7 +8,11 @@ export const elements = [
 ];
 
 export const $anchor = () => document.createComment('0');
-export const $div = () => document.createElement('div');
+export const $div = (text) => {
+    const div = document.createElement('div');
+    if(text !== undefined) div.textContent = text;
+    return div;
+};
 export const $text = (text) => document.createTextNode(text);
 export const $helloText = () => $text('Hello');
 
