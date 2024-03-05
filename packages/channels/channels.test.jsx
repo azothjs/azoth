@@ -16,6 +16,17 @@ const Loading = () => <p>loading...</p>;
 const CatCount = cats => <p>{cats.length} cats</p>;
 const CatList = cats => <ul>{cats.map(name => <Cat name={name} />)}</ul>;
 
+describe('Arguments', () => {
+    test('null options not channel', async ({ expect }) => {
+        const { promise, resolve } = Promise.withResolvers();
+        const [squarePromise, notAChannel] = use(promise, x => x ** 2, null);
+        resolve(3);
+        const square = await squarePromise;
+        expect(square).toBe(9);
+        expect(notAChannel).not.toBeDefined();
+    });
+});
+
 describe('Promise', () => {
 
     test('promise only', async ({ fixture, find, expect }) => {
@@ -184,6 +195,37 @@ describe('Async Iterator', () => {
         dispatch({ name: 'duchess' });
         await find('duchess');
         expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>duchess<!--1--></p><!--1-->"`);
+
+    });
+
+
+    class CatDetail {
+        get name() { return this.p.textContent; }
+        set name(name) { this.p.textContent = name; }
+
+        render({ name }) {
+            return this.p = <p>{name}</p>;
+        }
+    }
+
+    test.todo('channel, { output: each|once|none }', async ({ fixture, find, expect }) => {
+        let cat = { name: 'felix' };
+        const [catAsync, setCat] = subject(value => cat = value, {
+            startWith: cat
+        });
+
+        // const Cat = <Cat />
+        use(catAsync, cat => {
+
+        }, { first: cat => <Cat name={cat.name} /> });
+
+        fixture.append(<CatLayout />);
+        await find('felix', { exact: false });
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>felix<!--1--></p><!--1-->"`);
+
+        // dispatch({ name: 'duchess' });
+        // await find('duchess');
+        // expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>duchess<!--1--></p><!--1-->"`);
 
     });
 

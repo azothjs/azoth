@@ -35,7 +35,7 @@ function fromPromise(promise, channel, options) {
     if(startWith) {
         return fromPromiseStartWith(promise, channel, startWith);
     }
-    return [channel ? promise.then(channel) : promise];
+    return channel ? promise.then(channel) : promise;
 }
 
 async function* fromPromiseStartWith(promise, channel, startWith) {
