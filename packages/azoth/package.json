@@ -1,6 +1,6 @@
 {
     "name": "azoth",
-    "version": "1.1.7",
+    "version": "1.1.8",
     "description": "Azoth JSX hypermedia",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -27,7 +27,7 @@
     ],
     "exports": {
         "./runtime": "./runtime.js",
-        "./composition": "./composition.js",
+        "./compose": "./compose.js",
         "./channels": "./channels.js",
         "./vite-plugin": "./vite-plugin.js"
     },
