@@ -1,4 +1,5 @@
 import { Multicast } from './generators.js';
+import { AsyncSourceTypeError } from './throw.js';
 
 export function use(asyncSource, ...args) {
     const [channels, options] = getArguments(args);
@@ -14,7 +15,7 @@ export function use(asyncSource, ...args) {
                 ? [fromAsyncIterator(asyncSource, channels[0], options)]
                 : branchAsyncIterator(asyncSource, channels, options);
         default:
-            throwAsyncSourceTypeError(type);
+            throw new AsyncSourceTypeError(type);
     }
 }
 
@@ -68,10 +69,4 @@ function branchAsyncIterator(iterator, channels, options) {
         }
         return multicast.subscriber(channel, options);
     });
-}
-
-function throwAsyncSourceTypeError(type) {
-    throw new TypeError(`\
-Unexpected asynchronous data source type "${type}". Expected an async data provider type, or \
-a function that returns an async data provider type."`);
 }
