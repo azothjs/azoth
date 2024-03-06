@@ -4,36 +4,17 @@ layout: home
 
 hero:
   name: Azoth
-  text: Infinite Possibilities
-  tagline: No&nbsp;State. No&nbsp;Renderer. No&nbsp;Context. No&nbsp;Framework. No&nbsp;Render&nbsp;Tree. No&nbsp;DSL. No&nbsp;Limits...
+  text: Hypermedia
+  tagline: Infinite Possibilities. Build the Web.
   image:
     light: /azoth-logo-black.svg
     dark: /azoth-logo-white.svg
     alt: Azoth Logo
   actions:
     - theme: brand
-      text: JSX
-      link: /jsx
+      text: "action"
+      link: /about
+
 
 ---
-
-**Rewind**
-
-Let go of state-driven and virtual framework concepts that were a good idea in 2013. 
-
-Start over, drawing on what was learned, and build with the power of the Web Platform of 2024.
-
-**Rethink**
-
-Create rich and compelling user experiences through directly DOM and Web Platform access. Animations, Video, Audio, Canvas, WebGL. And DOM-based third party libraries like GSAP, d3
-
-Easily render from any async data structure. Go beyond promises:
-- Web Streams for generative AI and rich media
-- Evented realtime via Web Sockets, Web RTC, SSE, plus support for client SDKs like Supabase, FireBase, and ApolloGraphQL
-- Observable pipeline and state management tools like RxJS and XState that expose a .subscribe 
-
-
-
-**Reboot**
-
 

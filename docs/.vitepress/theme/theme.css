@@ -1,30 +1,28 @@
 @font-face {
-    font-family: century-gothic;
+    font-family: 'Century Gothic';
     src: url(/century-gothic/CenturyGothic.ttf);
 }
 
 
 :root {
     --vp-c-brand-1: #008EC0;
-    --vp-c-brand-2: #008EC0;
+    --vp-c-brand-2: #B96D9C;
 
     --vp-c-indigo-1: #4D5A6E;
     --vp-c-indigo-2: #5E647E;
     --vp-c-indigo-3: #008EC0;
     --vp-c-indigo-soft: #746d8c5b;
 
-    --vp-code-color: var(--vp-c-brand-1);
-
-
     /* normal text font */
     --vp-font-family-base: 'Open Sans';
     /* --vp-font-family-base: 'Noto Sans Display'; */
-
+    --azoth-header-font:
+        'Century Gothic',
+        'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     /* code font */
     --vp-font-family-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco,
         Consolas, 'Liberation Mono', 'Courier New', monospace;
 }
-
 
 /*
 :root {
@@ -91,4 +89,51 @@
     /* --vp-c-text-1: rgba(255, 255, 245, 0.86); */
     --vp-c-text-2: rgba(235, 235, 245, 0.6);
     --vp-c-text-3: rgba(235, 235, 245, 0.38);
+}
+
+
+/**
+ * Component: Code
+ * -------------------------------------------------------------------------- */
+
+:root {
+    --vp-code-line-height: 1.7;
+    --vp-code-font-size: 0.875em;
+    --vp-code-color: #EC9929;
+    --vp-code-link-color: var(--vp-c-brand-1);
+    --vp-code-link-hover-color: var(--vp-c-brand-2);
+    --vp-code-bg: var(--vp-c-default-soft);
+
+
+    --vp-code-block-color: var(--vp-c-text-2);
+    --vp-code-block-bg: var(--vp-c-bg-alt);
+    --vp-code-block-divider-color: var(--vp-c-gutter);
+
+    --vp-code-lang-color: var(--vp-c-text-3);
+
+    --vp-code-line-highlight-color: var(--vp-c-default-soft);
+    --vp-code-line-number-color: var(--vp-c-text-3);
+
+    --vp-code-line-diff-add-color: var(--vp-c-success-soft);
+    --vp-code-line-diff-add-symbol-color: var(--vp-c-success-1);
+
+    --vp-code-line-diff-remove-color: var(--vp-c-danger-soft);
+    --vp-code-line-diff-remove-symbol-color: var(--vp-c-danger-1);
+
+    --vp-code-line-warning-color: var(--vp-c-warning-soft);
+    --vp-code-line-error-color: var(--vp-c-danger-soft);
+
+    --vp-code-copy-code-border-color: var(--vp-c-divider);
+    --vp-code-copy-code-bg: var(--vp-c-bg-soft);
+    --vp-code-copy-code-hover-border-color: var(--vp-c-divider);
+    --vp-code-copy-code-hover-bg: var(--vp-c-bg);
+    --vp-code-copy-code-active-text: var(--vp-c-text-2);
+    --vp-code-copy-copied-text-content: 'Copied';
+
+    --vp-code-tab-divider: var(--vp-code-block-divider-color);
+    --vp-code-tab-text-color: var(--vp-c-text-2);
+    --vp-code-tab-bg: var(--vp-code-block-bg);
+    --vp-code-tab-hover-text-color: var(--vp-c-text-1);
+    --vp-code-tab-active-text-color: var(--vp-c-text-1);
+    --vp-code-tab-active-bar-color: var(--vp-c-brand-1);
 }
