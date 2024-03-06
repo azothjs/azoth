@@ -6,6 +6,13 @@ hero:
   name: The Azoth Project
   text: Infinite Possibilities
   tagline: No&nbsp;State. No&nbsp;Renderer. No&nbsp;Context. No&nbsp;Framework. No&nbsp;Render&nbsp;Tree. No&nbsp;DSL. No&nbsp;Limits...
+#   tagline: "No&nbsp;State
+#     <br>No&nbsp;Renderer
+#     <br>No&nbsp;Render&nbsp;Tree
+#     <br>No&nbsp;Context
+#     <br>No&nbsp;DSL
+#     <br>No&nbsp;Framework
+#     <br>No&nbsp;Limits..."
   image:
     light: /azoth-logo-black.svg
     dark: /azoth-logo-white.svg
