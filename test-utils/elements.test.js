@@ -7,13 +7,13 @@ export const elements = [
     elementWithAnchorText,
 ];
 
-export const $anchor = () => document.createComment('0');
+export const $anchor = (text = '0') => document.createComment(text);
+export const $text = (text) => document.createTextNode(text);
 export const $div = (text) => {
     const div = document.createElement('div');
     if(text !== undefined) div.textContent = text;
     return div;
 };
-export const $text = (text) => document.createTextNode(text);
 export const $helloText = () => $text('Hello');
 
 export function elementWithText(text = 'hello') {

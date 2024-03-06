@@ -1,9 +1,8 @@
-import { elementWithAnchor, elementWithTextAnchor, elements } from 'test-utils/elements';
+import { elementWithAnchor } from 'test-utils/elements';
 import { beforeEach, describe, test } from 'vitest';
 import 'test-utils/with-resolvers-polyfill';
 import { findByText, findAllByText } from '@testing-library/dom';
 import { runCompose } from './compose.test.js';
-
 
 export function fixtureSetup(context) {
     document.body.innerHTML = '';

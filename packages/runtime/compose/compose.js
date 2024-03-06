@@ -1,10 +1,13 @@
 /* compose, composeElement, create, createElement */
+export const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
 export function compose(anchor, input, keepLast, props, slottable) {
     if(keepLast !== true) keepLast = false;
     const type = typeof input;
 
     switch(true) {
+        case input === IGNORE:
+            break;
         case input === undefined:
         case input === null:
         case input === true:
@@ -14,7 +17,6 @@ export function compose(anchor, input, keepLast, props, slottable) {
             break;
         case type === 'number':
         case type === 'bigint':
-        case type === 'symbol':
             input = `${input}`;
         // eslint-disable-next-line no-fallthrough
         case type === 'string':
@@ -35,7 +37,7 @@ export function compose(anchor, input, keepLast, props, slottable) {
             break;
         }
         case type !== 'object': {
-            // ES2023: no JavaScript types that trigger this  
+            // ES2023: Symbol should be only type  
             throwTypeError(input, type);
             break;
         }
@@ -195,6 +197,8 @@ async function composeAsyncIterator(anchor, iterator, keepLast, props, slottable
 /* thrown errors */
 
 function throwTypeError(input, type, footer = '') {
+    // Passing Symbol to `{...}` throws!
+    if(type === 'symbol') input = 'Symbol';
     throw new TypeError(`\
 Invalid compose {...} input type "${type}", value ${input}.\
 ${footer}`

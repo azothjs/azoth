@@ -1,9 +1,8 @@
-import { describe, test, expect } from 'vitest';
-import { compose, composeElement, createElement } from './compose.js';
-import { $anchor, $div, elementWithAnchor, elementWithText, elementWithTextAnchor } from 'test-utils/elements';
-import { runCompose } from './compose.test.js';
+import { describe, test, beforeEach } from 'vitest';
+import { composeElement, createElement } from './compose.js';
+import { $div, elementWithAnchor } from 'test-utils/elements';
 import { fixtureSetup } from './compose.async.test.js';
-import { beforeEach } from 'vitest';
+import { runCompose } from './compose.test.js';
 
 // <div>{name}</div>
 function Component({ name }) {
