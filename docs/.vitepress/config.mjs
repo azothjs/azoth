@@ -51,17 +51,17 @@ export default defineConfig({
                     { text: 'Async', link: '/jsx/async' },
                 ]
             },
-            {
-                text: 'Channels',
-                items: [
-                    { text: 'Intro to Channels', link: '/channels/about' },
-                    { text: 'Async Data Providers', link: '/channels/async' },
-                    { text: 'Transform Functions', link: '/channels/transform' },
-                    { text: 'Channel and Provider Options', link: '/channels/options' },
-                    { text: 'Branch & Layer', link: '/channels/branch-and-layer' },
-                    { text: 'Track State', link: '/channels/state' },
-                ]
-            }
+            // {
+            //     text: 'Channels',
+            //     items: [
+            //         { text: 'Intro to Channels', link: '/channels/about' },
+            //         { text: 'Async Data Providers', link: '/channels/async' },
+            //         { text: 'Transform Functions', link: '/channels/transform' },
+            //         { text: 'Channel and Provider Options', link: '/channels/options' },
+            //         { text: 'Branch & Layer', link: '/channels/branch-and-layer' },
+            //         { text: 'Track State', link: '/channels/state' },
+            //     ]
+            // }
         ],
 
         socialLinks: [

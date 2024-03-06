@@ -6,11 +6,15 @@
 
 :root {
     --vp-c-brand-1: #008EC0;
+    --vp-c-brand-2: #008EC0;
 
     --vp-c-indigo-1: #4D5A6E;
     --vp-c-indigo-2: #5E647E;
     --vp-c-indigo-3: #008EC0;
     --vp-c-indigo-soft: #746d8c5b;
+
+    --vp-code-color: var(--vp-c-brand-1);
+
 
     /* normal text font */
     --vp-font-family-base: 'Open Sans';
@@ -20,6 +24,7 @@
     --vp-font-family-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco,
         Consolas, 'Liberation Mono', 'Courier New', monospace;
 }
+
 
 /*
 :root {
