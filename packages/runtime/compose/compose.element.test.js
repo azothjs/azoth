@@ -1,8 +1,11 @@
 import { describe, test, beforeEach } from 'vitest';
-import { composeElement, createElement } from './index.js';
+import 'test-utils/with-resolvers-polyfill';
 import { $div, elementWithAnchor } from 'test-utils/elements';
-import { fixtureSetup } from './compose.async.test.js';
+import { fixtureSetup } from 'test-utils/fixtures';
 import { runCompose } from './compose.test.js';
+import { composeElement, createElement } from './index.js';
+
+beforeEach(fixtureSetup);
 
 // <div>{name}</div>
 function Component({ name }) {
@@ -52,8 +55,6 @@ class ClassCompRenderP {
 }
 const ArrowCompP = async ({ name }) => runCompose(name, elementWithAnchor);
 const ASYNC_CONSTRUCTORS = [ComponentP, ClassCompP, RenderObjectP, ClassCompRenderP, ArrowCompP];
-
-beforeEach(fixtureSetup);
 
 describe('create element', () => {
 

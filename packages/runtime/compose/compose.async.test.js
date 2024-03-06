@@ -1,15 +1,8 @@
-import { elementWithAnchor } from 'test-utils/elements';
 import { beforeEach, describe, test } from 'vitest';
 import 'test-utils/with-resolvers-polyfill';
-import { findByText, findAllByText } from '@testing-library/dom';
+import { elementWithAnchor } from 'test-utils/elements';
+import { fixtureSetup } from 'test-utils/fixtures';
 import { runCompose } from './compose.test.js';
-
-export function fixtureSetup(context) {
-    document.body.innerHTML = '';
-    context.fixture = document.body;
-    context.find = (filter, options) => findByText(context.fixture, filter, options);
-    context.findAll = (filter, options) => findAllByText(context.fixture, filter, options);
-}
 
 beforeEach(fixtureSetup);
 

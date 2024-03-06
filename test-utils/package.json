@@ -10,12 +10,14 @@
     ],
     "exports": {
         "./with-resolvers-polyfill": "./with-resolvers-polyfill.js",
-        "./elements": "./elements.test.js"
+        "./elements": "./elements.test.js",
+        "./fixtures": "./fixtures.js"
     },
     "scripts": {
         "test": "vitest"
     },
     "dependencies": {
+        "@testing-library/dom": "^9.3.4",
         "vitest": "^1.3.1"
     },
     "devDependencies": {
