@@ -12,6 +12,7 @@
     "type": "module",
     "scripts": {
         "start": "pnpm -F sandbox start",
+        "start:docs": "pnpm -F docs start",
         "check": "pnpm update && pnpm test",
         "update": "pnpm update -r",
         "test": "CI=true pnpm test -r -- --passWithNoTests",
