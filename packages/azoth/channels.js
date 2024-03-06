@@ -1,1 +1,1 @@
-export { use, subject } from '@azoth-web/channels';
+export * from '@azoth-web/channels';

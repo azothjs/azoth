@@ -1,5 +1,5 @@
 import { describe, test, beforeEach } from 'vitest';
-import { composeElement, createElement } from './compose.js';
+import { composeElement, createElement } from './index.js';
 import { $div, elementWithAnchor } from 'test-utils/elements';
 import { fixtureSetup } from './compose.async.test.js';
 import { runCompose } from './compose.test.js';

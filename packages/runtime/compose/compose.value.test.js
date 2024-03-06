@@ -1,5 +1,5 @@
 import { describe, test } from 'vitest';
-import { compose } from './compose.js';
+import { compose } from './index.js';
 import {
     elementWithAnchor, elementWithText,
     $text, $div, $anchor

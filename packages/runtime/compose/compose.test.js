@@ -1,5 +1,5 @@
 import { describe, test } from 'vitest';
-import { IGNORE, compose } from './compose.js';
+import { IGNORE, compose } from './index.js';
 import {
     elements, elementWithAnchor, elementWithText,
     $anchor

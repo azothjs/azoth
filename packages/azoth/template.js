@@ -1,4 +1,1 @@
-export {
-    makeRenderer,
-    rendererById,
-} from '@azoth-web/runtime/renderer';
+export * from '@azoth-web/runtime/renderer';
