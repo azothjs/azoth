@@ -1,0 +1,48 @@
+{
+    "name": "@azoth-web/server",
+    "version": "0.0.1",
+    "description": "Azoth full stack web server",
+    "author": "Marty Nelson",
+    "license": "MIT",
+    "keywords": [
+        "azoth",
+        "fullstack framework",
+        "fullstack azoth",
+        "fullstack hypermedia",
+        "azoth hypermedia",
+        "azothjs",
+        "azothjsx",
+        "azoth js",
+        "streaming server",
+        "streaming fullstack",
+        "javascript framework",
+        "javascript library",
+        "fullstack javacsript",
+        "fullstack js",
+        "js framework",
+        "hypermedia"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/azoth-web/azoth.git",
+        "directory": "packages/server"
+    },
+    "type": "module",
+    "main": "./index.jsx",
+    "files": [],
+    "scripts": {
+        "build": "vite build -c vite.config.js",
+        "dev": "vite dev -c vite.config.js",
+        "deploy": "wrangler deploy --minify src/index.tsx"
+    },
+    "dependencies": {
+        "hono": "^4.0.10"
+    },
+    "devDependencies": {
+        "@cloudflare/workers-types": "^4.20240222.0",
+        "esbuild": "^0.20.1",
+        "vite": "^5.1.5",
+        "vite-plugin-cloudflare": "^0.4.1",
+        "wrangler": "^3.32.0"
+    }
+}

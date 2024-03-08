@@ -30,6 +30,7 @@
         "./renderer": "./renderer/index.js"
     },
     "devDependencies": {
+        "@typescript/lib-dom": "npm:@types/web@^0.0.140",
         "test-utils": "workspace:^"
     }
 }

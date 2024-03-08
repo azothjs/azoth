@@ -5,6 +5,15 @@ settings:
   excludeLinksFromLockfile: false
 
 devDependencies:
+  '@typescript/lib-dom':
+    specifier: npm:@types/web@^0.0.140
+    version: /@types/web@0.0.140
   test-utils:
     specifier: workspace:^
     version: link:../../test-utils
+
+packages:
+
+  /@types/web@0.0.140:
+    resolution: {integrity: sha512-uBeH71RjueNd68iI5LJHi0EYg9f+eFczOJFJ1mEdw0Kw3UC54UPhEgw/HYpY/jc9GB0HhAnZnyF6sCmP+IQKPg==}
+    dev: true

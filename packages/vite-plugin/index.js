@@ -13,9 +13,8 @@ export default function azothPlugin(options) {
 
     const programTemplates = new Map();
     let command = '';
-
     const transformJSX = {
-        name: 'azoth-jsx',
+        name: 'azoth',
         enforce: 'pre',
 
         config(config, { command: cmd }) {
