@@ -13,26 +13,21 @@
     "scripts": {
         "start": "pnpm -F sandbox start",
         "start:docs": "pnpm -F docs start",
-        "check": "pnpm update && pnpm test",
-        "update": "pnpm update -r",
-        "test": "CI=true pnpm test -r -- --passWithNoTests",
-        "test:jsonic": "pnpm -F jsonic test",
-        "test:runtime": "pnpm -F runtime test",
-        "test:compiler": "pnpm -F compiler test",
-        "test:test-utils": "pnpm -F test-utils test",
-        "test:plugin": "pnpm -F vite-plugin test",
-        "lint": "eslint packages",
-        "publint": "pnpm -r run publint"
+        "test": "vitest",
+        "test:CI": "CI=true vitest",
+        "lint": "eslint packages"
     },
     "devDependencies": {
-        "@vitest/browser": "^1.3.1",
+        "@testing-library/dom": "^9.3.4",
         "eslint": "^8.57.0",
-        "globals": "^13.24.0",
+        "globals": "^14.0.0",
         "happy-dom": "^13.6.2",
-        "publint": "^0.2.7",
         "vite": "^5.1.5",
         "vite-plugin-inspect": "^0.8.3",
         "vitest": "^1.3.1"
     },
-    "packageManager": "^pnpm@8.15.1"
+    "packageManager": "^pnpm@8.15.1",
+    "dependencies": {
+        "azoth": "link:/Users/marty/dev/azoth-web/azoth/packages/azoth"
+    }
 }

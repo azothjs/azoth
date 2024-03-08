@@ -20,9 +20,6 @@
         "directory": "core/vite-plugin"
     },
     "type": "module",
-    "scripts": {
-        "publint": "publint"
-    },
     "files": [
         "index.js",
         "dist"
@@ -33,10 +30,6 @@
                 "default": "./index.js"
             }
         }
-    },
-    "devDependencies": {
-        "publint": "^0.2.7",
-        "vitest": "^1.3.1"
     },
     "peerDependencies": {
         "vite": "^5.0.12"

@@ -51,7 +51,7 @@
     "vitest.watchOnStartup": true,
     "vitest.commandLine": "npx vitest --dom --",
     "search.exclude": {
-        "pnpm-lock.yaml": true
+        "**/pnpm-lock.yaml": true
     },
     "npm.packageManager": "pnpm",
     "explorer.fileNesting.patterns": {

@@ -13,6 +13,10 @@ export default defineConfig({
         azothPlugin(),
         inspect()
     ],
+    build: {
+        target: 'esnext',
+        sourcemap: true,
+    },
     esbuild: {
         exclude: '**/*.jsx',
     }

@@ -21,10 +21,8 @@
     },
     "type": "module",
     "scripts": {
-        "test": "pnpm run test:build && vitest -w false ",
-        "test:build": "vite build",
-        "test:update": "rm -rf ./expected-out && cp -R ./out ./expected-out",
-        "build": "vite build"
+        "test": "vite build && vitest -w false ",
+        "test:update": "rm -rf ./expected-out && cp -R ./out ./expected-out"
     },
     "files": [
         "index.js",

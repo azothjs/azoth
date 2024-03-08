@@ -1,0 +1,10 @@
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+dependencies:
+  azoth:
+    specifier: link:/Users/marty/dev/azoth-web/azoth/packages/azoth
+    version: link:azoth
