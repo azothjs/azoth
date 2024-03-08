@@ -1,1 +1,1 @@
-export * from '@azoth-web/channels';
+export * from '@azothjs/channels';

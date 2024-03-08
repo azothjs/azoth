@@ -5,12 +5,12 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@azoth-web/channels':
+  '@azothjs/channels':
     specifier: workspace:^
     version: link:../channels
-  '@azoth-web/runtime':
+  '@azothjs/runtime':
     specifier: workspace:^
     version: link:../runtime
-  '@azoth-web/vite-plugin':
+  '@azothjs/vite-plugin':
     specifier: workspace:^
     version: link:../vite-plugin

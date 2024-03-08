@@ -1,6 +1,6 @@
 {
-    "name": "@azoth-web/channels",
-    "version": "0.1.4",
+    "name": "@azothjs/channels",
+    "version": "0.1.0",
     "description": "Asynchronous layout channels",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -15,7 +15,7 @@
     ],
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/azoth-web/azoth.git",
+        "url": "git+https://github.com/azothjs/azoth.git",
         "directory": "packages/channels"
     },
     "type": "module",

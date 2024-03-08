@@ -1,6 +1,6 @@
 {
-    "name": "@azoth-web/compiler",
-    "version": "1.8.0",
+    "name": "@azothjs/compiler",
+    "version": "0.0.1",
     "description": "Azoth compiler",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -12,7 +12,7 @@
     ],
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/azoth-web/azoth.git",
+        "url": "git+https://github.com/azothjs/azoth.git",
         "directory": "packages/compiler"
     },
     "type": "module",

@@ -1,1 +1,1 @@
-export { default } from '@azoth-web/vite-plugin';
+export { default } from '@azothjs/vite-plugin';

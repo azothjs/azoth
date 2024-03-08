@@ -65,7 +65,7 @@ export default defineConfig({
         ],
 
         socialLinks: [
-            { icon: 'github', link: 'https://github.com/azoth-web/azoth' }
+            { icon: 'github', link: 'https://github.com/azothjs/azoth' }
         ]
     }
 })
