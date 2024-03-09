@@ -17,7 +17,7 @@ jobs:
       with:
         node-version: latest
     - run: pnpm install
-    - run: pnpm update -r
+    - run: pnpm update
     - run: pnpm lint
     - run: pnpm test
       env:
