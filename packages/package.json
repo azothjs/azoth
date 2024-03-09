@@ -1,0 +1,5 @@
+{
+	"dependencies": {
+		"test-utils": "link:test-utils"
+	}
+}

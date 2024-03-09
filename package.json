@@ -28,6 +28,8 @@
     },
     "packageManager": "^pnpm@8.15.1",
     "dependencies": {
-        "azoth": "link:/Users/marty/dev/azothjs/azoth/packages/azoth"
+        "@azothjs/channels": "link:/Users/marty/dev/azothjs/azoth/packages/azoth",
+        "azoth": "link:/Users/marty/dev/azothjs/azoth/packages/azoth",
+        "test-utils": "link:test-utils"
     }
 }
