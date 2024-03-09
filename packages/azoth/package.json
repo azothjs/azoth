@@ -33,8 +33,8 @@
     },
     "packageManager": "^pnpm@8.15.1",
     "dependencies": {
-        "@azothjs/channels": "workspace:^",
-        "@azothjs/runtime": "workspace:^",
-        "@azothjs/vite-plugin": "workspace:^"
+        "@azothjs/channels": "workspace:*",
+        "@azothjs/runtime": "workspace:*",
+        "@azothjs/vite-plugin": "workspace:*"
     }
 }
