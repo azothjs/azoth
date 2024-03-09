@@ -17,6 +17,7 @@ jobs:
       with:
         node-version: latest
     - run: pnpm install
+    - run: pnpm link /packages/azoth
     - run: pnpm update -r
     - run: pnpm lint
     - run: pnpm test
