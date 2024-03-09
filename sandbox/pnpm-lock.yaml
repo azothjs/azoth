@@ -6,10 +6,10 @@ settings:
 
 dependencies:
   azoth:
-    specifier: workspace:^
+    specifier: workspace:*
     version: link:../packages/azoth
   jsonic:
-    specifier: workspace:^
+    specifier: workspace:*
     version: link:../packages/jsonic
 
 devDependencies:

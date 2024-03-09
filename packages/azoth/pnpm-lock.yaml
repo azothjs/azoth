@@ -6,11 +6,11 @@ settings:
 
 dependencies:
   '@azothjs/channels':
-    specifier: workspace:^
+    specifier: workspace:*
     version: link:../channels
   '@azothjs/runtime':
-    specifier: workspace:^
+    specifier: workspace:*
     version: link:../runtime
   '@azothjs/vite-plugin':
-    specifier: workspace:^
+    specifier: workspace:*
     version: link:../vite-plugin
