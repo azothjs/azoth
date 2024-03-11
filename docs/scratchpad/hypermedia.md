@@ -1,5 +1,75 @@
 # Web Architecture with Hypermedia 
 
+
+Azoth is a fullstack UI/X library/framework reimagined for the Web Platform of 2024.
+
+Here are the core tenets:
+
+1. The Platform will provide the highest quality and best performance
+1. Build **with** the Web Platform, not *on** the Platform
+1. The developer needs access to all Web APIs, including the DOM
+1. Communication is streaming
+1. Static vs dynamic generation decisions can be made on the rate of change and possible variations
+1. Isomorphic modules allow variable delivery decisions based on feature and device
+
+## Architecture Principals
+
+### Hypermedia > State-Driven
+
+Hypermedia is rich UI content media that provides interactivity to enhance and modify the content itself as the source of truth.
+
+### Theory
+
+"State-driven" frameworks require the use of APIs that maintain in-memory data as the source of truth from which the renderer projects the UI.  This is represented as:
+
+<pre>
+    <code>ui = fn(state)</code>
+</pre>
+
+In contrast, hypermedia consist of iterative changes, each of which occurs at it's own time. In the representative equation, notice that state is remove from equation:
+
+<pre>
+    <code>ui<sub>n</sub> = ui<sub>n-1</sub> + Δ</code>
+</pre>
+
+Which can be read as:
+
+> The UI is the prior state of the UI plus the delta applied by the last interaction
+
+These two models are mutually exclusive (state and UI cannot both be the source truth). 
+
+### Paradigm
+
+#### State-Driven
+
+Components are designed such that time is _abstracted away_. The developer thinks in terms of needed state and state transitions. UI components should handle all permutations of state without regard to sequence (timeless). The framework is in control of all rendering, unless the developer is required to intervene for performance reasons.
+
+#### Hypermedia
+
+Work and components segmented into discrete, known time slices. The developer thinks iteratively about the current render, the set of available actions, and what will be the set of future "current renders" they trigger. The UI encapsulates channels of data with the corresponding presentation. As long as the underlying services are not disrupted, there are no restrictions on the types of changes the developer can perform.
+
+### Practice
+
+
+There are very practical ramifications to using hypermedia vs state-driven architectures:
+
+
+
+
+double dispatch
+
+### Pragmatic
+
+
+
+When used in the same environment (e.g. SSR), hypermedia always wins because 
+constructing UIs from data versus extrapolating state from a UI is a P/NP problem (this is 
+the same reason React can't build a compiler).
+
+
+
+
+
 [Hypermedia](https://en.wikipedia.org/wiki/Hypermedia) is rich ui content that provides interactivity to enhance and modify the media itself. It provides many advantages when applied to modern web architecture. If you are using any server-rendering, you already are adapting to hypermedia!
 
 This article is requires an advanced understanding of modern JavaScript frameworks and the web in general. If you have topic of interest let me know, there's a lot to learn
@@ -42,7 +112,7 @@ But state as truth is anathema to hypermedia. The Web Platform UI is the medium 
 We don't need no dom control  
 No dark useEffect in the render  
 useState, leave them UIs alone  
-_queue mounting guitar rhythm_  
+
 Hey, useState, leave them UIs alone
 
 State here means buffering data into memory on the client so the framework can use that to layout the ui. 

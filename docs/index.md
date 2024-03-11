@@ -3,8 +3,8 @@
 layout: home
 
 hero:
-  name: Azoth
-  text: Hypermedia
+  name: The Azoth Project
+  text: Fullstack Hypermedia
   tagline: Infinite Possibilities. Build the Web.
   image:
     light: /azoth-logo-black.svg
@@ -13,8 +13,5 @@ hero:
   actions:
     - theme: brand
       text: "action"
-      link: /about
-
-
+      link: /action
 ---
-
