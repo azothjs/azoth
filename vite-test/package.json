@@ -1,7 +1,7 @@
 {
     "name": "vite-test",
-    "version": "0.0.0",
-    "description": "azoth plugins for vite",
+    "version": "1.0.0",
+    "description": "test project for azoth vite plugins",
     "author": "martypdx",
     "license": "MIT",
     "keywords": [
@@ -16,8 +16,8 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/azoth-web/azoth.git",
-        "directory": "aetheria-core/vite-plugin"
+        "url": "git+https://github.com/azothjs/azoth.git",
+        "directory": "packages/vite-plugin"
     },
     "type": "module",
     "scripts": {

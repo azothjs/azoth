@@ -1,6 +1,6 @@
 {
-    "name": "@azoth-web/runtime",
-    "version": "1.8.3",
+    "name": "@azothjs/runtime",
+    "version": "0.1.0",
     "description": "Azoth runtime",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -18,8 +18,8 @@
     ],
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/azoth-web/azoth.git",
-        "directory": "core/runtime"
+        "url": "git+https://github.com/azothjs/azoth.git",
+        "directory": "packages/runtime"
     },
     "type": "module",
     "files": [

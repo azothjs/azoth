@@ -12,8 +12,8 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "azoth": "workspace:^",
-        "jsonic": "workspace:^"
+        "azoth": "workspace:*",
+        "jsonic": "workspace:*"
     },
     "devDependencies": {
         "vite": "^5.1.5"

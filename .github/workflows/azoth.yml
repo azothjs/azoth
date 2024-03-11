@@ -17,6 +17,8 @@ jobs:
       with:
         node-version: latest
     - run: pnpm install
+    # Needed for CI on GitHub
+    - run: pnpm update -r
     - run: pnpm lint
     - run: pnpm test
       env:

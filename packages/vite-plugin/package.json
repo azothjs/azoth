@@ -1,6 +1,6 @@
 {
-    "name": "@azoth-web/vite-plugin",
-    "version": "1.8.0",
+    "name": "@azothjs/vite-plugin",
+    "version": "0.1.0",
     "description": "azoth plugins for vite",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -16,8 +16,8 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/azoth-web/azoth.git",
-        "directory": "core/vite-plugin"
+        "url": "git+https://github.com/azothjs/azoth.git",
+        "directory": "packages/vite-plugin"
     },
     "type": "module",
     "files": [
@@ -35,7 +35,7 @@
         "vite": "^5.0.12"
     },
     "dependencies": {
-        "@azoth-web/compiler": "workspace:*",
+        "@azothjs/compiler": "workspace:*",
         "@rollup/pluginutils": "^5.1.0",
         "source-map": "^0.7.4"
     }

@@ -1,1 +1,1 @@
-export * from '@azoth-web/runtime/compose';
+export * from '@azothjs/runtime/compose';
