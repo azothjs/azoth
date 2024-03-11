@@ -31,7 +31,6 @@ export default defineConfig({
                     const { name, moduleIds: [virtualName] } = chunkInfo;
                     if(name.startsWith(`_virtual_azoth-templates`)) {
                         const [, params] = virtualName.split('?');
-                        console.log(name, params);
                         const [ids] = params.split('&');
                         const [, id] = ids.split('=');
                         return `${id}.html`;
