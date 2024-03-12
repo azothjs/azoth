@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import { compile as _compile } from './index.js';
+import { compile as _compile } from './compiler.js';
 import { test } from 'vitest';
 
 const compile = input => {

@@ -1,6 +1,6 @@
 {
     "name": "@azothjs/compiler",
-    "version": "0.0.1",
+    "version": "0.1.1",
     "description": "Azoth compiler",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -16,14 +16,14 @@
         "directory": "packages/compiler"
     },
     "type": "module",
-    "main": "./index.js",
+    "main": "./compiler.js",
     "files": [
         "**/!(*test*).js"
     ],
     "exports": {
         ".": {
             "import": {
-                "default": "./index.js"
+                "default": "./compiler.js"
             }
         }
     },

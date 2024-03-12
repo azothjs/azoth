@@ -129,7 +129,7 @@ function create(input, props, slottable, anchor) {
             return anchor;
         }
         case Array.isArray(input): {
-            const anchor = document.createComment('0');
+            if(!anchor) anchor = document.createComment('0');
             compose(anchor, input, false);
             return anchor;
         }

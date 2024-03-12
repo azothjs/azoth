@@ -1,9 +1,9 @@
 import { describe, test, beforeEach } from 'vitest';
 import 'test-utils/with-resolvers-polyfill';
-import { $div, elementWithAnchor } from 'test-utils/elements';
+import { $div, elementWithText, elementWithAnchor } from 'test-utils/elements';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { runCompose } from './compose.test.js';
-import { composeElement, createElement } from './index.js';
+import { composeElement, createElement } from './compose.js';
 
 beforeEach(fixtureSetup);
 
@@ -187,6 +187,24 @@ describe('compose element', () => {
             await find('felix');
             expect(fixture.innerHTML).toBe(expected);
         });
+    });
+
+    function ArrayList() {
+        return Promise.resolve([
+            elementWithText('one').dom,
+            elementWithText('two').dom,
+            elementWithText('three').dom,
+        ]);
+    }
+
+    test('Promised array component', async ({ expect, fixture, find }) => {
+        const { dom, anchor } = elementWithAnchor();
+        composeElement(anchor, Promise.resolve(ArrayList));
+        fixture.append(dom);
+        await find('one', { exact: false });
+        expect(fixture.innerHTML).toMatchInlineSnapshot(
+            `"<div><div>one</div><div>two</div><div>three</div><!--3--></div>"`
+        );
     });
 
 });

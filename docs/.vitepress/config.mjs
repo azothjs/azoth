@@ -19,7 +19,6 @@ export default defineConfig({
             type: "image/svg+xml",
             media: '(prefers-color-scheme: dark)',
         }],
-
         ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
         ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOriginIsolated: true }],
         ['link', {
@@ -37,31 +36,21 @@ export default defineConfig({
             alt: 'Azoth Logo',
         },
         nav: [
-            { text: 'Arcanum', link: '/intro' },
-            { text: 'About', link: '/about' },
-            { text: 'Examples', link: '/examples' }
+            { text: 'Arcanum', link: '/about' },
         ],
         sidebar: [
             {
-                text: 'JSX',
+                text: 'Get Started',
                 items: [
-                    { text: 'About', link: '/jsx/about' },
-                    { text: 'Compose', link: '/jsx/compose' },
-                    // { text: 'Component', link: '/jsx/compose' },
-                    { text: 'Async', link: '/jsx/async' },
+                    { text: 'Intro', link: '/intro' },
                 ]
-            },
-            // {
-            //     text: 'Channels',
-            //     items: [
-            //         { text: 'Intro to Channels', link: '/channels/about' },
-            //         { text: 'Async Data Providers', link: '/channels/async' },
-            //         { text: 'Transform Functions', link: '/channels/transform' },
-            //         { text: 'Channel and Provider Options', link: '/channels/options' },
-            //         { text: 'Branch & Layer', link: '/channels/branch-and-layer' },
-            //         { text: 'Track State', link: '/channels/state' },
-            //     ]
-            // }
+            }
+
+            // { text: 'About', link: '/about' },
+            // { text: 'Compose', link: '/compose' },
+            // { text: 'Component', link: '/component' },
+            // { text: 'Async', link: '/async' },
+
         ],
 
         socialLinks: [

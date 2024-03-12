@@ -1,6 +1,5 @@
-import { compile, templateModule } from '../compiler/index.js';
+import { compile, templateModule } from '@azothjs/compiler';
 import { createFilter } from '@rollup/pluginutils';
-import { SourceNode, SourceMapConsumer } from 'source-map';
 import path from 'node:path';
 
 const resolvedTemplateModule = '\0' + templateModule;

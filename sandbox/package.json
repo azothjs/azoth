@@ -16,6 +16,6 @@
         "jsonic": "workspace:*"
     },
     "devDependencies": {
-        "vite": "^5.1.5"
+        "vite": "^5.1.6"
     }
 }

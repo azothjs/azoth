@@ -1,6 +1,6 @@
 {
     "name": "@azothjs/runtime",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Azoth runtime",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -26,8 +26,8 @@
         "**/!(*test|*config).js"
     ],
     "exports": {
-        "./compose": "./compose/index.js",
-        "./renderer": "./renderer/index.js"
+        "./compose": "./compose/compose.js",
+        "./renderer": "./renderer/renderer.js"
     },
     "devDependencies": {
         "test-utils": "workspace:^"

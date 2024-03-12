@@ -12,6 +12,6 @@ hero:
     alt: Azoth Logo
   actions:
     - theme: brand
-      text: "action"
-      link: /action
+      text: Get Started
+      link: /about
 ---
