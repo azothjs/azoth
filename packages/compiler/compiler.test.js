@@ -15,6 +15,44 @@ const compile = input => {
 };
 
 describe('JSX dom literals', () => {
+
+    test.only('Hello Azoth', ({ expect }) => {
+        const input = `const t = <p className={"className"}>
+            Hello {"Azoth"}
+        </p>;`;
+
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "import { __compose } from 'azoth/runtime';
+          import { ta516887159 } from 'virtual:azoth-templates?id=a516887159';
+          const t = (() => {
+              const __root = ta516887159()[0];
+              const __child1 = __root.childNodes[1];
+              __root.className = ("className");
+              __compose(__child1, "Azoth");
+              return __root;
+          })();
+          "
+        `);
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "html": "<p>
+                      Hello <!--0-->
+                  </p>",
+              "id": "a516887159",
+              "imports": [
+                "compose",
+              ],
+              "isDomFragment": false,
+              "isEmpty": false,
+              "isStatic": false,
+            },
+          ]
+        `);
+    });
+
     test('complex template structure with props and child nodes', ({ expect }) => {
         const input = `const t = <div>
             <p className={"my-class"}>{"felix"}</p>
