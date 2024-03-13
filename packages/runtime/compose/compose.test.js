@@ -2,7 +2,7 @@ import { describe, test } from 'vitest';
 import { IGNORE, compose } from './compose.js';
 import {
     elements, elementWithAnchor, elementWithText,
-    $anchor
+    elementWithTextAnchor, $anchor
 } from 'test-utils/elements';
 
 export function runCompose(value, create) {
@@ -70,6 +70,28 @@ describe('append and remove', () => {
           </div>
         `);
 
+    });
+
+    test('weird edge case found error when text is number', ({ expect }) => {
+        const { dom, anchor } = elementWithTextAnchor();
+
+        compose(anchor, '1');
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            Hello
+            1
+            <!--1-->
+          </div>
+        `);
+
+        compose(anchor, '2');
+        expect(dom).toMatchInlineSnapshot(`
+          <div>
+            Hello
+            2
+            <!--1-->
+          </div>
+        `);
     });
 
     test('nested anchors', ({ expect }) => {

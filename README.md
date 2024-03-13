@@ -3,24 +3,26 @@
 Welcome to the Azoth Project!
 
 Azoth is currently under active development. However, there is
-much to play around with. Here is the current list of packages
+much to play around with. 
+
+## Packages and Projects
+
+**Packages**
 
 package | purpose | status
 ---    |---      |---
-compiler | core JSX transform to target DOM runtime | beta
-compiler | core JSX transform to target Server runtime | in progress
-runtime | DOM runtime w/ basic template service | beta
-runtime | Server runtime | in progress
+compiler | Core JSX transformation. DOM target complete, server target in progress.
+runtime | Core runtime w/ template services. DOM target complete, server target in progress | beta
 vite-plugin | Azoth plugin for vite
-channels | asynchronous data to layout | beta
-jsonic | streaming JSON parser | alpha
+channels | Data to layout management | beta
+jsonic | Streaming JSON parser | alpha
 
-The projects are also included:
+**Projects**
 
-project | purpose 
----    |---      
-docs | project documentation
-sandbox | developer scratchpad
-test-utils | common test helpers
-vite-test | e2e vite pipeline test
+project | purpose | status
+---     |---       |---
+sandbox | developer scratchpad | available
+test-utils | common test helpers | available
+vite-test | e2e vite pipeline test | simple
+docs | project documentation | setup, no content
 

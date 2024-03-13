@@ -152,6 +152,8 @@ function clear(anchor) {
     let node = anchor;
     let count = +anchor.data;
 
+    // TODO: validate count received
+
     while(count--) {
         const { previousSibling } = node;
         if(!previousSibling) break;
@@ -161,7 +163,6 @@ function clear(anchor) {
             clear(previousSibling);
         }
 
-        clear(previousSibling);
         previousSibling.remove();
     }
 
