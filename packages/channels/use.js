@@ -1,5 +1,5 @@
 import { Multicast } from './generators.js';
-import { AsyncSourceTypeError } from './throw.js';
+import { AsyncSourceTypeError, OptionMissingFunctionArgumentError } from './throw.js';
 
 export function use(asyncSource, ...args) {
     const [channels, options] = getArguments(args);
@@ -33,21 +33,41 @@ function getArguments(channels) {
 
 function fromPromise(promise, channel, options) {
     const startWith = options?.startWith;
+    const map = options?.map ?? false;
     if(startWith) {
-        return fromPromiseStartWith(promise, channel, startWith);
+        return fromPromiseStartWith(startWith, promise, channel, map);
+    }
+    return promiseResolution(promise, channel, map);
+}
+
+async function* fromPromiseStartWith(startWith, promise, channel, map) {
+    yield startWith;
+    yield promiseResolution(promise, channel, map);
+}
+
+function promiseResolution(promise, channel, map) {
+    if(map) {
+        if(!channel) throw new OptionMissingFunctionArgumentError();
+        // TODO: include or suppress index? which param???
+        // collapse "slottable" back into props???
+        return promise.then(array => array.map(channel));
     }
     return channel ? promise.then(channel) : promise;
 }
 
-async function* fromPromiseStartWith(promise, channel, startWith) {
-    yield startWith;
-    yield channel ? promise.then(channel) : promise;
-}
-
 async function* fromAsyncIterator(iterator, channel, options) {
     const startWith = options?.startWith;
+    const map = options?.map ?? false;
+    if(map && !channel) throw new OptionMissingFunctionArgumentError();
+
     if(startWith) yield startWith;
+
     for await(const value of iterator) {
+        if(map) {
+            yield value.map(channel);
+            continue;
+        }
+
         yield channel ? channel(value) : value;
     }
 }
@@ -61,12 +81,12 @@ function branchPromise(promise, channels) {
     });
 }
 
-function branchAsyncIterator(iterator, channels, options) {
+function branchAsyncIterator(iterator, channels) {
     const multicast = new Multicast(iterator);
     return channels.map(channel => {
         if(Array.isArray(channel)) { // [channel, options]
             return multicast.subscriber(channel[0], channel[1]);
         }
-        return multicast.subscriber(channel, options);
+        return multicast.subscriber(channel);
     });
 }

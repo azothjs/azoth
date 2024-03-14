@@ -1,3 +1,21 @@
+import { ConflictingOptionsError, OptionMissingFunctionArgumentError } from './throw.js';
+
+function resolveOptions(options, transform) {
+    let initialValue, startWith, map = false;
+    if(options) {
+        initialValue = options.initialValue;
+        startWith = options.startWith;
+        map = options.map ?? false;
+        if(initialValue !== undefined) {
+            if(startWith !== undefined) new ConflictingOptionsError();
+            if(!transform) throw new OptionMissingFunctionArgumentError('initialValue');
+        }
+        if(map && !transform) {
+            throw new OptionMissingFunctionArgumentError();
+        }
+    }
+    return { initialValue, startWith, map };
+}
 
 export function subject(transform, options) {
     if(!options && typeof transform === 'object') {
@@ -5,26 +23,18 @@ export function subject(transform, options) {
         transform = null;
     }
 
-    let initialValue, startWith;
-    if(options) {
-        initialValue = options.initialValue;
-        startWith = options.startWith;
-        if(initialValue !== undefined) {
-            if(startWith !== undefined) {
-                throw new Error('Cannot specify both initialValue and startWith option');
-            }
-            if(!transform) {
-                throw new Error('Cannot specify initialValue without a transform function');
-            }
-        }
-    }
+    const { initialValue, startWith, map } = resolveOptions(options, transform);
 
     const relay = { resolve: null };
 
     let unsentEarlyDispatch = null;
 
     function dispatch(payload) {
-        if(transform) payload = transform(payload);
+        if(transform) {
+            if(map) payload = payload.map(transform);
+            else payload = transform(payload);
+        }
+
         if(relay.resolve) relay.resolve(payload);
         else {
             // eslint-disable-next-line eqeqeq
