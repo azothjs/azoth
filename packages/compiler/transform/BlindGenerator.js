@@ -1,17 +1,27 @@
 import { Generator, writeNextLine } from './GeneratorBase.js';
 import { isValidESIdentifier } from 'is-valid-es-identifier';
-import { generate as astring } from 'astring';
 import { generateWith } from '../compiler.js';
 
-const OPENING_PROP = {
+const OPENING_TYPES = {
+    JSXOpeningElement: true,
+    JSXOpeningFragment: true,
+};
+
+const OPENING_PROP_BY_TYPE = {
     JSXElement: 'openingElement',
     JSXFragment: 'openingFragment',
 };
 
-const IS_OPENING = {
-    JSXOpeningElement: true,
-    JSXOpeningFragment: true,
-};
+function getOpening(element) {
+    const { type } = element;
+    if(OPENING_TYPES[type]) return element;
+
+    const prop = OPENING_PROP_BY_TYPE[type];
+    if(prop) return element[prop];
+
+    throw new TypeError(`Unexpected binding element type "${element.type}"`);
+}
+
 
 export class BindGenerator extends Generator {
     static generate(template) {
@@ -35,7 +45,7 @@ export class BindGenerator extends Generator {
     JSXTemplate(state) {
         const { template } = this;
         // Short-circuit templates
-        const { isStatic, bindings, node: root } = template;
+        const { isStatic, node: root } = template;
         const { isComponent } = root;
         if(isStatic || isComponent) {
             if(isComponent) this.CreateElement(root, state);
@@ -43,16 +53,10 @@ export class BindGenerator extends Generator {
             return;
         }
 
-        this.GetTargets(template, state);
-
-
+        this.DomTargets(template, state);
         this.Bindings(template, state);
-
-
     }
 
-    // process javascript in {...} exprs,
-    // supports nested template: recursive processing ftw!
     JSXExpressionContainer({ expression }, state) {
         this[expression.type](expression, state);
     }
@@ -73,59 +77,50 @@ export class BindGenerator extends Generator {
         }
         state.write(`t${id}`, node);
         state.write(`(`);
+        // TODO: this should go in template module
         if(isDomFragment) state.write('true');
         state.write(`)`);
     }
 
-    GetTargets(template, state) {
-        const { boundElements, bindings, node } = template;
+    DomTargets(template, state) {
+        const { boundElements, bindings, isBoundRoot } = template;
+        const { length: elLength } = boundElements;
 
-        const hasTargets = !!boundElements.length;
-        const params = hasTargets ? `root, targets` : `root`;
-        state.write(`function getTargets(${params}) {`);
-        state.indentLevel++;
+        const ROOT = 'r';
+        const TARGET = 't';
 
-        // target variables
-        for(let i = 0; i < boundElements.length; i++) {
-            const boundElement = boundElements[i];
-            const opening = boundElement.openingElement || boundElement.openFragment;
-            writeNextLine(state);
-            state.write(`const target${i} = `);
-            state.write(`targets[${i}]`, opening?.name);
-            state.write(`;`);
+        state.write(`function getTargets(`);
+        if(isBoundRoot) state.write(ROOT);
+        if(elLength) {
+            const targets = [];
+            for(let i = 0; i < elLength; i++) {
+                targets.push(`${TARGET}${i}`);
+            }
+            state.write(`, [${targets.join(', ')}]`);
         }
+        state.write(') {');
 
-        const returnValues = [];
+        state.indentLevel++;
+        writeNextLine(state);
+
+        state.write(`return [`);
         for(let i = 0; i < bindings.length; i++) {
             const { element, type, index, node } = bindings[i];
-            const { queryIndex } = element;
-            const varName = queryIndex === -1 ? `root` : `target${queryIndex}`;
+            const { isRoot, queryIndex } = element;
+            const varName = isRoot ? ROOT : `${TARGET}${queryIndex}`;
+
+            if(i !== 0) state.write(', ');
+
             if(type !== 'child') {
-                returnValues.push(varName);
+                state.write(`${varName}`);
                 continue;
             }
 
-            let opening = null;
-            if(IS_OPENING[element.type]) opening = element;
-            else {
-                const prop = OPENING_PROP[element.type];
-                if(prop) opening = element[prop];
-                else {
-                    throw new TypeError(`Unexpected binding node type "${node.type}"`);
-                }
-            }
-
-            const childVar = `child${i}`;
-            returnValues.push(childVar);
-            writeNextLine(state);
-            state.write(`const ${childVar} = `);
+            const opening = getOpening(element, node);
             state.write(`${varName}.childNodes`, opening.name);
             state.write(`[${index}]`, node);
-            state.write(`;`);
         }
-
-        writeNextLine(state);
-        state.write(`return [${returnValues.join(', ')}];`);
+        state.write(`];`);
 
         state.indentLevel--;
         writeNextLine(state);
@@ -266,3 +261,4 @@ export class BindGenerator extends Generator {
         state.write(`;`);
     }
 }
+

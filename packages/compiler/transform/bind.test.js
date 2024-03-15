@@ -12,7 +12,7 @@ describe('Bind Generator', () => {
     test('Hello Bind', ({ expect }) => {
         // const input = `const t = <p>yo</p>;`;
         const input = `const t = <p className={"className"}>
-            Hello <span>hey {"Azoth"}!</span>
+            {"Greeting"} <span>hey {"Azoth"}!</span>
         </p>;`;
 
         const initial = preParse(input);
@@ -22,16 +22,15 @@ describe('Bind Generator', () => {
         const { code } = BindGenerator.generate(template);
 
         expect(code).toMatchInlineSnapshot(`
-          "function getTargets(root, targets) {
-            const target0 = targets[0];
-            const child1 = target0.childNodes[1];
-            return [root, child1];
+          "function getTargets(r, [t0]) {
+            return [r, r.childNodes[1], t0.childNodes[1]];
           }
 
-          function apply(p0, p1) {
-            const [root, t0, t1] = getTargets();
+          function apply(p0, p1, p2) {
+            const [root, t0, t1, t2] = getTargets();
             t0.className = p0;
             compose(t1, p1);
+            compose(t2, p2);
           }
           "
         `);

@@ -92,6 +92,7 @@ export class Analyzer {
 
     #bind(type, node, expr, index) {
         const element = this.#elements.current;
+        element.isRoot = element === this.#root;
 
         const binding = {
             element,
@@ -106,6 +107,8 @@ export class Analyzer {
             if(type !== 'prop') {
                 throw new TypeError(`Unexpected binding type "${type}", expected "prop"`);
             }
+
+            // early exit! components get bindings as props
             element.props.push(binding);
             return;
         }
@@ -116,7 +119,7 @@ export class Analyzer {
             this.#imports.add('compose');
         }
 
-        if(element === this.#root) {
+        if(element.isRoot) {
             // root can't be a "target", it gets a -1 queryIndex 
             // to signal bound template root (either el or fragment)
             element.queryIndex = -1;
