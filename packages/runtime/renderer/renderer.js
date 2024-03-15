@@ -29,13 +29,19 @@ function rendererFactory(id, node, isFragment) {
     return render;
 }
 
+const QUERY_SELECTOR = '[data-bind]';
+
 function renderer(fragment, isFragment) {
     if(!isFragment) fragment = fragment.firstElementChild;
     // TODO: malformed fragments...necessary?
 
     return function render() {
         const clone = fragment.cloneNode(true);
-        const targets = clone.querySelectorAll('[data-bind]');
+        const targets = clone.querySelectorAll(QUERY_SELECTOR);
         return [clone, targets];
     };
+}
+
+export function getBoundElements(dom) {
+    return dom.querySelectorAll(QUERY_SELECTOR);
 }

@@ -34,6 +34,28 @@ describe('Bind Generator', () => {
           }
           "
         `);
+    });
+
+    test('Hello Bind', ({ expect }) => {
+        // const input = `const t = <p>yo</p>;`;
+        const input = `name => <p>{name}</p>`;
+        const initial = preParse(input);
+        const template = initial.templates[0];
+        expect(template.node.type).toBe('JSXElement');
+
+        const { code } = BindGenerator.generate(template);
+
+        expect(code).toMatchInlineSnapshot(`
+          "function getTargets(r) {
+            return [r.childNodes[0]];
+          }
+
+          function apply(p0) {
+            const [root, t0] = getTargets();
+            compose(t0, p0);
+          }
+          "
+        `);
 
 
     });
