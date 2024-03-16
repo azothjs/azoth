@@ -4,6 +4,21 @@ export function clearTemplates() {
     templates.clear();
 }
 
+export function makeStringRenderer(id, html, isFragment = false) {
+    return () => {
+        const root = [];
+        const targets = [];
+        for(let i = 0; i < html.length; i++) {
+            root.push(html[i]);
+            if(i === html.length - 1) break;
+            const target = [];
+            targets.push(target);
+            root.push(target);
+        }
+        return [root, targets];
+    };
+}
+
 export function makeRenderer(id, html, isFragment = false) {
     if(templates.has(id)) return templates.get(id);
 
@@ -47,23 +62,62 @@ export function getBoundElements(dom) {
 }
 
 
-/*
+
 const map = new Map();
+
+
+export const injectable = [];
+export function inject(node, callback) {
+    injectable.push(node);
+    callback();
+    const popped = injectable.pop();
+    if(popped !== node) {
+        // TODO: display html like object for compose
+        throw new Error('Injectable stack error');
+    }
+}
+
+
 export function makeTemplate(source, targets, makeBind) {
     let bind = null;
-    let root = injectableRoot;
+    let node = injectable.at(-1); // peek!
     // TODO: test injectable is right template id
 
-    if(root) bind = map.get(root);
+    if(node) bind = map.get(node);
     if(!bind) {
-        const result = root
-            ? [root, getBoundElements(root)]
+        const result = node
+            ? [node, getBoundElements(node)]
             : source();
-        root = result[0];
-        const nodes = targets(root, result[1]);
+        node = result[0];
+        const nodes = targets(node, result[1]);
         bind = makeBind(nodes);
-        map.set(root, bind);
+        map.set(node, bind);
     }
 
-    return [root, bind];
-};*/
+    return [node, bind];
+}
+
+export class Controller {
+    static for(renderFn) {
+        return new this(renderFn);
+    }
+    constructor(renderFn) {
+        this.renderFn = renderFn;
+    }
+    render(props) {
+        return this.renderFn(props);
+    }
+    update(node, props) {
+        inject(node, () => this.renderFn(props));
+    }
+}
+
+export class Updater extends Controller {
+    #dom = null;
+    render(props) {
+        return this.#dom = super.render(props);
+    }
+    update(props) {
+        super.update(this.#dom, props);
+    }
+}
