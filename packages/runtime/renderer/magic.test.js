@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import { compose } from '../compose/compose.js';
-import { makeRenderer, getBoundElements, makeTemplate } from './renderer.js';
+import { makeRenderer, getBoundElements } from './renderer.js';
 
 // template generated artifacts
 const source = makeRenderer('id', `<p data-bind><!--0--></p>`);
@@ -12,10 +12,9 @@ function injectRender(dom, callback) {
     injectableRoot = null;
 }
 
-function getTargets(r, boundEls) {
+function getBindTargets(r, boundEls) {
     return [r.childNodes[0]];
 }
-
 const makeBind = targets => {
     const t0 = targets[0];
     return p0 => {
@@ -24,11 +23,31 @@ const makeBind = targets => {
 };
 
 function render123(p0) {
-    const [root, bind] = makeTemplate(source, getTargets, makeBind);
+    const [root, bind] = makeTemplate(source);
     bind(p0);
     return root;
 }
 
+const map = new Map();
+
+const makeTemplate = (source) => {
+    let bind = null;
+    let root = injectableRoot;
+    // TODO: test injectable is right template id
+
+    if(root) bind = map.get(root);
+    if(!bind) {
+        const result = root
+            ? [root, getBoundElements(root)]
+            : source();
+        root = result[0];
+        const nodes = getBindTargets(root, result[1]);
+        bind = makeBind(nodes);
+        map.set(root, bind);
+    }
+
+    return [root, bind];
+};
 
 class Controller {
     static for(renderFn) {

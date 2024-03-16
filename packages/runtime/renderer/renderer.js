@@ -47,8 +47,8 @@ export function getBoundElements(dom) {
 }
 
 
+/*
 const map = new Map();
-
 export function makeTemplate(source, targets, makeBind) {
     let bind = null;
     let root = injectableRoot;
@@ -66,4 +66,4 @@ export function makeTemplate(source, targets, makeBind) {
     }
 
     return [root, bind];
-};
+};*/
