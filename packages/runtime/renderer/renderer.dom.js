@@ -42,6 +42,6 @@ function renderer(fragment, isFragment) {
     };
 }
 
-export function getBoundElements(dom) {
+export function getDOMBound(dom) {
     return dom.querySelectorAll(QUERY_SELECTOR);
 }

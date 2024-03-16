@@ -2,13 +2,15 @@ import { describe, test } from 'vitest';
 import { compose } from '../compose/compose.js';
 import {
     makeRenderer,
-    getBoundElements,
+    getDOMBound,
 } from './renderer.dom.js';
 import {
     makeTemplate,
     makeStringRenderer,
+    getStringBound,
     Controller,
     Updater,
+    clearBind,
 } from './renderer.js';
 
 // template generated artifacts
@@ -41,7 +43,7 @@ function renderDOM(p0) {
         source,
         getTargets,
         makeBind,
-        getBoundElements,
+        getDOMBound,
     );
     bind(p0);
     return root;
@@ -50,14 +52,15 @@ function renderString(p0) {
     const [root, bind] = makeTemplate(
         stringSource,
         getStringTargets,
-        makeStringBind
+        makeStringBind,
+        getStringBound,
     );
     bind(p0);
     return root;
 }
 /*
 const NameTag = Controller.for(({ greeting, name }) => {
-    const Greeting = Controller.for(greeting => <span>{greeting}</span>);
+    const Greeting = Updater.for(greeting => <span>{greeting}</span>);
 
     return <p>
         <Greeting greeting={greeting} /> {name}
@@ -68,7 +71,8 @@ const Hello = Controller.for(name => <p>{name}</p>);
 */
 describe('string render', () => {
     const flatRender = node => node.flat().join('');
-    test.only('Controller.for', ({ expect }) => {
+
+    test('Controller.for', ({ expect }) => {
         const controller = Controller.for(name => renderString(name));
 
         let node1 = controller.render('felix');
@@ -90,6 +94,14 @@ describe('string render', () => {
         );
     });
 
+    test('inject unknown node', ({ expect }) => {
+        const controller = Controller.for(name => renderString(name));
+        let node = controller.render('felix');
+        clearBind(node);
+        controller.update(node, 'garfield');
+        expect(flatRender(node)).toMatchInlineSnapshot(`"<p data-bind>garfield</p>"`);
+    });
+
     test('Updater.for', ({ expect }) => {
         const updater = Updater.for(name => renderString(name));
         const node = updater.render('felix');
@@ -104,6 +116,7 @@ describe('string render', () => {
     });
 
 });
+
 describe('dom render', () => {
 
     test('Controller.for', ({ expect }) => {
@@ -118,6 +131,14 @@ describe('dom render', () => {
         controller.update(node2, 'stimpy');
         expect(node1.outerHTML).toMatchInlineSnapshot(`"<p data-bind="">garfield<!--1--></p>"`);
         expect(node2.outerHTML).toMatchInlineSnapshot(`"<p data-bind="">stimpy<!--1--></p>"`);
+    });
+
+    test('inject unknown node creates bind', ({ expect }) => {
+        const controller = Controller.for(name => renderDOM(name));
+        let node = controller.render('felix');
+        clearBind(node);
+        controller.update(node, 'garfield');
+        expect(node.outerHTML).toMatchInlineSnapshot(`"<p data-bind="">garfield1<!--1--></p>"`);
     });
 
     test('Updater.for', ({ expect }) => {

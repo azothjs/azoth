@@ -1,17 +1,27 @@
 
 export function makeStringRenderer(id, html, isFragment = false) {
+    const template = [];
+    for(let i = 0; i < html.length; i++) {
+        if(i !== 0) template.push(null);
+        template.push(html[i]);
+    }
+
     return () => {
-        const root = [];
+        const root = template.slice();
         const targets = [];
-        for(let i = 0; i < html.length; i++) {
-            root.push(html[i]);
-            if(i === html.length - 1) break;
-            const target = [];
-            targets.push(target);
-            root.push(target);
+        for(let i = 1; i < root.length; i += 2) {
+            targets.push(root[i] = []);
         }
         return [root, targets];
     };
+}
+
+export function getStringBound(root) {
+    const targets = [];
+    for(let i = 1; i < root.length; i += 2) {
+        targets.push(root[i] = []);
+    }
+    return targets;
 }
 
 // stack
@@ -28,6 +38,11 @@ export function inject(node, callback) {
 
 const map = new Map();
 
+// TODO: will evolve once "clean-up" happens
+export function clearBind(node) {
+    if(map.has(node)) map.delete(node);
+}
+
 export function makeTemplate(source, targets, makeBind, getBound) {
     let bind = null;
     let boundEls = null;
@@ -38,6 +53,10 @@ export function makeTemplate(source, targets, makeBind, getBound) {
     if(node) bind = map.get(node);
     if(bind) return [node, bind];
 
+    // use case would be list component optimize by
+    // not keeping bind functions,
+    // honestly not sure this really needed, the
+    // overhead is small as it is simple function
     if(node) boundEls = getBound(node);
     else {
         // (destructured re-assignment)
