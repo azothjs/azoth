@@ -22,6 +22,10 @@ function getOpening(element) {
     throw new TypeError(`Unexpected binding element type "${element.type}"`);
 }
 
+const ROOT = 'r';
+const TARGETS = 'ts';
+const TARGET = 't';
+const VALUE = 'v';
 
 export class BindGenerator extends Generator {
     static generate(template) {
@@ -53,8 +57,9 @@ export class BindGenerator extends Generator {
             return;
         }
 
-        this.DomTargets(template, state);
+        this.Targets(template, state);
         this.Bindings(template, state);
+        this.Render(template, state);
     }
 
     JSXExpressionContainer({ expression }, state) {
@@ -82,22 +87,13 @@ export class BindGenerator extends Generator {
         state.write(`)`);
     }
 
-    DomTargets(template, state) {
+    Targets(template, state) {
         const { boundElements, bindings, isBoundRoot } = template;
         const { length: elLength } = boundElements;
 
-        const ROOT = 'r';
-        const TARGET = 't';
-
-        state.write(`function getTargets(`);
-        if(isBoundRoot) state.write(ROOT);
-        if(elLength) {
-            const targets = [];
-            for(let i = 0; i < elLength; i++) {
-                targets.push(`${TARGET}${i}`);
-            }
-            state.write(`, [${targets.join(', ')}]`);
-        }
+        state.write(`function targets(`);
+        state.write(ROOT);
+        if(elLength) state.write(`, ${TARGETS}`);
         state.write(') {');
 
         state.indentLevel++;
@@ -107,7 +103,7 @@ export class BindGenerator extends Generator {
         for(let i = 0; i < bindings.length; i++) {
             const { element, type, index, node } = bindings[i];
             const { isRoot, queryIndex } = element;
-            const varName = isRoot ? ROOT : `${TARGET}${queryIndex}`;
+            const varName = isRoot ? ROOT : `${TARGETS}[${queryIndex}]`;
 
             if(i !== 0) state.write(', ');
 
@@ -126,35 +122,51 @@ export class BindGenerator extends Generator {
         writeNextLine(state);
         state.write(`}`);
         state.write(state.lineEnd);
-        writeNextLine(state);
     }
 
-    Bindings(template, state) {
-        const { boundElements, bindings, node } = template;
-
+    Render(template, state) {
+        const { bindings } = template;
 
         const params = [];
         for(let i = 0; i < bindings.length; i++) {
-            params.push(`p${i}`);
+            params.push(`${VALUE}${i}`);
         }
-        state.write(`function apply(${params.join(', ')}) {`);
+
+        state.write(`function render(${params.join(', ')}) {`);
         state.indentLevel++;
         writeNextLine(state);
 
-        const returnStatement = template.node.returnStatement;
+        state.write(`const [root, bind] = makeTemplate(source);`);
+        writeNextLine(state);
+        state.write(`bind(${params.join(', ')});`);
+        writeNextLine(state);
+        state.write(`return root;`);
 
+        state.indentLevel--;
+        writeNextLine(state);
+        state.write(`}`);
+        state.write(state.lineEnd);
+    }
 
-        // template service renderer call
-        const hasTargets = !!boundElements.length;
+    Bindings(template, state) {
+        const { bindings } = template;
 
-        const vars = ['root'];
+        state.write(`function bind(${TARGETS}) {`);
+        state.indentLevel++;
+        writeNextLine(state);
+
+        const targets = [];
+        const params = [];
         for(let i = 0; i < bindings.length; i++) {
-            vars.push(`t${i}`);
+            targets.push(`${TARGET}${i} = ${TARGETS}[${i}]`);
+            params.push(`${VALUE}${i}`);
         }
 
-        state.write(`const [${vars.join(', ')}] = getTargets();`);
+        state.write(`const ${targets.join(', ')};`);
+        writeNextLine(state);
+        state.write(`return (${params.join(', ')}) => {`);
+        state.indentLevel++;
 
-        // bindings
         for(let i = 0; i < bindings.length; i++) {
             const { element, type, node, expr } = bindings[i];
             writeNextLine(state);
@@ -182,21 +194,25 @@ export class BindGenerator extends Generator {
 
         state.indentLevel--;
         writeNextLine(state);
+        state.write(`};`);
+        state.indentLevel--;
+        writeNextLine(state);
         state.write(`}`);
+
         state.write(state.lineEnd);
     }
 
     Compose(node, expr, index, state) {
         state.write(`compose(`, node);
-        state.write(`t${index}, `, node);
-        state.write(`p${index}`, expr);
+        state.write(`${TARGET}${index}, `, node);
+        state.write(`${VALUE}${index}`, expr);
         // this[expr.type](expr, state);
         state.write(`);`);
     }
 
     ComposeElement(node, expr, index, state) {
         state.write(`composeElement(`, node);
-        state.write(`t${index}, `);
+        state.write(`${TARGET}${index}, `);
         this.CompleteElement(node, expr, state);
         state.write(`);`);
     }
@@ -237,9 +253,8 @@ export class BindGenerator extends Generator {
 
     BindingProp(node, expr, index, element, state) {
         const { queryIndex, openingElement, openingFragment } = element;
-        const varName = queryIndex === -1 ? `root` : `target${queryIndex}`;
         const opening = openingElement ?? openingFragment;
-        state.write(`t${index}`, opening.name);
+        state.write(`${TARGET}${index}`, opening.name);
         // TODO: more property validation
         const identity = node.name;
         const propName = identity.name;
@@ -257,7 +272,7 @@ export class BindGenerator extends Generator {
         /* expression */
         state.write(` = `);
         // this[expr.type](expr, state);
-        state.write(`p${index}`, expr);
+        state.write(`${VALUE}${index}`, expr);
         state.write(`;`);
     }
 }

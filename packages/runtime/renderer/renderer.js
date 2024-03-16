@@ -45,3 +45,25 @@ function renderer(fragment, isFragment) {
 export function getBoundElements(dom) {
     return dom.querySelectorAll(QUERY_SELECTOR);
 }
+
+
+const map = new Map();
+
+export function makeTemplate(source, targets, makeBind) {
+    let bind = null;
+    let root = injectableRoot;
+    // TODO: test injectable is right template id
+
+    if(root) bind = map.get(root);
+    if(!bind) {
+        const result = root
+            ? [root, getBoundElements(root)]
+            : source();
+        root = result[0];
+        const nodes = targets(root, result[1]);
+        bind = makeBind(nodes);
+        map.set(root, bind);
+    }
+
+    return [root, bind];
+};
