@@ -1,4 +1,3 @@
-import { Stack } from './Stack.js';
 import { Template } from './Template.js';
 import { voidElements } from './html.js';
 
@@ -14,7 +13,7 @@ const BINDING_ATTR = {
 const byOrder = (a, b) => a.order - b.order;
 
 export class Analyzer {
-    #elements = new Stack();
+    #elements = []; // stack
     #documentOrder = 0;
     #boundElements = new Set();
     #bindings = [];
@@ -91,7 +90,7 @@ export class Analyzer {
     }
 
     #bind(type, node, expr, index) {
-        const element = this.#elements.current;
+        const element = this.#elements.at(-1); // peek
         element.isRoot = element === this.#root;
 
         const binding = {
@@ -261,5 +260,3 @@ function trimChildren(node) {
         node.children = trimmed;
     }
 }
-
-

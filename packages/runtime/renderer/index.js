@@ -1,0 +1,1 @@
+export { makeRenderer, rendererById } from './renderer.dom.js';

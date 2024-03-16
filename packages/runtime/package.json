@@ -27,7 +27,7 @@
     ],
     "exports": {
         "./compose": "./compose/compose.js",
-        "./renderer": "./renderer/renderer.js"
+        "./renderer": "./renderer/index.js"
     },
     "devDependencies": {
         "test-utils": "workspace:^"

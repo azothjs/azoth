@@ -1,8 +1,3 @@
-const templates = new Map();
-
-export function clearTemplates() {
-    templates.clear();
-}
 
 export function makeStringRenderer(id, html, isFragment = false) {
     return () => {
@@ -19,54 +14,8 @@ export function makeStringRenderer(id, html, isFragment = false) {
     };
 }
 
-export function makeRenderer(id, html, isFragment = false) {
-    if(templates.has(id)) return templates.get(id);
-
-    const template = document.createElement('template');
-    template.innerHTML = html;
-    return rendererFactory(id, template.content, isFragment);
-}
-
-export function rendererById(id, isFragment = false) {
-    if(templates.has(id)) return templates.get(id);
-
-    const templateEl = document.getElementById(id);
-    if(!templateEl) {
-        throw new Error(`No template with id "${id}"`);
-    }
-
-    return rendererFactory(id, templateEl.content, isFragment);
-}
-
-function rendererFactory(id, node, isFragment) {
-    const render = renderer(node, isFragment);
-    templates.set(id, render);
-    return render;
-}
-
-const QUERY_SELECTOR = '[data-bind]';
-
-function renderer(fragment, isFragment) {
-    if(!isFragment) fragment = fragment.firstElementChild;
-    // TODO: malformed fragments...necessary?
-
-    return function render() {
-        const clone = fragment.cloneNode(true);
-        const targets = clone.querySelectorAll(QUERY_SELECTOR);
-        return [clone, targets];
-    };
-}
-
-export function getBoundElements(dom) {
-    return dom.querySelectorAll(QUERY_SELECTOR);
-}
-
-
-
-const map = new Map();
-
-
-export const injectable = [];
+// stack
+const injectable = [];
 export function inject(node, callback) {
     injectable.push(node);
     callback();
@@ -77,23 +26,28 @@ export function inject(node, callback) {
     }
 }
 
+const map = new Map();
 
-export function makeTemplate(source, targets, makeBind) {
+export function makeTemplate(source, targets, makeBind, getBound) {
     let bind = null;
+    let boundEls = null;
     let node = injectable.at(-1); // peek!
+
     // TODO: test injectable is right template id
 
     if(node) bind = map.get(node);
-    if(!bind) {
-        const result = node
-            ? [node, getBoundElements(node)]
-            : source();
-        node = result[0];
-        const nodes = targets(node, result[1]);
-        bind = makeBind(nodes);
-        map.set(node, bind);
+    if(bind) return [node, bind];
+
+    if(node) boundEls = getBound(node);
+    else {
+        // (destructured re-assignment)
+        ([node, boundEls] = source());
     }
 
+    const nodes = targets(node, boundEls);
+    bind = makeBind(nodes);
+
+    map.set(node, bind);
     return [node, bind];
 }
 
@@ -113,11 +67,11 @@ export class Controller {
 }
 
 export class Updater extends Controller {
-    #dom = null;
+    #node = null;
     render(props) {
-        return this.#dom = super.render(props);
+        return this.#node = super.render(props);
     }
     update(props) {
-        super.update(this.#dom, props);
+        super.update(this.#node, props);
     }
 }

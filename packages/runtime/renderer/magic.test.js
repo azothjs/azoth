@@ -1,6 +1,15 @@
 import { describe, test } from 'vitest';
 import { compose } from '../compose/compose.js';
-import { makeRenderer, makeTemplate, Controller, Updater, makeStringRenderer } from './renderer.js';
+import {
+    makeRenderer,
+    getBoundElements,
+} from './renderer.dom.js';
+import {
+    makeTemplate,
+    makeStringRenderer,
+    Controller,
+    Updater,
+} from './renderer.js';
 
 // template generated artifacts
 const source = makeRenderer('id', `<p data-bind><!--0--></p>`);
@@ -27,11 +36,12 @@ const makeStringBind = targets => {
         t0[0] = p0;
     };
 };
-function render123(p0) {
+function renderDOM(p0) {
     const [root, bind] = makeTemplate(
         source,
         getTargets,
-        makeBind
+        makeBind,
+        getBoundElements,
     );
     bind(p0);
     return root;
@@ -58,7 +68,7 @@ const Hello = Controller.for(name => <p>{name}</p>);
 */
 describe('string render', () => {
     const flatRender = node => node.flat().join('');
-    test('Controller.for', ({ expect }) => {
+    test.only('Controller.for', ({ expect }) => {
         const controller = Controller.for(name => renderString(name));
 
         let node1 = controller.render('felix');
@@ -97,7 +107,7 @@ describe('string render', () => {
 describe('dom render', () => {
 
     test('Controller.for', ({ expect }) => {
-        const controller = Controller.for(name => render123(name));
+        const controller = Controller.for(name => renderDOM(name));
 
         let node1 = controller.render('felix');
         let node2 = controller.render('duchess');
@@ -111,7 +121,7 @@ describe('dom render', () => {
     });
 
     test('Updater.for', ({ expect }) => {
-        const updater = Updater.for(name => render123(name));
+        const updater = Updater.for(name => renderDOM(name));
         const node = updater.render('felix');
         expect(node.outerHTML).toMatchInlineSnapshot(`"<p data-bind="">felix<!--1--></p>"`);
 
