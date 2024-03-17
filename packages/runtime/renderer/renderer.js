@@ -24,6 +24,14 @@ export function getStringBound(root) {
     return targets;
 }
 
+
+const map = new Map();
+
+// TODO: cleanup actions on nodes
+export function clearBind(node) {
+    if(map.has(node)) map.delete(node);
+}
+
 // stack
 const injectable = [];
 export function inject(node, callback) {
@@ -34,13 +42,6 @@ export function inject(node, callback) {
         // TODO: display html like object for compose
         throw new Error('Injectable stack error');
     }
-}
-
-const map = new Map();
-
-// TODO: will evolve once "clean-up" happens
-export function clearBind(node) {
-    if(map.has(node)) map.delete(node);
 }
 
 export function makeTemplate(source, targets, makeBind, getBound) {

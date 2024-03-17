@@ -16,7 +16,7 @@ const compile = input => {
 
 describe('JSX dom literals', () => {
 
-    test.only('Hello Azoth', ({ expect }) => {
+    test('Hello Azoth', ({ expect }) => {
         const input = `const t = <p className={"className"}>
             Hello {"Azoth"}
         </p>;`;
