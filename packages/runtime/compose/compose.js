@@ -80,7 +80,7 @@ export function composeElement(anchor, Constructor, props, slottable) {
 export function createElement(Constructor, props, slottable) {
     const result = create(Constructor, props, slottable);
     // result is returned to caller, force to be of type Node
-    // and convert strings and numbers into text nodes
+    // by converting strings and numbers into text nodes
     const type = typeof result;
     if(type === 'string' || type === 'number') {
         return document.createTextNode(result);
@@ -104,10 +104,7 @@ function create(input, props, slottable, anchor) {
             return anchor ? void compose(anchor, input) : input;
         case !!(input.prototype?.constructor): {
             // eslint-disable-next-line new-cap
-            const created = new input(props, slottable);
-            return isRenderObject(created)
-                ? create(created, props, slottable, anchor)
-                : create(created, null, null, anchor);
+            return create(new input(props, slottable), null, null, anchor);
         }
         case type === 'function':
             return create(input(props, slottable), null, null, anchor);
@@ -115,26 +112,28 @@ function create(input, props, slottable, anchor) {
             throwTypeError(input, type);
             break;
         }
-        case !!input[Symbol.asyncIterator]:
-            if(!anchor) anchor = document.createComment('0');
-            composeAsyncIterator(anchor, input, false, props, slottable);
-            return anchor;
         case isRenderObject(input):
             return create(input.render(props, slottable), null, null, anchor);
-        case input instanceof Promise: {
-            if(!anchor) anchor = document.createComment('0');
-            input.then(value => {
-                create(value, props, slottable, anchor);
-            });
-            return anchor;
-        }
-        case Array.isArray(input): {
-            if(!anchor) anchor = document.createComment('0');
-            compose(anchor, input, false);
-            return anchor;
-        }
         default: {
-            throwTypeErrorForObject(input, type);
+            // these inputs require a comment anchor to which they can render
+            if(!anchor) anchor = document.createComment('0');
+
+            if(input[Symbol.asyncIterator]) {
+                composeAsyncIterator(anchor, input, false, props, slottable);
+            }
+            else if(input instanceof Promise) {
+                input.then(value => {
+                    create(value, props, slottable, anchor);
+                });
+            }
+            else if(Array.isArray(input)) {
+                composeArray(anchor, input, false);
+            }
+            else {
+                throwTypeErrorForObject(input, type);
+            }
+
+            return anchor;
         }
     }
 }

@@ -1,9 +1,6 @@
 import { describe, test } from 'vitest';
 import { IGNORE, compose } from './compose.js';
-import {
-    elements, elementWithAnchor, elementWithText,
-    $anchor
-} from 'test-utils/elements';
+import { elements, elementWithAnchor, elementWithText, $anchor } from 'test-utils/elements';
 
 export function runCompose(value, create) {
     const { dom, anchor } = create();
