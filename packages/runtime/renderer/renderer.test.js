@@ -1,7 +1,7 @@
 import { beforeEach, describe, test } from 'vitest';
-import { clearTemplates, makeRenderer } from './renderer.dom.js';
+import { clearTemplates, makeRenderer, Renderer } from './renderer.js';
 
-describe('isFragment', () => {
+describe('DOM isFragment', () => {
 
     beforeEach(clearTemplates);
 

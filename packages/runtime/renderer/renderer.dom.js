@@ -1,6 +1,6 @@
 const QUERY_SELECTOR = '[data-bind]';
-export const DOMRenderEngine = {
-    name: 'DOMRenderEngine',
+export const DOMRenderer = {
+    name: 'DOMRenderer',
     make(html) {
         const template = document.createElement('template');
         template.innerHTML = html;
@@ -15,7 +15,7 @@ export const DOMRenderEngine = {
     },
     renderer(fragment, isFragment) {
         if(!isFragment) fragment = fragment.firstElementChild;
-        // TODO: malformed fragments...necessary?
+        // TODO: malformed fragment check...necessary?
 
         return function render() {
             const clone = fragment.cloneNode(true);
@@ -24,8 +24,6 @@ export const DOMRenderEngine = {
         };
     },
     bound(dom) {
-        /* bound */
         return dom.querySelectorAll(QUERY_SELECTOR);
-        /*    */
     }
 };

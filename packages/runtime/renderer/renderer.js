@@ -1,48 +1,51 @@
-import { DOMRenderEngine } from './renderer.dom.js';
-import { HTMLRenderEngine } from './renderer.html.js';
+import { DOMRenderer } from './renderer.dom.js';
+import { HTMLRenderer } from './renderer.html.js';
 
-let renderEngine = DOMRenderEngine;
+const templates = new Map(); // cache
+let renderEngine = DOMRenderer; // DOM or HTML engine
+
+// TODO: Class !!!!!
+
 export const RenderService = {
     useDOMEngine() {
-        renderEngine = DOMRenderEngine;
+        renderEngine = DOMRenderer;
+        clear();
     },
     useHTMLEngine() {
-        renderEngine = HTMLRenderEngine;
+        renderEngine = HTMLRenderer;
+        clear();
     },
-    clear,
     get,
     bound,
 };
 
-const templates = new Map();
 function clear() {
     templates.clear();
 }
 
-export function get(id, isFragment = false, html = '') {
+function get(id, isFragment = false, content) {
     if(templates.has(id)) return templates.get(id);
 
-    let node = html ? renderEngine.make(html) : renderEngine.get(id);
+    const node = content ? renderEngine.make(content) : renderEngine.get(id);
     const render = renderEngine.renderer(node, isFragment);
 
     templates.set(id, render);
     return render;
 }
 
-export function bound(node) {
+function bound(node) {
     return renderEngine.bound(node);
 }
 
-const bindings = new Map();
-
-// TODO: impl cleanup actions on nodes
+const bindings = new Map(); // cache
+// TODO: implement cleanup actions on nodes
 export function clearBind(node) {
     if(bindings.has(node)) bindings.delete(node);
 }
 
 // stack
 const injectable = [];
-export function inject(node, callback) {
+function inject(node, callback) {
     injectable.push(node);
     callback();
     const popped = injectable.pop();
@@ -52,7 +55,8 @@ export function inject(node, callback) {
     }
 }
 
-export function makeTemplate(source, targets, makeBind) {
+export function render(id, targets, makeBind, isFragment, content) {
+    let source = get(id, isFragment, content);
     let bind = null;
     let boundEls = null;
     let node = injectable.at(-1); // peek!

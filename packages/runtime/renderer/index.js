@@ -1,1 +1,1 @@
-export { makeRenderer, rendererById } from './renderer.dom.js';
+export { makeRenderer, rendererById } from './renderer.js';
