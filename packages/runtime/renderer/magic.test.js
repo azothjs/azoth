@@ -1,63 +1,14 @@
-import { describe, test } from 'vitest';
+import { describe, test, beforeEach, beforeAll } from 'vitest';
 import { compose } from '../compose/compose.js';
 import {
-    makeRenderer,
-    getDOMBound,
-} from './renderer.dom.js';
-import {
+    get,
     makeTemplate,
-    makeStringRenderer,
-    getStringBound,
     Controller,
     Updater,
     clearBind,
+    RenderService,
 } from './renderer.js';
 
-// template generated artifacts
-const source = makeRenderer('id', `<p data-bind><!--0--></p>`);
-const stringSource = makeStringRenderer('id', [`<p data-bind>`, `</p>`]);
-
-function getTargets(r, boundEls) {
-    return [r.childNodes[0]];
-}
-
-const makeBind = targets => {
-    const t0 = targets[0];
-    return p0 => {
-        compose(t0, p0);
-    };
-};
-
-function getStringTargets(r, boundEls) {
-    return [boundEls[0]];
-}
-
-const makeStringBind = targets => {
-    const t0 = targets[0];
-    return p0 => {
-        t0[0] = p0;
-    };
-};
-function renderDOM(p0) {
-    const [root, bind] = makeTemplate(
-        source,
-        getTargets,
-        makeBind,
-        getDOMBound,
-    );
-    bind(p0);
-    return root;
-}
-function renderString(p0) {
-    const [root, bind] = makeTemplate(
-        stringSource,
-        getStringTargets,
-        makeStringBind,
-        getStringBound,
-    );
-    bind(p0);
-    return root;
-}
 /*
 const NameTag = Controller.for(({ greeting, name }) => {
     const Greeting = Updater.for(greeting => <span>{greeting}</span>);
@@ -69,55 +20,36 @@ const NameTag = Controller.for(({ greeting, name }) => {
 
 const Hello = Controller.for(name => <p>{name}</p>);
 */
-describe('string render', () => {
-    const flatRender = node => node.flat().join('');
 
-    test('Controller.for', ({ expect }) => {
-        const controller = Controller.for(name => renderString(name));
-
-        let node1 = controller.render('felix');
-        let node2 = controller.render('duchess');
-        expect(flatRender(node1)).toMatchInlineSnapshot(
-            `"<p data-bind>felix</p>"`
-        );
-        expect(flatRender(node2)).toMatchInlineSnapshot(
-            `"<p data-bind>duchess</p>"`
-        );
-
-        controller.update(node1, 'garfield');
-        controller.update(node2, 'stimpy');
-        expect(flatRender(node1)).toMatchInlineSnapshot(
-            `"<p data-bind>garfield</p>"`
-        );
-        expect(flatRender(node2)).toMatchInlineSnapshot(
-            `"<p data-bind>stimpy</p>"`
-        );
-    });
-
-    test('inject unknown node', ({ expect }) => {
-        const controller = Controller.for(name => renderString(name));
-        let node = controller.render('felix');
-        clearBind(node);
-        controller.update(node, 'garfield');
-        expect(flatRender(node)).toMatchInlineSnapshot(`"<p data-bind>garfield</p>"`);
-    });
-
-    test('Updater.for', ({ expect }) => {
-        const updater = Updater.for(name => renderString(name));
-        const node = updater.render('felix');
-        expect(flatRender(node)).toMatchInlineSnapshot(
-            `"<p data-bind>felix</p>"`
-        );
-
-        updater.update('duchess');
-        expect(flatRender(node)).toMatchInlineSnapshot(
-            `"<p data-bind>duchess</p>"`
-        );
-    });
-
-});
 
 describe('dom render', () => {
+    let source = null;
+    beforeAll(() => {
+        RenderService.clear();
+        RenderService.useDOMEngine();
+        source = get('id', false, `<p data-bind><!--0--></p>`);
+    });
+
+    function getTargets(r, boundEls) {
+        return [r.childNodes[0]];
+    }
+
+    const makeBind = targets => {
+        const t0 = targets[0];
+        return p0 => {
+            compose(t0, p0);
+        };
+    };
+
+    function renderDOM(p0) {
+        const [root, bind] = makeTemplate(
+            source,
+            getTargets,
+            makeBind,
+        );
+        bind(p0);
+        return root;
+    }
 
     test('Controller.for', ({ expect }) => {
         const controller = Controller.for(name => renderDOM(name));
@@ -151,3 +83,78 @@ describe('dom render', () => {
     });
 
 });
+
+describe('html render', () => {
+    const flatRender = node => node.flat().join('');
+
+    let source = null;
+    beforeAll(() => {
+        RenderService.clear();
+        RenderService.useHTMLEngine();
+        source = get('id', false, [`<p data-bind>`, `</p>`]);
+    });
+
+    function getTargets(r, boundEls) {
+        return [boundEls[0]];
+    }
+    const makeBind = targets => {
+        const t0 = targets[0];
+        return p0 => {
+            t0[0] = p0;
+        };
+    };
+    function render(p0) {
+        const [root, bind] = makeTemplate(
+            source,
+            getTargets,
+            makeBind,
+        );
+        bind(p0);
+        return root;
+    }
+
+    test('Controller.for', ({ expect }) => {
+        const controller = Controller.for(name => render(name));
+
+        let node1 = controller.render('felix');
+        let node2 = controller.render('duchess');
+        expect(flatRender(node1)).toMatchInlineSnapshot(
+            `"<p data-bind>felix</p>"`
+        );
+        expect(flatRender(node2)).toMatchInlineSnapshot(
+            `"<p data-bind>duchess</p>"`
+        );
+
+        controller.update(node1, 'garfield');
+        controller.update(node2, 'stimpy');
+        expect(flatRender(node1)).toMatchInlineSnapshot(
+            `"<p data-bind>garfield</p>"`
+        );
+        expect(flatRender(node2)).toMatchInlineSnapshot(
+            `"<p data-bind>stimpy</p>"`
+        );
+    });
+
+    test('inject unknown node', ({ expect }) => {
+        const controller = Controller.for(name => render(name));
+        let node = controller.render('felix');
+        clearBind(node);
+        controller.update(node, 'garfield');
+        expect(flatRender(node)).toMatchInlineSnapshot(`"<p data-bind>garfield</p>"`);
+    });
+
+    test('Updater.for', ({ expect }) => {
+        const updater = Updater.for(name => render(name));
+        const node = updater.render('felix');
+        expect(flatRender(node)).toMatchInlineSnapshot(
+            `"<p data-bind>felix</p>"`
+        );
+
+        updater.update('duchess');
+        expect(flatRender(node)).toMatchInlineSnapshot(
+            `"<p data-bind>duchess</p>"`
+        );
+    });
+
+});
+

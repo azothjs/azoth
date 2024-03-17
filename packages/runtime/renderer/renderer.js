@@ -1,35 +1,43 @@
+import { DOMRenderEngine } from './renderer.dom.js';
+import { HTMLRenderEngine } from './renderer.html.js';
 
-export function makeStringRenderer(id, html, isFragment = false) {
-    const template = [];
-    for(let i = 0; i < html.length; i++) {
-        if(i !== 0) template.push(null);
-        template.push(html[i]);
-    }
+let renderEngine = DOMRenderEngine;
+export const RenderService = {
+    useDOMEngine() {
+        renderEngine = DOMRenderEngine;
+    },
+    useHTMLEngine() {
+        renderEngine = HTMLRenderEngine;
+    },
+    clear,
+    get,
+    bound,
+};
 
-    return () => {
-        const root = template.slice();
-        const targets = [];
-        for(let i = 1; i < root.length; i += 2) {
-            targets.push(root[i] = []);
-        }
-        return [root, targets];
-    };
+const templates = new Map();
+function clear() {
+    templates.clear();
 }
 
-export function getStringBound(root) {
-    const targets = [];
-    for(let i = 1; i < root.length; i += 2) {
-        targets.push(root[i] = []);
-    }
-    return targets;
+export function get(id, isFragment = false, html = '') {
+    if(templates.has(id)) return templates.get(id);
+
+    let node = html ? renderEngine.make(html) : renderEngine.get(id);
+    const render = renderEngine.renderer(node, isFragment);
+
+    templates.set(id, render);
+    return render;
 }
 
+export function bound(node) {
+    return renderEngine.bound(node);
+}
 
-const map = new Map();
+const bindings = new Map();
 
-// TODO: cleanup actions on nodes
+// TODO: impl cleanup actions on nodes
 export function clearBind(node) {
-    if(map.has(node)) map.delete(node);
+    if(bindings.has(node)) bindings.delete(node);
 }
 
 // stack
@@ -44,21 +52,21 @@ export function inject(node, callback) {
     }
 }
 
-export function makeTemplate(source, targets, makeBind, getBound) {
+export function makeTemplate(source, targets, makeBind) {
     let bind = null;
     let boundEls = null;
     let node = injectable.at(-1); // peek!
 
-    // TODO: test injectable is right template id
+    // TODO: test injectable is right template id type
 
-    if(node) bind = map.get(node);
+    if(node) bind = bindings.get(node);
     if(bind) return [node, bind];
 
     // use case would be list component optimize by
     // not keeping bind functions,
     // honestly not sure this really needed, the
     // overhead is small as it is simple function
-    if(node) boundEls = getBound(node);
+    if(node) boundEls = renderEngine.bound(node);
     else {
         // (destructured re-assignment)
         ([node, boundEls] = source());
@@ -67,7 +75,7 @@ export function makeTemplate(source, targets, makeBind, getBound) {
     const nodes = targets(node, boundEls);
     bind = makeBind(nodes);
 
-    map.set(node, bind);
+    bindings.set(node, bind);
     return [node, bind];
 }
 
