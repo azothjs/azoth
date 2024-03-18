@@ -1,14 +1,16 @@
 export const HTMLRenderer = {
     name: 'HTMLRenderer',
-    make(html) {
-        return html;
+
+    createTemplate(_id, content) {
+        if(!content) {
+            // Q: what is the prod optimized equiv? if any?
+            // Array/String literal seems as good or better than JSON file?
+            // TODO: benchmark
+            throw new TypeError(`HTMLRenderer.createTemplate requires "content" parameter`);
+        }
+        return HTMLRenderer.renderer(content);
     },
-    get(id) {
-        // Q: what is the prod optimized equiv? if any?
-        // Array/String literal seems as good or better than JSON file?
-        // TODO: benchmark
-        throw new Error(`HTMLRenderer does not support "get(id)" of "${id}". Use "make(html)" instead`);
-    },
+
     // pretty sure fragments NOT needed for html render,
     // really a DOM optimization to avoid Fragment container
     // on single element root

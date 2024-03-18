@@ -1,10 +1,8 @@
-import { DOMRenderer } from './renderer.dom.js';
-import { HTMLRenderer } from './renderer.html.js';
+import { DOMRenderer } from './dom-renderer.js';
+import { HTMLRenderer } from './html-renderer.js';
 
 const templates = new Map(); // cache
 let renderEngine = DOMRenderer; // DOM or HTML engine
-
-// TODO: Class !!!!!
 
 export const RenderService = {
     useDOMEngine() {
@@ -26,11 +24,10 @@ function clear() {
 function get(id, isFragment = false, content) {
     if(templates.has(id)) return templates.get(id);
 
-    const node = content ? renderEngine.make(content) : renderEngine.get(id);
-    const render = renderEngine.renderer(node, isFragment);
+    const template = renderEngine.createTemplate(id, content, isFragment);
 
-    templates.set(id, render);
-    return render;
+    templates.set(id, template);
+    return template;
 }
 
 function bound(node) {
