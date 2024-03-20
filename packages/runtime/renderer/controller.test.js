@@ -1,8 +1,7 @@
 import { describe, test, beforeEach, beforeAll } from 'vitest';
 import { compose } from '../compose/compose.js';
 import {
-    get,
-    render,
+    renderer,
     Controller,
     Updater,
     clearBind,
@@ -10,8 +9,17 @@ import {
 } from './renderer.js';
 
 describe('dom render', () => {
+
+    let getBound = null;
     beforeAll(() => {
         RenderService.useDOMEngine();
+        getBound = renderer(
+            'id',
+            getTargets,
+            makeBind,
+            false,
+            `<p data-bind><!--0--></p>`,
+        );
     });
 
     function getTargets(r, boundEls) {
@@ -26,13 +34,7 @@ describe('dom render', () => {
     };
 
     function renderDOM(p0) {
-        const [root, bind] = render(
-            'id',
-            getTargets,
-            makeBind,
-            false,
-            `<p data-bind><!--0--></p>`,
-        );
+        const [root, bind] = getBound();
         bind(p0);
         return root;
     }
@@ -73,8 +75,16 @@ describe('dom render', () => {
 describe('html render', () => {
     const flatRender = node => node.flat().join('');
 
+    let getBound = null;
     beforeAll(() => {
         RenderService.useHTMLEngine();
+        getBound = renderer(
+            'id',
+            getTargets,
+            makeBind,
+            false,
+            [`<p data-bind>`, `</p>`],
+        );
     });
 
     function getTargets(r, boundEls) {
@@ -87,14 +97,9 @@ describe('html render', () => {
             t0[0] = p0;
         };
     };
+
     function renderHTML(p0) {
-        const [root, bind] = render(
-            'id',
-            getTargets,
-            makeBind,
-            false,
-            [`<p data-bind>`, `</p>`],
-        );
+        const [root, bind] = getBound();
         bind(p0);
         return root;
     }

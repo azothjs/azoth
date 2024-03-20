@@ -2,40 +2,20 @@ import { Generator, writeNextLine } from './GeneratorBase.js';
 import { isValidESIdentifier } from 'is-valid-es-identifier';
 import { generateWith } from '../compiler.js';
 
-const OPENING_TYPES = {
-    JSXOpeningElement: true,
-    JSXOpeningFragment: true,
-};
-
-const OPENING_PROP_BY_TYPE = {
-    JSXElement: 'openingElement',
-    JSXFragment: 'openingFragment',
-};
-
-function getOpening(element) {
-    const { type } = element;
-    if(OPENING_TYPES[type]) return element;
-
-    const prop = OPENING_PROP_BY_TYPE[type];
-    if(prop) return element[prop];
-
-    throw new TypeError(`Unexpected binding element type "${element.type}"`);
-}
-
-const ROOT = 'r';
 const TARGETS = 'ts';
 const TARGET = 't';
 const VALUE = 'v';
 
-export class BindGenerator extends Generator {
+export class RenderGenerator extends Generator {
     static generate(template) {
-        const generator = new BindGenerator(template);
+        const generator = new this(template);
         return generateWith(generator, template.node);
     }
+    #bindings = null;
 
     constructor(template) {
         super();
-        this.template = template;
+        this.#bindings = template.bindings;
     }
 
     JSXFragment(_node, state) {
@@ -47,19 +27,7 @@ export class BindGenerator extends Generator {
     }
 
     JSXTemplate(state) {
-        const { template } = this;
-        // Short-circuit templates
-        const { isStatic, node: root } = template;
-        const { isComponent } = root;
-        if(isStatic || isComponent) {
-            if(isComponent) this.CreateElement(root, state);
-            else if(isStatic) this.StaticRoot(template, state);
-            return;
-        }
-
-        this.Targets(template, state);
-        this.Bindings(template, state);
-        this.Render(template, state);
+        this.Bindings(state);
     }
 
     JSXExpressionContainer({ expression }, state) {
@@ -70,86 +38,32 @@ export class BindGenerator extends Generator {
         state.write(identifier.name, identifier);
     }
 
-    StaticRoot(template, state) {
-        this.TemplateRenderer(template, state);
-        if(!template.isEmpty) state.write(`[0]`, template.node); // dom root
-    }
+    // Render(template, state) {
+    //     const { bindings, isDomFragment } = template;
 
-    TemplateRenderer({ id, isEmpty, isDomFragment, node }, state) {
-        if(isEmpty) {
-            state.write('null', node);
-            return;
-        }
-        state.write(`t${id}`, node);
-        state.write(`(`);
-        // TODO: this should go in template module
-        if(isDomFragment) state.write('true');
-        state.write(`)`);
-    }
+    //     const params = [];
+    //     for(let i = 0; i < bindings.length; i++) {
+    //         params.push(`${VALUE}${i}`);
+    //     }
 
-    Targets(template, state) {
-        const { boundElements, bindings } = template;
-        const { length: elLength } = boundElements;
+    //     state.write(`function renderDOM(${params.join(', ')}) {`);
+    //     state.indentLevel++;
+    //     writeNextLine(state);
 
-        state.write(`function targets(`);
-        state.write(ROOT);
-        if(elLength) state.write(`, ${TARGETS}`);
-        state.write(') {');
+    //     state.write(`const [root, bind] = render('id', targets, bind, ${isDomFragment});`);
+    //     writeNextLine(state);
+    //     state.write(`bind(${params.join(', ')});`);
+    //     writeNextLine(state);
+    //     state.write(`return root;`);
 
-        state.indentLevel++;
-        writeNextLine(state);
+    //     state.indentLevel--;
+    //     writeNextLine(state);
+    //     state.write(`}`);
+    //     state.write(state.lineEnd);
+    // }
 
-        state.write(`return [`);
-        for(let i = 0; i < bindings.length; i++) {
-            const { element, type, index, node } = bindings[i];
-            const { isRoot, queryIndex } = element;
-            const target = isRoot ? ROOT : `${TARGETS}[${queryIndex}]`;
-
-            if(i !== 0) state.write(', ');
-
-            if(type !== 'child') {
-                state.write(`${target}`);
-                continue;
-            }
-
-            const opening = getOpening(element, node);
-            state.write(`${target}.childNodes`, opening.name);
-            state.write(`[${index}]`, node);
-        }
-        state.write(`];`);
-
-        state.indentLevel--;
-        writeNextLine(state);
-        state.write(`}`);
-        state.write(state.lineEnd);
-    }
-
-    Render(template, state) {
-        const { bindings, isDomFragment } = template;
-
-        const params = [];
-        for(let i = 0; i < bindings.length; i++) {
-            params.push(`${VALUE}${i}`);
-        }
-
-        state.write(`function renderDOM(${params.join(', ')}) {`);
-        state.indentLevel++;
-        writeNextLine(state);
-
-        state.write(`const [root, bind] = render('id', targets, bind, ${isDomFragment});`);
-        writeNextLine(state);
-        state.write(`bind(${params.join(', ')});`);
-        writeNextLine(state);
-        state.write(`return root;`);
-
-        state.indentLevel--;
-        writeNextLine(state);
-        state.write(`}`);
-        state.write(state.lineEnd);
-    }
-
-    Bindings(template, state) {
-        const { bindings } = template;
+    Bindings(state) {
+        const bindings = this.#bindings;
 
         state.write(`function bind(${TARGETS}) {`);
         state.indentLevel++;
@@ -206,7 +120,6 @@ export class BindGenerator extends Generator {
         state.write(`compose(`, node);
         state.write(`${TARGET}${index}, `, node);
         state.write(`${VALUE}${index}`, expr);
-        // this[expr.type](expr, state);
         state.write(`);`);
     }
 

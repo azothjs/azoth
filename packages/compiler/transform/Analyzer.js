@@ -36,6 +36,7 @@ export class Analyzer {
         });
     }
 
+    // TODO: move generation elsewhere
     generateTemplate(htmlGenerator) {
         const template = this.#template;
         if(!template.isEmpty) template.html = htmlGenerator(template.node);
@@ -99,6 +100,8 @@ export class Analyzer {
             node,
             expr,
             index,
+            // placeholder value until after analysis complete
+            queryIndex: -2,
         };
 
         if(element.isComponent) {

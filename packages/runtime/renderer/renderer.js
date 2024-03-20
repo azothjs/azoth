@@ -52,32 +52,35 @@ function inject(node, callback) {
     }
 }
 
-export function render(id, targets, makeBind, isFragment, content) {
-    let source = get(id, isFragment, content);
-    let bind = null;
-    let boundEls = null;
-    let node = injectable.at(-1); // peek!
+export function renderer(id, targets, makeBind, isFragment, content) {
+    const create = get(id, isFragment, content);
 
-    // TODO: test injectable is right template id type
+    return function getBound() {
+        let bind = null;
+        let boundEls = null;
+        let node = injectable.at(-1); // peek!
 
-    if(node) bind = bindings.get(node);
-    if(bind) return [node, bind];
+        // TODO: test injectable is right template id type
 
-    // use case would be list component optimize by
-    // not keeping bind functions,
-    // honestly not sure this really needed, the
-    // overhead is small as it is simple function
-    if(node) boundEls = renderEngine.bound(node);
-    else {
-        // (destructured re-assignment)
-        ([node, boundEls] = source());
-    }
+        if(node) bind = bindings.get(node);
+        if(bind) return [node, bind];
 
-    const nodes = targets(node, boundEls);
-    bind = makeBind(nodes);
+        // Honestly not sure this really needed, 
+        // use case would be list component optimize by
+        // not keeping bind functions?
+        // overhead is small as it is simple function
+        if(node) boundEls = renderEngine.bound(node);
+        else {
+            // (destructuring re-assignment)
+            ([node, boundEls] = create());
+        }
 
-    bindings.set(node, bind);
-    return [node, bind];
+        const nodes = targets(node, boundEls);
+        bind = makeBind(nodes);
+
+        bindings.set(node, bind);
+        return [node, bind];
+    };
 }
 
 export class Controller {

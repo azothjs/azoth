@@ -4,10 +4,10 @@ import { DOMRenderer } from './dom-renderer.js';
 describe('DOM isFragment', () => {
 
     test('element root w/ false and true', async ({ expect }) => {
-        const [div] = DOMRenderer.createTemplate('element-root', false, `<div>text</div>`)();
+        const [div] = DOMRenderer.createTemplate('element-root', `<div>text</div>`, false)();
         expect(div).toBeInstanceOf(HTMLDivElement);
 
-        const [fragment] = DOMRenderer.createTemplate('fragment-root', true, `<div>text</div>`)();
+        const [fragment] = DOMRenderer.createTemplate('fragment-root', `<div>text</div>`, true)();
         expect(fragment).toBeInstanceOf(DocumentFragment);
     });
 

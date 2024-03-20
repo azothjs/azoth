@@ -17,7 +17,7 @@ export default function azothPlugin(options) {
         name: 'azoth-jsx',
         enforce: 'pre',
 
-        config(config, { command: cmd }) {
+        config(_config, { command: cmd }) {
             command = cmd;
         },
 
