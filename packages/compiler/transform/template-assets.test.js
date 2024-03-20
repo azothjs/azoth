@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import { makeTargets, makeGetBound, makeRender } from './AssetsGenerator.js';
+import { makeTargets, makeGetBound, makeRender } from './template-assets.js';
 import { parse, generate as _generate } from '../compiler.js';
 import { describe, test, beforeEach } from 'vitest';
 import { RenderGenerator } from './RenderGenerator.js';
@@ -11,7 +11,6 @@ function preParse(input, expect) {
     expect(template.node.type).toBe('JSXElement');
     return template;
 }
-
 
 describe('targets generator', () => {
 

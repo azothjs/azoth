@@ -38,30 +38,6 @@ export class RenderGenerator extends Generator {
         state.write(identifier.name, identifier);
     }
 
-    // Render(template, state) {
-    //     const { bindings, isDomFragment } = template;
-
-    //     const params = [];
-    //     for(let i = 0; i < bindings.length; i++) {
-    //         params.push(`${VALUE}${i}`);
-    //     }
-
-    //     state.write(`function renderDOM(${params.join(', ')}) {`);
-    //     state.indentLevel++;
-    //     writeNextLine(state);
-
-    //     state.write(`const [root, bind] = render('id', targets, bind, ${isDomFragment});`);
-    //     writeNextLine(state);
-    //     state.write(`bind(${params.join(', ')});`);
-    //     writeNextLine(state);
-    //     state.write(`return root;`);
-
-    //     state.indentLevel--;
-    //     writeNextLine(state);
-    //     state.write(`}`);
-    //     state.write(state.lineEnd);
-    // }
-
     Bindings(state) {
         const bindings = this.#bindings;
 
