@@ -1,6 +1,6 @@
 {
-    "name": "@azothjs/compiler",
-    "version": "0.1.1",
+    "name": "@azoth/thoth",
+    "version": "0.2.0",
     "description": "Azoth compiler",
     "author": "Marty Nelson",
     "license": "MIT",

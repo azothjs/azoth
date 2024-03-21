@@ -1,1 +1,1 @@
-export * from '@azothjs/runtime/renderer';
+export * from '@azoth/maya/renderer';

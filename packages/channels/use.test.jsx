@@ -258,7 +258,7 @@ describe('async iterator', () => {
 
         await find('duchess');
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<ul><p>felix<!--1--></p><p>duchess<!--1--></p><p>garfield<!--1--></p><!--3--></ul>"`
+            `"<ul><p>felix<!--1--></p><p>duchess<!--1--></p><p>garfield<!--1--></p><!--3--><!--1--></ul>"`
         );
     });
 

@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@azothjs/compiler':
+  '@azoth/thoth':
     specifier: workspace:*
     version: link:../compiler
   '@rollup/pluginutils':

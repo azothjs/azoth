@@ -1,6 +1,6 @@
 {
-    "name": "@azothjs/runtime",
-    "version": "0.1.3",
+    "name": "@azoth/maya",
+    "version": "0.2.0",
     "description": "Azoth runtime",
     "author": "Marty Nelson",
     "license": "MIT",
