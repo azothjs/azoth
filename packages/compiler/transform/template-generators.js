@@ -26,3 +26,4 @@ export function makeRender({ bindings: { length } }) {
   return root;
 }\n`;
 }
+

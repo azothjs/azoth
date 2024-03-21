@@ -6,7 +6,7 @@ const TARGETS = 'ts';
 const TARGET = 't';
 const VALUE = 'v';
 
-export class RenderGenerator extends Generator {
+export class BindGenerator extends Generator {
     static generate(template) {
         const generator = new this(template);
         return generateWith(generator, template.node);
@@ -19,23 +19,11 @@ export class RenderGenerator extends Generator {
     }
 
     JSXFragment(_node, state) {
-        this.JSXTemplate(state);
-    }
-
-    JSXElement(_node, state) {
-        this.JSXTemplate(state);
-    }
-
-    JSXTemplate(state) {
         this.Bindings(state);
     }
 
-    JSXExpressionContainer({ expression }, state) {
-        this[expression.type](expression, state);
-    }
-
-    JSXIdentifier(identifier, state) {
-        state.write(identifier.name, identifier);
+    JSXElement(_node, state) {
+        this.Bindings(state);
     }
 
     Bindings(state) {
@@ -97,47 +85,6 @@ export class RenderGenerator extends Generator {
         state.write(`${TARGET}${index}, `, node);
         state.write(`${VALUE}${index}`, expr);
         state.write(`);`);
-    }
-
-    ComposeElement(node, expr, index, state) {
-        state.write(`composeElement(`, node);
-        state.write(`${TARGET}${index}, `);
-        this.CompleteElement(node, expr, state);
-        state.write(`);`);
-    }
-
-    CreateElement(node, state) {
-        state.write(`createElement(`, node);
-        this.CompleteElement(node, node.componentExpr, state);
-        state.write(`)`);
-    }
-
-    CompleteElement({ props, slotFragment }, expr, state) {
-        this[expr.type](expr, state);
-        if(props?.length) {
-            this.ComponentProps(props, state);
-        }
-        else if(slotFragment) state.write(`, null`);
-
-        if(slotFragment) {
-            state.write(', ');
-            this.JSXTemplate(slotFragment, state);
-        }
-    }
-
-    ComponentProps(props, state) {
-        state.write(`, {`);
-        for(let i = 0; i < props.length; i++) {
-            const { node, expr } = props[i];
-            // TODO: Dom lookup, JS .prop v['prop'], etc. 
-            // refactor with code below
-            state.write(` `);
-            state.write(node.name.name, node.name);
-            state.write(`: `);
-            this[expr.type](expr, state);
-            state.write(`,`);
-        }
-        state.write(` }`);
     }
 
     BindingProp(node, expr, index, element, state) {

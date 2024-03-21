@@ -117,10 +117,6 @@ export class Analyzer {
 
         this.#bindings.push(binding);
 
-        if(binding.type === 'child') {
-            this.#imports.add('compose');
-        }
-
         if(element.isRoot) {
             // root can't be a "target", it gets a -1 queryIndex 
             // to signal bound template root (either el or fragment)
@@ -202,7 +198,7 @@ export class Analyzer {
             else {
                 assessElement(child);
                 if(child.isComponent) {
-                    this.#imports.add('composeElement');
+                    this.#imports.add('createElement');
                     this.#bind('child', child, child.componentExpr, i + adj);
                 }
                 this[type](child, i + adj);

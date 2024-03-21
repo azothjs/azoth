@@ -77,15 +77,30 @@ export function composeElement(anchor, Constructor, props, slottable) {
     create(Constructor, props, slottable, anchor);
 }
 
-export function createElement(Constructor, props, slottable) {
+export function createElement(Constructor, props, slottable, topLevel = false) {
     const result = create(Constructor, props, slottable);
-    // result is returned to caller, force to be of type Node
-    // by converting strings and numbers into text nodes
+    if(!topLevel) return result;
+
+    // result is returned to caller, not composed by Azoth,
+    // force to be of type Node or null:
+    // strings and numbers into text nodes
+    // non-values to null
     const type = typeof result;
-    if(type === 'string' || type === 'number') {
-        return document.createTextNode(result);
+    switch(true) {
+        case type === 'string':
+        case type === 'number':
+            return document.createTextNode(result);
+        case result === undefined:
+        case result === null:
+        case result === true:
+        case result === false:
+        case result === IGNORE:
+            return null;
+        default:
+            return result;
     }
-    return result;
+
+
 }
 
 function create(input, props, slottable, anchor) {
@@ -101,6 +116,7 @@ function create(input, props, slottable, anchor) {
         case input === true:
         case input === false:
         case input === '':
+        case input === IGNORE:
             return anchor ? void compose(anchor, input) : input;
         case !!(input.prototype?.constructor): {
             // eslint-disable-next-line new-cap

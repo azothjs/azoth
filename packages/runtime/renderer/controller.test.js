@@ -1,4 +1,4 @@
-import { describe, test, beforeEach, beforeAll } from 'vitest';
+import { describe, test, beforeAll } from 'vitest';
 import { compose } from '../compose/compose.js';
 import {
     renderer,

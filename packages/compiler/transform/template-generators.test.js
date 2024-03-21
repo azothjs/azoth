@@ -1,8 +1,8 @@
 /* eslint-disable no-undef */
-import { makeTargets, makeGetBound, makeRender } from './template-assets.js';
+import { makeTargets, makeGetBound, makeRender } from './template-generators.js';
 import { parse, generate as _generate } from '../compiler.js';
 import { describe, test, beforeEach } from 'vitest';
-import { RenderGenerator } from './RenderGenerator.js';
+import { BindGenerator } from './BindGenerator.js';
 
 function preParse(input, expect) {
     const ast = parse(input);
@@ -94,7 +94,7 @@ describe('bind generator', () => {
     beforeEach(context => {
         context.compile = code => {
             const template = preParse(code, context.expect);
-            return RenderGenerator.generate(template).code;
+            return BindGenerator.generate(template).code;
         };
     });
 
