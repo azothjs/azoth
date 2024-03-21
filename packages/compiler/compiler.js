@@ -1,9 +1,10 @@
 import { Parser } from 'acorn';
 import acornJsx from 'acorn-jsx';
 import { generate as astring } from 'astring';
-import { TemplateGenerator, templateModule } from './transform/TemplateGenerator.js';
+import { Transpiler, templateModule } from './transform/Transpiler.js';
 import { SourceMapGenerator } from 'source-map';
 
+export * from './transform/template-generators.js';
 export { templateModule };
 
 // compile = parse + generate
@@ -51,7 +52,7 @@ export function generateWith(generator, ast, config) {
 }
 
 export function generate(ast, config) {
-    const generator = new TemplateGenerator();
+    const generator = new Transpiler();
     const generated = generateWith(generator, ast, config);
     const { templates } = generator;
 

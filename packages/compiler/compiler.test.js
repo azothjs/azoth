@@ -8,8 +8,8 @@ const compile = input => {
     });
     return {
         code, map,
-        templates: templates.map(({ id, html, isDomFragment, isEmpty }) => {
-            return { id, html, isDomFragment, isEmpty };
+        templates: templates.map(({ id, childBindKey, propBindKey, html, isDomFragment, isEmpty }) => {
+            return { id, childBindKey, propBindKey, html, isDomFragment, isEmpty };
         })
     };
 };
@@ -24,20 +24,22 @@ describe('JSX dom literals', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { ta516887159 } from 'virtual:azoth-templates?id=a516887159';
+          "import { tf312946f36 } from 'virtual:azoth-templates?id=f312946f36';
 
-          const t = ta516887159("className","Azoth");
+          const t = tf312946f36("className","Azoth");
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<p>
                       Hello <!--0-->
                   </p>",
-              "id": "a516887159",
+              "id": "f312946f36",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -63,15 +65,16 @@ describe('JSX dom literals', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { tfdd1a869cf } from 'virtual:azoth-templates?id=fdd1a869cf';
+          "import { t9fcf48061b } from 'virtual:azoth-templates?id=9fcf48061b';
 
-          const t = tfdd1a869cf("my-class","felix","this is","azoth","two","and...","span-class","ul-footer","footer");
+          const t = t9fcf48061b("my-class","felix","this is","azoth","two","and...","span-class","ul-footer","footer");
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<div>
                       <p data-bind><!--0--></p>
                       <p>static</p>
@@ -87,9 +90,10 @@ describe('JSX dom literals', () => {
                       <custom-element></custom-element>
                       <!--0-->
                   </div>",
-              "id": "fdd1a869cf",
+              "id": "9fcf48061b",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -107,19 +111,21 @@ describe('JSX dom literals', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t10073da0ec } from 'virtual:azoth-templates?id=10073da0ec';
+          "import { tfef7238342 } from 'virtual:azoth-templates?id=fef7238342';
 
-          const t = t10073da0ec("className","name","class","class-name");
+          const t = tfef7238342("className","name","class","class-name");
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<input required>",
-              "id": "10073da0ec",
+              "id": "fef7238342",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -133,25 +139,29 @@ describe('nested context', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t8dae88052a, t1a78cbe949 } from 'virtual:azoth-templates?id=8dae88052a&id=1a78cbe949';
+          "import { t728beb50f0, t1a78cbe949 } from 'virtual:azoth-templates?id=728beb50f0&id=1a78cbe949';
 
-          t8dae88052a(t1a78cbe949());
+          t728beb50f0(t1a78cbe949());
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<div><!--0--></div>",
-              "id": "8dae88052a",
+              "id": "728beb50f0",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<hr>",
               "id": "1a78cbe949",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -175,10 +185,12 @@ describe('template optimizations', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<p>Hello</p>",
               "id": "5bf3d2f523",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -195,10 +207,10 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { tc203fe7dcd, tc084de4382 } from 'virtual:azoth-templates?id=c203fe7dcd&id=c084de4382';
+          "import { tc203fe7dcd, t84c9741b4d, td41d8cd98f } from 'virtual:azoth-templates?id=c203fe7dcd&id=84c9741b4d&id=d41d8cd98f';
 
           const fragment = tc203fe7dcd();
-          const compose = tc084de4382(x);
+          const compose = t84c9741b4d(x);
           const empty = null;
           "
         `);
@@ -206,22 +218,28 @@ describe('fragments', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<hr><hr>",
               "id": "c203fe7dcd",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<!--0-->",
-              "id": "c084de4382",
+              "id": "84c9741b4d",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
+              "id": "d41d8cd98f",
               "isDomFragment": true,
               "isEmpty": true,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -258,14 +276,14 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { tc203fe7dcd, t1a78cbe949, tc084de4382, t6c72de769d } from 'virtual:azoth-templates?id=c203fe7dcd&id=1a78cbe949&id=c084de4382&id=6c72de769d';
+          "import { tc203fe7dcd, t1a78cbe949, t84c9741b4d, td41d8cd98f, t6c72de769d } from 'virtual:azoth-templates?id=c203fe7dcd&id=1a78cbe949&id=84c9741b4d&id=d41d8cd98f&id=6c72de769d';
 
           const fragment = tc203fe7dcd();
           const single = t1a78cbe949();
           const fragInFrag = t1a78cbe949();
-          const fragInFragCompose = tc084de4382(x);
+          const fragInFragCompose = t84c9741b4d(x);
           const empty = null;
-          const compose = tc084de4382(x);
+          const compose = t84c9741b4d(x);
           const text = t6c72de769d();
           "
         `);
@@ -273,48 +291,62 @@ describe('fragments', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<hr><hr>",
               "id": "c203fe7dcd",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<hr>",
               "id": "1a78cbe949",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<hr>",
               "id": "1a78cbe949",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<!--0-->",
-              "id": "c084de4382",
+              "id": "84c9741b4d",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
+              "id": "d41d8cd98f",
               "isDomFragment": true,
               "isEmpty": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<!--0-->",
-              "id": "c084de4382",
+              "id": "84c9741b4d",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "
                           text
                       ",
               "id": "6c72de769d",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -335,40 +367,48 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t1a78cbe949, tc084de4382 } from 'virtual:azoth-templates?id=1a78cbe949&id=c084de4382';
+          "import { t1a78cbe949, t84c9741b4d } from 'virtual:azoth-templates?id=1a78cbe949&id=84c9741b4d';
 
           const start = t1a78cbe949();
           const end = t1a78cbe949();
-          const composeStart = tc084de4382(x);
-          const composeEnd = tc084de4382(x);
+          const composeStart = t84c9741b4d(x);
+          const composeEnd = t84c9741b4d(x);
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<hr>",
               "id": "1a78cbe949",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<hr>",
               "id": "1a78cbe949",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<!--0-->",
-              "id": "c084de4382",
+              "id": "84c9741b4d",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<!--0-->",
-              "id": "c084de4382",
+              "id": "84c9741b4d",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -386,47 +426,57 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t653a3aad80, tdcaa233028, t2dc1738d5c, t0cf31b2c28, t5bc2a159b1 } from 'virtual:azoth-templates?id=653a3aad80&id=dcaa233028&id=2dc1738d5c&id=0cf31b2c28&id=5bc2a159b1';
+          "import { t653a3aad80, tdcaa233028, t2dc1738d5c, t0cf31b2c28, t3c41ad0e2b } from 'virtual:azoth-templates?id=653a3aad80&id=dcaa233028&id=2dc1738d5c&id=0cf31b2c28&id=3c41ad0e2b';
 
           const fragment = t653a3aad80();
           const single = tdcaa233028();
           const fragInFrag = t2dc1738d5c();
           const spaces = t0cf31b2c28();
-          const compose = t5bc2a159b1(x);
+          const compose = t3c41ad0e2b(x);
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": " <hr><hr> ",
               "id": "653a3aad80",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": " <hr> ",
               "id": "dcaa233028",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "  <hr>  ",
               "id": "2dc1738d5c",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "    ",
               "id": "0cf31b2c28",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": " <!--0--> ",
-              "id": "5bc2a159b1",
+              "id": "3c41ad0e2b",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -440,19 +490,21 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { tfaf808e6cc } from 'virtual:azoth-templates?id=faf808e6cc';
+          "import { t253e2ffa84 } from 'virtual:azoth-templates?id=253e2ffa84';
 
-          const fragment = tfaf808e6cc("two");
+          const fragment = t253e2ffa84("two");
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "one<!--0-->three",
-              "id": "faf808e6cc",
+              "id": "253e2ffa84",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -472,30 +524,34 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { tccaa44c114, t681310be49 } from 'virtual:azoth-templates?id=ccaa44c114&id=681310be49';
+          "import { tccaa44c114, taccbe53128 } from 'virtual:azoth-templates?id=ccaa44c114&id=accbe53128';
 
           const extraneous = tccaa44c114();
-          const childNodeIndex = t681310be49("expect index 3");
+          const childNodeIndex = taccbe53128("expect index 3");
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<div><hr><hr><hr></div>",
               "id": "ccaa44c114",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<div>
                           <p></p>
                           <!--0--><p></p>
                           <p></p>
                       </div>",
-              "id": "681310be49",
+              "id": "accbe53128",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -507,19 +563,21 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { tef691fa27a } from 'virtual:azoth-templates?id=ef691fa27a';
+          "import { t97874fe2c4 } from 'virtual:azoth-templates?id=97874fe2c4';
 
-          const App = tef691fa27a('foo','bar','qux');
+          const App = t97874fe2c4('foo','bar','qux');
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<!--0--><main data-bind><!--0--></main><!--0-->",
-              "id": "ef691fa27a",
+              "id": "97874fe2c4",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -536,19 +594,21 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t1cdf0d646f } from 'virtual:azoth-templates?id=1cdf0d646f';
+          "import { tb3611c2834 } from 'virtual:azoth-templates?id=b3611c2834';
 
-          document.body.append(t1cdf0d646f(prop));
+          document.body.append(tb3611c2834(prop));
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<custom-element></custom-element>",
-              "id": "1cdf0d646f",
+              "id": "b3611c2834",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -564,7 +624,7 @@ describe('element composition', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "import { __createElement } from 'azoth/runtime';
-
+          import { td41d8cd98f } from 'virtual:azoth-templates?id=d41d8cd98f';
           const c = __createElement(Component, true);
           const cProps = __createElement(Component, { prop: value, attr: "static", }, true);
           "
@@ -572,16 +632,20 @@ describe('element composition', () => {
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -598,20 +662,22 @@ describe('element composition', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "import { __createElement } from 'azoth/runtime';
-          import { t2288998344 } from 'virtual:azoth-templates?id=2288998344';
-          const component = t2288998344(__createElement(Component, { prop: value, prop2: "literal", }),__createElement(GotNoPropsAsYouCanSee));
+          import { t06bef50336 } from 'virtual:azoth-templates?id=06bef50336';
+          const component = t06bef50336(__createElement(Component, { prop: value, prop2: "literal", }),__createElement(GotNoPropsAsYouCanSee));
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<div>
                           <!--0-->
                           <!--0-->
                       </div>",
-              "id": "2288998344",
+              "id": "06bef50336",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -631,34 +697,40 @@ describe('element composition', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "import { __createElement } from 'azoth/runtime';
-          import { t2288998344 } from 'virtual:azoth-templates?id=2288998344';
+          import { td41d8cd98f, t06bef50336 } from 'virtual:azoth-templates?id=d41d8cd98f&id=06bef50336';
           const $A = __createElement(A, true);
           const $B = __createElement(B, true);
-          const dom = t2288998344($A,$B);
+          const dom = t06bef50336($A,$B);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<div>
                           <!--0-->
                           <!--0-->
                       </div>",
-              "id": "2288998344",
+              "id": "06bef50336",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -685,90 +757,114 @@ describe('element composition', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "import { __createElement } from 'azoth/runtime';
-          import { t904ca237ee, t1cb251ec0d, t9b045328fb } from 'virtual:azoth-templates?id=904ca237ee&id=1cb251ec0d&id=9b045328fb';
-          const c = __createElement(Component, null, t904ca237ee("test"), true);
-          const cTrim = __createElement(Component, null, t904ca237ee("test"), true);
-          const cTrimStart = __createElement(Component, null, t904ca237ee("test"), true);
-          const cTrimEnd = __createElement(Component, null, t904ca237ee("test"), true);
+          import { td41d8cd98f, tc193fcb516, t1cb251ec0d, t047dd60a46 } from 'virtual:azoth-templates?id=d41d8cd98f&id=c193fcb516&id=1cb251ec0d&id=047dd60a46';
+          const c = __createElement(Component, null, tc193fcb516("test"), true);
+          const cTrim = __createElement(Component, null, tc193fcb516("test"), true);
+          const cTrimStart = __createElement(Component, null, tc193fcb516("test"), true);
+          const cTrimEnd = __createElement(Component, null, tc193fcb516("test"), true);
           const cText = __createElement(Component, null, t1cb251ec0d(), true);
-          const cFrag = __createElement(Component, null, t9b045328fb(1,2), true);
+          const cFrag = __createElement(Component, null, t047dd60a46(1,2), true);
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<p><!--0--></p>",
-              "id": "904ca237ee",
+              "id": "c193fcb516",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<p><!--0--></p>",
-              "id": "904ca237ee",
+              "id": "c193fcb516",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<p><!--0--></p>",
-              "id": "904ca237ee",
+              "id": "c193fcb516",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<p><!--0--></p>",
-              "id": "904ca237ee",
+              "id": "c193fcb516",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "text",
               "id": "1cb251ec0d",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<p data-bind><!--0--></p>
                           <p data-bind><!--0--></p>",
-              "id": "9b045328fb",
+              "id": "047dd60a46",
               "isDomFragment": true,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -786,26 +882,30 @@ describe('render and composition cases', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t62831a5152, t8dc93cc914 } from 'virtual:azoth-templates?id=62831a5152&id=8dc93cc914';
+          "import { tcb5355f810, t9d84b2deff } from 'virtual:azoth-templates?id=cb5355f810&id=9d84b2deff';
 
-          const Item = name => t62831a5152(name);
-          const Template = () => t8dc93cc914([2, 4, 7].map(Item),"text");
+          const Item = name => tcb5355f810(name);
+          const Template = () => t9d84b2deff([2, 4, 7].map(Item),"text");
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<li><!--0--></li>",
-              "id": "62831a5152",
+              "id": "cb5355f810",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<div><!--0--><!--0--></div>",
-              "id": "8dc93cc914",
+              "id": "9d84b2deff",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -822,27 +922,31 @@ describe('render and composition cases', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t62831a5152, t25ec157413 } from 'virtual:azoth-templates?id=62831a5152&id=25ec157413';
+          "import { tcb5355f810, t65cf075bba } from 'virtual:azoth-templates?id=cb5355f810&id=65cf075bba';
 
-          const Emoji = ({name}) => t62831a5152(name);
+          const Emoji = ({name}) => tcb5355f810(name);
           const promise = fetchEmojis().then(emojis => emojis.map(Emoji));
-          const Emojis = t25ec157413(promise);
+          const Emojis = t65cf075bba(promise);
           document.body.append(Emojis);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<li><!--0--></li>",
-              "id": "62831a5152",
+              "id": "cb5355f810",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<ul><!--0--></ul>",
-              "id": "25ec157413",
+              "id": "65cf075bba",
               "isDomFragment": false,
               "isEmpty": false,
+              "propBindKey": undefined,
             },
           ]
         `);

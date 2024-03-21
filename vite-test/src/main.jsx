@@ -10,7 +10,7 @@ const App = <>
 
     <main>
         <h2>Amazing Emoji List</h2>
-        {List}
+        <List />
     </main>
 </>;
 
@@ -24,18 +24,10 @@ function EmojiList({ emojis }) {
 
 function Emoji({ name, unicode, htmlCode }) {
     return <li>
-        {InnerHtml({ html: htmlCode.join('') })}
+        <span innerHTML={htmlCode.join('')} />
         {name}
         {unicode}
     </li>;
 }
-
-function InnerHtml({ html, className = '' }) {
-    const rawEmoji = <span className={className ?? ''}></span>;
-    rawEmoji.firstChild.innerHTML = html;
-    return rawEmoji;
-}
-
-
 
 

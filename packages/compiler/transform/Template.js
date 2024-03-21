@@ -1,38 +1,42 @@
+import { generate } from 'astring';
 import revHash from 'rev-hash';
+import { HtmlGenerator } from './HtmlGenerator.js';
+
+const generator = new HtmlGenerator();
+const htmlGenerator = node => generate(node, { generator });
 
 export class Template {
-    isDomFragment = false;
-    isEmpty = false;
-    isStatic = false;
-    #html = '';
-    #id = '';
-
-    get id() {
-        return this.#id;
-    }
-    get html() {
-        return this.#html;
-    }
-
-    set html(html) {
-        this.#html = html;
-        this.#id = revHash(html);
-    }
 
     constructor(node, { bindings, boundElements, imports }) {
-        this.node = node;
-        this.bindings = bindings;
-        this.boundElements = boundElements;
-        this.imports = imports;
-
         if(node.isComponent && bindings.length) {
             throw new Error('Unexpected component binding length');
         }
 
+        this.node = node;
+        this.bindings = bindings;
+        this.boundElements = boundElements;
+        this.imports = imports;
         this.isBoundRoot = node.queryIndex === -1;
         this.isDomFragment = node.isJSXFragment;
         this.isEmpty = node.isComponent ||
             (node.isJSXFragment && node.children.length === 0);
         this.isStatic = this.isEmpty || (!boundElements.length) && node.queryIndex !== -1;
+
+        this.html = this.isEmpty ? '' : htmlGenerator(node);
+
+        let tKey = '', bKey = '';
+        if(bindings.length) {
+            tKey = revHash(bindings.map(({ type, index, element: { isRoot, queryIndex } }) => {
+                return (isRoot ? '' : `${queryIndex}`) + (type === 'child' ? `:${index}` : '');
+            }).join());
+            bKey = revHash(bindings.map(({ type, node }) => {
+                return type === 'prop' ? node.name.name : '';
+            }).join());
+        }
+
+        this.targetKey = tKey;
+        this.bindKey = bKey;
+        this.id = revHash(this.html + this.bindKey + this.targetKey);
+
     }
 }

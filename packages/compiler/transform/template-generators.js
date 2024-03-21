@@ -12,12 +12,20 @@ export function makeTargets(template) {
             : target;
     });
 
-    return `const targets = (${elLength ? 'r,t' : 'r'}) => [${values.join()}];\n`;
+    return `(${elLength ? 'r,t' : 'r'}) => [${values.join()}]`;
 }
 
-export function makeRenderer({ id, isDomFragment, html }, options) {
-    const content = options?.noContent ? '' : `, ${html}`;
-    return `const renderDOM = renderer('${id}', targets, bind, ${isDomFragment}${content});\n`;
+export function makeRenderer({ id, targetKey, bindKey, isDomFragment, html }, options) {
+    const content = !!options?.includeContent;
+    const target = targetKey ? `g${targetKey}` : `null`;
+    const bind = bindKey ? `b${bindKey}` : `null`;
+
+    let renderer = `__renderer(`;
+    renderer += `"${id}", ${target}, ${bind}, ${isDomFragment}`;
+    if(content) renderer += `, \`${html}\``;
+    renderer += `)`;
+
+    return renderer;
 }
 
 const TARGETS = 'ts';
@@ -32,16 +40,12 @@ export function makeBind({ bindings }) {
     }
 
     const bound = bindings.map(({ type, node }, index) => {
-        if(node.isComponent) {
-            throw new Error('need compose element');
-            // return ComposeElement(node, expr, i, state);
-        }
         if(type === 'child') {
-            return `compose(${TARGET}${index}, ${VALUE}${index});`;
+            return `__compose(${TARGET}${index}, ${VALUE}${index});`;
         }
         if(type === 'prop') {
             // TODO: consider source maps for prop on element
-            // TODO: refactor with component props names
+            // TODO: refactor with component props names when DOMProp/attr lookup exists
             const identity = node.name;
             const propName = identity.name;
             const isValidId = isValidESIdentifier(propName);
@@ -54,11 +58,11 @@ export function makeBind({ bindings }) {
         throw new Error(message);
     });
 
-    return `function bind(${TARGETS}) {
+    return `(${TARGETS}) => {
   const ${targets.join(', ')};
   return (${params.join(', ')}) => {
     ${bound.join('\n    ')}
   };    
-}\n`;
+}`;
 
 }

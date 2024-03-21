@@ -42,9 +42,9 @@ test('{...} one line', ({ expect }) => {
     const input = `<div>Hello {place}</div>`;
     const { _sourceMap, code } = compile(input);
     expect(code).toMatchInlineSnapshot(`
-      "import { ta94b210052 } from 'virtual:azoth-templates?id=a94b210052';
+      "import { t9be5e1247d } from 'virtual:azoth-templates?id=9be5e1247d';
 
-      ta94b210052(place);
+      t9be5e1247d(place);
       "
     `);
     expect(_sourceMap._mappings._array).toMatchInlineSnapshot(`
@@ -108,9 +108,9 @@ test('{...} three line', ({ expect }) => {
     </div>`;
     const { _sourceMap, code } = compile(input);
     expect(code).toMatchInlineSnapshot(`
-      "import { tf2d718c3f5 } from 'virtual:azoth-templates?id=f2d718c3f5';
+      "import { t1f0853a65c } from 'virtual:azoth-templates?id=1f0853a65c';
 
-      const t = tf2d718c3f5(place);
+      const t = t1f0853a65c(place);
       "
     `);
     expect(_sourceMap._mappings._array).toMatchInlineSnapshot(`

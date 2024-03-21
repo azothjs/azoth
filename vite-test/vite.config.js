@@ -15,6 +15,7 @@ export default defineConfig({
         assetsDir: './',
         modulePreload: false,
         rollupOptions: {
+            logLevel: 'debug',
             output: [{
                 format: 'es'
             }]

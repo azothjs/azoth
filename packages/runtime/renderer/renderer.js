@@ -54,7 +54,7 @@ function inject(node, callback) {
 
 const templateRenderer = getBound => (...args) => {
     const [root, bind] = getBound();
-    bind(...args);
+    if(bind) bind(...args);
     return root;
 };
 
@@ -68,8 +68,11 @@ export function renderer(id, targets, makeBind, isFragment, content) {
 
         // TODO: test injectable is right template id type
 
-        if(node) bind = bindings.get(node);
-        if(bind) return [node, bind];
+        if(node) {
+            const hasBind = bindings.has(node);
+            bind = bindings.get(node);
+            if(hasBind) return [node, bind];
+        }
 
         // Honestly not sure this really needed, 
         // use case would be list component optimize by
@@ -81,8 +84,8 @@ export function renderer(id, targets, makeBind, isFragment, content) {
             ([node, boundEls] = create());
         }
 
-        const nodes = targets(node, boundEls);
-        bind = makeBind(nodes);
+        const nodes = targets ? targets(node, boundEls) : null;
+        bind = makeBind ? makeBind(nodes) : null;
 
         bindings.set(node, bind);
         return [node, bind];

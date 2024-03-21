@@ -17,7 +17,6 @@ export class Analyzer {
     #documentOrder = 0;
     #boundElements = new Set();
     #bindings = [];
-    #template = null;
     #root = null;
     #imports = new Set();
 
@@ -29,18 +28,11 @@ export class Analyzer {
             boundElements[i].queryIndex = i;
         }
 
-        this.#template = new Template(this.#root, {
+        this.template = new Template(this.#root, {
             bindings: this.#bindings,
             boundElements,
             imports: [...(this.#imports.values())],
         });
-    }
-
-    // TODO: move generation elsewhere
-    generateTemplate(htmlGenerator) {
-        const template = this.#template;
-        if(!template.isEmpty) template.html = htmlGenerator(template.node);
-        return template;
     }
 
     #analyze(node) {

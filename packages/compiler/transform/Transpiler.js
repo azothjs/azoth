@@ -1,22 +1,11 @@
 import { generate } from 'astring';
 import { HtmlGenerator } from './HtmlGenerator.js';
-import { Generator, writeNextLine } from './GeneratorBase.js';
-import { isValidESIdentifier } from 'is-valid-es-identifier';
+import { Generator } from './GeneratorBase.js';
 import { Analyzer } from './Analyzer.js';
 
 export const templateModule = `virtual:azoth-templates`;
 
-const OPENING_PROP = {
-    JSXElement: 'openingElement',
-    JSXFragment: 'openingFragment',
-};
-
-const IS_OPENING = {
-    JSXOpeningElement: true,
-    JSXOpeningFragment: true,
-};
-
-export class TemplateGenerator extends Generator {
+export class Transpiler extends Generator {
     templates = [];
     uniqueIds = new Set();
 
@@ -73,7 +62,7 @@ export class TemplateGenerator extends Generator {
 
     JSXTemplate(node, state) {
         const analyzer = new Analyzer(node);
-        const template = analyzer.generateTemplate(this.htmlGenerator);
+        const template = analyzer.template;
 
         const { templates, uniqueIds } = this;
         templates.push(template);
