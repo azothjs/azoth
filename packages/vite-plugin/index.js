@@ -1,8 +1,19 @@
-import { compile, templateModule } from '@azothjs/compiler';
+import revHash from 'rev-hash';
+import { compile, templateModule, makeTargets, makeRenderer, makeBind } from '@azothjs/compiler';
 import { createFilter } from '@rollup/pluginutils';
 import path from 'node:path';
 
+export const targetModule = `virtual:azoth-target`;
+export const bindModule = `virtual:azoth-bind`;
+const resolvedTargetModule = '\0' + targetModule;
+const resolvedBindModule = '\0' + bindModule;
 const resolvedTemplateModule = '\0' + templateModule;
+
+const RESOLVED = {
+    [templateModule]: resolvedTemplateModule,
+    [targetModule]: resolvedTargetModule,
+    [bindModule]: resolvedBindModule,
+};
 
 export default function azothPlugin(options) {
     options = options ?? {};
@@ -11,49 +22,43 @@ export default function azothPlugin(options) {
     const filter = createFilter(include, exclude);
 
     const programTemplates = new Map();
-    let command = '';
+    const byTarget = new Map();
+    const byBind = new Map();
+
+    let config = null;
 
     const transformJSX = {
         name: 'azoth-jsx',
         enforce: 'pre',
 
-        config(config, { command: cmd }) {
-            command = cmd;
+        configResolved(resolvedConfig) {
+            // store the resolved config
+            config = resolvedConfig;
         },
+
 
         resolveId(id) {
             const [name, ids] = id.split('?', 2);
-            if(name !== templateModule) return;
-            return ids ? `${resolvedTemplateModule}?${ids}` : resolvedTemplateModule;
+            const resolved = RESOLVED[name];
+            if(!resolved) return;
+            return `${resolved}?${ids}`;
         },
 
         load(id) {
-            const [name, ids] = id.split('?', 2);
-            if(name !== resolvedTemplateModule) return;
+            const [name, params] = id.split('?', 2);
+            const isProdBuild = config.mode !== 'test' && config.command === 'build';
+            const ids = new URLSearchParams(params).getAll('id');
 
-            const isBuild = command === 'build';
-            const renderer = isBuild ? '__rendererById' : '__makeRenderer';
-            const importRenderer = `import { ${renderer} } from 'azoth/runtime';\n`;
-
-            const exports = new URLSearchParams(ids)
-                .getAll('id')
-                .map(id => {
-                    const { html, isDomFragment } = programTemplates.get(id);
-                    let exportRender = `\nexport const t${id} = ${renderer}('${id}'`;
-
-                    // html gets added to index.html in build,
-                    // but dev mode html is string in virtual module
-                    if(!isBuild) exportRender += `, \`${html}\``;
-
-                    // default is false, so only add if true (which is less common)
-                    if(isDomFragment) exportRender += ', true';
-
-                    exportRender += `);\n`;
-                    return exportRender;
-                })
-                .join('');
-
-            return importRenderer + exports;
+            switch(name) {
+                case resolvedTemplateModule:
+                    return loadTemplateModule(ids, isProdBuild);
+                case resolvedTargetModule:
+                    return loadTargetModule(ids);
+                case resolvedBindModule:
+                    return loadBindModule(ids);
+                default:
+                    return;
+            }
         },
 
         async transform(source, id) {
@@ -75,6 +80,49 @@ export default function azothPlugin(options) {
             return { code, map };
         }
     };
+
+    function loadTargetModule([id]) {
+        return `export const g${id} = ${makeTargets(byTarget.get(id))};`;
+    }
+
+    function loadBindModule([id]) {
+        return `import { __compose } from 'azoth/runtime';\nexport const b${id} = ${makeBind(byBind.get(id))};`;
+    }
+
+    function loadTemplateModule(ids, isBuild) {
+        const moduleImports = [`import { __renderer } from 'azoth/runtime';\n`];
+
+        const templates = ids.map(id => programTemplates.get(id));
+
+        const targetGenerators = new Set();
+        const bindGenerators = new Set();
+
+        const templateExports = templates.map(template => {
+            const { id, targetKey, bindKey } = template;
+            // TODO: refactor cleanup on this apparent duplication
+
+            if(targetKey) {
+                if(!byTarget.has(targetKey)) byTarget.set(targetKey, template);
+                if(!targetGenerators.has(targetKey)) {
+                    moduleImports.push(`import { g${targetKey} } from '${targetModule}?id=${targetKey}';\n`);
+                    targetGenerators.add(targetKey);
+                }
+            }
+
+            if(bindKey) {
+                if(!byBind.has(bindKey)) byBind.set(bindKey, template);
+                if(!bindGenerators.has(bindKey)) {
+                    moduleImports.push(`import { b${bindKey} } from '${bindModule}?id=${bindKey}';\n`);
+                    bindGenerators.add(bindKey);
+                }
+            }
+
+            return `export const t${id} = ${makeRenderer(template, { noContent: isBuild })};\n`;
+
+        });
+
+        return moduleImports.join('') + templateExports.join('');
+    }
 
     const TEMPLATE_COMMENT = '<!--azoth-templates-->';
     const BODY_START = '<body>';
@@ -100,3 +148,4 @@ export default function azothPlugin(options) {
 
     return [transformJSX, injectHTML];
 }
+

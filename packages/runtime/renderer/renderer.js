@@ -1,41 +1,117 @@
-const templates = new Map();
+import { DOMRenderer } from './dom-renderer.js';
+import { HTMLRenderer } from './html-renderer.js';
 
-export function clearTemplates() {
-    templates.clear();
+const templates = new Map(); // cache
+let renderEngine = DOMRenderer; // DOM or HTML engine
+
+export const RenderService = {
+    useDOMEngine() {
+        renderEngine = DOMRenderer;
+        templates.clear();
+    },
+    useHTMLEngine() {
+        renderEngine = HTMLRenderer;
+        templates.clear();
+    },
+    get,
+    bound,
+};
+
+
+function get(id, isFragment = false, content) {
+    if(templates.has(id)) return templates.get(id);
+    const template = renderEngine.createTemplate(id, content, isFragment);
+    templates.set(id, template);
+    return template;
 }
 
-export function makeRenderer(id, html, isFragment = false) {
-    if(templates.has(id)) return templates.get(id);
-
-    const template = document.createElement('template');
-    template.innerHTML = html;
-    return rendererFactory(id, template.content, isFragment);
+function bound(node) {
+    return renderEngine.bound(node);
 }
 
-export function rendererById(id, isFragment = false) {
-    if(templates.has(id)) return templates.get(id);
+const bindings = new Map(); // cache
+// TODO: implement cleanup actions on nodes
+export function clearBind(node) {
+    if(bindings.has(node)) bindings.delete(node);
+}
 
-    const templateEl = document.getElementById(id);
-    if(!templateEl) {
-        throw new Error(`No template with id "${id}"`);
+// stack
+const injectable = [];
+function inject(node, callback) {
+    injectable.push(node);
+    callback();
+    const popped = injectable.pop();
+    if(popped !== node) {
+        // TODO: display html like object for compose
+        throw new Error('Injectable stack error');
+    }
+}
+
+const templateRenderer = getBound => (...args) => {
+    const [root, bind] = getBound();
+    if(bind) bind(...args);
+    return root;
+};
+
+export function renderer(id, targets, makeBind, isFragment, content) {
+    const create = get(id, isFragment, content);
+
+    function getBound() {
+        let bind = null;
+        let boundEls = null;
+        let node = injectable.at(-1); // peek!
+
+        // TODO: test injectable is right template id type
+
+        if(node) {
+            const hasBind = bindings.has(node);
+            bind = bindings.get(node);
+            if(hasBind) return [node, bind];
+        }
+
+        // if(!create) return [null, null];
+
+        // Honestly not sure this really needed, 
+        // use case would be list component optimize by
+        // not keeping bind functions?
+        // overhead is small as it is simple function
+        if(node) boundEls = renderEngine.bound(node);
+        else {
+            // (destructuring re-assignment)
+            ([node, boundEls] = create());
+        }
+
+        const nodes = targets ? targets(node, boundEls) : null;
+        bind = makeBind ? makeBind(nodes) : null;
+
+        bindings.set(node, bind);
+        return [node, bind];
     }
 
-    return rendererFactory(id, templateEl.content, isFragment);
+    return templateRenderer(getBound);
 }
 
-function rendererFactory(id, node, isFragment) {
-    const render = renderer(node, isFragment);
-    templates.set(id, render);
-    return render;
+export class Controller {
+    static for(renderFn) {
+        return new this(renderFn);
+    }
+    constructor(renderFn) {
+        this.renderFn = renderFn;
+    }
+    render(props) {
+        return this.renderFn(props);
+    }
+    update(node, props) {
+        inject(node, () => this.renderFn(props));
+    }
 }
 
-function renderer(fragment, isFragment) {
-    if(!isFragment) fragment = fragment.firstElementChild;
-    // TODO: malformed fragments...necessary?
-
-    return function render() {
-        const clone = fragment.cloneNode(true);
-        const targets = clone.querySelectorAll('[data-bind]');
-        return [clone, targets];
-    };
+export class Updater extends Controller {
+    #node = null;
+    render(props) {
+        return this.#node = super.render(props);
+    }
+    update(props) {
+        super.update(this.#node, props);
+    }
 }

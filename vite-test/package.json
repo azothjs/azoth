@@ -21,7 +21,9 @@
     },
     "type": "module",
     "scripts": {
+        "build": "vite build",
         "test": "vite build && vitest -w false ",
+        "start": "vite",
         "test:update": "rm -rf ./expected-out && cp -R ./out ./expected-out"
     },
     "files": [
@@ -36,8 +38,8 @@
         }
     },
     "devDependencies": {
-        "vite": "^5.1.6",
-        "vitest": "^1.3.1"
+        "vite": "^5.2.2",
+        "vitest": "^1.4.0"
     },
     "dependencies": {
         "azoth": "workspace:*"

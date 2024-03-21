@@ -8,6 +8,7 @@ export default defineConfig({
     esbuild: {
         exclude: '**/*.jsx',
     },
+    logLevel: 'debug',
     build: {
         target: 'esnext',
         minify: false,

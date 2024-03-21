@@ -37,6 +37,7 @@
     "dependencies": {
         "@azothjs/compiler": "workspace:*",
         "@rollup/pluginutils": "^5.1.0",
+        "rev-hash": "^4.1.0",
         "source-map": "^0.7.4"
     }
 }

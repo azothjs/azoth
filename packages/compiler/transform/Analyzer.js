@@ -1,4 +1,3 @@
-import { Stack } from './Stack.js';
 import { Template } from './Template.js';
 import { voidElements } from './html.js';
 
@@ -14,11 +13,10 @@ const BINDING_ATTR = {
 const byOrder = (a, b) => a.order - b.order;
 
 export class Analyzer {
-    #elements = new Stack();
+    #elements = []; // stack
     #documentOrder = 0;
     #boundElements = new Set();
     #bindings = [];
-    #template = null;
     #root = null;
     #imports = new Set();
 
@@ -30,17 +28,11 @@ export class Analyzer {
             boundElements[i].queryIndex = i;
         }
 
-        this.#template = new Template(this.#root, {
+        this.template = new Template(this.#root, {
             bindings: this.#bindings,
             boundElements,
             imports: [...(this.#imports.values())],
         });
-    }
-
-    generateTemplate(htmlGenerator) {
-        const template = this.#template;
-        if(!template.isEmpty) template.html = htmlGenerator(template.node);
-        return template;
     }
 
     #analyze(node) {
@@ -91,7 +83,8 @@ export class Analyzer {
     }
 
     #bind(type, node, expr, index) {
-        const element = this.#elements.current;
+        const element = this.#elements.at(-1); // peek
+        element.isRoot = element === this.#root;
 
         const binding = {
             element,
@@ -99,6 +92,8 @@ export class Analyzer {
             node,
             expr,
             index,
+            // placeholder value until after analysis complete
+            queryIndex: -2,
         };
 
         if(element.isComponent) {
@@ -106,17 +101,15 @@ export class Analyzer {
             if(type !== 'prop') {
                 throw new TypeError(`Unexpected binding type "${type}", expected "prop"`);
             }
+
+            // early exit! components get bindings as props
             element.props.push(binding);
             return;
         }
 
         this.#bindings.push(binding);
 
-        if(binding.type === 'child') {
-            this.#imports.add('compose');
-        }
-
-        if(element === this.#root) {
+        if(element.isRoot) {
             // root can't be a "target", it gets a -1 queryIndex 
             // to signal bound template root (either el or fragment)
             element.queryIndex = -1;
@@ -197,7 +190,7 @@ export class Analyzer {
             else {
                 assessElement(child);
                 if(child.isComponent) {
-                    this.#imports.add('composeElement');
+                    this.#imports.add('createElement');
                     this.#bind('child', child, child.componentExpr, i + adj);
                 }
                 this[type](child, i + adj);
@@ -258,5 +251,3 @@ function trimChildren(node) {
         node.children = trimmed;
     }
 }
-
-

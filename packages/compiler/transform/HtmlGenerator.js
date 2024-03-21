@@ -94,7 +94,6 @@ export class HtmlGenerator extends Generator {
 
     // ...text...
     JSXText({ value }, state) {
-        // const normalized = value.replace(NORMALIZE_PATTERN, ' ');
         state.write(value);
     }
 }

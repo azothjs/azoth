@@ -1,7 +1,7 @@
 /* compose, composeElement, create, createElement */
-export const IGNORE = Symbol.for('azoth.compose.IGNORE');
+const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
-export function compose(anchor, input, keepLast, props, slottable) {
+function compose(anchor, input, keepLast, props, slottable) {
     if(keepLast !== true) keepLast = false;
     const type = typeof input;
 
@@ -73,11 +73,7 @@ export function compose(anchor, input, keepLast, props, slottable) {
 
 const isRenderObject = obj => obj && typeof obj === 'object' && obj.render && typeof obj.render === 'function';
 
-export function composeElement(anchor, Constructor, props, slottable) {
-    create(Constructor, props, slottable, anchor);
-}
-
-export function createElement(Constructor, props, slottable, topLevel = false) {
+function createElement(Constructor, props, slottable, topLevel = false) {
     const result = create(Constructor, props, slottable);
     if(!topLevel) return result;
 
@@ -146,7 +142,7 @@ function create(input, props, slottable, anchor) {
                 composeArray(anchor, input, false);
             }
             else {
-                throwTypeErrorForObject(input, type);
+                throwTypeErrorForObject(input);
             }
 
             return anchor;
@@ -167,8 +163,6 @@ function clear(anchor) {
     let node = anchor;
     let count = +anchor.data;
 
-    // TODO: validate count received
-
     while(count--) {
         const { previousSibling } = node;
         if(!previousSibling) break;
@@ -178,6 +172,7 @@ function clear(anchor) {
             clear(previousSibling);
         }
 
+        clear(previousSibling);
         previousSibling.remove();
     }
 
@@ -233,3 +228,147 @@ function throwTypeErrorForObject(obj) {
     throwTypeError(obj, 'object', message);
 }
 
+const QUERY_SELECTOR = '[data-bind]';
+const DOMRenderer = {
+    name: 'DOMRenderer',
+
+    createTemplate(id, content, isFragment) {
+        const node = DOMRenderer.template(id, content);
+        const render = DOMRenderer.renderer(node, isFragment);
+        return render;
+    },
+
+    template(id, content) {
+        if(content) return DOMRenderer.create(content);
+        DOMRenderer.getById(id);
+    },
+
+    create(html) {
+        const template = document.createElement('template');
+        template.innerHTML = html;
+        return template.content;
+    },
+    getById(id) {
+        const template = document.getElementById(id);
+        if(!template) {
+            throw new Error(`No template with id "${id}"`);
+        }
+        return template.content;
+    },
+
+    renderer(fragment, isFragment) {
+        if(!isFragment) fragment = fragment.firstElementChild;
+        // TODO: malformed fragment check...necessary?
+
+        return function render() {
+            const clone = fragment.cloneNode(true);
+            const targets = clone.querySelectorAll(QUERY_SELECTOR);
+            return [clone, targets];
+        };
+    },
+    bound(dom) {
+        return dom.querySelectorAll(QUERY_SELECTOR);
+    }
+};
+
+const templates = new Map(); // cache
+let renderEngine = DOMRenderer; // DOM or HTML engine
+
+function get(id, isFragment = false, content) {
+    if(templates.has(id)) return templates.get(id);
+
+    const template = renderEngine.createTemplate(id, content, isFragment);
+
+    templates.set(id, template);
+    return template;
+}
+
+const bindings = new Map(); // cache
+
+// stack
+const injectable = [];
+
+const templateRenderer = getBound => (...args) => {
+    const [root, bind] = getBound();
+    if(bind) bind(...args);
+    return root;
+};
+
+function renderer(id, targets, makeBind, isFragment, content) {
+    const create = get(id, isFragment, content);
+
+    function getBound() {
+        let bind = null;
+        let boundEls = null;
+        let node = injectable.at(-1); // peek!
+
+        // TODO: test injectable is right template id type
+
+        if(node) {
+            const hasBind = bindings.has(node);
+            bind = bindings.get(node);
+            if(hasBind) return [node, bind];
+        }
+
+        // Honestly not sure this really needed, 
+        // use case would be list component optimize by
+        // not keeping bind functions?
+        // overhead is small as it is simple function
+        if(node) boundEls = renderEngine.bound(node);
+        else {
+            // (destructuring re-assignment)
+            ([node, boundEls] = create());
+        }
+
+        const nodes = targets ? targets(node, boundEls) : null;
+        bind = makeBind ? makeBind(nodes) : null;
+
+        bindings.set(node, bind);
+        return [node, bind];
+    }
+
+    return templateRenderer(getBound);
+}
+
+const gac282a7be0 = (r,t) => [t[0].childNodes[3]];
+
+const bd41d8cd98f = (ts) => {
+  const t0 = ts[0];
+  return (v0) => {
+    compose(t0, v0);
+  };    
+};
+
+const g3558193cd9 = (r) => [r.childNodes[1]];
+
+const g2cc7b6176d = (r,t) => [t[0],r.childNodes[3],r.childNodes[5]];
+
+const bb3ae510d64 = (ts) => {
+  const t0 = ts[0], t1 = ts[1], t2 = ts[2];
+  return (v0, v1, v2) => {
+    t0.innerHTML = v0;
+    compose(t1, v1);
+    compose(t2, v2);
+  };    
+};
+
+const tf30ef00ee2 = renderer("f30ef00ee2", gac282a7be0, bd41d8cd98f, true);
+const te23131e855 = renderer("e23131e855", g3558193cd9, bd41d8cd98f, false);
+const t0f61ee8206 = renderer("0f61ee8206", g2cc7b6176d, bb3ae510d64, false);
+
+async function fetchEmojis() {
+    const res = await fetch('https://emojihub.yurace.pro/api/all');
+    return await res.json();
+}
+
+const List = fetchEmojis().then(emojis => EmojiList({
+  emojis
+}));
+const App = tf30ef00ee2(createElement(List));
+document.body.append(App);
+function EmojiList({emojis}) {
+  return te23131e855(emojis.map(Emoji));
+}
+function Emoji({name, unicode, htmlCode}) {
+  return t0f61ee8206(htmlCode.join(''),name,unicode);
+}

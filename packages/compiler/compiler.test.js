@@ -8,13 +8,43 @@ const compile = input => {
     });
     return {
         code, map,
-        templates: templates.map(({ id, html, isDomFragment, isEmpty, isStatic, imports }) => {
-            return { id, html, isDomFragment, isEmpty, isStatic, imports };
+        templates: templates.map(({ id, childBindKey, propBindKey, html, isDomFragment, isEmpty }) => {
+            return { id, childBindKey, propBindKey, html, isDomFragment, isEmpty };
         })
     };
 };
 
 describe('JSX dom literals', () => {
+
+    test('Hello Azoth', ({ expect }) => {
+        const input = `const t = <p className={"className"}>
+            Hello {"Azoth"}
+        </p>;`;
+
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "import { tf312946f36 } from 'virtual:azoth-templates?id=f312946f36';
+
+          const t = tf312946f36("className","Azoth");
+          "
+        `);
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "childBindKey": undefined,
+              "html": "<p>
+                      Hello <!--0-->
+                  </p>",
+              "id": "f312946f36",
+              "isDomFragment": false,
+              "isEmpty": false,
+              "propBindKey": undefined,
+            },
+          ]
+        `);
+    });
+
     test('complex template structure with props and child nodes', ({ expect }) => {
         const input = `const t = <div>
             <p className={"my-class"}>{"felix"}</p>
@@ -35,40 +65,16 @@ describe('JSX dom literals', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { tfdd1a869cf } from 'virtual:azoth-templates?id=fdd1a869cf';
-          const t = (() => {
-              const [__root, __targets] = tfdd1a869cf();
-              const __target0 =__targets[0];
-              const __target1 =__targets[1];
-              const __target2 =__targets[2];
-              const __target3 =__targets[3];
-              const __target4 =__targets[4];
-              const __target5 =__targets[5];
-              const __child1 = __target0.childNodes[0];
-              const __child2 = __target1.childNodes[0];
-              const __child3 = __target2.childNodes[0];
-              const __child4 = __target4.childNodes[1];
-              const __child5 = __target4.childNodes[3];
-              const __child7 = __target3.childNodes[7];
-              const __child8 = __root.childNodes[15];
-              __target0.className = ("my-class");
-              __compose(__child1, "felix");
-              __compose(__child2, "this is");
-              __compose(__child3, "azoth");
-              __compose(__child4, "two");
-              __compose(__child5, "and...");
-              __target5.className = ("span-class");
-              __compose(__child7, "ul-footer");
-              __compose(__child8, "footer");
-              return __root;
-          })();
+          "import { t9fcf48061b } from 'virtual:azoth-templates?id=9fcf48061b';
+
+          const t = t9fcf48061b("my-class","felix","this is","azoth","two","and...","span-class","ul-footer","footer");
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<div>
                       <p data-bind><!--0--></p>
                       <p>static</p>
@@ -84,13 +90,10 @@ describe('JSX dom literals', () => {
                       <custom-element></custom-element>
                       <!--0-->
                   </div>",
-              "id": "fdd1a869cf",
-              "imports": [
-                "compose",
-              ],
+              "id": "9fcf48061b",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -108,28 +111,21 @@ describe('JSX dom literals', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t10073da0ec } from 'virtual:azoth-templates?id=10073da0ec';
+          "import { tfef7238342 } from 'virtual:azoth-templates?id=fef7238342';
 
-          const t = (() => {
-              const __root = t10073da0ec()[0];
-              __root.className = ("className");
-              __root.name = ("name");
-              __root["class"] = ("class");
-              __root["class-name"] = ("class-name");
-              return __root;
-          })();
+          const t = tfef7238342("className","name","class","class-name");
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<input required>",
-              "id": "10073da0ec",
-              "imports": [],
+              "id": "fef7238342",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -143,36 +139,29 @@ describe('nested context', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { t8dae88052a, t1a78cbe949 } from 'virtual:azoth-templates?id=8dae88052a&id=1a78cbe949';
-          (() => {
-              const __root = t8dae88052a()[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, t1a78cbe949()[0]);
-              return __root;
-          })();
+          "import { t728beb50f0, t1a78cbe949 } from 'virtual:azoth-templates?id=728beb50f0&id=1a78cbe949';
+
+          t728beb50f0(t1a78cbe949());
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<div><!--0--></div>",
-              "id": "8dae88052a",
-              "imports": [
-                "compose",
-              ],
+              "id": "728beb50f0",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<hr>",
               "id": "1a78cbe949",
-              "imports": [],
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -189,95 +178,19 @@ describe('template optimizations', () => {
         expect(code).toMatchInlineSnapshot(`
           "import { t5bf3d2f523 } from 'virtual:azoth-templates?id=5bf3d2f523';
 
-          const template = t5bf3d2f523()[0];
+          const template = t5bf3d2f523();
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<p>Hello</p>",
               "id": "5bf3d2f523",
-              "imports": [],
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": true,
-            },
-          ]
-        `);
-    });
-});
-
-describe('surrounding code integration', () => {
-
-    test('ArrowFunctionExpression: implicit return is block return', ({ expect }) => {
-        const input = `
-            const template = (text) => <p>{text}</p>
-        `;
-
-        const { code, templates } = compile(input);
-
-        expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { t904ca237ee } from 'virtual:azoth-templates?id=904ca237ee';
-          const template = text => {
-              const __root = t904ca237ee()[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, text);
-              return __root;
-          };
-          "
-        `);
-
-        expect(templates).toMatchInlineSnapshot(`
-          [
-            {
-              "html": "<p><!--0--></p>",
-              "id": "904ca237ee",
-              "imports": [
-                "compose",
-              ],
-              "isDomFragment": false,
-              "isEmpty": false,
-              "isStatic": false,
-            },
-          ]
-        `);
-    });
-
-    test('ReturnStatement: injects statements before, returns root', ({ expect }) => {
-        const input = `
-            function template(text) {
-                const format = 'text' + '!';
-                return <p>{text}</p>;
-            }
-        `;
-
-        const { code, templates } = compile(input);
-
-        expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { t904ca237ee } from 'virtual:azoth-templates?id=904ca237ee';
-          function template(text) {
-              const format = 'text' + '!';
-              const __root = t904ca237ee()[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, text);
-              return __root;
-          }
-          "
-        `);
-        expect(templates).toMatchInlineSnapshot(`
-          [
-            {
-              "html": "<p><!--0--></p>",
-              "id": "904ca237ee",
-              "imports": [
-                "compose",
-              ],
-              "isDomFragment": false,
-              "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -285,102 +198,48 @@ describe('surrounding code integration', () => {
 });
 
 describe('fragments', () => {
-    test('<> ... </> basic', ({ expect }) => {
+    test('empty', ({ expect }) => {
         const input = `
             const fragment = <><hr/><hr/></>;
-            const single = <><hr/></>;
-            const fragInFrag = <><><hr/></></>;
-            const fragInFragCompose = <><>{x}</></>;
-            const empty = <></>;
             const compose = <>{x}</>;
-            const text = <>text</>;
+            const empty = <></>;
         `;
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { tc203fe7dcd, t1a78cbe949, tc084de4382, t1cb251ec0d } from 'virtual:azoth-templates?id=c203fe7dcd&id=1a78cbe949&id=c084de4382&id=1cb251ec0d';
-          const fragment = tc203fe7dcd(true)[0];
-          const single = t1a78cbe949()[0];
-          const fragInFrag = t1a78cbe949()[0];
-          const fragInFragCompose = (() => {
-              const __root = tc084de4382(true)[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, x);
-              return __root;
-          })();
+          "import { tc203fe7dcd, t84c9741b4d, td41d8cd98f } from 'virtual:azoth-templates?id=c203fe7dcd&id=84c9741b4d&id=d41d8cd98f';
+
+          const fragment = tc203fe7dcd();
+          const compose = t84c9741b4d(x);
           const empty = null;
-          const compose = (() => {
-              const __root = tc084de4382(true)[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, x);
-              return __root;
-          })();
-          const text = t1cb251ec0d(true)[0];
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<hr><hr>",
               "id": "c203fe7dcd",
-              "imports": [],
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
-              "html": "<hr>",
-              "id": "1a78cbe949",
-              "imports": [],
-              "isDomFragment": false,
-              "isEmpty": false,
-              "isStatic": true,
-            },
-            {
-              "html": "<hr>",
-              "id": "1a78cbe949",
-              "imports": [],
-              "isDomFragment": false,
-              "isEmpty": false,
-              "isStatic": true,
-            },
-            {
+              "childBindKey": undefined,
               "html": "<!--0-->",
-              "id": "c084de4382",
-              "imports": [
-                "compose",
-              ],
+              "id": "84c9741b4d",
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
-              "imports": [],
+              "id": "d41d8cd98f",
               "isDomFragment": true,
               "isEmpty": true,
-              "isStatic": true,
-            },
-            {
-              "html": "<!--0-->",
-              "id": "c084de4382",
-              "imports": [
-                "compose",
-              ],
-              "isDomFragment": true,
-              "isEmpty": false,
-              "isStatic": false,
-            },
-            {
-              "html": "text",
-              "id": "1cb251ec0d",
-              "imports": [],
-              "isDomFragment": true,
-              "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -417,91 +276,77 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { tc203fe7dcd, t1a78cbe949, tc084de4382, t6c72de769d } from 'virtual:azoth-templates?id=c203fe7dcd&id=1a78cbe949&id=c084de4382&id=6c72de769d';
-          const fragment = tc203fe7dcd(true)[0];
-          const single = t1a78cbe949()[0];
-          const fragInFrag = t1a78cbe949()[0];
-          const fragInFragCompose = (() => {
-              const __root = tc084de4382(true)[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, x);
-              return __root;
-          })();
+          "import { tc203fe7dcd, t1a78cbe949, t84c9741b4d, td41d8cd98f, t6c72de769d } from 'virtual:azoth-templates?id=c203fe7dcd&id=1a78cbe949&id=84c9741b4d&id=d41d8cd98f&id=6c72de769d';
+
+          const fragment = tc203fe7dcd();
+          const single = t1a78cbe949();
+          const fragInFrag = t1a78cbe949();
+          const fragInFragCompose = t84c9741b4d(x);
           const empty = null;
-          const compose = (() => {
-              const __root = tc084de4382(true)[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, x);
-              return __root;
-          })();
-          const text = t6c72de769d(true)[0];
+          const compose = t84c9741b4d(x);
+          const text = t6c72de769d();
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<hr><hr>",
               "id": "c203fe7dcd",
-              "imports": [],
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<hr>",
               "id": "1a78cbe949",
-              "imports": [],
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<hr>",
               "id": "1a78cbe949",
-              "imports": [],
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<!--0-->",
-              "id": "c084de4382",
-              "imports": [
-                "compose",
-              ],
+              "id": "84c9741b4d",
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
-              "imports": [],
+              "id": "d41d8cd98f",
               "isDomFragment": true,
               "isEmpty": true,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<!--0-->",
-              "id": "c084de4382",
-              "imports": [
-                "compose",
-              ],
+              "id": "84c9741b4d",
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "
                           text
                       ",
               "id": "6c72de769d",
-              "imports": [],
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -522,62 +367,48 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { t1a78cbe949, tc084de4382 } from 'virtual:azoth-templates?id=1a78cbe949&id=c084de4382';
-          const start = t1a78cbe949()[0];
-          const end = t1a78cbe949()[0];
-          const composeStart = (() => {
-              const __root = tc084de4382(true)[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, x);
-              return __root;
-          })();
-          const composeEnd = (() => {
-              const __root = tc084de4382(true)[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, x);
-              return __root;
-          })();
+          "import { t1a78cbe949, t84c9741b4d } from 'virtual:azoth-templates?id=1a78cbe949&id=84c9741b4d';
+
+          const start = t1a78cbe949();
+          const end = t1a78cbe949();
+          const composeStart = t84c9741b4d(x);
+          const composeEnd = t84c9741b4d(x);
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<hr>",
               "id": "1a78cbe949",
-              "imports": [],
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<hr>",
               "id": "1a78cbe949",
-              "imports": [],
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<!--0-->",
-              "id": "c084de4382",
-              "imports": [
-                "compose",
-              ],
+              "id": "84c9741b4d",
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<!--0-->",
-              "id": "c084de4382",
-              "imports": [
-                "compose",
-              ],
+              "id": "84c9741b4d",
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -595,64 +426,57 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { t653a3aad80, tdcaa233028, t2dc1738d5c, t0cf31b2c28, t5bc2a159b1 } from 'virtual:azoth-templates?id=653a3aad80&id=dcaa233028&id=2dc1738d5c&id=0cf31b2c28&id=5bc2a159b1';
-          const fragment = t653a3aad80(true)[0];
-          const single = tdcaa233028(true)[0];
-          const fragInFrag = t2dc1738d5c(true)[0];
-          const spaces = t0cf31b2c28(true)[0];
-          const compose = (() => {
-              const __root = t5bc2a159b1(true)[0];
-              const __child0 = __root.childNodes[1];
-              __compose(__child0, x);
-              return __root;
-          })();
+          "import { t653a3aad80, tdcaa233028, t2dc1738d5c, t0cf31b2c28, t3c41ad0e2b } from 'virtual:azoth-templates?id=653a3aad80&id=dcaa233028&id=2dc1738d5c&id=0cf31b2c28&id=3c41ad0e2b';
+
+          const fragment = t653a3aad80();
+          const single = tdcaa233028();
+          const fragInFrag = t2dc1738d5c();
+          const spaces = t0cf31b2c28();
+          const compose = t3c41ad0e2b(x);
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": " <hr><hr> ",
               "id": "653a3aad80",
-              "imports": [],
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": " <hr> ",
               "id": "dcaa233028",
-              "imports": [],
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "  <hr>  ",
               "id": "2dc1738d5c",
-              "imports": [],
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "    ",
               "id": "0cf31b2c28",
-              "imports": [],
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": " <!--0--> ",
-              "id": "5bc2a159b1",
-              "imports": [
-                "compose",
-              ],
+              "id": "3c41ad0e2b",
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -666,28 +490,21 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { tfaf808e6cc } from 'virtual:azoth-templates?id=faf808e6cc';
-          const fragment = (() => {
-              const __root = tfaf808e6cc(true)[0];
-              const __child0 = __root.childNodes[1];
-              __compose(__child0, "two");
-              return __root;
-          })();
+          "import { t253e2ffa84 } from 'virtual:azoth-templates?id=253e2ffa84';
+
+          const fragment = t253e2ffa84("two");
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "one<!--0-->three",
-              "id": "faf808e6cc",
-              "imports": [
-                "compose",
-              ],
+              "id": "253e2ffa84",
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -707,41 +524,34 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { tccaa44c114, t681310be49 } from 'virtual:azoth-templates?id=ccaa44c114&id=681310be49';
-          const extraneous = tccaa44c114()[0];
-          const childNodeIndex = (() => {
-              const __root = t681310be49()[0];
-              const __child0 = __root.childNodes[3];
-              __compose(__child0, "expect index 3");
-              return __root;
-          })();
+          "import { tccaa44c114, taccbe53128 } from 'virtual:azoth-templates?id=ccaa44c114&id=accbe53128';
+
+          const extraneous = tccaa44c114();
+          const childNodeIndex = taccbe53128("expect index 3");
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<div><hr><hr><hr></div>",
               "id": "ccaa44c114",
-              "imports": [],
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<div>
                           <p></p>
                           <!--0--><p></p>
                           <p></p>
                       </div>",
-              "id": "681310be49",
-              "imports": [
-                "compose",
-              ],
+              "id": "accbe53128",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -753,70 +563,21 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { tef691fa27a } from 'virtual:azoth-templates?id=ef691fa27a';
-          const App = (() => {
-              const [__root, __targets] = tef691fa27a(true);
-              const __target0 =__targets[0];
-              const __child0 = __root.childNodes[0];
-              const __child1 = __target0.childNodes[0];
-              const __child2 = __root.childNodes[2];
-              __compose(__child0, 'foo');
-              __compose(__child1, 'bar');
-              __compose(__child2, 'qux');
-              return __root;
-          })();
+          "import { t97874fe2c4 } from 'virtual:azoth-templates?id=97874fe2c4';
+
+          const App = t97874fe2c4('foo','bar','qux');
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<!--0--><main data-bind><!--0--></main><!--0-->",
-              "id": "ef691fa27a",
-              "imports": [
-                "compose",
-              ],
+              "id": "97874fe2c4",
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": false,
-            },
-          ]
-        `);
-
-    });
-});
-
-describe('template root', () => {
-    test('single element is root', ({ expect }) => {
-        const input = `
-            const div = <div>{hello}</div>;
-        `;
-        const { code, templates } = compile(input);
-
-        expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { t8dae88052a } from 'virtual:azoth-templates?id=8dae88052a';
-          const div = (() => {
-              const __root = t8dae88052a()[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, hello);
-              return __root;
-          })();
-          "
-        `);
-
-        expect(templates).toMatchInlineSnapshot(`
-          [
-            {
-              "html": "<div><!--0--></div>",
-              "id": "8dae88052a",
-              "imports": [
-                "compose",
-              ],
-              "isDomFragment": false,
-              "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -833,25 +594,21 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t1cdf0d646f } from 'virtual:azoth-templates?id=1cdf0d646f';
+          "import { tb3611c2834 } from 'virtual:azoth-templates?id=b3611c2834';
 
-          document.body.append((() => {
-              const __root = t1cdf0d646f()[0];
-              __root.prop = (prop);
-              return __root;
-          })());
+          document.body.append(tb3611c2834(prop));
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<custom-element></custom-element>",
-              "id": "1cdf0d646f",
-              "imports": [],
+              "id": "b3611c2834",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -867,32 +624,28 @@ describe('element composition', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "import { __createElement } from 'azoth/runtime';
-
-          const c = __createElement(Component);
-          const cProps = __createElement(Component, { prop: value, attr: "static", });
+          import { td41d8cd98f } from 'virtual:azoth-templates?id=d41d8cd98f';
+          const c = __createElement(Component, true);
+          const cProps = __createElement(Component, { prop: value, attr: "static", }, true);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
-              "imports": [
-                "createElement",
-              ],
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
-              "imports": [
-                "createElement",
-              ],
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -908,33 +661,23 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { __composeElement, __compose } from 'azoth/runtime';
-          import { t2288998344 } from 'virtual:azoth-templates?id=2288998344';
-          const component = (() => {
-              const __root = t2288998344()[0];
-              const __child0 = __root.childNodes[1];
-              const __child1 = __root.childNodes[3];
-              __composeElement(__child0, Component, { prop: value, prop2: "literal", });
-              __composeElement(__child1, GotNoPropsAsYouCanSee);
-              return __root;
-          })();
+          "import { __createElement } from 'azoth/runtime';
+          import { t06bef50336 } from 'virtual:azoth-templates?id=06bef50336';
+          const component = t06bef50336(__createElement(Component, { prop: value, prop2: "literal", }),__createElement(GotNoPropsAsYouCanSee));
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<div>
                           <!--0-->
                           <!--0-->
                       </div>",
-              "id": "2288998344",
-              "imports": [
-                "composeElement",
-                "compose",
-              ],
+              "id": "06bef50336",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -953,92 +696,41 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { __createElement, __compose } from 'azoth/runtime';
-          import { t2288998344 } from 'virtual:azoth-templates?id=2288998344';
-          const $A = __createElement(A);
-          const $B = __createElement(B);
-          const dom = (() => {
-              const __root = t2288998344()[0];
-              const __child0 = __root.childNodes[1];
-              const __child1 = __root.childNodes[3];
-              __compose(__child0, $A);
-              __compose(__child1, $B);
-              return __root;
-          })();
+          "import { __createElement } from 'azoth/runtime';
+          import { td41d8cd98f, t06bef50336 } from 'virtual:azoth-templates?id=d41d8cd98f&id=06bef50336';
+          const $A = __createElement(A, true);
+          const $B = __createElement(B, true);
+          const dom = t06bef50336($A,$B);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
-              "imports": [
-                "createElement",
-              ],
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
-              "imports": [
-                "createElement",
-              ],
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<div>
                           <!--0-->
                           <!--0-->
                       </div>",
-              "id": "2288998344",
-              "imports": [
-                "compose",
-              ],
+              "id": "06bef50336",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
-            },
-          ]
-        `);
-
-    });
-
-    test('return keyword in Function with static jsx', ({ expect }) => {
-        const input = `
-            function Surprise() {
-                return <section>
-                    <h2>Guess What...</h2>
-                    <p>surprise!</p>
-                </section>;
-            }
-        `;
-
-        const { code, templates } = compile(input);
-
-        expect(code).toMatchInlineSnapshot(`
-          "import { t92cc583556 } from 'virtual:azoth-templates?id=92cc583556';
-
-          function Surprise() {
-              return t92cc583556()[0];
-          }
-          "
-        `);
-        expect(templates).toMatchInlineSnapshot(`
-          [
-            {
-              "html": "<section>
-                              <h2>Guess What...</h2>
-                              <p>surprise!</p>
-                          </section>",
-              "id": "92cc583556",
-              "imports": [],
-              "isDomFragment": false,
-              "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -1064,166 +756,115 @@ describe('element composition', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { __createElement, __compose } from 'azoth/runtime';
-          import { t904ca237ee, t1cb251ec0d, t9b045328fb } from 'virtual:azoth-templates?id=904ca237ee&id=1cb251ec0d&id=9b045328fb';
-          const c = __createElement(Component, null, (() => {
-              const __root = t904ca237ee()[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, "test");
-              return __root;
-          })());
-          const cTrim = __createElement(Component, null, (() => {
-              const __root = t904ca237ee()[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, "test");
-              return __root;
-          })());
-          const cTrimStart = __createElement(Component, null, (() => {
-              const __root = t904ca237ee()[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, "test");
-              return __root;
-          })());
-          const cTrimEnd = __createElement(Component, null, (() => {
-              const __root = t904ca237ee()[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, "test");
-              return __root;
-          })());
-          const cText = __createElement(Component, null, t1cb251ec0d(true)[0]);
-          const cFrag = __createElement(Component, null, (() => {
-              const [__root, __targets] = t9b045328fb(true);
-              const __target0 =__targets[0];
-              const __target1 =__targets[1];
-              const __child0 = __target0.childNodes[0];
-              const __child1 = __target1.childNodes[0];
-              __compose(__child0, 1);
-              __compose(__child1, 2);
-              return __root;
-          })());
+          "import { __createElement } from 'azoth/runtime';
+          import { td41d8cd98f, tc193fcb516, t1cb251ec0d, t047dd60a46 } from 'virtual:azoth-templates?id=d41d8cd98f&id=c193fcb516&id=1cb251ec0d&id=047dd60a46';
+          const c = __createElement(Component, null, tc193fcb516("test"), true);
+          const cTrim = __createElement(Component, null, tc193fcb516("test"), true);
+          const cTrimStart = __createElement(Component, null, tc193fcb516("test"), true);
+          const cTrimEnd = __createElement(Component, null, tc193fcb516("test"), true);
+          const cText = __createElement(Component, null, t1cb251ec0d(), true);
+          const cFrag = __createElement(Component, null, t047dd60a46(1,2), true);
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
-              "imports": [
-                "createElement",
-              ],
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<p><!--0--></p>",
-              "id": "904ca237ee",
-              "imports": [
-                "compose",
-              ],
+              "id": "c193fcb516",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
-              "imports": [
-                "createElement",
-              ],
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<p><!--0--></p>",
-              "id": "904ca237ee",
-              "imports": [
-                "compose",
-              ],
+              "id": "c193fcb516",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
-              "imports": [
-                "createElement",
-              ],
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<p><!--0--></p>",
-              "id": "904ca237ee",
-              "imports": [
-                "compose",
-              ],
+              "id": "c193fcb516",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
-              "imports": [
-                "createElement",
-              ],
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<p><!--0--></p>",
-              "id": "904ca237ee",
-              "imports": [
-                "compose",
-              ],
+              "id": "c193fcb516",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
-              "imports": [
-                "createElement",
-              ],
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "text",
               "id": "1cb251ec0d",
-              "imports": [],
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "",
-              "id": "",
-              "imports": [
-                "createElement",
-              ],
+              "id": "d41d8cd98f",
               "isDomFragment": false,
               "isEmpty": true,
-              "isStatic": true,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<p data-bind><!--0--></p>
                           <p data-bind><!--0--></p>",
-              "id": "9b045328fb",
-              "imports": [
-                "compose",
-              ],
+              "id": "047dd60a46",
               "isDomFragment": true,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -1241,82 +882,30 @@ describe('render and composition cases', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { t62831a5152, t8dc93cc914 } from 'virtual:azoth-templates?id=62831a5152&id=8dc93cc914';
-          const Item = name => {
-              const __root = t62831a5152()[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, name);
-              return __root;
-          };
-          const Template = () => {
-              const __root = t8dc93cc914()[0];
-              const __child0 = __root.childNodes[0];
-              const __child1 = __root.childNodes[1];
-              __compose(__child0, [2, 4, 7].map(Item));
-              __compose(__child1, "text");
-              return __root;
-          };
+          "import { tcb5355f810, t9d84b2deff } from 'virtual:azoth-templates?id=cb5355f810&id=9d84b2deff';
+
+          const Item = name => tcb5355f810(name);
+          const Template = () => t9d84b2deff([2, 4, 7].map(Item),"text");
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<li><!--0--></li>",
-              "id": "62831a5152",
-              "imports": [
-                "compose",
-              ],
+              "id": "cb5355f810",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<div><!--0--><!--0--></div>",
-              "id": "8dc93cc914",
-              "imports": [
-                "compose",
-              ],
+              "id": "9d84b2deff",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
-            },
-          ]
-        `);
-
-    });
-
-    test('edge case: previously broken esbuild jsx', ({ expect }) => {
-        const input = `
-            const render = () => <li className={category}>Hello {place}</li>
-        `;
-        const { code, templates } = compile(input);
-
-        expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { t2b440f4741 } from 'virtual:azoth-templates?id=2b440f4741';
-          const render = () => {
-              const __root = t2b440f4741()[0];
-              const __child1 = __root.childNodes[1];
-              __root.className = (category);
-              __compose(__child1, place);
-              return __root;
-          };
-          "
-        `);
-
-        expect(templates).toMatchInlineSnapshot(`
-          [
-            {
-              "html": "<li>Hello <!--0--></li>",
-              "id": "2b440f4741",
-              "imports": [
-                "compose",
-              ],
-              "isDomFragment": false,
-              "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
           ]
         `);
@@ -1333,45 +922,31 @@ describe('render and composition cases', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { __compose } from 'azoth/runtime';
-          import { t62831a5152, t25ec157413 } from 'virtual:azoth-templates?id=62831a5152&id=25ec157413';
-          const Emoji = ({name}) => {
-              const __root = t62831a5152()[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, name);
-              return __root;
-          };
+          "import { tcb5355f810, t65cf075bba } from 'virtual:azoth-templates?id=cb5355f810&id=65cf075bba';
+
+          const Emoji = ({name}) => tcb5355f810(name);
           const promise = fetchEmojis().then(emojis => emojis.map(Emoji));
-          const Emojis = (() => {
-              const __root = t25ec157413()[0];
-              const __child0 = __root.childNodes[0];
-              __compose(__child0, promise);
-              return __root;
-          })();
+          const Emojis = t65cf075bba(promise);
           document.body.append(Emojis);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
+              "childBindKey": undefined,
               "html": "<li><!--0--></li>",
-              "id": "62831a5152",
-              "imports": [
-                "compose",
-              ],
+              "id": "cb5355f810",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
             {
+              "childBindKey": undefined,
               "html": "<ul><!--0--></ul>",
-              "id": "25ec157413",
-              "imports": [
-                "compose",
-              ],
+              "id": "65cf075bba",
               "isDomFragment": false,
               "isEmpty": false,
-              "isStatic": false,
+              "propBindKey": undefined,
             },
           ]
         `);

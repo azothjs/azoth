@@ -1,4 +1,4 @@
-import { describe, test, beforeEach } from 'vitest';
+import { test, beforeEach } from 'vitest';
 import './with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { subject } from './generators.js';

@@ -20,17 +20,13 @@ class ClassComp {
     }
 }
 const ArrowComp = ({ name }) => runCompose(name, elementWithAnchor);
-class ClassCompRender {
-    render({ name }) {
-        return runCompose(name, elementWithAnchor);
-    }
-}
+
 const RenderObject = {
     render({ name }) {
         return runCompose(name, elementWithAnchor);
     }
 };
-const CONSTRUCTORS = [Component, ClassComp, RenderObject, ClassCompRender, ArrowComp];
+const CONSTRUCTORS = [Component, ClassComp, RenderObject, ArrowComp];
 
 function ComponentP({ name }) {
     return Promise.resolve(runCompose(name, elementWithAnchor));
@@ -48,13 +44,8 @@ const RenderObjectP = {
         return runCompose(name, elementWithAnchor);
     }
 };
-class ClassCompRenderP {
-    async render({ name }) {
-        return () => runCompose(name, elementWithAnchor);
-    }
-}
 const ArrowCompP = async ({ name }) => runCompose(name, elementWithAnchor);
-const ASYNC_CONSTRUCTORS = [ComponentP, ClassCompP, RenderObjectP, ClassCompRenderP, ArrowCompP];
+const ASYNC_CONSTRUCTORS = [ComponentP, ClassCompP, RenderObjectP, ArrowCompP];
 
 describe('create element', () => {
 

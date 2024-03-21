@@ -57,4 +57,5 @@
     "explorer.fileNesting.patterns": {
         "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb, pnpm-workspace.yaml"
     },
+    "liveServer.settings.port": 5501,
 }

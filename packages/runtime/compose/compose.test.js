@@ -1,8 +1,8 @@
 import { describe, test } from 'vitest';
 import { IGNORE, compose } from './compose.js';
 import {
-    elements, elementWithAnchor, elementWithText,
-    elementWithTextAnchor, $anchor
+    elements, elementWithAnchor, elementWithText, elementWithTextAnchor,
+    $anchor
 } from 'test-utils/elements';
 
 export function runCompose(value, create) {

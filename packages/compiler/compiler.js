@@ -1,9 +1,10 @@
 import { Parser } from 'acorn';
 import acornJsx from 'acorn-jsx';
 import { generate as astring } from 'astring';
-import { TemplateGenerator, templateModule } from './transform/TemplateGenerator.js';
+import { Transpiler, templateModule } from './transform/Transpiler.js';
 import { SourceMapGenerator } from 'source-map';
 
+export * from './transform/template-generators.js';
 export { templateModule };
 
 // compile = parse + generate
@@ -33,24 +34,30 @@ export function parse(code, options = {}) {
 }
 
 // generate = ast --> code + html
-export function generate(ast, config) {
-    const file = config?.sourceFile || 'module.jsx';
+export function generateWith(generator, ast, config) {
+    const file = config?.sourceFile || 'script.js';
     const sourceMap = new SourceMapGenerator({ file });
-    const generator = new TemplateGenerator();
-
-    let code = astring(ast, {
+    const code = astring(ast, {
         ...config,
         generator,
         sourceMap,
     });
 
-    const { templates } = generator;
-
     return {
         code,
-        templates,
         map: sourceMap.toJSON(),
         // exposed for testing
         _sourceMap: sourceMap,
+    };
+}
+
+export function generate(ast, config) {
+    const generator = new Transpiler();
+    const generated = generateWith(generator, ast, config);
+    const { templates } = generator;
+
+    return {
+        ...generated,
+        templates,
     };
 }
