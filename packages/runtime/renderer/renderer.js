@@ -7,25 +7,20 @@ let renderEngine = DOMRenderer; // DOM or HTML engine
 export const RenderService = {
     useDOMEngine() {
         renderEngine = DOMRenderer;
-        clear();
+        templates.clear();
     },
     useHTMLEngine() {
         renderEngine = HTMLRenderer;
-        clear();
+        templates.clear();
     },
     get,
     bound,
 };
 
-function clear() {
-    templates.clear();
-}
 
 function get(id, isFragment = false, content) {
     if(templates.has(id)) return templates.get(id);
-
     const template = renderEngine.createTemplate(id, content, isFragment);
-
     templates.set(id, template);
     return template;
 }
@@ -73,6 +68,8 @@ export function renderer(id, targets, makeBind, isFragment, content) {
             bind = bindings.get(node);
             if(hasBind) return [node, bind];
         }
+
+        // if(!create) return [null, null];
 
         // Honestly not sure this really needed, 
         // use case would be list component optimize by

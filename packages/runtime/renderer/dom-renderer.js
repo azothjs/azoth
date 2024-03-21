@@ -4,12 +4,14 @@ export const DOMRenderer = {
 
     createTemplate(id, content, isFragment) {
         const node = DOMRenderer.template(id, content);
+        if(!node) return null;
         const render = DOMRenderer.renderer(node, isFragment);
         return render;
     },
 
     template(id, content) {
         if(content) return DOMRenderer.create(content);
+        if(content === '') return null;
         DOMRenderer.getById(id);
     },
 

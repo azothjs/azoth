@@ -25,15 +25,17 @@ export default function azothPlugin(options) {
     const byTarget = new Map();
     const byBind = new Map();
 
-    let command = '';
+    let config = null;
 
     const transformJSX = {
         name: 'azoth-jsx',
         enforce: 'pre',
 
-        config(_config, { command: cmd }) {
-            command = cmd;
+        configResolved(resolvedConfig) {
+            // store the resolved config
+            config = resolvedConfig;
         },
+
 
         resolveId(id) {
             const [name, ids] = id.split('?', 2);
@@ -44,12 +46,12 @@ export default function azothPlugin(options) {
 
         load(id) {
             const [name, params] = id.split('?', 2);
-            const isBuild = command === 'build';
+            const isProdBuild = config.mode !== 'test' && config.command === 'build';
             const ids = new URLSearchParams(params).getAll('id');
 
             switch(name) {
                 case resolvedTemplateModule:
-                    return loadTemplateModule(ids, isBuild);
+                    return loadTemplateModule(ids, isProdBuild);
                 case resolvedTargetModule:
                     return loadTargetModule(ids);
                 case resolvedBindModule:
@@ -97,7 +99,6 @@ export default function azothPlugin(options) {
 
         const templateExports = templates.map(template => {
             const { id, targetKey, bindKey } = template;
-
             // TODO: refactor cleanup on this apparent duplication
 
             if(targetKey) {
@@ -116,7 +117,7 @@ export default function azothPlugin(options) {
                 }
             }
 
-            return `export const t${id} = ${makeRenderer(template, { includeContent: !isBuild })};\n`;
+            return `export const t${id} = ${makeRenderer(template, { noContent: isBuild })};\n`;
 
         });
 

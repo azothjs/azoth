@@ -8,6 +8,7 @@ export default defineConfig({
     esbuild: {
         exclude: '**/*.jsx',
     },
+    logLevel: 'debug',
     build: {
         target: 'esnext',
         minify: false,
@@ -15,7 +16,6 @@ export default defineConfig({
         assetsDir: './',
         modulePreload: false,
         rollupOptions: {
-            logLevel: 'debug',
             output: [{
                 format: 'es'
             }]

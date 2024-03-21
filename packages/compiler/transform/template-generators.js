@@ -16,10 +16,9 @@ export function makeTargets(template) {
 }
 
 export function makeRenderer({ id, targetKey, bindKey, isDomFragment, html }, options) {
-    const content = !!options?.includeContent;
+    const content = !options?.noContent;
     const target = targetKey ? `g${targetKey}` : `null`;
     const bind = bindKey ? `b${bindKey}` : `null`;
-
     let renderer = `__renderer(`;
     renderer += `"${id}", ${target}, ${bind}, ${isDomFragment}`;
     if(content) renderer += `, \`${html}\``;
