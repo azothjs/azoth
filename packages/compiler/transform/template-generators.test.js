@@ -1,8 +1,7 @@
 /* eslint-disable no-undef */
-import { makeTargets, makeGetBound, makeRender } from './template-generators.js';
+import { makeTargets, makeGetBound, makeRender, makeBind } from './template-generators.js';
 import { parse, generate as _generate } from '../compiler.js';
 import { describe, test, beforeEach } from 'vitest';
-import { BindGenerator } from './BindGenerator.js';
 
 function preParse(input, expect) {
     const ast = parse(input);
@@ -94,7 +93,7 @@ describe('bind generator', () => {
     beforeEach(context => {
         context.compile = code => {
             const template = preParse(code, context.expect);
-            return BindGenerator.generate(template).code;
+            return makeBind(template);
         };
     });
 
@@ -105,7 +104,7 @@ describe('bind generator', () => {
             const t0 = ts[0];
             return (v0) => {
               compose(t0, v0);
-            };
+            };    
           }
           "
         `);
@@ -123,7 +122,7 @@ describe('bind generator', () => {
               t0.className = v0;
               compose(t1, v1);
               compose(t2, v2);
-            };
+            };    
           }
           "
         `
