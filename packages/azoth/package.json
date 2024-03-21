@@ -34,7 +34,7 @@
     "packageManager": "^pnpm@8.15.1",
     "dependencies": {
         "@azothjs/channels": "workspace:*",
-        "@azoth/maya": "workspace:*",
+        "@azothjs/maya": "workspace:*",
         "@azothjs/vite-plugin": "workspace:*"
     }
 }

@@ -1,5 +1,5 @@
 {
-    "name": "@azoth/thoth",
+    "name": "@azothjs/thoth",
     "version": "0.2.0",
     "description": "Azoth compiler",
     "author": "Marty Nelson",

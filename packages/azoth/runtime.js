@@ -1,8 +1,8 @@
 export {
     compose as __compose,
     createElement as __createElement,
-} from '@azoth/maya/compose';
+} from '@azothjs/maya/compose';
 
 export {
     renderer as __renderer,
-} from '@azoth/maya/renderer';
+} from '@azothjs/maya/renderer';

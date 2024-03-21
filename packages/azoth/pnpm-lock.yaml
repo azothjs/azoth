@@ -5,12 +5,12 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@azoth/maya':
-    specifier: workspace:*
-    version: link:../runtime
   '@azothjs/channels':
     specifier: workspace:*
     version: link:../channels
+  '@azothjs/maya':
+    specifier: workspace:*
+    version: link:../runtime
   '@azothjs/vite-plugin':
     specifier: workspace:*
     version: link:../vite-plugin

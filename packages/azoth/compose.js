@@ -1,1 +1,1 @@
-export * from '@azoth/maya/compose';
+export * from '@azothjs/maya/compose';
