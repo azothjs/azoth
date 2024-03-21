@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import { makeTargets, makeGetBound, makeRender, makeBind } from './template-generators.js';
+import { makeTargets, makeRenderer, makeRender, makeBind } from './template-generators.js';
 import { parse, generate as _generate } from '../compiler.js';
 import { describe, test, beforeEach } from 'vitest';
 
@@ -41,12 +41,12 @@ describe('targets generator', () => {
     });
 });
 
-describe('getBound generator', () => {
+describe('renderDOM generator', () => {
 
     beforeEach(context => {
         context.compile = code => {
             const template = preParse(code, context.expect);
-            return makeGetBound(template);
+            return makeRenderer(template);
         };
     });
 
@@ -54,7 +54,7 @@ describe('getBound generator', () => {
         const code = compile(`name => <p>{name}</p>`, expect);
 
         expect(code).toMatchInlineSnapshot(`
-          "const getBound = renderer('904ca237ee', targets, bind, false, <p><!--0--></p>);
+          "const renderDOM = renderer('904ca237ee', targets, bind, false, <p><!--0--></p>);
           "
         `);
     });
@@ -67,7 +67,7 @@ describe('getBound generator', () => {
 
         expect(code).toMatchInlineSnapshot(
             `
-          "const getBound = renderer('5252cfebed', targets, bind, false, <p>
+          "const renderDOM = renderer('5252cfebed', targets, bind, false, <p>
                       <!--0--> <span data-bind>hey <!--0-->!</span>
                   </p>);
           "
@@ -77,10 +77,10 @@ describe('getBound generator', () => {
 
     test('option noContent: true', ({ expect }) => {
         const template = preParse(`name => <p>{name}</p>`, expect);
-        const code = makeGetBound(template, { noContent: true });
+        const code = makeRenderer(template, { noContent: true });
 
         expect(code).toMatchInlineSnapshot(`
-          "const getBound = renderer('904ca237ee', targets, bind, false);
+          "const renderDOM = renderer('904ca237ee', targets, bind, false);
           "
         `);
     });
@@ -124,44 +124,6 @@ describe('bind generator', () => {
               compose(t1, v1);
               compose(t2, v2);
             };    
-          }
-          "
-        `
-        );
-    });
-});
-
-describe('render generator', () => {
-
-    beforeEach(context => {
-        context.compile = code => {
-            const template = preParse(code, context.expect);
-            return makeRender(template);
-        };
-    });
-
-    test('simple', ({ compile, expect }) => {
-        const code = compile(`name => <p>{name}</p>`);
-        expect(code).toMatchInlineSnapshot(`
-          "function renderDOM(p0) {
-            const [root, bind] = getBound();
-            bind(p0);
-            return root;
-          }
-          "
-        `);
-    });
-
-    test('props and elements', ({ compile, expect }) => {
-        const code = compile(`const t = <p className={"className"}>
-            {"Greeting"} <span>hey {"Azoth"}!</span>
-        </p>;`);
-        expect(code).toMatchInlineSnapshot(
-            `
-          "function renderDOM(p0,p1,p2) {
-            const [root, bind] = getBound();
-            bind(p0,p1,p2);
-            return root;
           }
           "
         `

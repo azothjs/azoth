@@ -52,10 +52,16 @@ function inject(node, callback) {
     }
 }
 
+const templateRenderer = getBound => (...args) => {
+    const [root, bind] = getBound();
+    bind(...args);
+    return root;
+};
+
 export function renderer(id, targets, makeBind, isFragment, content) {
     const create = get(id, isFragment, content);
 
-    return function getBound() {
+    function getBound() {
         let bind = null;
         let boundEls = null;
         let node = injectable.at(-1); // peek!
@@ -80,7 +86,9 @@ export function renderer(id, targets, makeBind, isFragment, content) {
 
         bindings.set(node, bind);
         return [node, bind];
-    };
+    }
+
+    return templateRenderer(getBound);
 }
 
 export class Controller {

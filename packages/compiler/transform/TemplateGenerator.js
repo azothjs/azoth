@@ -83,7 +83,7 @@ export class TemplateGenerator extends Generator {
         const { node: root } = template;
         const { isComponent } = root;
         if(isComponent) {
-            this.CreateElement(root, state);
+            this.CreateElement(root, state, true);
             return;
         }
 
@@ -129,9 +129,10 @@ export class TemplateGenerator extends Generator {
         state.write(`)`);
     }
 
-    CreateElement(node, state) {
+    CreateElement(node, state, topLevel = false) {
         state.write(`__createElement(`, node);
         this.CompleteElement(node, node.componentExpr, state);
+        if(topLevel) state.write(`, true`);
         state.write(`)`);
     }
 

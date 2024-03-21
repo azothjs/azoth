@@ -10,10 +10,10 @@ import {
 
 describe('dom render', () => {
 
-    let getBound = null;
+    let renderDOM = null;
     beforeAll(() => {
         RenderService.useDOMEngine();
-        getBound = renderer(
+        renderDOM = renderer(
             'id',
             getTargets,
             makeBind,
@@ -32,12 +32,6 @@ describe('dom render', () => {
             compose(t0, p0);
         };
     };
-
-    function renderDOM(p0) {
-        const [root, bind] = getBound();
-        bind(p0);
-        return root;
-    }
 
     test('Controller.for', ({ expect }) => {
         const controller = Controller.for(name => renderDOM(name));
@@ -75,10 +69,10 @@ describe('dom render', () => {
 describe('html render', () => {
     const flatRender = node => node.flat().join('');
 
-    let getBound = null;
+    let renderHTML = null;
     beforeAll(() => {
         RenderService.useHTMLEngine();
-        getBound = renderer(
+        renderHTML = renderer(
             'id',
             getTargets,
             makeBind,
@@ -97,12 +91,6 @@ describe('html render', () => {
             t0[0] = p0;
         };
     };
-
-    function renderHTML(p0) {
-        const [root, bind] = getBound();
-        bind(p0);
-        return root;
-    }
 
     test('Controller.for', ({ expect }) => {
         const controller = Controller.for(name => renderHTML(name));

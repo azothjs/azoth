@@ -28,6 +28,7 @@ export class Template {
         if(node.isComponent && bindings.length) {
             throw new Error('Unexpected component binding length');
         }
+
         this.isBoundRoot = node.queryIndex === -1;
         this.isDomFragment = node.isJSXFragment;
         this.isEmpty = node.isComponent ||

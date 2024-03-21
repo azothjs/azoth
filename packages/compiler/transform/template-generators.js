@@ -15,18 +15,9 @@ export function makeTargets(template) {
     return `const targets = (${elLength ? 'r,t' : 'r'}) => [${values.join()}];\n`;
 }
 
-export function makeGetBound({ id, isDomFragment, html }, options) {
+export function makeRenderer({ id, isDomFragment, html }, options) {
     const content = options?.noContent ? '' : `, ${html}`;
-    return `const getBound = renderer('${id}', targets, bind, ${isDomFragment}${content});\n`;
-}
-
-export function makeRender({ bindings: { length } }) {
-    const params = Array.from({ length }, (_, i) => `p${i}`);
-    return `function renderDOM(${params}) {
-  const [root, bind] = getBound();
-  bind(${params});
-  return root;
-}\n`;
+    return `const renderDOM = renderer('${id}', targets, bind, ${isDomFragment}${content});\n`;
 }
 
 const TARGETS = 'ts';

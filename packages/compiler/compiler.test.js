@@ -565,8 +565,8 @@ describe('element composition', () => {
         expect(code).toMatchInlineSnapshot(`
           "import { __createElement } from 'azoth/runtime';
 
-          const c = __createElement(Component);
-          const cProps = __createElement(Component, { prop: value, attr: "static", });
+          const c = __createElement(Component, true);
+          const cProps = __createElement(Component, { prop: value, attr: "static", }, true);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
@@ -632,8 +632,8 @@ describe('element composition', () => {
         expect(code).toMatchInlineSnapshot(`
           "import { __createElement } from 'azoth/runtime';
           import { t2288998344 } from 'virtual:azoth-templates?id=2288998344';
-          const $A = __createElement(A);
-          const $B = __createElement(B);
+          const $A = __createElement(A, true);
+          const $B = __createElement(B, true);
           const dom = t2288998344($A,$B);
           "
         `);
@@ -686,12 +686,12 @@ describe('element composition', () => {
         expect(code).toMatchInlineSnapshot(`
           "import { __createElement } from 'azoth/runtime';
           import { t904ca237ee, t1cb251ec0d, t9b045328fb } from 'virtual:azoth-templates?id=904ca237ee&id=1cb251ec0d&id=9b045328fb';
-          const c = __createElement(Component, null, t904ca237ee("test"));
-          const cTrim = __createElement(Component, null, t904ca237ee("test"));
-          const cTrimStart = __createElement(Component, null, t904ca237ee("test"));
-          const cTrimEnd = __createElement(Component, null, t904ca237ee("test"));
-          const cText = __createElement(Component, null, t1cb251ec0d());
-          const cFrag = __createElement(Component, null, t9b045328fb(1,2));
+          const c = __createElement(Component, null, t904ca237ee("test"), true);
+          const cTrim = __createElement(Component, null, t904ca237ee("test"), true);
+          const cTrimStart = __createElement(Component, null, t904ca237ee("test"), true);
+          const cTrimEnd = __createElement(Component, null, t904ca237ee("test"), true);
+          const cText = __createElement(Component, null, t1cb251ec0d(), true);
+          const cFrag = __createElement(Component, null, t9b045328fb(1,2), true);
           "
         `);
 
