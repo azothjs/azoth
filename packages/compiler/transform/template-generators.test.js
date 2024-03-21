@@ -44,14 +44,14 @@ describe('targets generator', () => {
 describe('getBound generator', () => {
 
     beforeEach(context => {
-        context.getTemplate = code => {
-            return preParse(code, context.expect);
+        context.compile = code => {
+            const template = preParse(code, context.expect);
+            return makeGetBound(template);
         };
     });
 
-    test('simple', ({ expect }) => {
-        const template = preParse(`name => <p>{name}</p>`, expect);
-        const code = makeGetBound(template);
+    test('simple', ({ compile, expect }) => {
+        const code = compile(`name => <p>{name}</p>`, expect);
 
         expect(code).toMatchInlineSnapshot(`
           "const getBound = renderer('904ca237ee', targets, bind, false, <p><!--0--></p>);
@@ -59,11 +59,12 @@ describe('getBound generator', () => {
         `);
     });
 
-    test('props and elements', ({ expect }) => {
-        const template = preParse(`const t = <p className={"className"}>
+
+    test('props and elements', ({ compile, expect }) => {
+        const code = compile(`const t = <p className={"className"}>
             {"Greeting"} <span>hey {"Azoth"}!</span>
-        </p>;`, expect);
-        const code = makeGetBound(template);
+        </p>;`);
+
         expect(code).toMatchInlineSnapshot(
             `
           "const getBound = renderer('5252cfebed', targets, bind, false, <p>
@@ -74,8 +75,8 @@ describe('getBound generator', () => {
         );
     });
 
-    test('option noContent: true', ({ getTemplate, expect }) => {
-        const template = getTemplate(`name => <p>{name}</p>`);
+    test('option noContent: true', ({ expect }) => {
+        const template = preParse(`name => <p>{name}</p>`, expect);
         const code = makeGetBound(template, { noContent: true });
 
         expect(code).toMatchInlineSnapshot(`
