@@ -23,10 +23,6 @@ function get(id, isFragment = false, content) {
     return template;
 }
 
-function bound(node) {
-    return renderEngine.bound(node);
-}
-
 const bindings = new Map(); // cache
 // TODO: implement cleanup actions on nodes
 export function clearBind(node) {
