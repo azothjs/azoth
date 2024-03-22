@@ -12,9 +12,7 @@ export const RenderService = {
     useHTMLEngine() {
         renderEngine = HTMLRenderer;
         templates.clear();
-    },
-    get,
-    bound,
+    }
 };
 
 

@@ -1,6 +1,6 @@
 {
     "name": "@azothjs/maya",
-    "version": "0.2.0",
+    "version": "0.2.2",
     "description": "Azoth runtime",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -19,7 +19,7 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/azothjs/azoth.git",
-        "directory": "packages/runtime"
+        "directory": "packages/maya"
     },
     "type": "module",
     "files": [
@@ -27,7 +27,7 @@
     ],
     "exports": {
         "./compose": "./compose/compose.js",
-        "./renderer": "./renderer/index.js"
+        "./renderer": "./renderer/renderer.js"
     },
     "devDependencies": {
         "test-utils": "workspace:^"

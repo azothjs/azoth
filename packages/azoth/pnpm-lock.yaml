@@ -10,7 +10,7 @@ dependencies:
     version: link:../channels
   '@azothjs/maya':
     specifier: workspace:*
-    version: link:../runtime
+    version: link:../maya
   '@azothjs/vite-plugin':
     specifier: workspace:*
     version: link:../vite-plugin

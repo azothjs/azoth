@@ -1,6 +1,6 @@
 {
     "name": "azoth",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "Azoth JSX hypermedia",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -19,7 +19,8 @@
     ],
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/azothjs/azoth.git"
+        "url": "git+https://github.com/azothjs/azoth.git",
+        "directory": "packages/azoth"
     },
     "type": "module",
     "files": [
