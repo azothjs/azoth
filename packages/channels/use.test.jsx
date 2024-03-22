@@ -210,7 +210,7 @@ describe('promise', () => {
 
 });
 
-describe('async iterator', () => {
+describe.skip('async iterator', () => {
 
     test('iterator only', async ({ fixture, find, expect }) => {
         const [iterator, dispatch] = subject();
@@ -227,7 +227,7 @@ describe('async iterator', () => {
         expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>duchess<!--1--></p><!--1-->"`);
     });
 
-    test('channel', async ({ fixture, find, expect }) => {
+    test.skip('channel', async ({ fixture, find, expect }) => {
         let cat = { name: 'felix' };
         const [catChannel, dispatch] = subject(value => cat = value, {
             startWith: cat

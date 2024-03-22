@@ -1,5 +1,14 @@
 /* compose, composeElement, create, createElement */
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
+export class Sync {
+    static wrap(initial, input) {
+        return new this(initial, input);
+    }
+    constructor(initial, input) {
+        this.initial = initial;
+        this.input = input;
+    }
+}
 
 export function compose(anchor, input, keepLast, props, slottable) {
     if(keepLast !== true) keepLast = false;
@@ -26,6 +35,10 @@ export function compose(anchor, input, keepLast, props, slottable) {
             if(props) Object.assign(input, props);
             if(slottable) input.slottable = slottable;
             replace(anchor, input, keepLast);
+            break;
+        case input instanceof Sync:
+            compose(anchor, input.initial, keepLast);
+            compose(anchor, input.input, keepLast, props, slottable);
             break;
         case type === 'function': {
             // will throw if function is class,
@@ -99,8 +112,6 @@ export function createElement(Constructor, props, slottable, topLevel = false) {
         default:
             return result;
     }
-
-
 }
 
 function create(input, props, slottable, anchor) {
@@ -145,6 +156,16 @@ function create(input, props, slottable, anchor) {
             else if(Array.isArray(input)) {
                 composeArray(anchor, input, false);
             }
+            else if(input instanceof Sync) {
+                // REASSIGN anchor! sync input will compose _before_
+                // anchor is appended to DOM, need container until then
+                const commentAnchor = anchor;
+                anchor = document.createDocumentFragment();
+                anchor.append(commentAnchor);
+
+                create(input.initial, props, slottable, commentAnchor);
+                create(input.input, props, slottable, commentAnchor);
+            }
             else {
                 throwTypeErrorForObject(input, type);
             }
@@ -153,7 +174,6 @@ function create(input, props, slottable, anchor) {
         }
     }
 }
-
 
 /* replace and clear */
 
@@ -183,7 +203,6 @@ function clear(anchor) {
 
     anchor.data = 0;
 }
-
 
 /* complex types */
 
@@ -232,4 +251,3 @@ function throwTypeErrorForObject(obj) {
     }
     throwTypeError(obj, 'object', message);
 }
-

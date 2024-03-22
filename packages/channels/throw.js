@@ -15,10 +15,3 @@ More arguments needed: option "${option}" requires a mapping function.`);
     }
 }
 
-export class ConflictingOptionsError extends TypeError {
-    constructor() {
-        super(`\
-Cannot specify both initialValue and startWith options.`);
-    }
-}
-

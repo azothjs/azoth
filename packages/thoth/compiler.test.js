@@ -585,7 +585,7 @@ describe('fragments', () => {
     });
 });
 
-describe('element composition', () => {
+describe('components and custom element', () => {
 
     test('custom-element with property', ({ expect }) => {
         const input = `

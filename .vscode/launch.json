@@ -15,6 +15,7 @@
             ],
             "program": "${workspaceRoot}/vite-test/node_modules/vitest/vitest.mjs",
             "args": [
+                "--test-timeout=600000",
                 "-r",
                 "${relativeFileDirname}",
                 "run",

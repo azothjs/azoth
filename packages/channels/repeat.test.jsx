@@ -24,7 +24,7 @@ test('promise with count', async ({ expect }) => {
 
 test('async iterator with default 2', async ({ expect, fixture, find }) => {
     let name = 'pete';
-    const [iterator, dispatch] = subject(value => name = value, { startWith: name });
+    const [iterator, dispatch] = subject(value => name = value, { start: name });
     const [one, two, shouldBeNull] = repeat(iterator);
     fixture.append(<p>{one} {two} {shouldBeNull}</p>);
 
@@ -42,7 +42,7 @@ test('async iterator with default 2', async ({ expect, fixture, find }) => {
 
 test('async iterator with count', async ({ expect, fixture, find }) => {
     let name = 'pete';
-    const [iterator, dispatch] = subject(value => name = value, { startWith: name });
+    const [iterator, dispatch] = subject(value => name = value, { start: name });
     const [one, two, three] = repeat(iterator, 3);
     fixture.append(<p>{one} {two} {three}</p>);
 

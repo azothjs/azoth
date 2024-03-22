@@ -175,7 +175,6 @@ describe('append and remove', () => {
 
 });
 
-
 describe('throws on invalid types', () => {
 
     test('throw on invalid object', ({ expect }) => {

@@ -3,6 +3,7 @@ import 'test-utils/with-resolvers-polyfill';
 import { elementWithAnchor } from 'test-utils/elements';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { runCompose } from './compose.test.js';
+import { Sync } from './compose.js';
 
 beforeEach(fixtureSetup);
 
@@ -98,6 +99,43 @@ describe('async values', () => {
 
         expect(fixture.innerHTML).toMatchInlineSnapshot(
             `"<div>yielded<!--1--></div>"`
+        );
+    });
+
+    test('sync render promise', async ({ expect, fixture, find }) => {
+        const syncWrapper = Sync.wrap('sync render', Promise.resolve('hi'));
+        const dom = runCompose(syncWrapper, elementWithAnchor);
+        fixture.append(dom);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>sync render<!--1--></div>"`);
+        await find('hi');
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>hi<!--1--></div>"`);
+    });
+
+    test('sync render async iter', async ({ expect, fixture, find }) => {
+        let resolve = null;
+        const doAsync = async (value) => {
+            const { promise, resolve: res } = Promise.withResolvers();
+            resolve = () => res(value);
+            return promise;
+        };
+
+        async function* numbers() {
+            yield doAsync('one');
+            yield doAsync('two');
+            yield doAsync('three');
+        }
+
+        const syncWrapper = Sync.wrap('here come async numbers!', numbers());
+        fixture.append(runCompose(syncWrapper, elementWithAnchor));
+        // initial render
+        expect(fixture.innerHTML).toMatchInlineSnapshot(
+            `"<div>here come async numbers!<!--1--></div>"`
+        );
+
+        resolve();
+        await find('one');
+        expect(fixture.innerHTML).toMatchInlineSnapshot(
+            `"<div>one<!--1--></div>"`
         );
     });
 });

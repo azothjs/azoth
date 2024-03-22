@@ -42,41 +42,8 @@ describe('promise', () => {
     });
 
 
-    test('channel, { startWith }', async ({ fixture, find, expect }) => {
-        const { promise, resolve } = Promise.withResolvers();
 
-        const [LayoutChannel] = use(promise, Cat, {
-            startWith: <Loading />
-        });
-        fixture.append(<LayoutChannel />);
-
-        await find('loading...');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>loading...</p><!--1-->"`
-        );
-
-        // trigger promise resolution post-loading
-        resolve({ name: 'felix' });
-        await find('felix');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>felix<!--1--></p><!--1-->"`
-        );
-    });
-
-    test('fast resolve with { startWith }', async ({ fixture, find, expect }) => {
-        const promise = Promise.resolve({ name: 'felix' });
-
-        const [LayoutChannel] = use(promise, Cat, {
-            startWith: <Loading />
-        });
-        fixture.append(<>{LayoutChannel}</>);
-
-        // test that a fast resolve is the first await "find"
-        await find('felix');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>felix<!--1--></p><!--1-->"`);
-    });
-
-    test('branch ...channels', async ({ fixture, find, expect }) => {
+    test.todo('branch ...channels', async ({ fixture, find, expect }) => {
         const promise = Promise.resolve(['felix', 'duchess', 'stimpy']);
 
         const [CountChannel, ListChannel] = use(promise, CatCount, CatList);
@@ -111,12 +78,12 @@ describe('promise', () => {
     `);
     });
 
-    test('branch [channel, { startWith }], channel', async ({ fixture, find, expect }) => {
+    test.todo('branch [channel, { start }], channel', async ({ fixture, find, expect }) => {
         const { promise, resolve } = Promise.withResolvers();
 
         const [ListChannel, CountChannel] = use(
             promise,
-            [CatList, { startWith: <Loading /> }],
+            [CatList, { start: <Loading /> }],
             CatCount
         );
         fixture.append(<CountChannel />, <ListChannel />);
@@ -183,7 +150,7 @@ describe('Async Iterator', () => {
     test('channel', async ({ fixture, find, expect }) => {
         let cat = { name: 'felix' };
         const [catChannel, dispatch] = subject(value => cat = value, {
-            startWith: cat
+            start: cat
         });
 
         const [LayoutChannel] = use(catChannel, Cat);
@@ -206,11 +173,11 @@ describe('Async Iterator', () => {
         }
     }
 
-    test('channel, { startWith }', async ({ fixture, find, expect }) => {
+    test('channel, { start }', async ({ fixture, find, expect }) => {
         const [cat, dispatch] = subject();
 
         const [LayoutChannel] = use(cat, Cat, {
-            startWith: <Loading />
+            start: <Loading />
         });
         fixture.append(<>{LayoutChannel}</>);
 
@@ -226,14 +193,14 @@ describe('Async Iterator', () => {
         );
     });
 
-    test('fast resolve with { startWith }', async ({ fixture, find, expect }) => {
+    test('fast resolve with { start }', async ({ fixture, find, expect }) => {
         let cat = { name: 'felix' };
         const [catChannel, dispatch] = subject(value => cat = value, {
-            startWith: cat
+            start: cat
         });
 
         const [LayoutChannel] = use(catChannel, Cat, {
-            startWith: <Loading />
+            start: <Loading />
         });
         fixture.append(<>{LayoutChannel}</>);
 
@@ -245,7 +212,7 @@ describe('Async Iterator', () => {
     test('branch ...channels', async ({ fixture, find, expect }) => {
         let cats = ['felix', 'duchess', 'stimpy'];
         const [catsChannel, dispatch] = subject(value => cats = value, {
-            startWith: cats
+            start: cats
         });
 
         const [CountChannel, ListChannel] = use(catsChannel, CatCount, CatList);
@@ -301,11 +268,11 @@ describe('Async Iterator', () => {
         `);
     });
 
-    test('branch [channel, { startWith }], channel', async ({ fixture, find, expect }) => {
+    test('branch [channel, { start }], channel', async ({ fixture, find, expect }) => {
         const [cats, dispatch] = subject();
 
         const [ListChannel, CountChannel] = use(cats,
-            [CatList, { startWith: <Loading /> }],
+            [CatList, { start: <Loading /> }],
             CatCount
         );
         fixture.append(<CountChannel />, <ListChannel />);

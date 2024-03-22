@@ -3,7 +3,7 @@ import 'test-utils/with-resolvers-polyfill';
 import { $div, elementWithText, elementWithAnchor } from 'test-utils/elements';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { runCompose } from './compose.test.js';
-import { composeElement, createElement } from './compose.js';
+import { Sync, composeElement, createElement } from './compose.js';
 
 beforeEach(fixtureSetup);
 
@@ -200,4 +200,22 @@ describe('compose element', () => {
 
 });
 
+describe('Sync wrap', () => {
+    test('initial render', async ({ expect, fixture, find }) => {
+        const syncWrapper = Sync.wrap('cat coming', ClassCompP);
+        const dom = createElement(syncWrapper, { name: 'felix' });
+        expect(dom).toMatchInlineSnapshot(`
+          <DocumentFragment>
+            cat coming
+            <!--1-->
+          </DocumentFragment>
+        `);
+
+        fixture.append(dom);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"cat coming<!--1-->"`);
+
+        await find('felix');
+        expect(fixture.innerHTML).toBe(`<div>felix<!--1--></div><!--1-->`);
+    });
+});
 

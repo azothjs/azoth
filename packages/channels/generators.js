@@ -1,20 +1,21 @@
-import { ConflictingOptionsError, OptionMissingFunctionArgumentError } from './throw.js';
+import { Sync } from '../maya/compose/compose.js';
+import { OptionMissingFunctionArgumentError } from './throw.js';
 
 function resolveOptions(options, transform) {
-    let initialValue, startWith, map = false;
+    let start, init, map = false;
     if(options) {
-        initialValue = options.initialValue;
-        startWith = options.startWith;
-        map = options.map ?? false;
-        if(initialValue !== undefined) {
-            if(startWith !== undefined) new ConflictingOptionsError();
-            if(!transform) throw new OptionMissingFunctionArgumentError('initialValue');
-        }
+        init = options.init;
+        start = options.start;
+        map = !!options.map;
         if(map && !transform) {
             throw new OptionMissingFunctionArgumentError();
         }
     }
-    return { initialValue, startWith, map };
+    return {
+        init, start, map,
+        hasStart: start !== undefined,
+        hasInit: init !== undefined,
+    };
 }
 
 export function subject(transform, options) {
@@ -23,42 +24,33 @@ export function subject(transform, options) {
         transform = null;
     }
 
-    const { initialValue, startWith, map } = resolveOptions(options, transform);
+    const { init, start, map, hasStart, hasInit } = resolveOptions(options, transform);
 
     const relay = { resolve: null };
 
-    let unsentEarlyDispatch = null;
+    const maybeTransform = payload => transform ? transform(payload) : payload;
+
+    let onDeck = hasStart && hasInit ? maybeTransform(init) : null;
 
     function dispatch(payload) {
-        if(transform) {
-            if(map) payload = payload.map(transform);
-            else payload = transform(payload);
-        }
+        if(map) payload = payload.map(transform);
+        else payload = maybeTransform(payload);
 
         if(relay.resolve) relay.resolve(payload);
-        else {
-            // eslint-disable-next-line eqeqeq
-            if(payload != null) unsentEarlyDispatch = payload;
-        }
+        else onDeck = payload;
     }
 
     async function* generator() {
         let promise = null;
         let resolve = null;
 
-        if(initialValue !== undefined) {
-            yield transform(initialValue);
-        }
-        if(startWith !== undefined) {
-            yield startWith;
-        }
-        // this handles dispatch that happens between 
-        // initial/start yields and main loop:
-        // eslint-disable-next-line eqeqeq
-        while(unsentEarlyDispatch != null) {
-            const toYield = unsentEarlyDispatch;
-            unsentEarlyDispatch = null;
-            yield toYield;
+        // this handles:
+        // 1. maybeTransformed init when init is used with start
+        // 2. dispatch fires via synchronous call during render
+        while(onDeck !== undefined) {
+            const received = onDeck;
+            onDeck = undefined;
+            yield received;
         }
 
         while(true) {
@@ -68,7 +60,18 @@ export function subject(transform, options) {
         }
     }
 
-    const asyncIterator = generator();
+    let asyncIterator = generator();
+
+    // eslint-disable-next-line eqeqeq
+    if(hasStart) {
+        return [Sync.wrap(start, asyncIterator), dispatch];
+    }
+    // eslint-disable-next-line eqeqeq
+    if(hasInit) {
+        const value = transform ? transform(init) : init;
+        return [Sync.wrap(value, asyncIterator), dispatch];
+    }
+
     return [asyncIterator, dispatch];
 }
 
