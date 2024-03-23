@@ -45,7 +45,7 @@ function makeChannel(asyncSource, transform, map, onDeck) {
         case !!asyncSource[Symbol.asyncIterator]:
             return fromAsyncIterator(asyncSource, transform, map, onDeck);
         default:
-            throw new AsyncSourceTypeError(typeof asyncSource);
+            throw new AsyncSourceTypeError(asyncSource);
     }
 }
 

@@ -14,7 +14,7 @@ export function subject(transformArg, options) {
     let onDeck = hasStart && hasInit ? maybeTransform(init) : undefined;
 
     function dispatch(payload) {
-        if(map) payload = payload.map(transform);
+        if(map) payload = payload?.map(transform);
         else payload = maybeTransform(payload);
 
         if(relay.resolve) relay.resolve(payload);
@@ -63,14 +63,25 @@ export function multicast(iterator) {
 
 export class Multicast {
     #consumers = [];
+    #async = null;
+    #initial;
 
-    constructor(subject) {
-        this.subject = subject;
+    constructor(async) {
+        if(async instanceof Sync) {
+            const { initial, input } = async;
+            this.#async = input;
+            this.#initial = initial;
+        }
+        else {
+            this.#async = async;
+        }
+
         this.#start();
     }
 
     async #start() {
-        for await(let value of this.subject) {
+        const async = this.#async;
+        for await(let value of async) {
             for(let consumer of this.#consumers) {
                 consumer(value);
             }
@@ -78,8 +89,8 @@ export class Multicast {
     }
 
     subscriber(transform, options) {
-        const [iterator, dispatch] = subject(transform, options);
-        this.#consumers.push(dispatch);
+        const [iterator, next] = subject(transform, options);
+        this.#consumers.push(next);
         return iterator;
     }
 }

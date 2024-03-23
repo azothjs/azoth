@@ -12,7 +12,7 @@ export function consume(asyncSource, ...actions) {
             break;
         case !!asyncSource[Symbol.asyncIterator]:
         default:
-            throw new AsyncSourceTypeError(type);
+            throw new AsyncSourceTypeError(asyncSource);
     }
 }
 

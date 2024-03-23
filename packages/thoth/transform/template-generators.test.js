@@ -31,8 +31,8 @@ describe('targets generator', () => {
             export const Cat = ({ name }) => <p>{name}</p>;
             export const CatList = cats => <ul>{cats.map(Cat)}</ul>;
             export const CatCount = cats => <p>{cats.length} cats</p>;
-            export const CatName = ({ name }) => <li>{name}</li>;
-            export const CatNames = cats => <ul>{cats.map(name => <CatName name={name} />)}</ul>;
+            export const CatName = (name) => <li>{name}</li>;
+            export const CatNames = cats => <ul>{cats.map(CatName)}</ul>;
         `;
 
         const ast = parse(input);
@@ -46,7 +46,6 @@ describe('targets generator', () => {
             "(r) => [r.childNodes[0]]",
             "(r) => [r.childNodes[0]]",
             "(r) => [r.childNodes[0]]",
-            "null",
           ]
         `);
     });
@@ -203,8 +202,8 @@ describe('render generator', () => {
             export const Cat = ({ name }) => <p>{name}</p>;
             export const CatList = cats => <ul>{cats.map(Cat)}</ul>;
             export const CatCount = cats => <p>{cats.length} cats</p>;
-            export const CatName = ({ name }) => <li>{name}</li>;
-            export const CatNames = cats => <ul>{cats.map(name => <CatName name={name} />)}</ul>;
+            export const CatName = (name) => <li>{name}</li>;
+            export const CatNames = cats => <ul>{cats.map(CatName)}</ul>;
         `;
 
         const ast = parse(input);
@@ -218,7 +217,6 @@ describe('render generator', () => {
             "__renderer("b4f8dfe3c0", g1a9d5db22c, bd41d8cd98f, false, \`<p><!--0--> cats</p>\`)",
             "__renderer("cb5355f810", g1a9d5db22c, bd41d8cd98f, false, \`<li><!--0--></li>\`)",
             "__renderer("65cf075bba", g1a9d5db22c, bd41d8cd98f, false, \`<ul><!--0--></ul>\`)",
-            "__renderer("d41d8cd98f", null, null, false, \`\`)",
           ]
         `);
     });

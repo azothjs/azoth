@@ -274,7 +274,7 @@ describe('sync, start, init', () => {
         expect(() => {
             channel(cat, { init: 'will throw' });
         }).toThrowErrorMatchingInlineSnapshot(
-            `[TypeError: Option "init" was supplied with an asynchronous data provider that already has been wrapped with a synchronous initial value to be provided as the initial input of this channel. Use one or the other, but not both.]`
+            `[TypeError: Option "init" was supplied with an async provider that is wrapped with its own initial synchronous initial value to be provided as the initial input of this channel. Use one or the other, but not both.]`
         );
     });
 });

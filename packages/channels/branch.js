@@ -1,17 +1,15 @@
-import { Sync } from '../maya/compose/compose.js';
 import { Multicast } from './generators.js';
-import { resolveArgs } from './resolve-args.js';
 import { AsyncSourceTypeError } from './throw.js';
 import { channel } from './channel.js';
 
-export function branch(asyncSource, ...transforms) {
-    // TODO: no transforms error, or numeric repeat?
+export function branch(async, ...transforms) {
     switch(true) {
-        case asyncSource instanceof Promise:
-            return branchPromise(asyncSource, transforms);
-        case !!asyncSource[Symbol.asyncIterator]:
+        case async instanceof Promise:
+            return branchPromise(async, transforms);
+        case !!async?.[Symbol.asyncIterator]:
+            return branchAsyncIterator(async, transforms);
         default:
-            throw new AsyncSourceTypeError(typeof asyncSource);
+            throw new AsyncSourceTypeError(async);
     }
 }
 
@@ -30,7 +28,7 @@ function branchAsyncIterator(iterator, transforms) {
     return transforms.map(transform => {
         if(Array.isArray(transform)) {
             // #[transform, options];
-            multicast.subscriber(transform[0], transform[1]);
+            return multicast.subscriber(transform[0], transform[1]);
         }
         return multicast.subscriber(transform);
     });
