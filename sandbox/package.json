@@ -4,7 +4,7 @@
     "description": "dev sandbox for working with azoth",
     "type": "module",
     "scripts": {
-        "start": "vite --clearScreen=false",
+        "start": "vite --clearScreen=false -c ../vite.config.js",
         "build": "vite build",
         "preview": "vite preview",
         "test": "vitest"
@@ -16,6 +16,6 @@
         "jsonic": "workspace:*"
     },
     "devDependencies": {
-        "vite": "^5.2.2"
+        "vite": "^5.2.4"
     }
 }

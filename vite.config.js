@@ -16,6 +16,9 @@ export default defineConfig({
     build: {
         target: 'esnext',
         sourcemap: true,
+        rollupOptions: {
+            logLevel: 'debug'
+        }
     },
     esbuild: {
         exclude: '**/*.jsx',

@@ -22,18 +22,15 @@ test('promise with count', async ({ expect }) => {
     expect(resolved).toEqual(['re', 're', 're', 're']);
 });
 
-test('async iterator with default 2', async ({ expect, fixture, find }) => {
-    let name = 'pete';
-    const [iterator, dispatch] = subject(value => name = value, { start: name });
+test.only('async iterator with default 2', async ({ expect, fixture, find }) => {
+    const [iterator, next] = subject({ start: 'pete' });
     const [one, two, shouldBeNull] = repeat(iterator);
     fixture.append(<p>{one} {two} {shouldBeNull}</p>);
-
-    await find('pete', { exact: false });
     expect(fixture.innerHTML).toMatchInlineSnapshot(
         `"<p>pete<!--1--> pete<!--1--> <!--0--></p>"`
     );
 
-    dispatch('repete');
+    next('repete');
     await find('repete', { exact: false });
     expect(fixture.innerHTML).toMatchInlineSnapshot(
         `"<p>repete<!--1--> repete<!--1--> <!--0--></p>"`

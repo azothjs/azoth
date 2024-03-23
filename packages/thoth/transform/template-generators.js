@@ -3,6 +3,7 @@ import { isValidESIdentifier } from 'is-valid-es-identifier';
 export function makeTargets(template) {
     const { boundElements, bindings } = template;
     const { length: elLength } = boundElements;
+    if(!bindings.length) return 'null';
 
     const values = bindings.map(({ element, type, index }) => {
         const { isRoot, queryIndex } = element;
@@ -21,7 +22,7 @@ export function makeRenderer({ id, targetKey, bindKey, isDomFragment, html }, op
     const bind = bindKey ? `b${bindKey}` : `null`;
     let renderer = `__renderer(`;
     renderer += `"${id}", ${target}, ${bind}, ${isDomFragment}`;
-    if(content) renderer += `, \`${html}\``;
+    if(content) renderer += ', `' + `${html}` + '`';
     renderer += `)`;
 
     return renderer;
@@ -32,6 +33,8 @@ const TARGET = 't';
 const VALUE = 'v';
 
 export function makeBind({ bindings }) {
+    if(!bindings.length) return 'null';
+
     const targets = [], params = [];
     for(let i = 0; i < bindings.length; i++) {
         targets.push(`${TARGET}${i} = ${TARGETS}[${i}]`);

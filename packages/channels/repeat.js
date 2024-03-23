@@ -3,6 +3,10 @@ import { AsyncSourceTypeError } from './throw.js';
 
 export function repeat(asyncSource, count = 2) {
     // TODO: validate positive integer
+
+}
+
+function doRepeat(asyncSource, count) {
     const type = typeof asyncSource;
     switch(true) {
         case asyncSource instanceof Promise:

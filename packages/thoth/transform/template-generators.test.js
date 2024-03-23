@@ -25,6 +25,32 @@ describe('targets generator', () => {
         expect(code).toMatchInlineSnapshot(`"(r) => [r.childNodes[0]]"`);
     });
 
+    test('edge case', ({ expect }) => {
+        const input = `
+            export const Loading = () => <p>loading...</p>;
+            export const Cat = ({ name }) => <p>{name}</p>;
+            export const CatList = cats => <ul>{cats.map(Cat)}</ul>;
+            export const CatCount = cats => <p>{cats.length} cats</p>;
+            export const CatName = ({ name }) => <li>{name}</li>;
+            export const CatNames = cats => <ul>{cats.map(name => <CatName name={name} />)}</ul>;
+        `;
+
+        const ast = parse(input);
+        const initial = _generate(ast);
+        const mapped = initial.templates.map(makeTargets);
+        expect(mapped).toMatchInlineSnapshot(`
+          [
+            "null",
+            "(r) => [r.childNodes[0]]",
+            "(r) => [r.childNodes[0]]",
+            "(r) => [r.childNodes[0]]",
+            "(r) => [r.childNodes[0]]",
+            "(r) => [r.childNodes[0]]",
+            "null",
+          ]
+        `);
+    });
+
     test('props and elements', ({ compile, expect }) => {
         const code = compile(`const t = <p className={"className"}>
             {"Greeting"} <span>hey {"Azoth"}!</span>
@@ -73,6 +99,58 @@ describe('bind generator', () => {
         `
         );
     });
+
+
+    test('edge case', ({ expect }) => {
+        const input = `
+            export const Loading = () => <p>loading...</p>;
+            export const Cat = ({ name }) => <p>{name}</p>;
+            export const CatList = cats => <ul>{cats.map(Cat)}</ul>;
+            export const CatCount = cats => <p>{cats.length} cats</p>;
+            export const CatName = ({ name }) => <li>{name}</li>;
+            export const CatNames = cats => <ul>{cats.map(name => <CatName name={name} />)}</ul>;
+        `;
+
+        const ast = parse(input);
+        const initial = _generate(ast);
+        const mapped = initial.templates.map(makeBind);
+        expect(mapped).toMatchInlineSnapshot(`
+          [
+            "null",
+            "(ts) => {
+            const t0 = ts[0];
+            return (v0) => {
+              __compose(t0, v0);
+            };    
+          }",
+            "(ts) => {
+            const t0 = ts[0];
+            return (v0) => {
+              __compose(t0, v0);
+            };    
+          }",
+            "(ts) => {
+            const t0 = ts[0];
+            return (v0) => {
+              __compose(t0, v0);
+            };    
+          }",
+            "(ts) => {
+            const t0 = ts[0];
+            return (v0) => {
+              __compose(t0, v0);
+            };    
+          }",
+            "(ts) => {
+            const t0 = ts[0];
+            return (v0) => {
+              __compose(t0, v0);
+            };    
+          }",
+            "null",
+          ]
+        `);
+    });
 });
 
 describe('render generator', () => {
@@ -118,5 +196,31 @@ describe('render generator', () => {
         expect(code).toMatchInlineSnapshot(`"__renderer("c193fcb516", g1a9d5db22c, bd41d8cd98f, false)"`);
     });
 
-});
 
+    test('edge case', ({ expect }) => {
+        const input = `
+            export const Loading = () => <p>loading...</p>;
+            export const Cat = ({ name }) => <p>{name}</p>;
+            export const CatList = cats => <ul>{cats.map(Cat)}</ul>;
+            export const CatCount = cats => <p>{cats.length} cats</p>;
+            export const CatName = ({ name }) => <li>{name}</li>;
+            export const CatNames = cats => <ul>{cats.map(name => <CatName name={name} />)}</ul>;
+        `;
+
+        const ast = parse(input);
+        const initial = _generate(ast);
+        const mapped = initial.templates.map(makeRenderer);
+        expect(mapped).toMatchInlineSnapshot(`
+          [
+            "__renderer("35b2653e5d", null, null, false, \`<p>loading...</p>\`)",
+            "__renderer("c193fcb516", g1a9d5db22c, bd41d8cd98f, false, \`<p><!--0--></p>\`)",
+            "__renderer("65cf075bba", g1a9d5db22c, bd41d8cd98f, false, \`<ul><!--0--></ul>\`)",
+            "__renderer("b4f8dfe3c0", g1a9d5db22c, bd41d8cd98f, false, \`<p><!--0--> cats</p>\`)",
+            "__renderer("cb5355f810", g1a9d5db22c, bd41d8cd98f, false, \`<li><!--0--></li>\`)",
+            "__renderer("65cf075bba", g1a9d5db22c, bd41d8cd98f, false, \`<ul><!--0--></ul>\`)",
+            "__renderer("d41d8cd98f", null, null, false, \`\`)",
+          ]
+        `);
+    });
+
+});

@@ -65,11 +65,6 @@ test('options.init', async ({ fixture, find, expect }) => {
 
 });
 
-const sleep = (ms) => {
-    const { promise, resolve } = Promise.withResolvers();
-    setTimeout(resolve, ms);
-    return promise;
-};
 
 test('both start and init', async ({ expect, find, fixture }) => {
     const [wrappedAsync, next] = subject(

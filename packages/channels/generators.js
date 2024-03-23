@@ -1,25 +1,5 @@
 import { Sync } from '../maya/compose/compose.js';
-import { OptionMissingFunctionArgumentError } from './throw.js';
-
-function resolveArgs(transform, options) {
-    if(!options && typeof transform === 'object') {
-        options = transform;
-        transform = null;
-    }
-    const init = options?.init;
-    const start = options?.start;
-    const map = !!options?.map;
-
-    if(map && !transform) {
-        throw new OptionMissingFunctionArgumentError();
-    }
-
-    return {
-        init, start, map,
-        hasStart: start !== undefined,
-        hasInit: init !== undefined,
-    };
-}
+import { resolveArgs } from './resolve-args.js';
 
 export function subject(transformArg, options) {
     const {

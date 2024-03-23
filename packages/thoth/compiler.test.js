@@ -950,7 +950,31 @@ describe('render and composition cases', () => {
             },
           ]
         `);
-
-
     });
+
+    test('export edge case', ({ expect }) => {
+        const input = `
+            export const Loading = () => <p>loading...</p>;
+            export const Cat = ({ name }) => <p>{name}</p>;
+            export const CatList = cats => <ul>{cats.map(Cat)}</ul>;
+            export const CatCount = cats => <p>{cats.length} cats</p>;
+            export const CatName = ({ name }) => <li>{name}</li>;
+            export const CatNames = cats => <ul>{cats.map(name => <CatName name={name} />)}</ul>;
+        `;
+
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+            "import { __createElement } from 'azoth/runtime';
+            import { t35b2653e5d, tc193fcb516, t65cf075bba, tb4f8dfe3c0, tcb5355f810, td41d8cd98f } from 'virtual:azoth-templates?id=35b2653e5d&id=c193fcb516&id=65cf075bba&id=b4f8dfe3c0&id=cb5355f810&id=d41d8cd98f';
+            export const Loading = () => t35b2653e5d();
+            export const Cat = ({name}) => tc193fcb516(name);
+            export const CatList = cats => t65cf075bba(cats.map(Cat));
+            export const CatCount = cats => tb4f8dfe3c0(cats.length);
+            export const CatName = ({name}) => tcb5355f810(name);
+            export const CatNames = cats => t65cf075bba(cats.map(name => __createElement(CatName, { name: name, }, true)));
+            "
+        `);
+    });
+
 });
