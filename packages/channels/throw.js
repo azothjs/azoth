@@ -1,5 +1,5 @@
 
-export class AsyncSourceTypeError extends TypeError {
+export class AsyncTypeError extends TypeError {
     constructor(asyncProvider) {
         let message = '';
         if(!asyncProvider) {

@@ -1,6 +1,6 @@
 import { Sync } from '../maya/compose/compose.js';
 import { Multicast } from './generators.js';
-import { AsyncSourceTypeError, BadTeeCountArgumentError } from './throw.js';
+import { AsyncTypeError, BadTeeCountArgumentError } from './throw.js';
 
 export function tee(async, count = 2) {
     const repeat = parseInt(count);
@@ -26,7 +26,7 @@ function makeTee(asyncProvider, count, init) {
         case !!asyncProvider?.[Symbol.asyncIterator]:
             return teeAsyncIterator(asyncProvider, count, init);
         default:
-            throw new AsyncSourceTypeError(asyncProvider);
+            throw new AsyncTypeError(asyncProvider);
     }
 }
 

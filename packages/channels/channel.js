@@ -1,6 +1,6 @@
 import { Sync } from '../maya/compose/compose.js';
 import { resolveArgs } from './resolve-args.js';
-import { AsyncSourceTypeError, InitOptionWithSyncWrappedAsyncProviderError, OptionMissingFunctionArgumentError } from './throw.js';
+import { AsyncTypeError, InitOptionWithSyncWrappedAsyncProviderError, OptionMissingFunctionArgumentError } from './throw.js';
 
 export function channel(async, transformArg, options) {
     const {
@@ -45,7 +45,7 @@ function makeChannel(asyncSource, transform, map, onDeck) {
         case !!asyncSource[Symbol.asyncIterator]:
             return fromAsyncIterator(asyncSource, transform, map, onDeck);
         default:
-            throw new AsyncSourceTypeError(asyncSource);
+            throw new AsyncTypeError(asyncSource);
     }
 }
 

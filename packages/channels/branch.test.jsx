@@ -3,7 +3,7 @@ import './with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { subject } from './generators.js';
 import { branch } from './branch.js';
-import { Cat, CatCount, CatList, CatNames } from './test-cats.jsx';
+import { Cat, CatCount, CatNames } from './test-cats.jsx';
 
 beforeEach(fixtureSetup);
 
@@ -118,7 +118,6 @@ describe('promise', () => {
             <!--1-->,
           ]
         `);
-
     });
 
 });

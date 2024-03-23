@@ -1,5 +1,5 @@
 import { Multicast } from './generators.js';
-import { AsyncSourceTypeError } from './throw.js';
+import { AsyncTypeError } from './throw.js';
 
 export function consume(asyncSource, ...actions) {
     const type = typeof asyncSource;
@@ -12,7 +12,7 @@ export function consume(asyncSource, ...actions) {
             break;
         case !!asyncSource[Symbol.asyncIterator]:
         default:
-            throw new AsyncSourceTypeError(asyncSource);
+            throw new AsyncTypeError(asyncSource);
     }
 }
 
