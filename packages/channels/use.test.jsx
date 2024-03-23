@@ -2,318 +2,309 @@ import { describe, test, beforeEach } from 'vitest';
 import './with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { subject } from './generators.js';
-import { use } from './use.js';
+import { branch, channel, use } from './use.js';
 import { waitForElementToBeRemoved } from '@testing-library/dom';
 
 beforeEach(fixtureSetup);
 
 const Loading = () => <p>loading...</p>;
 const Cat = ({ name }) => <p>{name}</p>;
-const CatCount = cats => <p>{cats.length} cats</p>;
 const CatList = cats => <ul>{cats.map(Cat)}</ul>;
-const CatNameList = cats => <ul>{cats.map(name => <Cat name={name} />)}</ul>;
+const CatCount = cats => <p>{cats.length} cats</p>;
+const CatName = ({ name }) => <li>{name}</li>;
+const CatNames = cats => <ul>{cats.map(name => <CatName name={name} />)}</ul>;
 
-describe('arguments', () => {
-    test('null options not channel', async ({ expect }) => {
-        const { promise, resolve } = Promise.withResolvers();
+describe('channel', () => {
 
-        const [squarePromise, notAChannel] = use(promise, x => x ** 2, null);
+    describe('promise', () => {
 
-        resolve(3);
-        const square = await squarePromise;
-        expect(square).toBe(9);
-        expect(notAChannel).not.toBeDefined();
+        test('promise only', async ({ fixture, find, expect }) => {
+            const promise = Promise.resolve('felix');
+            const CatChannel = channel(promise);
+            fixture.append(<CatChannel />);
+
+            await find('felix');
+            expect(fixture.innerHTML).toMatchInlineSnapshot(`"felix<!--1-->"`);
+        });
+
+        test('transform', async ({ fixture, find, expect }) => {
+            const promise = Promise.resolve({ name: 'felix' });
+            const CatChannel = channel(promise, Cat);
+            fixture.append(<CatChannel />);
+
+            await find('felix');
+            expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>felix<!--1--></p><!--1-->"`);
+        });
+
+        test('transform, { map: true }', async ({ fixture, find, expect }) => {
+            const promise = Promise.resolve([
+                { name: 'felix' },
+                { name: 'duchess' },
+                { name: 'garfield' }
+            ]);
+            const Cats = channel(promise, Cat, { map: true });
+            fixture.append(<Cats />);
+
+            await find('felix', { exact: false });
+            expect(fixture.innerHTML).toMatchInlineSnapshot(
+                `"<p>felix<!--1--></p><p>duchess<!--1--></p><p>garfield<!--1--></p><!--3-->"`
+            );
+        });
     });
+
+    describe('async iterator', () => {
+
+        test('iterator only', async ({ fixture, find, expect }) => {
+            const [iterator, next] = subject();
+
+            const CatChannel = channel(iterator);
+            fixture.append(<CatChannel />);
+            expect(fixture.innerHTML).toMatchInlineSnapshot(`"<!--0-->"`);
+
+            next(<Cat name='felix' />);
+            await find('felix');
+            expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>felix<!--1--></p><!--1-->"`);
+
+            next(<Cat name='duchess' />);
+            await find('duchess');
+            expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>duchess<!--1--></p><!--1-->"`);
+        });
+
+        test('transform', async ({ fixture, find, expect }) => {
+            const [cat, next] = subject();
+
+            const CatChannel = channel(cat, Cat);
+            fixture.append(<CatChannel />);
+            expect(fixture.innerHTML).toMatchInlineSnapshot(`"<!--0-->"`);
+
+            next({ name: 'duchess' });
+            await find('duchess');
+            expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>duchess<!--1--></p><!--1-->"`);
+
+            next({ name: 'garfield' });
+            await find('garfield');
+            expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>garfield<!--1--></p><!--1-->"`);
+        });
+
+        test('transform, { map: true }', async ({ fixture, find, expect }) => {
+            const [cats, dispatch] = subject();
+
+            const Cats = channel(cats, Cat, { map: true });
+            fixture.append(<ul><Cats /></ul>);
+
+            dispatch([
+                { name: 'felix' },
+                { name: 'duchess' },
+                { name: 'garfield' }
+            ]);
+
+            await find('duchess');
+            expect(fixture.innerHTML).toMatchInlineSnapshot(
+                `"<ul><p>felix<!--1--></p><p>duchess<!--1--></p><p>garfield<!--1--></p><!--3--><!--1--></ul>"`
+            );
+        });
+    });
+
+    describe('Sync, start, init, option rules', () => {
+
+        test('Sync', async ({ fixture, find, expect }) => {
+            const [cat, next] = subject({ start: 'felix' });
+
+            const CatChannel = channel(cat);
+            fixture.append(<CatChannel />);
+            expect(fixture.innerHTML).toMatchInlineSnapshot(`"felix<!--1-->"`);
+
+            next('duchess');
+            await find('duchess');
+            expect(fixture.innerHTML).toMatchInlineSnapshot(`"duchess<!--1-->"`);
+        });
+
+        test('Sync, transform', async ({ fixture, find, expect }) => {
+            const [cat, next] = subject({
+                start: { name: 'felix' }
+            });
+
+            const CatChannel = channel(cat, Cat);
+            fixture.append(<CatChannel />);
+            expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>felix<!--1--></p><!--1-->"`);
+
+            next({ name: 'duchess' });
+            await find('duchess');
+            expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>duchess<!--1--></p><!--1-->"`);
+        });
+
+        test('Sync, transform, { map: true }', async ({ fixture, find, expect }) => {
+            const [cats, next] = subject({
+                start: [
+                    { name: 'felix' },
+                    { name: 'duchess' },
+                    { name: 'garfield' }
+                ]
+            });
+
+            const Cats = channel(cats, Cat, { map: true });
+            fixture.append(<ul><Cats /></ul>);
+
+            next([
+                { name: 'tom' },
+                { name: 'stimpy' },
+            ]);
+
+            await find('tom');
+            expect(fixture.innerHTML).toMatchInlineSnapshot(
+                `"<ul><p>tom<!--1--></p><p>stimpy<!--1--></p><!--2--><!--1--></ul>"`
+            );
+        });
+
+        test('{ start }', async ({ fixture, find, expect }) => {
+            const [cat, next] = subject();
+
+            const CatChannel = channel(cat, { start: 'felix' });
+            fixture.append(<CatChannel />);
+            expect(fixture.innerHTML).toMatchInlineSnapshot(
+                `"felix<!--1-->"`
+            );
+
+            next('duchess');
+            await find('duchess');
+            expect(fixture.innerHTML).toMatchInlineSnapshot(
+                `"duchess<!--1-->"`
+            );
+        });
+
+        test('{ init }', async ({ fixture, find, expect }) => {
+            const [cat, next] = subject();
+
+            const CatChannel = channel(cat, { init: 'felix' });
+
+            fixture.append(<CatChannel />);
+            expect(fixture.innerHTML).toMatchInlineSnapshot(
+                `"felix<!--1-->"`
+            );
+
+            next('stimpy');
+            await find('stimpy');
+            expect(fixture.innerHTML).toMatchInlineSnapshot(
+                `"stimpy<!--1-->"`
+            );
+        });
+
+        test('transform, { init }', async ({ fixture, find, expect }) => {
+            const [cat, next] = subject();
+
+            const CatChannel = channel(cat, name => {
+                return name === 'felix'
+                    ? <p>FELIX FTW</p>
+                    : <p>{name}</p>;
+            }, { init: 'felix' });
+
+            fixture.append(<CatChannel />);
+            expect(fixture.innerHTML).toMatchInlineSnapshot(
+                `"<p>FELIX FTW</p><!--1-->"`
+            );
+
+            next('stimpy');
+            await find('stimpy');
+            expect(fixture.innerHTML).toMatchInlineSnapshot(
+                `"<p>stimpy<!--1--></p><!--1-->"`
+            );
+        });
+
+        test('throws: { map: true } w/o transform', async ({ expect }) => {
+            expect(() => {
+                channel(Promise.resolve(), { map: true });
+            }).toThrowErrorMatchingInlineSnapshot(
+                `[TypeError: More arguments needed: option "map: true" requires a mapping function.]`
+            );
+        });
+    });
+
 });
 
-describe('promise', () => {
+describe('branch promise', () => {
 
-    test('promise only', async ({ fixture, find, expect }) => {
-        const promise = Promise.resolve(Cat({ name: 'felix' }));
-
-        const [LayoutChannel] = use(promise);
-        fixture.append(<LayoutChannel />);
-
-        const dom = await find('felix');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>felix<!--1--></p><!--1-->"`);
+    beforeEach(context => {
+        context.childHTML = () => [
+            ...context.fixture.childNodes
+        ].map(cn => cn.outerHTML ?? cn);
     });
 
-    test('channel', async ({ fixture, find, expect }) => {
-        const promise = Promise.resolve({ name: 'felix' });
-
-        const [LayoutChannel] = use(promise, Cat);
-        fixture.append(<LayoutChannel />);
-
-        await find('felix');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>felix<!--1--></p><!--1-->"`);
-    });
-
-    test('channel, { map: true }', async ({ fixture, find, expect }) => {
-        const promise = Promise.resolve([
-            { name: 'felix' },
-            { name: 'duchess' },
-            { name: 'garfield' }
-        ]);
-
-        const [LayoutChannel] = use(promise, Cat, { map: true });
-        fixture.append(<LayoutChannel />);
-
-        await find('felix', { exact: false });
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>felix<!--1--></p><p>duchess<!--1--></p><p>garfield<!--1--></p><!--3-->"`
-        );
-    });
-
-    test('throws: { map: true } w/o channel', async ({ expect }) => {
-        expect(() => {
-            use(Promise.resolve(), { map: true });
-        }).toThrowErrorMatchingInlineSnapshot(
-            `[TypeError: More arguments needed: option "map: true" requires a mapping function.]`);
-    });
-
-    test('channel, { startWith }', async ({ fixture, find, expect }) => {
-        const { promise, resolve } = Promise.withResolvers();
-
-        const [LayoutChannel] = use(promise, Cat, {
-            startWith: <Loading />
-        });
-        fixture.append(<LayoutChannel />);
-
-        await find('loading...');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>loading...</p><!--1-->"`
-        );
-
-        // trigger promise resolution post-loading
-        resolve({ name: 'felix' });
-        await find('felix');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>felix<!--1--></p><!--1-->"`
-        );
-    });
-
-    test('fast resolve with { startWith }', async ({ fixture, find, expect }) => {
-        const promise = Promise.resolve({ name: 'felix' });
-
-        const [LayoutChannel] = use(promise, Cat, {
-            startWith: <Loading />
-        });
-        fixture.append(<LayoutChannel />);
-
-        // test that a fast resolve is the first async "find",
-        await find('felix');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>felix<!--1--></p><!--1-->"`
-        );
-    });
-
-    test('branch ...channels', async ({ fixture, find, expect }) => {
+    test('...transforms', async ({ fixture, find, expect, childHTML }) => {
         const promise = Promise.resolve(['felix', 'duchess', 'stimpy']);
-
-        const [CountChannel, ListChannel] = use(promise, CatCount, CatNameList);
-        fixture.append(<CountChannel />, <ListChannel />);
+        const [Count, List] = branch(promise, CatCount, CatNames);
+        fixture.append(<Count />, <List />);
 
         await Promise.all([find('felix'), find('3 cats')]);
-        expect(fixture).toMatchInlineSnapshot(`
-      <body>
-        <p>
-          3
-          <!--1-->
-           cats
-        </p>
-        <!--1-->
-        <ul>
-          <p>
-            felix
-            <!--1-->
-          </p>
-          <p>
-            duchess
-            <!--1-->
-          </p>
-          <p>
-            stimpy
-            <!--1-->
-          </p>
-          <!--3-->
-        </ul>
-        <!--1-->
-      </body>
-    `);
+        expect(childHTML())
+            .toMatchInlineSnapshot(`
+              [
+                "<p>3<!--1--> cats</p>",
+                <!--1-->,
+                "<ul><li>felix<!--1--></li><li>duchess<!--1--></li><li>stimpy<!--1--></li><!--3--></ul>",
+                <!--1-->,
+              ]
+            `);
     });
 
-    test('branch options', async ({ fixture, find, expect }) => {
+    test('all transform/option combos', async ({
+        fixture, find, expect, childHTML
+    }) => {
         const { promise, resolve } = Promise.withResolvers();
 
-        const [ListChannel, MapChannel, CountChannel] = use(
+        const Channels = branch(
             promise,
-            [CatList, { startWith: <Loading /> }],
-            [Cat, { map: true }],
-            CatCount
-        );
-        fixture.append(<ListChannel />, <MapChannel />, <CountChannel />);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<!--0--><!--0--><!--0-->"`
-        );
-
-        await find('loading...');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>loading...</p><!--1--><!--0--><!--0-->"`
+            [null, { start: 'start-' }],
+            [null, { init: 'init-' }],
+            [name => 'second-', { start: 'first-' }],
+            [name => name.toUpperCase(), { init: 'felix' }],
+            null,
+            name => `-${name}!`,
+            [name => name[0]],
         );
 
-        resolve([
-            { name: 'felix' },
-            { name: 'duchess' },
-            { name: 'garfield' }
-        ]);
-        await find('3 cats');
-        expect(fixture).toMatchInlineSnapshot(`
-          <body>
-            <ul>
-              <p>
-                felix
-                <!--1-->
-              </p>
-              <p>
-                duchess
-                <!--1-->
-              </p>
-              <p>
-                garfield
-                <!--1-->
-              </p>
-              <!--3-->
-            </ul>
-            <!--1-->
-            <p>
-              felix
-              <!--1-->
-            </p>
-            <p>
-              duchess
-              <!--1-->
-            </p>
-            <p>
-              garfield
-              <!--1-->
-            </p>
-            <!--3-->
-            <p>
-              3
-              <!--1-->
-               cats
-            </p>
-            <!--1-->
-          </body>
+        expect(Channels.length).toBe(7);
+        fixture.append(<>{Channels.map(Channel => <p><Channel /></p>)}</>);
+        expect(childHTML()).toMatchInlineSnapshot(`
+          [
+            "<p>start-<!--1--><!--1--></p>",
+            "<p>init-<!--1--><!--1--></p>",
+            "<p>first-<!--1--><!--1--></p>",
+            "<p>FELIX<!--1--><!--1--></p>",
+            "<p><!--0--><!--1--></p>",
+            "<p><!--0--><!--1--></p>",
+            "<p><!--0--><!--1--></p>",
+            <!--7-->,
+          ]
         `);
-    });
 
+        resolve('cat-');
+
+        await find('c');
+        expect(childHTML()).toMatchInlineSnapshot(`
+          [
+            "<p>cat-<!--1--><!--1--></p>",
+            "<p>cat-<!--1--><!--1--></p>",
+            "<p>second-<!--1--><!--1--></p>",
+            "<p>CAT-<!--1--><!--1--></p>",
+            "<p>cat-<!--1--><!--1--></p>",
+            "<p>-cat-!<!--1--><!--1--></p>",
+            "<p>c<!--1--><!--1--></p>",
+            <!--7-->,
+          ]
+        `);
+
+    });
 });
 
-describe.skip('async iterator', () => {
+describe('async iterator', () => {
 
-    test('iterator only', async ({ fixture, find, expect }) => {
-        const [iterator, dispatch] = subject();
-
-        const [LayoutChannel] = use(iterator);
-        fixture.append(<LayoutChannel />);
-
-        dispatch(<Cat name='felix' />);
-        await find('felix');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>felix<!--1--></p><!--1-->"`);
-
-        dispatch(<Cat name='duchess' />);
-        await find('duchess');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>duchess<!--1--></p><!--1-->"`);
-    });
-
-    test.skip('channel', async ({ fixture, find, expect }) => {
-        let cat = { name: 'felix' };
-        const [catChannel, dispatch] = subject(value => cat = value, {
-            startWith: cat
-        });
-
-        const [LayoutChannel] = use(catChannel, Cat);
-        fixture.append(<LayoutChannel />);
-
-        await find('felix');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>felix<!--1--></p><!--1-->"`);
-
-        dispatch({ name: 'duchess' });
-        await find('duchess');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>duchess<!--1--></p><!--1-->"`);
-    });
-
-    test('channel, { map: true }', async ({ fixture, find, expect }) => {
-        const [cats, dispatch] = subject();
-
-        const [Cats] = use(cats, Cat, { map: true });
-        fixture.append(<ul><Cats /></ul>);
-
-        dispatch([
-            { name: 'felix' },
-            { name: 'duchess' },
-            { name: 'garfield' }
-        ]);
-
-        await find('duchess');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<ul><p>felix<!--1--></p><p>duchess<!--1--></p><p>garfield<!--1--></p><!--3--><!--1--></ul>"`
-        );
-    });
-
-
-    class CatDetail {
-        get name() { return this.p.textContent; }
-        set name(name) { this.p.textContent = name; }
-        render({ name }) {
-            return this.p = <p>{name}</p>;
-        }
-    }
-
-    test('channel, { startWith }', async ({ fixture, find, expect }) => {
-        const [cat, dispatch] = subject();
-
-        const [LayoutChannel] = use(cat, Cat, {
-            startWith: <Loading />
-        });
-        fixture.append(<>{LayoutChannel}</>);
-
-        await find('loading...');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>loading...</p><!--1-->"`
-        );
-
-        dispatch({ name: 'felix' });
-        await find('felix');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>felix<!--1--></p><!--1-->"`
-        );
-    });
-
-    test('fast resolve with { startWith }', async ({ fixture, find, expect }) => {
-        let cat = { name: 'felix' };
-        const [catChannel] = subject(value => cat = value, {
-            startWith: cat
-        });
-
-        const [LayoutChannel] = use(catChannel, Cat, {
-            startWith: <Loading />
-        });
-        fixture.append(<>{LayoutChannel}</>);
-
-        // test that a fast resolve is the first await "find"
-        await find('felix');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>felix<!--1--></p><!--1-->"`);
-    });
-
-    test('branch ...channels', async ({ fixture, find, expect }) => {
+    test.skip('branch ...channels', async ({ fixture, find, expect }) => {
         let cats = ['felix', 'duchess', 'stimpy'];
         const [catsChannel, dispatch] = subject(value => cats = value, {
             startWith: cats
         });
 
-        const [CountChannel, ListChannel] = use(catsChannel, CatCount, CatNameList);
+        const [CountChannel, ListChannel] = use(catsChannel, CatCount);
         fixture.append(<CountChannel />, <ListChannel />);
 
         await Promise.all([find('felix'), find('3 cats')]);
@@ -366,7 +357,7 @@ describe.skip('async iterator', () => {
         `);
     });
 
-    test('branch options', async ({ fixture, find, findAll, expect }) => {
+    test.skip('branch options', async ({ fixture, find, findAll, expect }) => {
         const [cats, dispatch] = subject();
 
         const [ListChannel, MapChannel, CountChannel] = use(
@@ -481,4 +472,5 @@ describe.skip('async iterator', () => {
           </body>
         `);
     });
+
 });

@@ -1,16 +1,19 @@
 import { Sync } from '../maya/compose/compose.js';
 import { OptionMissingFunctionArgumentError } from './throw.js';
 
-function resolveOptions(options, transform) {
-    let start, init, map = false;
-    if(options) {
-        init = options.init;
-        start = options.start;
-        map = !!options.map;
-        if(map && !transform) {
-            throw new OptionMissingFunctionArgumentError();
-        }
+function resolveArgs(transform, options) {
+    if(!options && typeof transform === 'object') {
+        options = transform;
+        transform = null;
     }
+    const init = options?.init;
+    const start = options?.start;
+    const map = !!options?.map;
+
+    if(map && !transform) {
+        throw new OptionMissingFunctionArgumentError();
+    }
+
     return {
         init, start, map,
         hasStart: start !== undefined,
@@ -18,19 +21,17 @@ function resolveOptions(options, transform) {
     };
 }
 
-export function subject(transform, options) {
-    if(!options && typeof transform === 'object') {
-        options = transform;
-        transform = null;
-    }
-
-    const { init, start, map, hasStart, hasInit } = resolveOptions(options, transform);
-
-    const relay = { resolve: null };
+export function subject(transformArg, options) {
+    const {
+        transform,
+        init, start, map,
+        hasStart, hasInit
+    } = resolveArgs(transformArg, options);
 
     const maybeTransform = payload => transform ? transform(payload) : payload;
 
-    let onDeck = hasStart && hasInit ? maybeTransform(init) : null;
+    const relay = { resolve: null };
+    let onDeck = hasStart && hasInit ? maybeTransform(init) : undefined;
 
     function dispatch(payload) {
         if(map) payload = payload.map(transform);
