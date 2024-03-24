@@ -1,37 +1,22 @@
 import { Sync } from '../maya/compose/compose.js';
 import { generator } from './generator.js';
-import { observe } from './unicast.js';
 
 export class Multicast {
     #consumers = [];
-    #async = null;
-    #started = false;
-    #initial;
+    #iter = null;
 
-    constructor(async) {
-        if(async instanceof Sync) {
-            const { initial, input } = async;
-            this.#async = input;
-            this.#initial = initial;
-        }
-        else {
-            this.#async = async;
-        }
+    constructor(iter) {
+        this.#iter = (iter instanceof Sync) ? iter.input : iter;
         this.start();
     }
 
     async start() {
-        const async = this.#async;
-        this.#started = true;
-        for await(let value of async) {
-            for(let consumer of this.#consumers) {
+        const iter = this.#iter;
+        for await(const value of iter) {
+            for(const consumer of this.#consumers) {
                 consumer(value);
             }
         }
-    }
-
-    channel(transform, options) {
-
     }
 
     subscriber(transform, options) {

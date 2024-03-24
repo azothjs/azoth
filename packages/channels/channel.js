@@ -1,6 +1,6 @@
 import { Sync } from '../maya/compose/compose.js';
 import { resolveArgs } from './resolve-args.js';
-import { AsyncTypeError, InitOptionWithSyncWrappedAsyncProviderError, OptionMissingFunctionArgumentError } from './throw.js';
+import { AsyncTypeError, InitOptionWithSyncWrappedAsyncProviderError } from './throw.js';
 
 export function channel(async, transformArg, options) {
     const {

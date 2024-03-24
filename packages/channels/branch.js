@@ -1,7 +1,6 @@
 import { Multicast } from './Multicast.js';
 import { AsyncTypeError } from './throw.js';
 import { channel } from './channel.js';
-import { Sync } from '../maya/compose/compose.js';
 
 export function branch(async, ...transforms) {
     switch(true) {
