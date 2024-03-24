@@ -98,9 +98,10 @@ export default function azothPlugin(options) {
         const bindGenerators = new Set();
 
         const templateExports = templates.map(template => {
-            const { id, targetKey, bindKey } = template;
-            // TODO: refactor cleanup on this apparent duplication
+            const { id, targetKey, bindKey, isEmpty } = template;
+            if(isEmpty) return '';
 
+            // TODO: refactor cleanup on this apparent duplication
             if(targetKey) {
                 if(!byTarget.has(targetKey)) byTarget.set(targetKey, template);
                 if(!targetGenerators.has(targetKey)) {

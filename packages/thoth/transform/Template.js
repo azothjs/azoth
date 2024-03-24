@@ -25,7 +25,7 @@ export class Template {
         this.html = this.isEmpty ? '' : htmlGenerator(node);
 
         let tKey = '', bKey = '';
-        if(bindings.length) {
+        if(!this.isStatic) {
             tKey = revHash(bindings.map(({ type, index, element: { isRoot, queryIndex } }) => {
                 return (isRoot ? '' : `${queryIndex}`) + (type === 'child' ? `:${index}` : '');
             }).join());

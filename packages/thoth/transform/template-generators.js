@@ -1,9 +1,9 @@
 import { isValidESIdentifier } from 'is-valid-es-identifier';
 
 export function makeTargets(template) {
-    const { boundElements, bindings } = template;
+    const { boundElements, bindings, isStatic } = template;
     const { length: elLength } = boundElements;
-    if(!bindings.length) return 'null';
+    if(isStatic) return 'null';
 
     const values = bindings.map(({ element, type, index }) => {
         const { isRoot, queryIndex } = element;
@@ -16,7 +16,9 @@ export function makeTargets(template) {
     return `(${elLength ? 'r,t' : 'r'}) => [${values.join()}]`;
 }
 
-export function makeRenderer({ id, targetKey, bindKey, isDomFragment, html }, options) {
+export function makeRenderer({ isEmpty, id, targetKey, bindKey, isDomFragment, html }, options) {
+    if(isEmpty) return `null`;
+
     const content = !options?.noContent;
     const target = targetKey ? `g${targetKey}` : `null`;
     const bind = bindKey ? `b${bindKey}` : `null`;
@@ -32,8 +34,8 @@ const TARGETS = 'ts';
 const TARGET = 't';
 const VALUE = 'v';
 
-export function makeBind({ bindings }) {
-    if(!bindings.length) return 'null';
+export function makeBind({ isStatic, bindings }) {
+    if(isStatic) return 'null';
 
     const targets = [], params = [];
     for(let i = 0; i < bindings.length; i++) {
