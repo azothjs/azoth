@@ -63,7 +63,7 @@ export function renderer(id, targets, makeBind, isFragment, content) {
             if(hasBind) return [node, bind];
         }
 
-        // if(!create) return [null, null];
+        if(!create) return [null, null];
 
         // Honestly not sure this really needed, 
         // use case would be list component optimize by
