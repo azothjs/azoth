@@ -44,7 +44,7 @@ describe('promise', () => {
 
 describe('async iterator', () => {
 
-    test.only('default 2', async ({ expect, fixture, find }) => {
+    test('default 2', async ({ expect, fixture, find }) => {
         const [iterator, next] = unicast();
         const Channels = tee(iterator);
         fixture.append(...Channels.map(C => <C />));
@@ -87,7 +87,7 @@ describe('async iterator', () => {
     });
 
     test('with initial value', async ({ expect, fixture, find }) => {
-        const [iterator, next] = unicast({ start: 'first' });
+        const [iterator, next] = unicast('first');
         const [one, two, three] = tee(iterator, 3);
         fixture.append(<p>{one} {two} {three}</p>);
         expect(fixture.innerHTML).toMatchInlineSnapshot(
