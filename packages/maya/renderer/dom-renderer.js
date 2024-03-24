@@ -12,7 +12,7 @@ export const DOMRenderer = {
     template(id, content) {
         if(content) return DOMRenderer.create(content);
         if(content === '') return null;
-        DOMRenderer.getById(id);
+        return DOMRenderer.getById(id);
     },
 
     create(html) {
