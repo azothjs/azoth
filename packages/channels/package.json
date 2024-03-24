@@ -1,6 +1,6 @@
 {
     "name": "@azothjs/channels",
-    "version": "0.3.3",
+    "version": "0.3.4",
     "description": "Asynchronous layout channels",
     "author": "Marty Nelson",
     "license": "MIT",
