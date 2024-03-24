@@ -1,14 +1,14 @@
 import './with-resolvers-polyfill.js';
 import { beforeEach, test } from 'vitest';
 import { fixtureSetup } from 'test-utils/fixtures';
-import { observe } from './observe.js';
+import { unicast } from './unicast.js';
 
 // TODO: move away from fixture
 
 beforeEach(fixtureSetup);
 
-test('observe()', async ({ fixture, find, expect }) => {
-    const [asyncIterator, next] = observe();
+test('unicast()', async ({ fixture, find, expect }) => {
+    const [asyncIterator, next] = unicast();
     fixture.append(<>{asyncIterator}</>);
     expect(fixture.innerHTML).toMatchInlineSnapshot(`"<!--0-->"`);
     next('test');
@@ -18,7 +18,7 @@ test('observe()', async ({ fixture, find, expect }) => {
 });
 
 test('transform', async ({ fixture, find, expect }) => {
-    const [asyncIterator, next] = observe(s => s?.toUpperCase());
+    const [asyncIterator, next] = unicast(s => s?.toUpperCase());
     fixture.append(<>{asyncIterator}</>);
 
     next('hello');
@@ -30,7 +30,7 @@ test('transform', async ({ fixture, find, expect }) => {
 });
 
 test('transform, init', async ({ fixture, find, expect }) => {
-    const [wrappedAsync, next] = observe(x => x ** 2, 2);
+    const [wrappedAsync, next] = unicast(x => x ** 2, 2);
     fixture.append(<>{wrappedAsync}</>);
     expect(fixture.innerHTML).toMatchInlineSnapshot(`"4<!--1-->"`);
     next(3);
@@ -39,7 +39,7 @@ test('transform, init', async ({ fixture, find, expect }) => {
 });
 
 test('null, init', async ({ fixture, find, expect }) => {
-    const [wrappedAsync, next] = observe(null, 2);
+    const [wrappedAsync, next] = unicast(2);
     fixture.append(<>{wrappedAsync}</>);
     expect(fixture.innerHTML).toMatchInlineSnapshot(`"2<!--1-->"`);
     next(3);
@@ -49,9 +49,9 @@ test('null, init', async ({ fixture, find, expect }) => {
 
 test('throw if transform not function', ({ expect }) => {
     expect(() => {
-        observe(2);
+        unicast(2, 2);
     }).toThrowErrorMatchingInlineSnapshot(`
-      [TypeError: The "transform" argument must be function. If you want to use an initial value with no transform, pass "null" as the first argument to observe. Received:
+      [TypeError: The "transform" argument must be a function. If you want to use an initial value with no function, pass "null" as the first argument to "unicast". Received:
 
       2
 

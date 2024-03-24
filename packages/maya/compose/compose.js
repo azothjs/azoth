@@ -1,5 +1,6 @@
 /* compose, composeElement, create, createElement */
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
+
 export class Sync {
     static wrap(initial, input) {
         return new this(initial, input);

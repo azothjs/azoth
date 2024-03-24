@@ -2,7 +2,7 @@ import { describe, test, beforeEach } from 'vitest';
 import './with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { consume } from './consume.js';
-import { observe } from './observe.js';
+import { unicast } from './unicast.js';
 
 beforeEach(fixtureSetup);
 
@@ -39,7 +39,7 @@ describe('promise', () => {
 describe('async iterator', () => {
 
     test('action', async ({ expect }) => {
-        const [iter, next] = observe();
+        const [iter, next] = unicast();
         let { promise, resolve } = Promise.withResolvers();
         let test = { cat: '' };
         consume(iter, cat => {
@@ -60,7 +60,7 @@ describe('async iterator', () => {
     });
 
     test('sync async', async ({ expect }) => {
-        const [iter, next] = observe(null, 'felix');
+        const [iter, next] = unicast('felix');
         let { promise, resolve } = Promise.withResolvers();
         let test = { cat: '' };
         consume(iter, cat => {

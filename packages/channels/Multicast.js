@@ -1,6 +1,6 @@
 import { Sync } from '../maya/compose/compose.js';
 import { generator } from './generator.js';
-import { observe } from './observe.js';
+import { observe } from './unicast.js';
 
 export class Multicast {
     #consumers = [];

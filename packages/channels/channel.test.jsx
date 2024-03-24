@@ -1,7 +1,7 @@
 import { describe, test, beforeEach } from 'vitest';
 import './with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
-import { observe } from './observe.js';
+import { unicast } from './unicast.js';
 import { channel } from './channel.js';
 import { sleep } from '../../test-utils/sleep.js';
 import { Cat } from './test-cats.jsx';
@@ -74,7 +74,7 @@ describe('promise', () => {
 describe('async iterator', () => {
 
     test('iterator only', async ({ fixture, find, expect }) => {
-        const [iterator, next] = observe();
+        const [iterator, next] = unicast();
 
         const CatChannel = channel(iterator);
         fixture.append(<CatChannel />);
@@ -90,7 +90,7 @@ describe('async iterator', () => {
     });
 
     test('transform', async ({ fixture, find, expect }) => {
-        const [cat, next] = observe();
+        const [cat, next] = unicast();
 
         const CatChannel = channel(cat, Cat);
         fixture.append(<CatChannel />);
@@ -106,7 +106,7 @@ describe('async iterator', () => {
     });
 
     test('transform, { map: true }', async ({ fixture, find, expect }) => {
-        const [cats, dispatch] = observe();
+        const [cats, dispatch] = unicast();
 
         const Cats = channel(cats, Cat, { map: true });
         fixture.append(<ul><Cats /></ul>);
@@ -124,7 +124,7 @@ describe('async iterator', () => {
     });
 
     test('transform, { start, init }', async ({ fixture, find, expect }) => {
-        const [cat, next] = observe();
+        const [cat, next] = unicast();
 
         // const promise = sleep(50).then(() => 'duchess');
 
@@ -157,7 +157,7 @@ describe('async iterator', () => {
 describe('sync, init, start', () => {
 
     test('sync', async ({ fixture, find, expect }) => {
-        const [cat, next] = observe(null, 'felix');
+        const [cat, next] = unicast('felix');
 
         const CatChannel = channel(cat);
         fixture.append(<CatChannel />);
@@ -169,7 +169,7 @@ describe('sync, init, start', () => {
     });
 
     test('sync, transform', async ({ fixture, find, expect }) => {
-        const [cat, next] = observe(null, { name: 'felix' });
+        const [cat, next] = unicast({ name: 'felix' });
 
         const CatChannel = channel(cat, Cat);
         fixture.append(<CatChannel />);
@@ -181,7 +181,7 @@ describe('sync, init, start', () => {
     });
 
     test('sync, transform, { map: true }', async ({ fixture, find, expect }) => {
-        const [cats, next] = observe(null, [
+        const [cats, next] = unicast([
             { name: 'felix' },
             { name: 'duchess' },
             { name: 'garfield' }
@@ -202,7 +202,7 @@ describe('sync, init, start', () => {
     });
 
     test('{ start }', async ({ fixture, find, expect }) => {
-        const [cat, next] = observe();
+        const [cat, next] = unicast();
 
         const CatChannel = channel(cat, { start: 'felix' });
         fixture.append(<CatChannel />);
@@ -218,7 +218,7 @@ describe('sync, init, start', () => {
     });
 
     test('{ init }', async ({ fixture, find, expect }) => {
-        const [cat, next] = observe();
+        const [cat, next] = unicast();
 
         const CatChannel = channel(cat, { init: 'felix' });
 
@@ -235,7 +235,7 @@ describe('sync, init, start', () => {
     });
 
     test('transform, { init }', async ({ fixture, find, expect }) => {
-        const [cat, next] = observe();
+        const [cat, next] = unicast();
 
         const CatChannel = channel(cat, name => {
             return name === 'felix'
@@ -266,7 +266,7 @@ describe('throws', () => {
     });
 
     test.skip('sync, { init }', async ({ expect }) => {
-        const [cat] = observe({ start: 'felix' });
+        const [cat] = unicast({ start: 'felix' });
         expect(() => {
             channel(cat, { init: 'will throw' });
         }).toThrowErrorMatchingInlineSnapshot(

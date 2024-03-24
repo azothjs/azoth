@@ -1,7 +1,7 @@
 import { describe, test, beforeEach } from 'vitest';
 import './with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
-import { observe } from './observe.js';
+import { unicast } from './unicast.js';
 import { branch } from './branch.js';
 import { Cat, CatCount, CatName, CatNames } from './test-cats.jsx';
 import { generator } from './generator.js';
@@ -126,7 +126,7 @@ describe('promise', () => {
 describe('async iterator', () => {
 
     test('...transforms', async ({ fixture, find, expect, childHTML }) => {
-        const [cats, next] = observe();
+        const [cats, next] = unicast();
         const [Count, List, Map] = branch(
             cats,
             CatCount, CatNames,

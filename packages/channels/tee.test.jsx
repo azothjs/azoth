@@ -1,7 +1,7 @@
 import { describe, test, beforeEach } from 'vitest';
 import './with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
-import { observe } from './observe.js';
+import { unicast } from './unicast.js';
 import { tee } from './tee.js';
 import { Sync } from '../maya/compose/compose.js';
 
@@ -45,7 +45,7 @@ describe('promise', () => {
 describe('async iterator', () => {
 
     test.only('default 2', async ({ expect, fixture, find }) => {
-        const [iterator, next] = observe();
+        const [iterator, next] = unicast();
         const Channels = tee(iterator);
         fixture.append(...Channels.map(C => <C />));
         expect(fixture.innerHTML).toMatchInlineSnapshot(
@@ -66,7 +66,7 @@ describe('async iterator', () => {
     });
 
     test('count', async ({ expect, fixture, find }) => {
-        const [iterator, next] = observe();
+        const [iterator, next] = unicast();
         const [one, two, three] = tee(iterator, 3);
         fixture.append(<p>{one} {two} {three}</p>);
         expect(fixture.innerHTML).toMatchInlineSnapshot(
@@ -87,7 +87,7 @@ describe('async iterator', () => {
     });
 
     test('with initial value', async ({ expect, fixture, find }) => {
-        const [iterator, next] = observe({ start: 'first' });
+        const [iterator, next] = unicast({ start: 'first' });
         const [one, two, three] = tee(iterator, 3);
         fixture.append(<p>{one} {two} {three}</p>);
         expect(fixture.innerHTML).toMatchInlineSnapshot(

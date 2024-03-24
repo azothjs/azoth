@@ -1,13 +1,12 @@
 import { Sync } from '../maya/compose/compose.js';
 import { generator } from './generator.js';
-import { resolveArgs } from './resolve-args.js';
 import { TransformNotFunctionArgumentError } from './throw.js';
-
 
 export function reduce(reducer, init) {
     if(reducer && typeof reducer !== 'function') {
-        throw new TransformNotFunctionArgumentError(reducer);
+        throw new TransformNotFunctionArgumentError(reducer, { method: 'reduce', param: 'reducer' });
     }
-
-    return generator(reducer, { init, reducer: true });
+    let state = reducer(init);
+    const [iter, dispatch] = generator(action => state = reducer(state, action));
+    return [Sync.wrap(state, iter), dispatch];
 }

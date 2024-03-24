@@ -46,10 +46,10 @@ export class BadTeeCountArgumentError extends TypeError {
 }
 
 export class TransformNotFunctionArgumentError extends TypeError {
-    constructor(value) {
+    constructor(value, { method = 'generator', param = 'transform' } = {}) {
         super(`\
-The "transform" argument must be function. If you want to use an initial \
-value with no transform, pass "null" as the first argument to observe.` + getObjectJSON(value));
+The "${param}" argument must be a function. If you want to use an initial \
+value with no function, pass "null" as the first argument to "${method}".` + getObjectJSON(value));
     }
 }
 

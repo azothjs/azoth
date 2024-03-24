@@ -1,4 +1,4 @@
-import { observe } from './observe.js';
+import { observe } from './unicast.js';
 
 export function broadcast() {
     const listeners = [];
