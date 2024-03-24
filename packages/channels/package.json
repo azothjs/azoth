@@ -1,6 +1,6 @@
 {
     "name": "@azothjs/channels",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "description": "Asynchronous layout channels",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -21,16 +21,7 @@
     "type": "module",
     "main": "./index.js",
     "files": [
-        "branch.js",
-        "channel.js",
-        "consume.js",
-        "generator.js",
-        "reduce.js",
-        "tee.js",
-        "throw.js",
-        "unicast.js",
-        "with-resolvers-polyfill.js",
-        "README"
+        "**/!(*test|*config).js"
     ],
     "exports": {
         ".": "./index.js"
