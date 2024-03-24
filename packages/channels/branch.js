@@ -1,6 +1,7 @@
-import { Multicast } from './generators.js';
+import { Multicast } from './Multicast.js';
 import { AsyncTypeError } from './throw.js';
 import { channel } from './channel.js';
+import { Sync } from '../maya/compose/compose.js';
 
 export function branch(async, ...transforms) {
     switch(true) {
@@ -24,10 +25,14 @@ function branchPromise(promise, transforms) {
 
 function branchAsyncIterator(iterator, transforms) {
     const multicast = new Multicast(iterator);
-    return transforms.map(transform => {
+    const branches = transforms.map(transform => {
+        const iterator = multicast.subscriber();
+
         if(Array.isArray(transform)) { // #[transform, options];
             return multicast.subscriber(transform[0], transform[1]);
         }
         return multicast.subscriber(transform);
     });
+    multicast.start();
+    return branches;
 }

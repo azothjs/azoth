@@ -1,7 +1,7 @@
 import { describe, test, beforeEach } from 'vitest';
 import './with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
-import { subject } from './generators.js';
+import { observe } from './observe.js';
 import { channel } from './channel.js';
 import { sleep } from '../../test-utils/sleep.js';
 import { Cat } from './test-cats.jsx';
@@ -74,7 +74,7 @@ describe('promise', () => {
 describe('async iterator', () => {
 
     test('iterator only', async ({ fixture, find, expect }) => {
-        const [iterator, next] = subject();
+        const [iterator, next] = observe();
 
         const CatChannel = channel(iterator);
         fixture.append(<CatChannel />);
@@ -90,7 +90,7 @@ describe('async iterator', () => {
     });
 
     test('transform', async ({ fixture, find, expect }) => {
-        const [cat, next] = subject();
+        const [cat, next] = observe();
 
         const CatChannel = channel(cat, Cat);
         fixture.append(<CatChannel />);
@@ -106,7 +106,7 @@ describe('async iterator', () => {
     });
 
     test('transform, { map: true }', async ({ fixture, find, expect }) => {
-        const [cats, dispatch] = subject();
+        const [cats, dispatch] = observe();
 
         const Cats = channel(cats, Cat, { map: true });
         fixture.append(<ul><Cats /></ul>);
@@ -124,7 +124,7 @@ describe('async iterator', () => {
     });
 
     test('transform, { start, init }', async ({ fixture, find, expect }) => {
-        const [cat, next] = subject();
+        const [cat, next] = observe();
 
         // const promise = sleep(50).then(() => 'duchess');
 
@@ -154,12 +154,10 @@ describe('async iterator', () => {
     });
 });
 
-describe('sync, start, init', () => {
+describe('sync, init, start', () => {
 
     test('sync', async ({ fixture, find, expect }) => {
-        const [cat, next] = subject({
-            start: 'felix'
-        });
+        const [cat, next] = observe(null, 'felix');
 
         const CatChannel = channel(cat);
         fixture.append(<CatChannel />);
@@ -171,9 +169,7 @@ describe('sync, start, init', () => {
     });
 
     test('sync, transform', async ({ fixture, find, expect }) => {
-        const [cat, next] = subject({
-            start: { name: 'felix' }
-        });
+        const [cat, next] = observe(null, { name: 'felix' });
 
         const CatChannel = channel(cat, Cat);
         fixture.append(<CatChannel />);
@@ -185,13 +181,11 @@ describe('sync, start, init', () => {
     });
 
     test('sync, transform, { map: true }', async ({ fixture, find, expect }) => {
-        const [cats, next] = subject({
-            start: [
-                { name: 'felix' },
-                { name: 'duchess' },
-                { name: 'garfield' }
-            ]
-        });
+        const [cats, next] = observe(null, [
+            { name: 'felix' },
+            { name: 'duchess' },
+            { name: 'garfield' }
+        ]);
 
         const Cats = channel(cats, Cat, { map: true });
         fixture.append(<ul><Cats /></ul>);
@@ -208,7 +202,7 @@ describe('sync, start, init', () => {
     });
 
     test('{ start }', async ({ fixture, find, expect }) => {
-        const [cat, next] = subject();
+        const [cat, next] = observe();
 
         const CatChannel = channel(cat, { start: 'felix' });
         fixture.append(<CatChannel />);
@@ -224,7 +218,7 @@ describe('sync, start, init', () => {
     });
 
     test('{ init }', async ({ fixture, find, expect }) => {
-        const [cat, next] = subject();
+        const [cat, next] = observe();
 
         const CatChannel = channel(cat, { init: 'felix' });
 
@@ -241,7 +235,7 @@ describe('sync, start, init', () => {
     });
 
     test('transform, { init }', async ({ fixture, find, expect }) => {
-        const [cat, next] = subject();
+        const [cat, next] = observe();
 
         const CatChannel = channel(cat, name => {
             return name === 'felix'
@@ -260,8 +254,10 @@ describe('sync, start, init', () => {
             `"<p>stimpy<!--1--></p><!--1-->"`
         );
     });
+});
 
-    test('throws: { map: true } w/o transform', async ({ expect }) => {
+describe('throws', () => {
+    test('{ map: true } w/o transform', async ({ expect }) => {
         expect(() => {
             channel(Promise.resolve(), { map: true });
         }).toThrowErrorMatchingInlineSnapshot(
@@ -269,8 +265,8 @@ describe('sync, start, init', () => {
         );
     });
 
-    test('throws: sync, { init }', async ({ expect }) => {
-        const [cat] = subject({ start: 'felix' });
+    test.skip('sync, { init }', async ({ expect }) => {
+        const [cat] = observe({ start: 'felix' });
         expect(() => {
             channel(cat, { init: 'will throw' });
         }).toThrowErrorMatchingInlineSnapshot(

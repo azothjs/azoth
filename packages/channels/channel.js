@@ -36,23 +36,22 @@ export function channel(async, transformArg, options) {
     return out;
 }
 
-function makeChannel(asyncSource, transform, map, onDeck) {
+function makeChannel(async, transform, map, onDeck) {
     switch(true) {
-        case asyncSource instanceof Promise: {
-            const promised = fromPromise(asyncSource, transform, map);
+        case async instanceof Promise: {
+            const promised = fromPromise(async, transform, map);
             return onDeck ? toAsyncGenerator(onDeck, promised) : promised;
         }
-        case !!asyncSource[Symbol.asyncIterator]:
-            return fromAsyncIterator(asyncSource, transform, map, onDeck);
+        case !!async?.[Symbol.asyncIterator]:
+            return fromAsyncIterator(async, transform, map, onDeck);
         default:
-            throw new AsyncTypeError(asyncSource);
+            throw new AsyncTypeError(async);
     }
 }
 
 function fromPromise(promise, transform, map) {
     if(map) {
-        // TODO: additional errors if not array?
-        return promise.then(array => array.map(transform));
+        return promise.then(array => array?.map(transform));
     }
     return transform ? promise.then(transform) : promise;
 
@@ -68,7 +67,7 @@ async function* fromAsyncIterator(iterator, transform, map, onDeck) {
 
     for await(const value of iterator) {
         if(map) {
-            yield value.map(transform);
+            yield value?.map(transform);
             continue;
         }
         yield transform ? transform(value) : value;

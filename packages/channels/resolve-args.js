@@ -1,7 +1,6 @@
 import { OptionMissingFunctionArgumentError } from './throw.js';
 
 export function resolveArgs(transform, options) {
-
     if(!options && typeof transform === 'object') {
         options = transform;
         transform = null;
@@ -10,6 +9,7 @@ export function resolveArgs(transform, options) {
     const init = options?.init;
     const start = options?.start;
     const map = !!options?.map;
+    const reduce = options?.reduce;
 
     if(map && !transform) {
         throw new OptionMissingFunctionArgumentError();
@@ -18,6 +18,7 @@ export function resolveArgs(transform, options) {
     return {
         transform,
         init, start, map,
+        reduce,
         hasStart: start !== undefined,
         hasInit: init !== undefined,
     };

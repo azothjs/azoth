@@ -45,6 +45,14 @@ export class BadTeeCountArgumentError extends TypeError {
     }
 }
 
+export class TransformNotFunctionArgumentError extends TypeError {
+    constructor(value) {
+        super(`\
+The "transform" argument must be function. If you want to use an initial \
+value with no transform, pass "null" as the first argument to observe.` + getObjectJSON(value));
+    }
+}
+
 export class InitOptionWithSyncWrappedAsyncProviderError extends TypeError {
     constructor() {
         super(`\

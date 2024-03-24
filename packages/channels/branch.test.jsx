@@ -1,9 +1,10 @@
 import { describe, test, beforeEach } from 'vitest';
 import './with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
-import { subject } from './generators.js';
+import { observe } from './observe.js';
 import { branch } from './branch.js';
-import { Cat, CatCount, CatNames } from './test-cats.jsx';
+import { Cat, CatCount, CatName, CatNames } from './test-cats.jsx';
+import { generator } from './generator.js';
 
 beforeEach(fixtureSetup);
 
@@ -125,17 +126,19 @@ describe('promise', () => {
 describe('async iterator', () => {
 
     test('...transforms', async ({ fixture, find, expect, childHTML }) => {
-        const [cats, next] = subject();
+        const [cats, next] = observe();
         const [Count, List, Map] = branch(
             cats,
             CatCount, CatNames,
-            [Cat, { map: true }]
+            [CatName, { map: true }]
         );
         fixture.append(<Count />, <List />, <Map />);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<!--0--><!--0--><!--0-->"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(
+            `"<!--0--><!--0--><!--0-->"`
+        );
 
         next(['felix', 'duchess', 'stimpy']);
-        await find('felix');
+        await find('3 cats');
         expect(childHTML())
             .toMatchInlineSnapshot(`
               [
@@ -143,9 +146,9 @@ describe('async iterator', () => {
                 <!--1-->,
                 "<ul><li>felix<!--1--></li><li>duchess<!--1--></li><li>stimpy<!--1--></li><!--3--></ul>",
                 <!--1-->,
-                "<p><!--0--></p>",
-                "<p><!--0--></p>",
-                "<p><!--0--></p>",
+                "<li>felix<!--1--></li>",
+                "<li>duchess<!--1--></li>",
+                "<li>stimpy<!--1--></li>",
                 <!--3-->,
               ]
             `);
@@ -165,18 +168,18 @@ describe('async iterator', () => {
     });
 
     test('all transform/option combos', async ({ fixture, find, expect, childHTML }) => {
-        const [cat, next] = subject();
+        const [cat, next] = generator();
 
         const Channels = branch(
             cat,
             [null, { start: 'start' }],
             [null, { init: 'init' }],
-            [name => 'second', { start: 'first' }],
+            [() => 'second', { start: 'first' }],
             [name => name, { start: 'one', init: 'two' }],
             [name => name.toUpperCase(), { init: 'felix' }],
             null,
             name => `${name}!`,
-            [name => name[0]],
+            [name => name?.[0]],
         );
 
         expect(Channels.length).toBe(8);

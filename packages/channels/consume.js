@@ -1,28 +1,56 @@
-import { Multicast } from './generators.js';
-import { AsyncTypeError } from './throw.js';
+import { Sync } from '../maya/compose/compose.js';
+import { resolveArgs } from './resolve-args.js';
+import { AsyncTypeError, InitOptionWithSyncWrappedAsyncProviderError } from './throw.js';
 
-export function consume(asyncSource, ...actions) {
-    const type = typeof asyncSource;
+export function consume(async, transform, options) {
+    const {
+        map, transform: consumer, // specialized version of transform
+        init, hasStart, hasInit
+    } = resolveArgs(transform, options);
 
-    switch(true) {
-        case asyncSource instanceof Promise:
-            actions.length < 2
-                ? consumePromise(asyncSource, actions[0])
-                : consumePromises(asyncSource, actions);
-            break;
-        case !!asyncSource[Symbol.asyncIterator]:
-        default:
-            throw new AsyncTypeError(asyncSource);
+    if(hasStart) {
+        // TODO: move to throw.js
+        throw new TypeError(`Option "start" cannot be used with consume as it does not emit values`);
+    }
+
+    let sync = init;
+    if(async instanceof Sync) {
+        if(hasInit) throw new InitOptionWithSyncWrappedAsyncProviderError();
+        const { initial, input } = async;
+        sync = initial;
+        async = input;
+    }
+
+    if(sync !== undefined) consumer(sync);
+
+    if(!map) doConsume(async, consumer);
+    else mapConsume(async, consumer, map);
+}
+
+async function doConsume(async, transform) {
+    if(async instanceof Promise) {
+        async.then(transform);
+    }
+    else if(async?.[Symbol.asyncIterator]) {
+        for await(const value of async) {
+            transform(value);
+        }
+    }
+    else {
+        throw new AsyncTypeError(async);
     }
 }
 
-function consumePromise(promise, action) {
-    promise.then(action);
-}
-
-function consumePromises(promise, actions) {
-    for(let i = 0; i < actions.length; i++) {
-        promise.then(actions[i]);
+async function mapConsume(async, transform, map) {
+    if(async instanceof Promise) {
+        async.then(array => array?.map(transform));
+    }
+    else if(async?.[Symbol.asyncIterator]) {
+        for await(const value of async) {
+            value?.map(transform);
+        }
+    }
+    else {
+        throw new AsyncTypeError(async);
     }
 }
-

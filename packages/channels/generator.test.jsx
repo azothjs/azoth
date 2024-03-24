@@ -2,7 +2,7 @@ import { beforeEach, test } from 'vitest';
 import './with-resolvers-polyfill.js';
 import { findByText } from '@testing-library/dom';
 import { fixtureSetup } from 'test-utils/fixtures';
-import { subject } from './generators.js';
+import { generator } from './generator.js';
 
 /* 
     Subject usually is a data provider that is then use(d), but it can be used 
@@ -15,8 +15,8 @@ import { subject } from './generators.js';
 
 beforeEach(fixtureSetup);
 
-test('subject()', async ({ fixture, find, expect }) => {
-    const [asyncIterator, next] = subject();
+test('generator()', async ({ fixture, find, expect }) => {
+    const [asyncIterator, next] = generator();
     fixture.append(<>{asyncIterator}</>);
     expect(fixture.innerHTML).toMatchInlineSnapshot(`"<!--0-->"`);
     next('test');
@@ -26,7 +26,7 @@ test('subject()', async ({ fixture, find, expect }) => {
 });
 
 test('transform', async ({ fixture, find, expect }) => {
-    const [asyncIterator, next] = subject(s => s?.toUpperCase());
+    const [asyncIterator, next] = generator(s => s?.toUpperCase());
     fixture.append(<>{asyncIterator}</>);
 
     next('hello');
@@ -38,7 +38,7 @@ test('transform', async ({ fixture, find, expect }) => {
 });
 
 test('options.start', async ({ fixture, find, expect }) => {
-    const [wrappedAsync, next] = subject({ start: 'hi' });
+    const [wrappedAsync, next] = generator({ start: 'hi' });
     fixture.append(<>{wrappedAsync}</>);
     expect(fixture.innerHTML).toMatchInlineSnapshot(`"hi<!--1-->"`);
     next('yo');
@@ -47,7 +47,7 @@ test('options.start', async ({ fixture, find, expect }) => {
 });
 
 test('options.start skips transform', async ({ fixture, find, expect }) => {
-    const [wrappedAsync, next] = subject(s => s?.toUpperCase(), { start: 'hi' });
+    const [wrappedAsync, next] = generator(s => s?.toUpperCase(), { start: 'hi' });
     fixture.append(<>{wrappedAsync}</>);
     expect(fixture.innerHTML).toMatchInlineSnapshot(`"hi<!--1-->"`);
     next('yo');
@@ -56,7 +56,7 @@ test('options.start skips transform', async ({ fixture, find, expect }) => {
 
 
 test('options.init', async ({ fixture, find, expect }) => {
-    const [wrappedAsync, next] = subject(x => x ** 2, { init: 2 });
+    const [wrappedAsync, next] = generator(x => x ** 2, { init: 2 });
     fixture.append(<>{wrappedAsync}</>);
     expect(fixture.innerHTML).toMatchInlineSnapshot(`"4<!--1-->"`);
     next(3);
@@ -67,7 +67,7 @@ test('options.init', async ({ fixture, find, expect }) => {
 
 
 test('both start and init', async ({ expect, find, fixture }) => {
-    const [wrappedAsync, next] = subject(
+    const [wrappedAsync, next] = generator(
         x => Promise.resolve(x ** 2),
         { init: 2, start: 42 }
     );

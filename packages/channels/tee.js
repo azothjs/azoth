@@ -1,5 +1,5 @@
 import { Sync } from '../maya/compose/compose.js';
-import { Multicast } from './generators.js';
+import { Multicast } from './Multicast.js';
 import { AsyncTypeError, BadTeeCountArgumentError } from './throw.js';
 
 export function tee(async, count = 2) {
@@ -46,5 +46,6 @@ function teeAsyncIterator(iterator, count, init) {
         const subscriber = multicast.subscriber();
         tees.push(init ? Sync.wrap(init, subscriber) : subscriber);
     }
+    multicast.start();
     return tees;
 }

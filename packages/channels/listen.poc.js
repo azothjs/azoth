@@ -1,4 +1,4 @@
-import { subject } from './generators.js';
+import { observe } from './observe.js';
 
 export function broadcast() {
     const listeners = [];
@@ -10,7 +10,7 @@ export function broadcast() {
     }
 
     function join(initial, transform) {
-        const [signal, iterator] = subject(initial, transform);
+        const [signal, iterator] = observe(initial, transform);
         listeners.push(signal);
         return iterator;
     }
