@@ -68,7 +68,7 @@ export class Analyzer {
         }
         else {
             assessElement(node);
-            if(node.isComponent) this.#imports.add('createElement');
+            if(node.isComponent) this.#imports.add('rC');
             this.JSXElement(node);
         }
     }
@@ -98,7 +98,7 @@ export class Analyzer {
 
         if(element.isComponent) {
             // only props, component children are "slot" template
-            if(type !== 'prop') {
+            if(type !== 'prop' && type !== 'spread') {
                 throw new TypeError(`Unexpected binding type "${type}", expected "prop"`);
             }
 
@@ -190,7 +190,7 @@ export class Analyzer {
             else {
                 assessElement(child);
                 if(child.isComponent) {
-                    this.#imports.add('createElement');
+                    // this.#imports.add('cC');
                     this.#bind('child', child, child.componentExpr, i + adj);
                 }
                 this[type](child, i + adj);
@@ -201,14 +201,22 @@ export class Analyzer {
     JSXProps(attributes) {
         for(var i = 0; i < attributes.length; i++) {
             const attr = attributes[i];
-            this.#bind('prop', attr, attr.value, i);
+            if(attr.type === 'JSXSpreadAttribute') {
+                this.#bind('spread', attr, attr.argument, i);
+            }
+            else {
+                this.#bind('prop', attr, attr.value, i);
+            }
         }
     }
 
     JSXAttributes(attributes) {
         for(var i = 0; i < attributes.length; i++) {
             const attr = attributes[i];
-            if(attr.value?.type === 'JSXExpressionContainer') {
+            if(attr.type === 'JSXSpreadAttribute') {
+                this.#bind('spread', attr, attr.argument, i);
+            }
+            else if(attr.value?.type === 'JSXExpressionContainer') {
                 this.#bind('prop', attr, attr.value.expression, i);
             }
         }

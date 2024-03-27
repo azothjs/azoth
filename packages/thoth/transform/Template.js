@@ -6,6 +6,9 @@ const generator = new HtmlGenerator();
 const htmlGenerator = node => generate(node, { generator });
 
 export class Template {
+    tMap = null;
+    bMap = null;
+    pMap = null;
 
     constructor(node, { bindings, boundElements, imports }) {
         if(node.isComponent && bindings.length) {
@@ -21,21 +24,32 @@ export class Template {
         this.isEmpty = node.isComponent ||
             (node.isJSXFragment && node.children.length === 0);
         this.isStatic = this.isEmpty || (!boundElements.length) && node.queryIndex !== -1;
-
         this.html = this.isEmpty ? '' : htmlGenerator(node);
 
-        let tKey = '', bKey = '';
         if(!this.isStatic) {
-            tKey = revHash(bindings.map(({ type, index, element: { isRoot, queryIndex } }) => {
-                return (isRoot ? '' : `${queryIndex}`) + (type === 'child' ? `:${index}` : '');
-            }).join());
-            bKey = revHash(bindings.map(({ type, node }) => {
-                return type === 'prop' ? node.name.name : '';
-            }).join());
+            let propIndex = 0;
+            const propMap = new Map();
+            this.bMap = bindings.map(({ type, node }) => {
+                if(type === 'child') return 0;
+                if(type === 'spread') return 2;
+                if(type === 'prop') {
+                    const prop = node.name.name;
+                    let index = propMap.has(prop)
+                        ? propMap.get(prop)
+                        : (propMap.set(prop, propIndex), propIndex++);
+                    return [1, index];
+                }
+            });
+            if(propMap.size) this.pMap = [...propMap.keys()];
+            this.tMap = bindings.map(({ type, index, element: { isRoot, queryIndex } }) => {
+                return type === 'child'
+                    ? (isRoot ? [index] : [queryIndex, index])
+                    : queryIndex;
+            });
         }
 
-        this.targetKey = tKey;
-        this.bindKey = bKey;
+        this.targetKey = this.tMap ? revHash(this.tMap.join()) : '';
+        this.bindKey = this.bMap ? revHash(this.bMap.join()) : '';
         this.id = revHash(this.html + this.bindKey + this.targetKey);
 
     }

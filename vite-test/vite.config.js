@@ -17,7 +17,10 @@ export default defineConfig({
         modulePreload: false,
         rollupOptions: {
             output: [{
-                format: 'es'
+                format: 'es',
+                entryFileNames: `[name].js`,
+                chunkFileNames: `[name].js`,
+                assetFileNames: `[name].[ext]`,
             }]
         },
     },

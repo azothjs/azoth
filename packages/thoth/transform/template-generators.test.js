@@ -75,7 +75,7 @@ describe('bind generator', () => {
           "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __compose(t0, v0);
+              __c(t0, v0);
             };    
           }"
         `);
@@ -91,8 +91,52 @@ describe('bind generator', () => {
             const t0 = ts[0], t1 = ts[1], t2 = ts[2];
             return (v0, v1, v2) => {
               t0.className = v0;
-              __compose(t1, v1);
-              __compose(t2, v2);
+              __c(t1, v1);
+              __c(t2, v2);
+            };    
+          }"
+        `
+        );
+    });
+
+    test('compose component', ({ compile, expect }) => {
+        const code = compile(`<div>
+            <Component prop={prop}><p>slottable</p></Component>
+        </div>;`);
+        expect(code).toMatchInlineSnapshot(
+            `
+          "(ts) => {
+            const t0 = ts[0];
+            return (v0) => {
+              __cC(t0, v0);
+            };    
+          }"
+        `
+        );
+    });
+
+    test('data-/dataset props', ({ compile, expect }) => {
+        const code = compile(`const t = <p data-id={id}></p>;`);
+        expect(code).toMatchInlineSnapshot(
+            `
+          "(ts) => {
+            const t0 = ts[0];
+            return (v0) => {
+              t0.dataset.id = v0;
+            };    
+          }"
+        `
+        );
+    });
+
+    test('spread props', ({ compile, expect }) => {
+        const code = compile(`const t = <p {...obj}></p>;`);
+        expect(code).toMatchInlineSnapshot(
+            `
+          "(ts) => {
+            const t0 = ts[0];
+            return (v0) => {
+              Object.assign(t0, v0);
             };    
           }"
         `
@@ -119,31 +163,31 @@ describe('bind generator', () => {
             "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __compose(t0, v0);
+              __c(t0, v0);
             };    
           }",
             "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __compose(t0, v0);
+              __c(t0, v0);
             };    
           }",
             "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __compose(t0, v0);
+              __c(t0, v0);
             };    
           }",
             "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __compose(t0, v0);
+              __c(t0, v0);
             };    
           }",
             "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __compose(t0, v0);
+              __c(t0, v0);
             };    
           }",
             "null",
@@ -164,7 +208,7 @@ describe('render generator', () => {
     test('simple', ({ compile, expect }) => {
         const code = compile(`name => <p>{name}</p>`);
 
-        expect(code).toMatchInlineSnapshot(`"__renderer("c193fcb516", g1a9d5db22c, bd41d8cd98f, false, \`<p><!--0--></p>\`)"`);
+        expect(code).toMatchInlineSnapshot(`"__renderer("6bf5e94b46", gcfcd208495, bcfcd208495, false, \`<p><!--0--></p>\`)"`);
     });
 
     test('static', ({ compile, expect }) => {
@@ -181,7 +225,7 @@ describe('render generator', () => {
 
         expect(code).toMatchInlineSnapshot(
             `
-          "__renderer("b32dab1494", g98cb41d3ff, bb90a39b45c, false, \`<p>
+          "__renderer("512df43ecd", g81fafaab96, b9c4cd0bb11, false, \`<p>
                       <!--0--> <span data-bind>hey <!--0-->!</span>
                   </p>\`)"
         `
@@ -192,7 +236,7 @@ describe('render generator', () => {
         const template = preParse(`name => <p>{name}</p>`, expect);
         const code = makeRenderer(template, { noContent: true });
 
-        expect(code).toMatchInlineSnapshot(`"__renderer("c193fcb516", g1a9d5db22c, bd41d8cd98f, false)"`);
+        expect(code).toMatchInlineSnapshot(`"__renderer("6bf5e94b46", gcfcd208495, bcfcd208495, false)"`);
     });
 
 
@@ -212,11 +256,11 @@ describe('render generator', () => {
         expect(mapped).toMatchInlineSnapshot(`
           [
             "__renderer("35b2653e5d", null, null, false, \`<p>loading...</p>\`)",
-            "__renderer("c193fcb516", g1a9d5db22c, bd41d8cd98f, false, \`<p><!--0--></p>\`)",
-            "__renderer("65cf075bba", g1a9d5db22c, bd41d8cd98f, false, \`<ul><!--0--></ul>\`)",
-            "__renderer("b4f8dfe3c0", g1a9d5db22c, bd41d8cd98f, false, \`<p><!--0--> cats</p>\`)",
-            "__renderer("cb5355f810", g1a9d5db22c, bd41d8cd98f, false, \`<li><!--0--></li>\`)",
-            "__renderer("65cf075bba", g1a9d5db22c, bd41d8cd98f, false, \`<ul><!--0--></ul>\`)",
+            "__renderer("6bf5e94b46", gcfcd208495, bcfcd208495, false, \`<p><!--0--></p>\`)",
+            "__renderer("df8076d019", gcfcd208495, bcfcd208495, false, \`<ul><!--0--></ul>\`)",
+            "__renderer("f0cd5e093f", gcfcd208495, bcfcd208495, false, \`<p><!--0--> cats</p>\`)",
+            "__renderer("4499130e13", gcfcd208495, bcfcd208495, false, \`<li><!--0--></li>\`)",
+            "__renderer("df8076d019", gcfcd208495, bcfcd208495, false, \`<ul><!--0--></ul>\`)",
           ]
         `);
     });

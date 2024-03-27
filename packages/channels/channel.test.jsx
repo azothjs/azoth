@@ -119,7 +119,7 @@ describe('async iterator', () => {
 
         await find('duchess');
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<ul><p>felix<!--1--></p><p>duchess<!--1--></p><p>garfield<!--1--></p><!--3--><!--1--></ul>"`
+            `"<ul><p>felix<!--1--></p><p>duchess<!--1--></p><p>garfield<!--1--></p><!--3--></ul>"`
         );
     });
 
@@ -197,7 +197,7 @@ describe('sync, init, start', () => {
 
         await find('tom');
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<ul><p>tom<!--1--></p><p>stimpy<!--1--></p><!--2--><!--1--></ul>"`
+            `"<ul><p><!--0--></p><p>tom<!--1--></p><p>stimpy<!--1--></p><!--3--></ul>"`
         );
     });
 

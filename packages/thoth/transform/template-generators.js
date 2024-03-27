@@ -45,17 +45,26 @@ export function makeBind({ isStatic, bindings }) {
 
     const bound = bindings.map(({ type, node }, index) => {
         if(type === 'child') {
-            return `__compose(${TARGET}${index}, ${VALUE}${index});`;
+            const method = node.isComponent ? `cC` : `c`;
+            return `__${method}(${TARGET}${index}, ${VALUE}${index});`;
+        }
+        if(type === 'spread') {
+            return `Object.assign(${TARGET}${index}, ${VALUE}${index});`;
         }
         if(type === 'prop') {
             // TODO: consider source maps for prop on element
-            // TODO: refactor with component props names when DOMProp/attr lookup exists
+            // TODO: DOMProp/attr lookup, camel vs '-', exceptions
             const identity = node.name;
-            const propName = identity.name;
+            let propName = identity.name;
+            let target = `${TARGET}${index}`;
+            if(propName.startsWith('data-')) {
+                target += `.dataset`;
+                propName = propName.slice(5);
+            }
             const isValidId = isValidESIdentifier(propName);
-            const refinement = isValidId ? `.${propName}` : `[${propName}]`;
+            const refinement = isValidId ? `.${propName}` : `["${propName}"]`;
 
-            return `${TARGET}${index}${refinement} = ${VALUE}${index};`;
+            return `${target}${refinement} = ${VALUE}${index};`;
 
         }
         const message = `Unexpected binding type "${type}", expected "child" or "prop"`;

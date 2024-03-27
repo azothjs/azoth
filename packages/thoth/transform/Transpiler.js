@@ -109,7 +109,7 @@ export class Transpiler extends Generator {
             }
 
             if(node.isComponent) {
-                this.CreateElement(node, state);
+                this.ComposeComponent(node, state);
                 continue;
             }
             this[expr.type](expr, state);
@@ -118,8 +118,23 @@ export class Transpiler extends Generator {
         state.write(`)`);
     }
 
+    ComposeComponent({ componentExpr: expr, props, slotFragment }, state) {
+        state.write(`[`);
+        this[expr.type](expr, state);
+        if(props?.length) {
+            this.ComponentProps(props, state);
+        }
+        else if(slotFragment) state.write(`, null`);
+
+        if(slotFragment) {
+            state.write(', ');
+            this.JSXTemplate(slotFragment, state);
+        }
+        state.write(`]`);
+    }
+
     CreateElement(node, state, topLevel = false) {
-        state.write(`__createElement(`, node);
+        state.write(`__rC(`, node);
         this.CompleteElement(node, node.componentExpr, state);
         if(topLevel) state.write(`, true`);
         state.write(`)`);

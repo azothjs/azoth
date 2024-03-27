@@ -69,6 +69,10 @@ export class HtmlGenerator extends Generator {
         this[node.property.type](node.property, state);
     }
 
+    JSXSpreadAttribute() {
+        // no-op, always dynamic
+    }
+
     // attr="value"
     JSXAttribute(node, state) {
         if(node.value?.type === 'JSXExpressionContainer') return;

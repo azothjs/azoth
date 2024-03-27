@@ -3,7 +3,7 @@ import 'test-utils/with-resolvers-polyfill';
 import { $div, elementWithText, elementWithAnchor } from 'test-utils/elements';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { runCompose } from './compose.test.js';
-import { Sync, composeElement, createElement } from './compose.js';
+import { Sync, composeComponent, createComponent } from './compose.js';
 
 beforeEach(fixtureSetup);
 
@@ -60,7 +60,7 @@ describe('create element', () => {
     describe.each(CONSTRUCTORS)('%o', Constructor => {
         const expected = `<div>felix<!--1--></div>`;
         test('prop-agation', ({ expect }) => {
-            const dom = createElement(Constructor, { name: 'felix' });
+            const dom = createComponent(Constructor, { name: 'felix' });
             expect(dom.outerHTML).toBe(expected);
         });
     });
@@ -68,7 +68,7 @@ describe('create element', () => {
     describe.each(ASYNC_CONSTRUCTORS)('%o', Constructor => {
         const expected = `<div>felix<!--1--></div><!--1-->`;
         test('prop-agation', async ({ expect, fixture, find }) => {
-            const dom = createElement(Constructor, { name: 'felix' });
+            const dom = createComponent(Constructor, { name: 'felix' });
             fixture.append(dom);
             await find('felix');
             expect(fixture.innerHTML).toBe(expected);
@@ -78,7 +78,7 @@ describe('create element', () => {
     describe.each(CONSTRUCTORS.concat(ASYNC_CONSTRUCTORS))('promised %o', Constructor => {
         const expected = `<div>felix<!--1--></div><!--1-->`;
         test('prop-agation', async ({ expect, fixture, find }) => {
-            const dom = createElement(Promise.resolve(Constructor), { name: 'felix' });
+            const dom = createComponent(Promise.resolve(Constructor), { name: 'felix' });
             fixture.append(dom);
             await find('felix');
             expect(fixture.innerHTML).toBe(expected);
@@ -88,7 +88,7 @@ describe('create element', () => {
     describe.each(CONSTRUCTORS.concat(ASYNC_CONSTRUCTORS))('promised %o', Constructor => {
         const expected = `<div>felix<!--1--></div><!--1-->`;
         test('prop-agation', async ({ expect, fixture, find }) => {
-            const dom = createElement(Promise.resolve(Constructor), { name: 'felix' });
+            const dom = createComponent(Promise.resolve(Constructor), { name: 'felix' });
             fixture.append(dom);
             await find('felix');
             expect(fixture.innerHTML).toBe(expected);
@@ -100,7 +100,7 @@ describe('create element', () => {
 describe('prop-agation', () => {
     test('Node props', async ({ expect }) => {
         const div = $div();
-        const dom = createElement(div, { textContent: 'felix' });
+        const dom = createComponent(div, { textContent: 'felix' });
         expect(dom).toMatchInlineSnapshot(`
           <div>
             felix
@@ -123,7 +123,7 @@ describe('prop-agation', () => {
             yield doAsync($div('three'));
         }
 
-        const dom = createElement(Numbers(), { className: 'number' });
+        const dom = createComponent(Numbers(), { className: 'number' });
         fixture.append(dom);
 
         resolve();
@@ -142,7 +142,7 @@ describe('prop-agation', () => {
     test('Non-render class is error', async ({ expect }) => {
         class MyClass { }
         expect(() => {
-            createElement(MyClass, { name: 'felix' });
+            createComponent(MyClass, { name: 'felix' });
         }).toThrowErrorMatchingInlineSnapshot(
             `
           [TypeError: Invalid compose {...} input type "object", value [object Object].
@@ -162,7 +162,7 @@ describe('compose element', () => {
         const expected = `<div><div>felix<!--1--></div><!--1--></div>`;
         test('prop-agation', async ({ expect, fixture, find }) => {
             const { dom, anchor } = elementWithAnchor();
-            composeElement(anchor, Component, { name: 'felix' });
+            composeComponent(anchor, [Component, { name: 'felix' }]);
             fixture.append(dom);
             await find('felix');
             expect(fixture.innerHTML).toBe(expected);
@@ -173,7 +173,7 @@ describe('compose element', () => {
         const expected = `<div><div>felix<!--1--></div><!--1--></div>`;
         test('prop-agation', async ({ expect, fixture, find }) => {
             const { dom, anchor } = elementWithAnchor();
-            composeElement(anchor, Promise.resolve(Component), { name: 'felix' });
+            composeComponent(anchor, [Promise.resolve(Component), { name: 'felix' }]);
             fixture.append(dom);
             await find('felix');
             expect(fixture.innerHTML).toBe(expected);
@@ -190,7 +190,7 @@ describe('compose element', () => {
 
     test('Promised array component', async ({ expect, fixture, find }) => {
         const { dom, anchor } = elementWithAnchor();
-        composeElement(anchor, Promise.resolve(ArrayList));
+        composeComponent(anchor, [Promise.resolve(ArrayList)]);
         fixture.append(dom);
         await find('one', { exact: false });
         expect(fixture.innerHTML).toMatchInlineSnapshot(
@@ -203,7 +203,7 @@ describe('compose element', () => {
 describe('Sync wrap', () => {
     test('initial render', async ({ expect, fixture, find }) => {
         const syncWrapper = Sync.wrap('cat coming', ClassCompP);
-        const dom = createElement(syncWrapper, { name: 'felix' });
+        const dom = createComponent(syncWrapper, { name: 'felix' });
         expect(dom).toMatchInlineSnapshot(`
           <DocumentFragment>
             cat coming

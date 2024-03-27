@@ -1,6 +1,7 @@
 export {
-    compose as __compose,
-    createElement as __createElement,
+    compose as __c,
+    createComponent as __rC,
+    composeComponent as __cC,
 } from '@azothjs/maya/compose';
 
 export {

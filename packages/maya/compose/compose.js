@@ -1,4 +1,3 @@
-/* compose, composeElement, create, createElement */
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
 export class Sync {
@@ -87,11 +86,11 @@ export function compose(anchor, input, keepLast, props, slottable) {
 
 const isRenderObject = obj => obj && typeof obj === 'object' && obj.render && typeof obj.render === 'function';
 
-export function composeElement(anchor, Constructor, props, slottable) {
+export function composeComponent(anchor, [Constructor, props, slottable]) {
     create(Constructor, props, slottable, anchor);
 }
 
-export function createElement(Constructor, props, slottable, topLevel = false) {
+export function createComponent(Constructor, props, slottable, topLevel = false) {
     const result = create(Constructor, props, slottable);
     if(!topLevel) return result;
 

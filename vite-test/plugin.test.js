@@ -12,11 +12,11 @@ test('plugin output produces same snapshot', async ({ expect }) => {
     // it programmatically. Likely need to work out directory permission. 
     // When that's done, switch to dir-compare
 
-    const expectedJS = resolve(__dirname, './expected-out/index-CHvwx500.js');
-    const actualJS = await readFile(resolve(__dirname, './out/index-CHvwx500.js'), 'utf8');
+    const expectedJS = resolve(__dirname, './expected-out/index.js');
+    const actualJS = await readFile(resolve(__dirname, './out/index.js'), 'utf8');
     expect(actualJS).toMatchFileSnapshot(expectedJS);
 
-    const expectedCSS = resolve(__dirname, './expected-out/index-DDapMaSx.css');
-    const actualCSS = await readFile(resolve(__dirname, './out/index-DDapMaSx.css'), 'utf8');
+    const expectedCSS = resolve(__dirname, './expected-out/index.css');
+    const actualCSS = await readFile(resolve(__dirname, './out/index.css'), 'utf8');
     expect(actualCSS).toMatchFileSnapshot(expectedCSS);
 });

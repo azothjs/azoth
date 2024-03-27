@@ -36,7 +36,6 @@ export default function azothPlugin(options) {
             config = resolvedConfig;
         },
 
-
         resolveId(id) {
             const [name, ids] = id.split('?', 2);
             const resolved = RESOLVED[name];
@@ -86,7 +85,8 @@ export default function azothPlugin(options) {
     }
 
     function loadBindModule([id]) {
-        return `import { __compose } from 'azoth/runtime';\nexport const b${id} = ${makeBind(byBind.get(id))};`;
+        // TODO: conditionally import based on what was used in templates
+        return `import { __c, __cC } from 'azoth/runtime';\nexport const b${id} = ${makeBind(byBind.get(id))};`;
     }
 
     function loadTemplateModule(ids, isBuild) {

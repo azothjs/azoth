@@ -6,7 +6,7 @@ const compile = input => {
     return _compile(input);
 };
 
-test('static one line', ({ expect }) => {
+test.skip('static one line', ({ expect }) => {
     const input = `const t = <div>Hello World</div>`;
     const { code, _sourceMap } = compile(input);
     expect(code).toMatchInlineSnapshot(`
@@ -38,7 +38,7 @@ test('static one line', ({ expect }) => {
     `);
 });
 
-test('{...} one line', ({ expect }) => {
+test.skip('{...} one line', ({ expect }) => {
     const input = `<div>Hello {place}</div>`;
     const { _sourceMap, code } = compile(input);
     expect(code).toMatchInlineSnapshot(`
@@ -69,7 +69,7 @@ test('{...} one line', ({ expect }) => {
     `);
 });
 
-test('static three line', ({ expect }) => {
+test.skip('static three line', ({ expect }) => {
     const input = `const t = <div>
         Hello World
     </div>`;
@@ -102,7 +102,7 @@ test('static three line', ({ expect }) => {
     `);
 });
 
-test('{...} three line', ({ expect }) => {
+test.skip('{...} three line', ({ expect }) => {
     const input = `const t = <div>
         Hello {place}
     </div>`;

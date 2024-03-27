@@ -19,7 +19,7 @@ dependencies:
     version: 0.7.4
   vite:
     specifier: ^5.0.12
-    version: 5.2.4
+    version: 5.2.6
 
 packages:
 
@@ -457,8 +457,8 @@ packages:
     engines: {node: '>= 8'}
     dev: false
 
-  /vite@5.2.4:
-    resolution: {integrity: sha512-vjFghvHWidBTinu5TCymJk/lRHlR5ljqB83yugr0HA1xspUPdOZHqbqDLnZ8f9/jINrtFHTCYYyIUi+o+Q5iyg==}
+  /vite@5.2.6:
+    resolution: {integrity: sha512-FPtnxFlSIKYjZ2eosBQamz4CbyrTizbZ3hnGJlh/wMtCrlp1Hah6AzBLjGI5I2urTfNnpovpHdrL6YRuBOPnCA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
