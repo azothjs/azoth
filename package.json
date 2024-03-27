@@ -19,6 +19,7 @@
     },
     "devDependencies": {
         "@testing-library/dom": "^9.3.4",
+        "@vitest/browser": "^1.4.0",
         "azoth": "workspace:./packages/azoth",
         "eslint": "^8.57.0",
         "globals": "^14.0.0",
@@ -27,5 +28,8 @@
         "vite-plugin-inspect": "^0.8.3",
         "vitest": "^1.4.0"
     },
-    "packageManager": "^pnpm@8.15.1"
+    "packageManager": "^pnpm@8.15.1",
+    "dependencies": {
+        "webdriverio": "^8.35.1"
+    }
 }

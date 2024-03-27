@@ -1,5 +1,5 @@
 import { generate } from 'astring';
-import revHash from 'rev-hash';
+import { createHash } from './create-hash.js';
 import { HtmlGenerator } from './HtmlGenerator.js';
 
 const generator = new HtmlGenerator();
@@ -48,9 +48,9 @@ export class Template {
             });
         }
 
-        this.targetKey = this.tMap ? revHash(this.tMap.join()) : '';
-        this.bindKey = this.bMap ? revHash(this.bMap.join()) : '';
-        this.id = revHash(this.html + this.bindKey + this.targetKey);
+        this.targetKey = this.tMap ? createHash(this.tMap.join()) : '';
+        this.bindKey = this.bMap ? createHash(this.bMap.join()) : '';
+        this.id = createHash(this.html + this.bindKey + this.targetKey);
 
     }
 }

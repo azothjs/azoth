@@ -1,4 +1,3 @@
-import revHash from 'rev-hash';
 import { compile, templateModule, makeTargets, makeRenderer, makeBind } from '@azothjs/thoth';
 import { createFilter } from '@rollup/pluginutils';
 import path from 'node:path';

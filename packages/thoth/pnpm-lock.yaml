@@ -4,28 +4,50 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-dependencies:
-  acorn:
-    specifier: ^8.11.3
-    version: 8.11.3
-  acorn-jsx:
-    specifier: ^5.3.2
-    version: 5.3.2(acorn@8.11.3)
-  astring:
-    specifier: ^1.8.6
-    version: 1.8.6
-  html-void-elements:
-    specifier: ^3.0.0
-    version: 3.0.0
-  is-valid-es-identifier:
-    specifier: ^2.0.0
-    version: 2.0.0
-  rev-hash:
-    specifier: ^4.1.0
-    version: 4.1.0
-  source-map:
-    specifier: ^0.7.4
-    version: 0.7.4
+importers:
+
+  .:
+    dependencies:
+      acorn:
+        specifier: ^8.11.3
+        version: 8.11.3
+      acorn-jsx:
+        specifier: ^5.3.2
+        version: 5.3.2(acorn@8.11.3)
+      astring:
+        specifier: ^1.8.6
+        version: 1.8.6
+      html-void-elements:
+        specifier: ^3.0.0
+        version: 3.0.0
+      is-valid-es-identifier:
+        specifier: ^2.0.0
+        version: 2.0.0
+      source-map:
+        specifier: ^0.7.4
+        version: 0.7.4
+
+  ../..: {}
+
+  ../../docs: {}
+
+  ../../sandbox: {}
+
+  ../../test-utils: {}
+
+  ../../vite-test: {}
+
+  ../azoth: {}
+
+  ../channels: {}
+
+  ../jsonic: {}
+
+  ../maya: {}
+
+  ../vahalla: {}
+
+  ../vite-plugin: {}
 
 packages:
 
@@ -54,11 +76,6 @@ packages:
 
   /is-valid-es-identifier@2.0.0:
     resolution: {integrity: sha512-pGthdulPJ9pcbsAbeHi7m/azRH1ik8N3UGK5aDodEEIKmBabiJ1KJUriQkgrnjVFA72yip6ueQRujluSzDInAQ==}
-    dev: false
-
-  /rev-hash@4.1.0:
-    resolution: {integrity: sha512-e0EGnaveLY2IYpYwHNdh43WZ2M84KgW3Z/T4F6+Z/BlZI/T1ZbxTWj36xgYgUPOieGXYo2q225jTeUXn+LWYjw==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dev: false
 
   /source-map@0.7.4:

@@ -208,13 +208,13 @@ describe('render generator', () => {
     test('simple', ({ compile, expect }) => {
         const code = compile(`name => <p>{name}</p>`);
 
-        expect(code).toMatchInlineSnapshot(`"__renderer("6bf5e94b46", gcfcd208495, bcfcd208495, false, \`<p><!--0--></p>\`)"`);
+        expect(code).toMatchInlineSnapshot(`"__renderer("8c36c09e", g5feceb66, b5feceb66, false, \`<p><!--0--></p>\`)"`);
     });
 
     test('static', ({ compile, expect }) => {
         const code = compile(`() => <p>static</p>`);
 
-        expect(code).toMatchInlineSnapshot(`"__renderer("e8a7ca1ef0", null, null, false, \`<p>static</p>\`)"`);
+        expect(code).toMatchInlineSnapshot(`"__renderer("a84dfd44", null, null, false, \`<p>static</p>\`)"`);
     });
 
 
@@ -225,7 +225,7 @@ describe('render generator', () => {
 
         expect(code).toMatchInlineSnapshot(
             `
-          "__renderer("512df43ecd", g81fafaab96, b9c4cd0bb11, false, \`<p>
+          "__renderer("ac9fa7a8", g0f063ba9, b1c402f25, false, \`<p>
                       <!--0--> <span data-bind>hey <!--0-->!</span>
                   </p>\`)"
         `
@@ -236,7 +236,7 @@ describe('render generator', () => {
         const template = preParse(`name => <p>{name}</p>`, expect);
         const code = makeRenderer(template, { noContent: true });
 
-        expect(code).toMatchInlineSnapshot(`"__renderer("6bf5e94b46", gcfcd208495, bcfcd208495, false)"`);
+        expect(code).toMatchInlineSnapshot(`"__renderer("8c36c09e", g5feceb66, b5feceb66, false)"`);
     });
 
 
@@ -255,12 +255,12 @@ describe('render generator', () => {
         const mapped = initial.templates.map(makeRenderer);
         expect(mapped).toMatchInlineSnapshot(`
           [
-            "__renderer("35b2653e5d", null, null, false, \`<p>loading...</p>\`)",
-            "__renderer("6bf5e94b46", gcfcd208495, bcfcd208495, false, \`<p><!--0--></p>\`)",
-            "__renderer("df8076d019", gcfcd208495, bcfcd208495, false, \`<ul><!--0--></ul>\`)",
-            "__renderer("f0cd5e093f", gcfcd208495, bcfcd208495, false, \`<p><!--0--> cats</p>\`)",
-            "__renderer("4499130e13", gcfcd208495, bcfcd208495, false, \`<li><!--0--></li>\`)",
-            "__renderer("df8076d019", gcfcd208495, bcfcd208495, false, \`<ul><!--0--></ul>\`)",
+            "__renderer("191b5e03", null, null, false, \`<p>loading...</p>\`)",
+            "__renderer("8c36c09e", g5feceb66, b5feceb66, false, \`<p><!--0--></p>\`)",
+            "__renderer("42562575", g5feceb66, b5feceb66, false, \`<ul><!--0--></ul>\`)",
+            "__renderer("3de8bc74", g5feceb66, b5feceb66, false, \`<p><!--0--> cats</p>\`)",
+            "__renderer("4a5c2312", g5feceb66, b5feceb66, false, \`<li><!--0--></li>\`)",
+            "__renderer("42562575", g5feceb66, b5feceb66, false, \`<ul><!--0--></ul>\`)",
           ]
         `);
     });

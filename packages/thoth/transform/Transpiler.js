@@ -66,7 +66,6 @@ export class Transpiler extends Generator {
 
         const { templates, uniqueIds } = this;
         templates.push(template);
-        if(template.id && !uniqueIds.has(template.id)) uniqueIds.add(template.id);
 
         // Short-circuit templates
         const { node: root } = template;
@@ -75,6 +74,8 @@ export class Transpiler extends Generator {
             this.CreateElement(root, state, true);
             return;
         }
+
+        if(template.id && !uniqueIds.has(template.id)) uniqueIds.add(template.id);
 
         this.DomLiteral(template, state);
     }

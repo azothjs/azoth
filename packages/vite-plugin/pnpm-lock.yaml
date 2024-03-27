@@ -4,22 +4,44 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-dependencies:
-  '@azothjs/thoth':
-    specifier: workspace:*
-    version: link:../thoth
-  '@rollup/pluginutils':
-    specifier: ^5.1.0
-    version: 5.1.0
-  rev-hash:
-    specifier: ^4.1.0
-    version: 4.1.0
-  source-map:
-    specifier: ^0.7.4
-    version: 0.7.4
-  vite:
-    specifier: ^5.0.12
-    version: 5.2.6
+importers:
+
+  .:
+    dependencies:
+      '@azothjs/thoth':
+        specifier: workspace:*
+        version: link:../thoth
+      '@rollup/pluginutils':
+        specifier: ^5.1.0
+        version: 5.1.0
+      source-map:
+        specifier: ^0.7.4
+        version: 0.7.4
+      vite:
+        specifier: ^5.0.12
+        version: 5.2.6
+
+  ../..: {}
+
+  ../../docs: {}
+
+  ../../sandbox: {}
+
+  ../../test-utils: {}
+
+  ../../vite-test: {}
+
+  ../azoth: {}
+
+  ../channels: {}
+
+  ../jsonic: {}
+
+  ../maya: {}
+
+  ../thoth: {}
+
+  ../vahalla: {}
 
 packages:
 
@@ -417,11 +439,6 @@ packages:
       nanoid: 3.3.7
       picocolors: 1.0.0
       source-map-js: 1.2.0
-    dev: false
-
-  /rev-hash@4.1.0:
-    resolution: {integrity: sha512-e0EGnaveLY2IYpYwHNdh43WZ2M84KgW3Z/T4F6+Z/BlZI/T1ZbxTWj36xgYgUPOieGXYo2q225jTeUXn+LWYjw==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dev: false
 
   /rollup@4.13.0:

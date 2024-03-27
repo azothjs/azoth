@@ -1,6 +1,5 @@
 import './with-resolvers-polyfill.js';
 import { beforeEach, test } from 'vitest';
-import { observe } from './unicast.js';
 import { fixtureSetup } from '../../test-utils/fixtures.js';
 import { reduce } from './reduce.js';
 

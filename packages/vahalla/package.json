@@ -1,0 +1,13 @@
+{
+    "name": "valhalla",
+    "version": "0.0.0",
+    "description": "Testing ground where warriors feast, fight, and train in preparation for the great battle of Ragnarok",
+    "author": "Marty Nelson",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/azothjs/azoth.git",
+        "directory": "packages/valhalla"
+    },
+    "type": "module"
+}
