@@ -1,6 +1,7 @@
 {
     "name": "azothjs",
-    "version": "0.0.1",
+    "version": "0.0.0",
+    "private": "true",
     "description": "azothjs monorepo",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -18,6 +19,7 @@
         "lint": "eslint packages"
     },
     "devDependencies": {
+        "@changesets/cli": "^2.27.1",
         "@testing-library/dom": "^9.3.4",
         "@vitest/browser": "^1.4.0",
         "azoth": "workspace:./packages/azoth",
