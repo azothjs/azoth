@@ -101,6 +101,7 @@ function sha256(data) {
     }
 
     function digest() {
+        // eslint-disable-next-line eqeqeq
         buf[bp++] = 0x80; if(bp == 64) process();
         if(bp + 8 > 64) {
             while(bp < 64) buf[bp++] = 0x00;
