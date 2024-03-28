@@ -1,1 +1,1 @@
-export * from './KeyedBlock.jsx';
+export * from './KeyedBlock.js';
