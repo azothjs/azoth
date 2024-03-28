@@ -1,6 +1,6 @@
 import { SyncAsync } from '@azothjs/maya/compose';
-import { Multicast } from './Multicast.js';
-import { AsyncTypeError, BadTeeCountArgumentError } from './throw.js';
+import { Multicast } from '../generators/Multicast.js';
+import { AsyncTypeError, BadTeeCountArgumentError } from '../throw.js';
 
 export function tee(async, count = 2) {
     const num = parseInt(count);

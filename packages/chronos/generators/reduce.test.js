@@ -1,27 +1,7 @@
-import './with-resolvers-polyfill.js';
-import { beforeEach, test } from 'vitest';
-import { fixtureSetup } from '../../test-utils/fixtures.js';
+import '../with-resolvers-polyfill.js';
+import { test } from 'vitest';
+import { SyncAsyncReader } from '../test-utils.jsx';
 import { reduce } from './reduce.js';
-
-// TODO: move away from fixture
-beforeEach(fixtureSetup);
-
-class SyncAsyncReader {
-    constructor({ sync, async }) {
-        this.state = sync;
-        this.read(async);
-    }
-    async read(iter) {
-        let { promise, resolve } = Promise.withResolvers();
-        this.promise = promise;
-        for await(const value of iter) {
-            this.state = value;
-            resolve();
-            ({ promise, resolve } = Promise.withResolvers());
-            this.promise = promise;
-        }
-    }
-}
 
 test('reducer', async ({ expect }) => {
     const [syncAsync, dispatch] = reduce((a = 0, b = 0) => {

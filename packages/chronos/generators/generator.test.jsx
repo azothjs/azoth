@@ -1,6 +1,5 @@
 import { beforeEach, test } from 'vitest';
-import './with-resolvers-polyfill.js';
-import { findByText } from '@testing-library/dom';
+import '../with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { generator } from './generator.js';
 

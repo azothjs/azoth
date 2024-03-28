@@ -1,6 +1,6 @@
 import { SyncAsync } from '@azothjs/maya/compose';
-import { resolveArgs } from './resolve-args.js';
-import { AsyncTypeError, InitOptionWithSyncWrappedAsyncProviderError } from './throw.js';
+import { resolveArgs } from '../resolve-args.js';
+import { AsyncTypeError, InitOptionWithSyncWrappedAsyncProviderError } from '../throw.js';
 
 export function channel(async, transformArg, options) {
     const {
@@ -19,7 +19,8 @@ export function channel(async, transformArg, options) {
     }
 
     let hasSync = sync !== undefined;
-    if(hasSync && transform) sync = transform(sync);
+    // if(hasSync && transform) sync = transform(sync);
+    if(hasSync && transform) sync = map ? sync?.map(transform) : transform(sync);
 
     let onDeck;
     if(hasStart && hasSync) {

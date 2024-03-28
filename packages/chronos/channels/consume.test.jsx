@@ -1,8 +1,8 @@
 import { describe, test, beforeEach } from 'vitest';
-import './with-resolvers-polyfill.js';
+import '../with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { consume } from './consume.js';
-import { unicast } from './unicast.js';
+import { unicast } from '../generators/unicast.js';
 
 beforeEach(fixtureSetup);
 

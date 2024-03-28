@@ -1,5 +1,5 @@
-import { Multicast } from './Multicast.js';
-import { AsyncTypeError } from './throw.js';
+import { Multicast } from '../generators/Multicast.js';
+import { AsyncTypeError } from '../throw.js';
 import { channel } from './channel.js';
 import { SyncAsync } from '@azothjs/maya/compose';
 

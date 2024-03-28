@@ -1,10 +1,9 @@
 import { describe, test, beforeEach } from 'vitest';
-import './with-resolvers-polyfill.js';
+import '../with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
-import { unicast } from './unicast.js';
+import { Cat, CatCount, CatName, CatNames } from '../test-utils.jsx';
+import { unicast } from '../generators/unicast.js';
 import { branch } from './branch.js';
-import { Cat, CatCount, CatName, CatNames } from './test-cats.jsx';
-import { generator } from './generator.js';
 
 beforeEach(fixtureSetup);
 
@@ -168,7 +167,7 @@ describe('async iterator', () => {
     });
 
     test('all transform/option combos', async ({ fixture, find, expect, childHTML }) => {
-        const [cat, next] = generator();
+        const [cat, next] = unicast();
 
         const Channels = branch(
             cat,
@@ -247,7 +246,7 @@ describe('async iterator', () => {
 
     });
 
-    test('syncAsync', async ({ fixture, find, expect, childHTML }) => {
+    test('syncAsync', async ({ fixture, find, expect }) => {
         const [cat, next] = unicast('felix');
         const [Cat, Length] = branch(
             cat,

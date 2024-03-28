@@ -1,5 +1,5 @@
 import { generator } from './generator.js';
-import { TransformNotFunctionArgumentError } from './throw.js';
+import { TransformNotFunctionArgumentError } from '../throw.js';
 
 export function unicast(transform, init) {
     if(typeof transform !== 'function') {

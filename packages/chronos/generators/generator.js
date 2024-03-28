@@ -1,5 +1,5 @@
 import { SyncAsync } from '@azothjs/maya/compose';
-import { resolveArgs } from './resolve-args.js';
+import { resolveArgs } from '../resolve-args.js';
 
 export function generator(transformArg, options) {
     const {
