@@ -1,10 +1,10 @@
 import { describe, test, beforeEach } from 'vitest';
-import './with-resolvers-polyfill.js';
+import '../with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
-import { unicast } from './unicast.js';
+import { unicast } from '../generators/unicast.js';
 import { channel } from './channel.js';
-import { sleep } from '../../test-utils/sleep.js';
-import { Cat } from './test-cats.jsx';
+import { sleep } from '../../../test-utils/sleep.js';
+import { Cat } from '../test-utils.jsx';
 
 beforeEach(fixtureSetup);
 
@@ -181,23 +181,19 @@ describe('sync, init, start', () => {
     });
 
     test('sync, transform, { map: true }', async ({ fixture, find, expect }) => {
-        const [cats, next] = unicast([
-            { name: 'felix' },
-            { name: 'duchess' },
-            { name: 'garfield' }
-        ]);
+        const [cats, next] = unicast(['felix', 'duchess', 'garfield']);
 
-        const Cats = channel(cats, Cat, { map: true });
-        fixture.append(<ul><Cats /></ul>);
-
-        next([
-            { name: 'tom' },
-            { name: 'stimpy' },
-        ]);
-
-        await find('tom');
+        const Cats = channel(cats, c => c.toUpperCase(), { map: true });
+        fixture.append(<Cats />);
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<ul><p><!--0--></p><p>tom<!--1--></p><p>stimpy<!--1--></p><!--3--></ul>"`
+            `"FELIXDUCHESSGARFIELD<!--3-->"`
+        );
+
+        next(['tom', 'stimpy']);
+
+        await find('TOM', { exact: false });
+        expect(fixture.innerHTML).toMatchInlineSnapshot(
+            `"TOMSTIMPY<!--2-->"`
         );
     });
 
@@ -262,15 +258,6 @@ describe('throws', () => {
             channel(Promise.resolve(), { map: true });
         }).toThrowErrorMatchingInlineSnapshot(
             `[TypeError: More arguments needed: option "map: true" requires a mapping function.]`
-        );
-    });
-
-    test.skip('sync, { init }', async ({ expect }) => {
-        const [cat] = unicast({ start: 'felix' });
-        expect(() => {
-            channel(cat, { init: 'will throw' });
-        }).toThrowErrorMatchingInlineSnapshot(
-            `[TypeError: Option "init" was supplied with an async provider that is wrapped with its own initial synchronous initial value to be provided as the initial input of this channel. Use one or the other, but not both.]`
         );
     });
 });

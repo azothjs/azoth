@@ -1,6 +1,6 @@
 import { SyncAsync } from '@azothjs/maya/compose';
 import { generator } from './generator.js';
-import { TransformNotFunctionArgumentError } from './throw.js';
+import { TransformNotFunctionArgumentError } from '../throw.js';
 
 export function reduce(reducer, init, initialAction = null) {
     if(reducer && typeof reducer !== 'function') {

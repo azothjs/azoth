@@ -1,6 +1,6 @@
 import { SyncAsync } from '@azothjs/maya/compose';
-import { resolveArgs } from './resolve-args.js';
-import { AsyncTypeError, InitOptionWithSyncWrappedAsyncProviderError } from './throw.js';
+import { resolveArgs } from '../resolve-args.js';
+import { AsyncTypeError, InitOptionWithSyncWrappedAsyncProviderError } from '../throw.js';
 
 export function consume(async, transform, options) {
     const {
