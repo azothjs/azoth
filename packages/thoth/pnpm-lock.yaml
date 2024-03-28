@@ -4,50 +4,25 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-importers:
-
-  .:
-    dependencies:
-      acorn:
-        specifier: ^8.11.3
-        version: 8.11.3
-      acorn-jsx:
-        specifier: ^5.3.2
-        version: 5.3.2(acorn@8.11.3)
-      astring:
-        specifier: ^1.8.6
-        version: 1.8.6
-      html-void-elements:
-        specifier: ^3.0.0
-        version: 3.0.0
-      is-valid-es-identifier:
-        specifier: ^2.0.0
-        version: 2.0.0
-      source-map:
-        specifier: ^0.7.4
-        version: 0.7.4
-
-  ../..: {}
-
-  ../../docs: {}
-
-  ../../sandbox: {}
-
-  ../../test-utils: {}
-
-  ../../vite-test: {}
-
-  ../azoth: {}
-
-  ../channels: {}
-
-  ../jsonic: {}
-
-  ../maya: {}
-
-  ../vahalla: {}
-
-  ../vite-plugin: {}
+dependencies:
+  acorn:
+    specifier: ^8.11.3
+    version: 8.11.3
+  acorn-jsx:
+    specifier: ^5.3.2
+    version: 5.3.2(acorn@8.11.3)
+  astring:
+    specifier: ^1.8.6
+    version: 1.8.6
+  html-void-elements:
+    specifier: ^3.0.0
+    version: 3.0.0
+  is-valid-es-identifier:
+    specifier: ^2.0.0
+    version: 2.0.0
+  source-map:
+    specifier: ^0.7.4
+    version: 0.7.4
 
 packages:
 
