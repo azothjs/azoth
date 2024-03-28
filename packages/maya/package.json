@@ -1,6 +1,6 @@
 {
     "name": "@azothjs/maya",
-    "version": "0.3.3",
+    "version": "0.3.4",
     "description": "Azoth runtime",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -26,6 +26,7 @@
         "**/!(*test|*config).js"
     ],
     "exports": {
+        "./blocks": "./blocks/blocks.js",
         "./compose": "./compose/compose.js",
         "./renderer": "./renderer/renderer.js"
     },
