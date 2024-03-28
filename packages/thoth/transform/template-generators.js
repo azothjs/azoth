@@ -12,7 +12,7 @@ export function makeTargets(template) {
         return type === BIND.CHILD ? `${target}.childNodes[${index}]` : target;
     });
 
-    return `(${elLength ? 'r,t' : 'r'}) => [${values.join()}]`;
+    return elLength ? `(r,t) => [${values.join()}]` : `r => [${values.join()}]`;
 }
 
 export function makeRenderer({ isEmpty, id, targetKey, bindKey, isDomFragment, html }, options) {

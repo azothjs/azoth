@@ -22,7 +22,7 @@ describe('targets generator', () => {
 
     test('simple', ({ compile, expect }) => {
         const code = compile(`name => <p>{name}</p>`);
-        expect(code).toMatchInlineSnapshot(`"(r) => [r.childNodes[0]]"`);
+        expect(code).toMatchInlineSnapshot(`"r => [r.childNodes[0]]"`);
     });
 
     test('edge case', ({ expect }) => {
@@ -41,11 +41,11 @@ describe('targets generator', () => {
         expect(mapped).toMatchInlineSnapshot(`
           [
             "null",
-            "(r) => [r.childNodes[0]]",
-            "(r) => [r.childNodes[0]]",
-            "(r) => [r.childNodes[0]]",
-            "(r) => [r.childNodes[0]]",
-            "(r) => [r.childNodes[0]]",
+            "r => [r.childNodes[0]]",
+            "r => [r.childNodes[0]]",
+            "r => [r.childNodes[0]]",
+            "r => [r.childNodes[0]]",
+            "r => [r.childNodes[0]]",
           ]
         `);
     });
