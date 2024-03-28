@@ -3,4 +3,4 @@ dist
 .env
 .DS_Store
 sandbox/src/
-./out
+vite-test/out
