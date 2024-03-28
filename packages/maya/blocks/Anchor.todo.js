@@ -1,6 +1,6 @@
 import { compose } from '../compose';
 
-export class Anchor {
+export class BlockAnchor {
     #anchor = document.createComment(0);
 
     constructor({ source, loader }) {
@@ -35,22 +35,22 @@ export class Anchor {
 }
 
 
-function fociLoader(anchor) {
-    return {
-        load(foci) {
-            anchor.replace(foci.map(focus => <Focus focus={focus} />));
-        },
-        add(focus) {
-            anchor.append(<Focus focus={focus} />);
-        },
-        remove() {
-            anchor.remove();
-        },
-        update(update,) {
-            // TODO: would be no-op for content editable
-            // or other source input...
-            anchor.replace(<Focus focus={update} />);
-        }
-    };
-}
+// function fociLoader(anchor) {
+//     return {
+//         load(foci) {
+//             anchor.replace(foci.map(focus => <Focus focus={focus} />));
+//         },
+//         add(focus) {
+//             anchor.append(<Focus focus={focus} />);
+//         },
+//         remove() {
+//             anchor.remove();
+//         },
+//         update(update) {
+//             // TODO: would be no-op for content editable
+//             // or other source input...
+//             anchor.replace(<Focus focus={update} />);
+//         }
+//     };
+// }
 
