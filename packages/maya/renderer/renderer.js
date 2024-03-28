@@ -103,9 +103,10 @@ export class Controller {
 export class Updater extends Controller {
     #node = null;
     render(props) {
-        return this.#node = super.render(props);
+        return this.#node ?? (this.#node = super.render(props));
     }
     update(props) {
-        super.update(this.#node, props);
+        const node = this.#node;
+        node ? super.update(node, props) : this.render(props);
     }
 }
