@@ -1,16 +1,19 @@
 {
     "name": "@azothjs/chronos",
-    "version": "0.3.9",
-    "description": "Asynchronous layout channels",
+    "version": "0.3.10",
+    "description": "Asynchronous data and layout management",
     "author": "Marty Nelson",
     "license": "MIT",
     "keywords": [
         "data",
         "streaming",
         "asynchronous",
+        "chronos",
         "layout channels",
         "channels",
         "azoth",
+        "azoth chronos",
+        "azoth generators",
         "azoth channels"
     ],
     "repository": {

@@ -1,6 +1,6 @@
 {
     "name": "azoth",
-    "version": "1.3.19",
+    "version": "1.3.20",
     "description": "Azoth JSX hypermedia",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -29,12 +29,13 @@
     "exports": {
         "./runtime": "./runtime.js",
         "./maya": "./maya.js",
-        "./channels": "./channels.js",
+        "./chronos/channels": "./chronos/channels.js",
+        "./chronos/generators": "./chronos/generators.js",
         "./vite-plugin": "./vite-plugin.js"
     },
     "packageManager": "^pnpm@8.15.1",
     "dependencies": {
-        "@azothjs/channels": "workspace:*",
+        "@azothjs/chronos": "workspace:*",
         "@azothjs/maya": "workspace:*",
         "@azothjs/vite-plugin": "workspace:*"
     }
