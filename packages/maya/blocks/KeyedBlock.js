@@ -1,4 +1,4 @@
-import { Controller } from '../renderer.js';
+import { Controller } from '../renderer/renderer.js';
 
 export class KeyedBlock {
     selectedId = '';
