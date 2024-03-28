@@ -735,7 +735,7 @@ describe('components and custom element', () => {
     test('top level components: empty and with props', ({ expect }) => {
         const input = `
             const c = <Component/>;
-            const cProps = <Component prop={value} attr="static"/>;
+            const cProps = <Component prop={value} {...spread} attr="static"/>;
         `;
         const { code, templates } = compile(input);
 
@@ -743,7 +743,7 @@ describe('components and custom element', () => {
           "import { __rC } from 'azoth/runtime';
 
           const c = __rC(Component, true);
-          const cProps = __rC(Component, { prop: value, attr: "static", }, true);
+          const cProps = __rC(Component, { prop: value, ...spread, attr: "static", }, true);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`

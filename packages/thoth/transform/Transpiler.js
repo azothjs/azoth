@@ -157,12 +157,17 @@ export class Transpiler extends Generator {
     ComponentProps(props, state) {
         state.write(`, {`);
         for(let i = 0; i < props.length; i++) {
-            const { node, expr } = props[i];
+            const { node, expr, type } = props[i];
             // TODO: Dom lookup, JS .prop v['prop'], etc. 
             // refactor with code below
             state.write(` `);
-            state.write(node.name.name, node.name);
-            state.write(`: `);
+            if(type === 'spread') {
+                state.write(`...`);
+            }
+            else {
+                state.write(node.name.name, node.name);
+                state.write(`: `);
+            }
             this[expr.type](expr, state);
             state.write(`,`);
         }
