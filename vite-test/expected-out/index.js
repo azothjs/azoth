@@ -1,13 +1,12 @@
-/* compose, composeElement, create, createElement */
 const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
-class Sync {
-    static wrap(initial, input) {
-        return new this(initial, input);
+class SyncAsync {
+    static from(sync, async) {
+        return new this(sync, async);
     }
-    constructor(initial, input) {
-        this.initial = initial;
-        this.input = input;
+    constructor(sync, async) {
+        this.sync = sync;
+        this.async = async;
     }
 }
 
@@ -37,9 +36,9 @@ function compose(anchor, input, keepLast, props, slottable) {
             if(slottable) input.slottable = slottable;
             replace(anchor, input, keepLast);
             break;
-        case input instanceof Sync:
-            compose(anchor, input.initial, keepLast);
-            compose(anchor, input.input, keepLast, props, slottable);
+        case input instanceof SyncAsync:
+            compose(anchor, input.sync, keepLast);
+            compose(anchor, input.async, keepLast, props, slottable);
             break;
         case type === 'function': {
             // will throw if function is class,
@@ -87,28 +86,8 @@ function compose(anchor, input, keepLast, props, slottable) {
 
 const isRenderObject = obj => obj && typeof obj === 'object' && obj.render && typeof obj.render === 'function';
 
-function createElement(Constructor, props, slottable, topLevel = false) {
-    const result = create(Constructor, props, slottable);
-    if(!topLevel) return result;
-
-    // result is returned to caller, not composed by Azoth,
-    // force to be of type Node or null:
-    // strings and numbers into text nodes
-    // non-values to null
-    const type = typeof result;
-    switch(true) {
-        case type === 'string':
-        case type === 'number':
-            return document.createTextNode(result);
-        case result === undefined:
-        case result === null:
-        case result === true:
-        case result === false:
-        case result === IGNORE:
-            return null;
-        default:
-            return result;
-    }
+function composeComponent(anchor, [Constructor, props, slottable]) {
+    create(Constructor, props, slottable, anchor);
 }
 
 function create(input, props, slottable, anchor) {
@@ -153,15 +132,15 @@ function create(input, props, slottable, anchor) {
             else if(Array.isArray(input)) {
                 composeArray(anchor, input, false);
             }
-            else if(input instanceof Sync) {
+            else if(input instanceof SyncAsync) {
                 // REASSIGN anchor! sync input will compose _before_
                 // anchor is appended to DOM, need container until then
                 const commentAnchor = anchor;
                 anchor = document.createDocumentFragment();
                 anchor.append(commentAnchor);
 
-                create(input.initial, props, slottable, commentAnchor);
-                create(input.input, props, slottable, commentAnchor);
+                create(input.sync, props, slottable, commentAnchor);
+                create(input.async, props, slottable, commentAnchor);
             }
             else {
                 throwTypeErrorForObject(input);
@@ -354,20 +333,20 @@ function renderer(id, targets, makeBind, isFragment, content) {
     return templateRenderer(getBound);
 }
 
-const gac282a7be0 = (r,t) => [t[0].childNodes[3]];
+const gf338800d = (r,t) => [t[0].childNodes[3]];
 
-const bd41d8cd98f = (ts) => {
+const b5feceb66 = (ts) => {
   const t0 = ts[0];
   return (v0) => {
-    compose(t0, v0);
+    composeComponent(t0, v0);
   };    
 };
 
-const g3558193cd9 = (r) => [r.childNodes[1]];
+const g6b86b273 = (r) => [r.childNodes[1]];
 
-const g2cc7b6176d = (r,t) => [t[0],r.childNodes[3],r.childNodes[5]];
+const g1762bad2 = (r,t) => [t[0],r.childNodes[3],r.childNodes[5]];
 
-const bb3ae510d64 = (ts) => {
+const b1c402f25 = (ts) => {
   const t0 = ts[0], t1 = ts[1], t2 = ts[2];
   return (v0, v1, v2) => {
     t0.innerHTML = v0;
@@ -376,9 +355,9 @@ const bb3ae510d64 = (ts) => {
   };    
 };
 
-const tf30ef00ee2 = renderer("f30ef00ee2", gac282a7be0, bd41d8cd98f, true);
-const te23131e855 = renderer("e23131e855", g3558193cd9, bd41d8cd98f, false);
-const t0f61ee8206 = renderer("0f61ee8206", g2cc7b6176d, bb3ae510d64, false);
+const tf0280d9c = renderer("f0280d9c", gf338800d, b5feceb66, true);
+const t3a34fe20 = renderer("3a34fe20", g6b86b273, b5feceb66, false);
+const t4b034012 = renderer("4b034012", g1762bad2, b1c402f25, false);
 
 async function fetchEmojis() {
     const res = await fetch('https://emojihub.yurace.pro/api/all');
@@ -388,11 +367,11 @@ async function fetchEmojis() {
 const List = fetchEmojis().then(emojis => EmojiList({
   emojis
 }));
-const App = tf30ef00ee2(createElement(List));
+const App = tf0280d9c([List]);
 document.body.append(App);
 function EmojiList({emojis}) {
-  return te23131e855(emojis.map(Emoji));
+  return t3a34fe20(emojis.map(Emoji));
 }
 function Emoji({name, unicode, htmlCode}) {
-  return t0f61ee8206(htmlCode.join(''),name,unicode);
+  return t4b034012(htmlCode.join(''),name,unicode);
 }
