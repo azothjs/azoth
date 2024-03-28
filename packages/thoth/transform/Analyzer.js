@@ -1,4 +1,4 @@
-import { Template } from './Template.js';
+import { BIND, Template } from './Template.js';
 import { voidElements } from './html.js';
 
 const BINDING_ATTR = {
@@ -98,8 +98,8 @@ export class Analyzer {
 
         if(element.isComponent) {
             // only props, component children are "slot" template
-            if(type !== 'prop' && type !== 'spread') {
-                throw new TypeError(`Unexpected binding type "${type}", expected "prop"`);
+            if(type !== BIND.PROP && type !== BIND.SPREAD) {
+                throw new TypeError(`Unexpected binding type "${type}", expected "BIND.PROP" or "BIND.SPREAD"`);
             }
 
             // early exit! components get bindings as props
@@ -127,7 +127,7 @@ export class Analyzer {
     JSXFragmentRoot(node) {
         this.#pushElement(node);
         if(node.openingFragment) {
-            this.JSXAttributes(node.openingFragment.attributes);
+            this.JSXAttributes(node.openingFragment.attributes, false);
         }
         this.JSXChildren(node);
         this.#popElement();
@@ -142,7 +142,7 @@ export class Analyzer {
         this.#pushElement(node);
 
         if(node.isComponent) {
-            this.JSXProps(node.openingElement.attributes);
+            this.JSXAttributes(node.openingElement.attributes, true);
             if(node.children.length) {
                 node.slotFragment = {
                     type: 'JSXFragment',
@@ -154,7 +154,7 @@ export class Analyzer {
                 };
             }
         } else {
-            this.JSXAttributes(node.openingElement.attributes);
+            this.JSXAttributes(node.openingElement.attributes, false);
             this.JSXChildren(node);
         }
 
@@ -190,41 +190,28 @@ export class Analyzer {
             else {
                 assessElement(child);
                 if(child.isComponent) {
-                    // this.#imports.add('cC');
-                    this.#bind('child', child, child.componentExpr, i + adj);
+                    this.#bind(BIND.COMPONENT, child, child.componentExpr, i + adj);
                 }
                 this[type](child, i + adj);
             }
         }
     }
 
-    JSXProps(attributes) {
+    JSXAttributes(attributes, bindAll = false) {
         for(var i = 0; i < attributes.length; i++) {
             const attr = attributes[i];
             if(attr.type === 'JSXSpreadAttribute') {
-                this.#bind('spread', attr, attr.argument, i);
+                this.#bind(BIND.SPREAD, attr, attr.argument, i);
             }
-            else {
-                this.#bind('prop', attr, attr.value, i);
-            }
-        }
-    }
-
-    JSXAttributes(attributes) {
-        for(var i = 0; i < attributes.length; i++) {
-            const attr = attributes[i];
-            if(attr.type === 'JSXSpreadAttribute') {
-                this.#bind('spread', attr, attr.argument, i);
-            }
-            else if(attr.value?.type === 'JSXExpressionContainer') {
-                this.#bind('prop', attr, attr.value.expression, i);
+            else if(bindAll || attr.value?.type === 'JSXExpressionContainer') {
+                this.#bind(BIND.PROP, attr, attr.value.expression, i);
             }
         }
     }
 
     JSXExpressionContainer(node, index) {
         if(node.expression.type === 'JSXEmptyExpression') return;
-        this.#bind('child', node, node.expression, index);
+        this.#bind(BIND.CHILD, node, node.expression, index);
     }
 
     JSXText() { /* no-op */ }

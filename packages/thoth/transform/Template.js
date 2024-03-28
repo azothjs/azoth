@@ -5,6 +5,14 @@ import { HtmlGenerator } from './HtmlGenerator.js';
 const generator = new HtmlGenerator();
 const htmlGenerator = node => generate(node, { generator });
 
+export const BIND = {
+    /*RESERVED: 0,*/
+    CHILD: 1,
+    COMPONENT: 2,
+    PROP: 3,
+    SPREAD: 4,
+};
+
 export class Template {
     tMap = null;
     bMap = null;
@@ -30,19 +38,19 @@ export class Template {
             let propIndex = 0;
             const propMap = new Map();
             this.bMap = bindings.map(({ type, node }) => {
-                if(type === 'child') return 0;
-                if(type === 'spread') return 2;
-                if(type === 'prop') {
-                    const prop = node.name.name;
-                    let index = propMap.has(prop)
-                        ? propMap.get(prop)
-                        : (propMap.set(prop, propIndex), propIndex++);
-                    return [1, index];
-                }
+                if(type !== BIND.PROP) return type;
+
+                const prop = node.name.name;
+                let index = propMap.has(prop)
+                    ? propMap.get(prop)
+                    : (propMap.set(prop, propIndex), propIndex++);
+                return index * -1; // index in propname as negative number
             });
+
             if(propMap.size) this.pMap = [...propMap.keys()];
+
             this.tMap = bindings.map(({ type, index, element: { isRoot, queryIndex } }) => {
-                return type === 'child'
+                return type === BIND.CHILD || type === BIND.COMPONENT
                     ? (isRoot ? [index] : [queryIndex, index])
                     : queryIndex;
             });

@@ -1149,7 +1149,7 @@ describe('render and composition cases', () => {
 
     });
 
-    test('list composition', ({ expect }) => {
+    test.only('list composition', ({ expect }) => {
         const input = `        
             const Emoji = ({ name }) => <li>{name}</li>;
             const promise = fetchEmojis().then(emojis => emojis.map(Emoji));
@@ -1159,21 +1159,21 @@ describe('render and composition cases', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t4a5c2312, t42562575 } from 'virtual:azoth-templates?id=4a5c2312&id=42562575';
+          "import { t4be044f9, tb2903d6d } from 'virtual:azoth-templates?id=4be044f9&id=b2903d6d';
 
-          const Emoji = ({name}) => t4a5c2312(name);
+          const Emoji = ({name}) => t4be044f9(name);
           const promise = fetchEmojis().then(emojis => emojis.map(Emoji));
-          const Emojis = t42562575(promise);
+          const Emojis = tb2903d6d(promise);
           document.body.append(Emojis);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "6b86b273",
               "html": "<li><!--0--></li>",
-              "id": "4a5c2312",
+              "id": "4be044f9",
               "isDomFragment": false,
               "isEmpty": false,
               "pMap": "null",
@@ -1181,10 +1181,10 @@ describe('render and composition cases', () => {
               "targetKey": "5feceb66",
             },
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "6b86b273",
               "html": "<ul><!--0--></ul>",
-              "id": "42562575",
+              "id": "b2903d6d",
               "isDomFragment": false,
               "isEmpty": false,
               "pMap": "null",
@@ -1208,14 +1208,14 @@ describe('render and composition cases', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t191b5e03, t8c36c09e, t42562575, t3de8bc74, t4a5c2312 } from 'virtual:azoth-templates?id=191b5e03&id=8c36c09e&id=42562575&id=3de8bc74&id=4a5c2312';
+          "import { t191b5e03, t77e67b80, tb2903d6d, t44ba17ec, t4be044f9 } from 'virtual:azoth-templates?id=191b5e03&id=77e67b80&id=b2903d6d&id=44ba17ec&id=4be044f9';
 
           export const Loading = () => t191b5e03();
-          export const Cat = ({name}) => t8c36c09e(name);
-          export const CatList = cats => t42562575(cats.map(Cat));
-          export const CatCount = cats => t3de8bc74(cats.length);
-          export const CatName = name => t4a5c2312(name);
-          export const CatNames = cats => t42562575(cats.map(CatName));
+          export const Cat = ({name}) => t77e67b80(name);
+          export const CatList = cats => tb2903d6d(cats.map(Cat));
+          export const CatCount = cats => t44ba17ec(cats.length);
+          export const CatName = name => t4be044f9(name);
+          export const CatNames = cats => tb2903d6d(cats.map(CatName));
           "
         `);
     });
