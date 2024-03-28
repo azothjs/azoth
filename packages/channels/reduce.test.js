@@ -7,9 +7,9 @@ import { reduce } from './reduce.js';
 beforeEach(fixtureSetup);
 
 class SyncAsyncReader {
-    constructor({ initial, input }) {
-        this.state = initial;
-        this.read(input);
+    constructor({ sync, async }) {
+        this.state = sync;
+        this.read(async);
     }
     async read(iter) {
         let { promise, resolve } = Promise.withResolvers();

@@ -3,7 +3,7 @@ import 'test-utils/with-resolvers-polyfill';
 import { elementWithAnchor } from 'test-utils/elements';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { runCompose } from './compose.test.js';
-import { Sync } from './compose.js';
+import { SyncAsync } from './compose.js';
 
 beforeEach(fixtureSetup);
 
@@ -103,7 +103,7 @@ describe('async values', () => {
     });
 
     test('sync render promise', async ({ expect, fixture, find }) => {
-        const syncWrapper = Sync.wrap('sync render', Promise.resolve('hi'));
+        const syncWrapper = SyncAsync.from('sync render', Promise.resolve('hi'));
         const dom = runCompose(syncWrapper, elementWithAnchor);
         fixture.append(dom);
         expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>sync render<!--1--></div>"`);
@@ -125,7 +125,7 @@ describe('async values', () => {
             yield doAsync('three');
         }
 
-        const syncWrapper = Sync.wrap('here come async numbers!', numbers());
+        const syncWrapper = SyncAsync.from('here come async numbers!', numbers());
         fixture.append(runCompose(syncWrapper, elementWithAnchor));
         // initial render
         expect(fixture.innerHTML).toMatchInlineSnapshot(

@@ -247,4 +247,24 @@ describe('async iterator', () => {
 
     });
 
+    test('syncAsync', async ({ fixture, find, expect, childHTML }) => {
+        const [cat, next] = unicast('felix');
+        const [Cat, Length] = branch(
+            cat,
+            null,
+            cat => cat.length
+        );
+        fixture.append(<Cat />, <Length />);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(
+            `"felix<!--1-->5<!--1-->"`
+        );
+
+        next('duchess');
+        await find('duchess', { exact: false });
+
+        expect(fixture.innerHTML).toMatchInlineSnapshot(
+            `"duchess<!--1-->7<!--1-->"`
+        );
+    });
+
 });

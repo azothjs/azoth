@@ -1,4 +1,4 @@
-import { Sync } from '../maya/compose/compose.js';
+import { SyncAsync } from '@azothjs/maya/compose';
 import { resolveArgs } from './resolve-args.js';
 import { AsyncTypeError, InitOptionWithSyncWrappedAsyncProviderError } from './throw.js';
 
@@ -14,11 +14,10 @@ export function consume(async, transform, options) {
     }
 
     let sync = init;
-    if(async instanceof Sync) {
+    if(async instanceof SyncAsync) {
         if(hasInit) throw new InitOptionWithSyncWrappedAsyncProviderError();
-        const { initial, input } = async;
-        sync = initial;
-        async = input;
+        sync = async.sync;
+        async = async.async;
     }
 
     if(sync !== undefined) consumer(sync);

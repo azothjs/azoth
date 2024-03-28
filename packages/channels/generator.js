@@ -1,4 +1,4 @@
-import { Sync } from '../maya/compose/compose.js';
+import { SyncAsync } from '@azothjs/maya/compose';
 import { resolveArgs } from './resolve-args.js';
 
 export function generator(transformArg, options) {
@@ -43,12 +43,12 @@ export function generator(transformArg, options) {
     let asyncIterator = generator();
 
     if(hasStart) {
-        return [Sync.wrap(start, asyncIterator), dispatch];
+        return [SyncAsync.from(start, asyncIterator), dispatch];
     }
 
     if(hasInit) {
         const value = transform ? transform(init) : init;
-        return [Sync.wrap(value, asyncIterator), dispatch];
+        return [SyncAsync.from(value, asyncIterator), dispatch];
     }
 
     return [asyncIterator, dispatch];

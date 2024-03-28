@@ -1,40 +1,38 @@
-import { Sync } from '../maya/compose/compose.js';
+import { SyncAsync } from '@azothjs/maya/compose';
 import { Multicast } from './Multicast.js';
 import { AsyncTypeError, BadTeeCountArgumentError } from './throw.js';
 
 export function tee(async, count = 2) {
-    const repeat = parseInt(count);
-    if(!(count >= 2)) {
+    const num = parseInt(count);
+    if(!(num >= 2)) {
         throw new BadTeeCountArgumentError(count);
     }
 
-    let init;
-    if(async instanceof Sync) {
-        const { initial, input } = async;
-        init = initial;
-        async = input;
+    let sync;
+    if(async instanceof SyncAsync) {
+        sync = async.sync;
+        async = async.async;
     }
 
-    return makeTee(async, count, init);
+    return makeTee(async, num, sync);
 }
 
-function makeTee(asyncProvider, count, init) {
-    const type = typeof asyncProvider;
+function makeTee(async, count, init) {
+    const type = typeof async;
     switch(true) {
-        case asyncProvider instanceof Promise:
-            return teePromise(asyncProvider, count, init);
-        case !!asyncProvider?.[Symbol.asyncIterator]:
-            return teeAsyncIterator(asyncProvider, count, init);
+        case async instanceof Promise:
+            return teePromise(async, count, init);
+        case !!async?.[Symbol.asyncIterator]:
+            return teeAsyncIterator(async, count, init);
         default:
-            throw new AsyncTypeError(asyncProvider);
+            throw new AsyncTypeError(async);
     }
 }
 
 function teePromise(promise, count, init) {
     const tees = [];
     for(let i = 0; i < count; i++) {
-        init ? Sync.wrap(init, promise) : promise;
-        tees.push(init ? Sync.wrap(init, promise) : promise);
+        tees.push(init !== undefined ? SyncAsync.from(init, promise) : promise);
     }
     return tees;
 }
@@ -44,7 +42,7 @@ function teeAsyncIterator(iterator, count, init) {
     const tees = [];
     for(let i = 0; i < count; i++) {
         const subscriber = multicast.subscriber();
-        tees.push(init ? Sync.wrap(init, subscriber) : subscriber);
+        tees.push(init ? SyncAsync.from(init, subscriber) : subscriber);
     }
     multicast.start();
     return tees;

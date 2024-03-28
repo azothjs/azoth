@@ -3,7 +3,7 @@ import './with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { unicast } from './unicast.js';
 import { tee } from './tee.js';
-import { Sync } from '../maya/compose/compose.js';
+import { SyncAsync } from '@azothjs/maya/compose';
 
 beforeEach(fixtureSetup);
 
@@ -27,7 +27,7 @@ describe('promise', () => {
     test('with initial value', async ({ expect, fixture, find }) => {
         const { promise, resolve } = Promise.withResolvers();
 
-        const Channels = tee(Sync.wrap('init', promise));
+        const Channels = tee(SyncAsync.from('init', promise));
         fixture.append(...Channels.map(C => <C />));
         expect(fixture.innerHTML).toMatchInlineSnapshot(
             `"init<!--1-->init<!--1-->"`

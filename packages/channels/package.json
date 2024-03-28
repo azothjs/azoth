@@ -31,5 +31,8 @@
     },
     "devDependencies": {
         "test-utils": "workspace:*"
+    },
+    "dependencies": {
+        "@azothjs/maya": "workspace:^"
     }
 }

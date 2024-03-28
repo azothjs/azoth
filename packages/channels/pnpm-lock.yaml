@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+dependencies:
+  '@azothjs/maya':
+    specifier: workspace:^
+    version: link:../maya
+
 devDependencies:
   test-utils:
     specifier: workspace:*

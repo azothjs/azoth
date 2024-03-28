@@ -1,4 +1,4 @@
-import { Sync } from '../maya/compose/compose.js';
+import { SyncAsync } from '@azothjs/maya/compose';
 import { resolveArgs } from './resolve-args.js';
 import { AsyncTypeError, InitOptionWithSyncWrappedAsyncProviderError } from './throw.js';
 
@@ -10,13 +10,12 @@ export function channel(async, transformArg, options) {
     } = resolveArgs(transformArg, options);
     let sync = init;
 
-    if(async instanceof Sync) {
-        const { initial, input } = async;
+    if(async instanceof SyncAsync) {
         if(hasInit) {
             throw new InitOptionWithSyncWrappedAsyncProviderError();
         }
-        sync = initial;
-        async = input;
+        sync = async.sync;
+        async = async.async;
     }
 
     let hasSync = sync !== undefined;
@@ -31,8 +30,8 @@ export function channel(async, transformArg, options) {
 
     const out = makeChannel(async, transform, map, onDeck);
 
-    if(hasStart) return Sync.wrap(start, out);
-    if(hasSync) return Sync.wrap(sync, out);
+    if(hasStart) return SyncAsync.from(start, out);
+    if(hasSync) return SyncAsync.from(sync, out);
     return out;
 }
 

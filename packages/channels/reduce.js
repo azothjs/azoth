@@ -1,4 +1,4 @@
-import { Sync } from '../maya/compose/compose.js';
+import { SyncAsync } from '@azothjs/maya/compose';
 import { generator } from './generator.js';
 import { TransformNotFunctionArgumentError } from './throw.js';
 
@@ -9,5 +9,5 @@ export function reduce(reducer, init, initialAction = null) {
 
     let state = reducer(init, initialAction);
     const [iter, dispatch] = generator(action => state = reducer(state, action));
-    return [Sync.wrap(state, iter), dispatch];
+    return [SyncAsync.from(state, iter), dispatch];
 }

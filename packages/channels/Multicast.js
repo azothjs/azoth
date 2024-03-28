@@ -1,4 +1,4 @@
-import { Sync } from '../maya/compose/compose.js';
+import { SyncAsync } from '@azothjs/maya/compose';
 import { generator } from './generator.js';
 
 export class Multicast {
@@ -6,7 +6,7 @@ export class Multicast {
     #iter = null;
 
     constructor(iter) {
-        this.#iter = (iter instanceof Sync) ? iter.input : iter;
+        this.#iter = (iter instanceof SyncAsync) ? iter.async : iter;
         this.start();
     }
 

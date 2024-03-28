@@ -1,12 +1,12 @@
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
-export class Sync {
-    static wrap(initial, input) {
-        return new this(initial, input);
+export class SyncAsync {
+    static from(sync, async) {
+        return new this(sync, async);
     }
-    constructor(initial, input) {
-        this.initial = initial;
-        this.input = input;
+    constructor(sync, async) {
+        this.sync = sync;
+        this.async = async;
     }
 }
 
@@ -36,9 +36,9 @@ export function compose(anchor, input, keepLast, props, slottable) {
             if(slottable) input.slottable = slottable;
             replace(anchor, input, keepLast);
             break;
-        case input instanceof Sync:
-            compose(anchor, input.initial, keepLast);
-            compose(anchor, input.input, keepLast, props, slottable);
+        case input instanceof SyncAsync:
+            compose(anchor, input.sync, keepLast);
+            compose(anchor, input.async, keepLast, props, slottable);
             break;
         case type === 'function': {
             // will throw if function is class,
@@ -156,15 +156,15 @@ function create(input, props, slottable, anchor) {
             else if(Array.isArray(input)) {
                 composeArray(anchor, input, false);
             }
-            else if(input instanceof Sync) {
+            else if(input instanceof SyncAsync) {
                 // REASSIGN anchor! sync input will compose _before_
                 // anchor is appended to DOM, need container until then
                 const commentAnchor = anchor;
                 anchor = document.createDocumentFragment();
                 anchor.append(commentAnchor);
 
-                create(input.initial, props, slottable, commentAnchor);
-                create(input.input, props, slottable, commentAnchor);
+                create(input.sync, props, slottable, commentAnchor);
+                create(input.async, props, slottable, commentAnchor);
             }
             else {
                 throwTypeErrorForObject(input, type);
