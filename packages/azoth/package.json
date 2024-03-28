@@ -1,6 +1,6 @@
 {
     "name": "azoth",
-    "version": "1.3.20",
+    "version": "1.3.21",
     "description": "Azoth JSX hypermedia",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -24,7 +24,7 @@
     },
     "type": "module",
     "files": [
-        "*.js"
+        "**/*.js"
     ],
     "exports": {
         "./runtime": "./runtime.js",
