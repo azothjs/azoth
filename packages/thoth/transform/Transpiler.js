@@ -126,10 +126,9 @@ export class Transpiler extends Generator {
         state.write(`]`);
     }
 
-    CreateElement(node, state, topLevel = false) {
+    CreateElement(node, state) {
         state.write(`__rC(`, node);
         this.CompleteElement(node, node.componentExpr, state);
-        if(topLevel) state.write(`, true`);
         state.write(`)`);
     }
 
@@ -160,7 +159,6 @@ export class Transpiler extends Generator {
                 state.write(node.name.name, node.name);
                 state.write(`: `);
             }
-            if(!expr) console.log(type, node);
             this[expr.type](expr, state);
             state.write(`,`);
         }

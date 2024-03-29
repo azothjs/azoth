@@ -87,17 +87,11 @@ export function compose(anchor, input, keepLast, props, slottable) {
 const isRenderObject = obj => obj && typeof obj === 'object' && obj.render && typeof obj.render === 'function';
 
 export function composeComponent(anchor, [Constructor, props, slottable]) {
-    // if(anchor.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
-    //     const fragment = anchor;
-    //     anchor = document.createComment('0');
-    //     fragment.appen
-    // }
     create(Constructor, props, slottable, anchor);
 }
 
-export function createComponent(Constructor, props, slottable, topLevel = false) {
+export function createComponent(Constructor, props, slottable) {
     const result = create(Constructor, props, slottable);
-    if(!topLevel) return result;
 
     // result is returned to caller, not composed by Azoth,
     // force to be of type Node or null:

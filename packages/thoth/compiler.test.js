@@ -753,8 +753,8 @@ describe('components and custom element', () => {
         expect(code).toMatchInlineSnapshot(`
           "import { __rC } from 'azoth/runtime';
 
-          const c = __rC(Component, true);
-          const cProps = __rC(Component, { prop: value, ...spread, attr: "static", }, true);
+          const c = __rC(Component);
+          const cProps = __rC(Component, { prop: value, ...spread, attr: "static", });
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
@@ -835,8 +835,8 @@ describe('components and custom element', () => {
         expect(code).toMatchInlineSnapshot(`
           "import { __rC } from 'azoth/runtime';
           import { tb1661d2c } from 'virtual:azoth-templates?id=b1661d2c';
-          const $A = __rC(A, true);
-          const $B = __rC(B, true);
+          const $A = __rC(A);
+          const $B = __rC(B);
           const dom = tb1661d2c($A,$B);
           "
         `);
@@ -904,12 +904,12 @@ describe('components and custom element', () => {
         expect(code).toMatchInlineSnapshot(`
           "import { __rC } from 'azoth/runtime';
           import { t06fd0cf3, t982d9e3e, t9d841c48 } from 'virtual:azoth-templates?id=06fd0cf3&id=982d9e3e&id=9d841c48';
-          const c = __rC(Component, null, t06fd0cf3("test"), true);
-          const cTrim = __rC(Component, null, t06fd0cf3("test"), true);
-          const cTrimStart = __rC(Component, null, t06fd0cf3("test"), true);
-          const cTrimEnd = __rC(Component, null, t06fd0cf3("test"), true);
-          const cText = __rC(Component, null, t982d9e3e(), true);
-          const cFrag = __rC(Component, null, t9d841c48(1,2), true);
+          const c = __rC(Component, null, t06fd0cf3("test"));
+          const cTrim = __rC(Component, null, t06fd0cf3("test"));
+          const cTrimStart = __rC(Component, null, t06fd0cf3("test"));
+          const cTrimEnd = __rC(Component, null, t06fd0cf3("test"));
+          const cText = __rC(Component, null, t982d9e3e());
+          const cFrag = __rC(Component, null, t9d841c48(1,2));
           "
         `);
 
@@ -1253,7 +1253,7 @@ describe('controller', () => {
           const C = Updater.for(({status}, slottable) => t71052812("status",slottable));
           const Greeting = Controller.for(({name}) => ta71d269a(name));
           const greeting = Greeting.render(data);
-          const t = __rC(C, { status: status, }, te9ee46e2(greeting), true);
+          const t = __rC(C, { status: status, }, te9ee46e2(greeting));
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
