@@ -16,7 +16,7 @@ export const BIND = {
 export class Template {
     tMap = null;
     bMap = null;
-    pMap = null;
+    propertyNames = null;
 
     constructor(node, { bindings, boundElements, imports }) {
         if(node.isComponent && bindings.length) {
@@ -27,7 +27,6 @@ export class Template {
         this.bindings = bindings;
         this.boundElements = boundElements;
         this.imports = imports;
-        this.isBoundRoot = node.queryIndex === -1;
         this.isDomFragment = node.isJSXFragment;
         this.isEmpty = node.isComponent ||
             (node.isJSXFragment && node.children.length === 0);
@@ -47,7 +46,7 @@ export class Template {
                 return index * -1; // index in propname as negative number
             });
 
-            if(propMap.size) this.pMap = [...propMap.keys()];
+            if(propMap.size) this.propertyNames = [...propMap.keys()];
 
             this.tMap = bindings.map(({ type, index, element: { isRoot, queryIndex } }) => {
                 return type === BIND.CHILD || type === BIND.COMPONENT
@@ -56,8 +55,8 @@ export class Template {
             });
         }
 
-        this.targetKey = this.tMap ? createHash(this.tMap.join()) : '';
-        this.bindKey = this.bMap ? createHash(this.bMap.join()) : '';
+        this.targetKey = this.tMap ? JSON.stringify(this.tMap) : '';
+        this.bindKey = this.bMap ? JSON.stringify(this.bMap) : '';
         this.id = createHash(this.html + this.bindKey + this.targetKey);
 
     }

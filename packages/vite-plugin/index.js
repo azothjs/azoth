@@ -29,6 +29,7 @@ export default function azothPlugin(options) {
     const transformJSX = {
         name: 'azoth-jsx',
         enforce: 'pre',
+        templates: programTemplates,
 
         configResolved(resolvedConfig) {
             // store the resolved config
@@ -59,8 +60,10 @@ export default function azothPlugin(options) {
             }
         },
 
-        async transform(source, id) {
+        transform(source, id) {
             if(!filter(id) || !extension.test(id)) return null;
+
+            console.log('transform program size', programTemplates.size);
 
             let { code, templates, map } = compile(source, {
                 generate: { sourceFile: path.basename(id) }
@@ -100,7 +103,6 @@ export default function azothPlugin(options) {
             const { id, targetKey, bindKey, isEmpty } = template;
             if(isEmpty) return '';
 
-            // TODO: refactor cleanup on this apparent duplication
             if(targetKey) {
                 if(!byTarget.has(targetKey)) byTarget.set(targetKey, template);
                 if(!targetGenerators.has(targetKey)) {
