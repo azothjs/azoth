@@ -63,8 +63,6 @@ export default function azothPlugin(options) {
         transform(source, id) {
             if(!filter(id) || !extension.test(id)) return null;
 
-            console.log('transform program size', programTemplates.size);
-
             let { code, templates, map } = compile(source, {
                 generate: { sourceFile: path.basename(id) }
             });

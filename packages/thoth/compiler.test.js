@@ -8,12 +8,12 @@ const compile = input => {
     });
     return {
         code, map,
-        templates: templates.map(({ id, targetKey, bindKey, html, isDomFragment, isEmpty, tMap, bMap, pMap }) => {
+        templates: templates.map(({ id, targetKey, bindKey, html, isDomFragment, isEmpty, tMap, bMap, propertyNames }) => {
             return {
                 id, html, isDomFragment, isEmpty, targetKey, bindKey,
                 tMap: JSON.stringify(tMap),
                 bMap: JSON.stringify(bMap),
-                pMap: JSON.stringify(pMap),
+                propertyNames
             };
         })
     };
@@ -27,23 +27,25 @@ describe('JSX dom literals', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t3fc11fd6 } from 'virtual:azoth-templates?id=3fc11fd6';
+          "import { tee909dab } from 'virtual:azoth-templates?id=ee909dab';
 
-          const t = t3fc11fd6(status,name);
+          const t = tee909dab(status,name);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "bMap": "[[1,0],0]",
-              "bindKey": "acd79dc7",
+              "bMap": "[0,1]",
+              "bindKey": "b413f47d",
               "html": "<p>Hello <!--0--></p>",
-              "id": "3fc11fd6",
+              "id": "ee909dab",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "["className"]",
+              "propertyNames": [
+                "className",
+              ],
               "tMap": "[-1,[1]]",
-              "targetKey": "8a918b5b",
+              "targetKey": "437cb43a",
             },
           ]
         `);
@@ -53,23 +55,23 @@ describe('JSX dom literals', () => {
         const { code, templates } = compile(`const t = <p {...obj}></p>;`);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { tda30746b } from 'virtual:azoth-templates?id=da30746b';
+          "import { t8ae413f2 } from 'virtual:azoth-templates?id=8ae413f2';
 
-          const t = tda30746b(obj);
+          const t = t8ae413f2(obj);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "bMap": "[2]",
-              "bindKey": "d4735e3a",
+              "bMap": "[4]",
+              "bindKey": "e52d9c50",
               "html": "<p></p>",
-              "id": "da30746b",
+              "id": "8ae413f2",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[-1]",
-              "targetKey": "1bad6b8c",
+              "targetKey": "a8100ae6",
             },
           ]
         `);
@@ -95,17 +97,17 @@ describe('JSX dom literals', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t9a7c9cc9 } from 'virtual:azoth-templates?id=9a7c9cc9';
+          "import { t72066b6d } from 'virtual:azoth-templates?id=72066b6d';
 
-          const t = t9a7c9cc9("my-class","felix","this is","azoth","two","and...","span-class","ul-footer","footer");
+          const t = t72066b6d("my-class","felix","this is","azoth","two","and...","span-class","ul-footer","footer");
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "bMap": "[[1,0],0,0,0,0,0,[1,0],0,0]",
-              "bindKey": "10360597",
+              "bMap": "[0,1,1,1,1,1,0,1,1]",
+              "bindKey": "f113ea14",
               "html": "<div>
                       <p data-bind><!--0--></p>
                       <p>static</p>
@@ -121,12 +123,14 @@ describe('JSX dom literals', () => {
                       <custom-element></custom-element>
                       <!--0-->
                   </div>",
-              "id": "9a7c9cc9",
+              "id": "72066b6d",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "["className"]",
+              "propertyNames": [
+                "className",
+              ],
               "tMap": "[0,[0,0],[1,0],[2,0],[4,1],[4,3],5,[3,7],[15]]",
-              "targetKey": "27562130",
+              "targetKey": "5cfa32c5",
             },
           ]
         `);
@@ -144,24 +148,29 @@ describe('JSX dom literals', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t7031c6b3 } from 'virtual:azoth-templates?id=7031c6b3';
+          "import { tb3e1f174 } from 'virtual:azoth-templates?id=b3e1f174';
 
-          const t = t7031c6b3("className","name","class","class-name");
+          const t = tb3e1f174("className","name","class","class-name");
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "bMap": "[[1,0],[1,1],[1,2],[1,3]]",
-              "bindKey": "27cbbeaa",
+              "bMap": "[0,-1,-2,-3]",
+              "bindKey": "94251893",
               "html": "<input required>",
-              "id": "7031c6b3",
+              "id": "b3e1f174",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "["className","name","class","class-name"]",
+              "propertyNames": [
+                "className",
+                "name",
+                "class",
+                "class-name",
+              ],
               "tMap": "[-1,-1,-1,-1]",
-              "targetKey": "582a358f",
+              "targetKey": "ad95131b",
             },
           ]
         `);
@@ -175,24 +184,24 @@ describe('nested context', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t00864888, t7c7d5ba2 } from 'virtual:azoth-templates?id=00864888&id=7c7d5ba2';
+          "import { t897b4a32, t7c7d5ba2 } from 'virtual:azoth-templates?id=897b4a32&id=7c7d5ba2';
 
-          t00864888(t7c7d5ba2());
+          t897b4a32(t7c7d5ba2());
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "<div><!--0--></div>",
-              "id": "00864888",
+              "id": "897b4a32",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0]]",
-              "targetKey": "5feceb66",
+              "targetKey": "6e340b9c",
             },
             {
               "bMap": "null",
@@ -201,7 +210,7 @@ describe('nested context', () => {
               "id": "7c7d5ba2",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -233,7 +242,7 @@ describe('template optimizations', () => {
               "id": "d0a26d23",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -252,10 +261,10 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t4d7e131d, t136c6d6b, te3b0c442 } from 'virtual:azoth-templates?id=4d7e131d&id=136c6d6b&id=e3b0c442';
+          "import { t4d7e131d, te9ee46e2, te3b0c442 } from 'virtual:azoth-templates?id=4d7e131d&id=e9ee46e2&id=e3b0c442';
 
           const fragment = t4d7e131d();
-          const compose = t136c6d6b(x);
+          const compose = te9ee46e2(x);
           const empty = null;
           "
         `);
@@ -269,20 +278,20 @@ describe('fragments', () => {
               "id": "4d7e131d",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "<!--0-->",
-              "id": "136c6d6b",
+              "id": "e9ee46e2",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0]]",
-              "targetKey": "5feceb66",
+              "targetKey": "6e340b9c",
             },
             {
               "bMap": "null",
@@ -291,7 +300,7 @@ describe('fragments', () => {
               "id": "e3b0c442",
               "isDomFragment": true,
               "isEmpty": true,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -330,14 +339,14 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t4d7e131d, t7c7d5ba2, t136c6d6b, te3b0c442, te39bbbf6 } from 'virtual:azoth-templates?id=4d7e131d&id=7c7d5ba2&id=136c6d6b&id=e3b0c442&id=e39bbbf6';
+          "import { t4d7e131d, t7c7d5ba2, te9ee46e2, te3b0c442, te39bbbf6 } from 'virtual:azoth-templates?id=4d7e131d&id=7c7d5ba2&id=e9ee46e2&id=e3b0c442&id=e39bbbf6';
 
           const fragment = t4d7e131d();
           const single = t7c7d5ba2();
           const fragInFrag = t7c7d5ba2();
-          const fragInFragCompose = t136c6d6b(x);
+          const fragInFragCompose = te9ee46e2(x);
           const empty = null;
-          const compose = t136c6d6b(x);
+          const compose = te9ee46e2(x);
           const text = te39bbbf6();
           "
         `);
@@ -351,7 +360,7 @@ describe('fragments', () => {
               "id": "4d7e131d",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -362,7 +371,7 @@ describe('fragments', () => {
               "id": "7c7d5ba2",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -373,20 +382,20 @@ describe('fragments', () => {
               "id": "7c7d5ba2",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "<!--0-->",
-              "id": "136c6d6b",
+              "id": "e9ee46e2",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0]]",
-              "targetKey": "5feceb66",
+              "targetKey": "6e340b9c",
             },
             {
               "bMap": "null",
@@ -395,20 +404,20 @@ describe('fragments', () => {
               "id": "e3b0c442",
               "isDomFragment": true,
               "isEmpty": true,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "<!--0-->",
-              "id": "136c6d6b",
+              "id": "e9ee46e2",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0]]",
-              "targetKey": "5feceb66",
+              "targetKey": "6e340b9c",
             },
             {
               "bMap": "null",
@@ -419,7 +428,7 @@ describe('fragments', () => {
               "id": "e39bbbf6",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -442,12 +451,12 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t7c7d5ba2, t136c6d6b } from 'virtual:azoth-templates?id=7c7d5ba2&id=136c6d6b';
+          "import { t7c7d5ba2, te9ee46e2 } from 'virtual:azoth-templates?id=7c7d5ba2&id=e9ee46e2';
 
           const start = t7c7d5ba2();
           const end = t7c7d5ba2();
-          const composeStart = t136c6d6b(x);
-          const composeEnd = t136c6d6b(x);
+          const composeStart = te9ee46e2(x);
+          const composeEnd = te9ee46e2(x);
           "
         `);
 
@@ -460,7 +469,7 @@ describe('fragments', () => {
               "id": "7c7d5ba2",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -471,31 +480,31 @@ describe('fragments', () => {
               "id": "7c7d5ba2",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "<!--0-->",
-              "id": "136c6d6b",
+              "id": "e9ee46e2",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0]]",
-              "targetKey": "5feceb66",
+              "targetKey": "6e340b9c",
             },
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "<!--0-->",
-              "id": "136c6d6b",
+              "id": "e9ee46e2",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0]]",
-              "targetKey": "5feceb66",
+              "targetKey": "6e340b9c",
             },
           ]
         `);
@@ -513,13 +522,13 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { te6b959a5, tc94e198a, t5c4a1a25, t1a0f564d, tac0e35e4 } from 'virtual:azoth-templates?id=e6b959a5&id=c94e198a&id=5c4a1a25&id=1a0f564d&id=ac0e35e4';
+          "import { te6b959a5, tc94e198a, t5c4a1a25, t1a0f564d, t6f02034b } from 'virtual:azoth-templates?id=e6b959a5&id=c94e198a&id=5c4a1a25&id=1a0f564d&id=6f02034b';
 
           const fragment = te6b959a5();
           const single = tc94e198a();
           const fragInFrag = t5c4a1a25();
           const spaces = t1a0f564d();
-          const compose = tac0e35e4(x);
+          const compose = t6f02034b(x);
           "
         `);
 
@@ -532,7 +541,7 @@ describe('fragments', () => {
               "id": "e6b959a5",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -543,7 +552,7 @@ describe('fragments', () => {
               "id": "c94e198a",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -554,7 +563,7 @@ describe('fragments', () => {
               "id": "5c4a1a25",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -565,20 +574,20 @@ describe('fragments', () => {
               "id": "1a0f564d",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": " <!--0--> ",
-              "id": "ac0e35e4",
+              "id": "6f02034b",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[1]]",
-              "targetKey": "6b86b273",
+              "targetKey": "4bf5122f",
             },
           ]
         `);
@@ -592,24 +601,24 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t88062041 } from 'virtual:azoth-templates?id=88062041';
+          "import { tb4e37a5c } from 'virtual:azoth-templates?id=b4e37a5c';
 
-          const fragment = t88062041("two");
+          const fragment = tb4e37a5c("two");
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "one<!--0-->three",
-              "id": "88062041",
+              "id": "b4e37a5c",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[1]]",
-              "targetKey": "6b86b273",
+              "targetKey": "4bf5122f",
             },
           ]
         `);
@@ -629,10 +638,10 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t6cad6a72, t646f93dc } from 'virtual:azoth-templates?id=6cad6a72&id=646f93dc';
+          "import { t6cad6a72, t84ebad93 } from 'virtual:azoth-templates?id=6cad6a72&id=84ebad93';
 
           const extraneous = t6cad6a72();
-          const childNodeIndex = t646f93dc("expect index 3");
+          const childNodeIndex = t84ebad93("expect index 3");
           "
         `);
 
@@ -645,24 +654,24 @@ describe('fragments', () => {
               "id": "6cad6a72",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "<div>
                           <p></p>
                           <!--0--><p></p>
                           <p></p>
                       </div>",
-              "id": "646f93dc",
+              "id": "84ebad93",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[3]]",
-              "targetKey": "4e074085",
+              "targetKey": "084fed08",
             },
           ]
         `);
@@ -674,24 +683,24 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t2ea2af44 } from 'virtual:azoth-templates?id=2ea2af44';
+          "import { te936c736 } from 'virtual:azoth-templates?id=e936c736';
 
-          const App = t2ea2af44('foo','bar','qux');
+          const App = te936c736('foo','bar','qux');
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "bMap": "[0,0,0]",
-              "bindKey": "7c01691d",
+              "bMap": "[1,1,1]",
+              "bindKey": "75c8fd04",
               "html": "<!--0--><main data-bind><!--0--></main><!--0-->",
-              "id": "2ea2af44",
+              "id": "e936c736",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0],[0,0],[2]]",
-              "targetKey": "71a10168",
+              "targetKey": "65d27a48",
             },
           ]
         `);
@@ -708,24 +717,26 @@ describe('components and custom element', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t22c6d34d } from 'virtual:azoth-templates?id=22c6d34d';
+          "import { t0b860ee7 } from 'virtual:azoth-templates?id=0b860ee7';
 
-          document.body.append(t22c6d34d(prop));
+          document.body.append(t0b860ee7(prop));
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "bMap": "[[1,0]]",
-              "bindKey": "b0e4f9bb",
+              "bMap": "[0]",
+              "bindKey": "6e340b9c",
               "html": "<custom-element></custom-element>",
-              "id": "22c6d34d",
+              "id": "0b860ee7",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "["prop"]",
+              "propertyNames": [
+                "prop",
+              ],
               "tMap": "[-1]",
-              "targetKey": "1bad6b8c",
+              "targetKey": "a8100ae6",
             },
           ]
         `);
@@ -755,7 +766,7 @@ describe('components and custom element', () => {
               "id": "e3b0c442",
               "isDomFragment": false,
               "isEmpty": true,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -766,7 +777,7 @@ describe('components and custom element', () => {
               "id": "e3b0c442",
               "isDomFragment": false,
               "isEmpty": true,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -784,26 +795,26 @@ describe('components and custom element', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t0d76db2c } from 'virtual:azoth-templates?id=0d76db2c';
+          "import { tffd26772 } from 'virtual:azoth-templates?id=ffd26772';
 
-          const component = t0d76db2c([Component, { prop: value, prop2: "literal", }],[GotNoPropsAsYouCanSee]);
+          const component = tffd26772([Component, { prop: value, prop2: "literal", }],[GotNoPropsAsYouCanSee]);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "bMap": "[0,0]",
-              "bindKey": "73348214",
+              "bMap": "[2,2]",
+              "bindKey": "50cff72c",
               "html": "<div>
                           <!--0-->
                           <!--0-->
                       </div>",
-              "id": "0d76db2c",
+              "id": "ffd26772",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[1],[3]]",
-              "targetKey": "ef96f1f6",
+              "targetKey": "c79b932e",
             },
           ]
         `);
@@ -823,10 +834,10 @@ describe('components and custom element', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "import { __rC } from 'azoth/runtime';
-          import { t0d76db2c } from 'virtual:azoth-templates?id=0d76db2c';
+          import { tb1661d2c } from 'virtual:azoth-templates?id=b1661d2c';
           const $A = __rC(A, true);
           const $B = __rC(B, true);
-          const dom = t0d76db2c($A,$B);
+          const dom = tb1661d2c($A,$B);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
@@ -838,7 +849,7 @@ describe('components and custom element', () => {
               "id": "e3b0c442",
               "isDomFragment": false,
               "isEmpty": true,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -849,23 +860,23 @@ describe('components and custom element', () => {
               "id": "e3b0c442",
               "isDomFragment": false,
               "isEmpty": true,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
             {
-              "bMap": "[0,0]",
-              "bindKey": "73348214",
+              "bMap": "[1,1]",
+              "bindKey": "9dcf97a1",
               "html": "<div>
                           <!--0-->
                           <!--0-->
                       </div>",
-              "id": "0d76db2c",
+              "id": "b1661d2c",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[1],[3]]",
-              "targetKey": "ef96f1f6",
+              "targetKey": "c79b932e",
             },
           ]
         `);
@@ -892,13 +903,13 @@ describe('components and custom element', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "import { __rC } from 'azoth/runtime';
-          import { t8c36c09e, t982d9e3e, t1befd3dd } from 'virtual:azoth-templates?id=8c36c09e&id=982d9e3e&id=1befd3dd';
-          const c = __rC(Component, null, t8c36c09e("test"), true);
-          const cTrim = __rC(Component, null, t8c36c09e("test"), true);
-          const cTrimStart = __rC(Component, null, t8c36c09e("test"), true);
-          const cTrimEnd = __rC(Component, null, t8c36c09e("test"), true);
+          import { t06fd0cf3, t982d9e3e, t9d841c48 } from 'virtual:azoth-templates?id=06fd0cf3&id=982d9e3e&id=9d841c48';
+          const c = __rC(Component, null, t06fd0cf3("test"), true);
+          const cTrim = __rC(Component, null, t06fd0cf3("test"), true);
+          const cTrimStart = __rC(Component, null, t06fd0cf3("test"), true);
+          const cTrimEnd = __rC(Component, null, t06fd0cf3("test"), true);
           const cText = __rC(Component, null, t982d9e3e(), true);
-          const cFrag = __rC(Component, null, t1befd3dd(1,2), true);
+          const cFrag = __rC(Component, null, t9d841c48(1,2), true);
           "
         `);
 
@@ -911,20 +922,20 @@ describe('components and custom element', () => {
               "id": "e3b0c442",
               "isDomFragment": false,
               "isEmpty": true,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "<p><!--0--></p>",
-              "id": "8c36c09e",
+              "id": "06fd0cf3",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0]]",
-              "targetKey": "5feceb66",
+              "targetKey": "6e340b9c",
             },
             {
               "bMap": "null",
@@ -933,20 +944,20 @@ describe('components and custom element', () => {
               "id": "e3b0c442",
               "isDomFragment": false,
               "isEmpty": true,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "<p><!--0--></p>",
-              "id": "8c36c09e",
+              "id": "06fd0cf3",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0]]",
-              "targetKey": "5feceb66",
+              "targetKey": "6e340b9c",
             },
             {
               "bMap": "null",
@@ -955,20 +966,20 @@ describe('components and custom element', () => {
               "id": "e3b0c442",
               "isDomFragment": false,
               "isEmpty": true,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "<p><!--0--></p>",
-              "id": "8c36c09e",
+              "id": "06fd0cf3",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0]]",
-              "targetKey": "5feceb66",
+              "targetKey": "6e340b9c",
             },
             {
               "bMap": "null",
@@ -977,20 +988,20 @@ describe('components and custom element', () => {
               "id": "e3b0c442",
               "isDomFragment": false,
               "isEmpty": true,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "<p><!--0--></p>",
-              "id": "8c36c09e",
+              "id": "06fd0cf3",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0]]",
-              "targetKey": "5feceb66",
+              "targetKey": "6e340b9c",
             },
             {
               "bMap": "null",
@@ -999,7 +1010,7 @@ describe('components and custom element', () => {
               "id": "e3b0c442",
               "isDomFragment": false,
               "isEmpty": true,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -1010,7 +1021,7 @@ describe('components and custom element', () => {
               "id": "982d9e3e",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -1021,21 +1032,21 @@ describe('components and custom element', () => {
               "id": "e3b0c442",
               "isDomFragment": false,
               "isEmpty": true,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
             {
-              "bMap": "[0,0]",
-              "bindKey": "73348214",
+              "bMap": "[1,1]",
+              "bindKey": "9dcf97a1",
               "html": "<p data-bind><!--0--></p>
                           <p data-bind><!--0--></p>",
-              "id": "1befd3dd",
+              "id": "9d841c48",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0,0],[1,0]]",
-              "targetKey": "7e4c73a9",
+              "targetKey": "96a296d2",
             },
           ]
         `);
@@ -1053,28 +1064,28 @@ describe('components and custom element', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { tb5dae465, t372bc820 } from 'virtual:azoth-templates?id=b5dae465&id=372bc820';
+          "import { tdcf43654, t372bc820 } from 'virtual:azoth-templates?id=dcf43654&id=372bc820';
 
-          const component = tb5dae465([Component],[Component, { prop: value, prop2: "literal", }],[Component, null, t372bc820()],[Component, { prop: value, prop2: "literal", }, t372bc820()]);
+          const component = tdcf43654([Component],[Component, { prop: value, prop2: "literal", }],[Component, null, t372bc820()],[Component, { prop: value, prop2: "literal", }, t372bc820()]);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "bMap": "[0,0,0,0]",
-              "bindKey": "4040da0f",
+              "bMap": "[2,2,2,2]",
+              "bindKey": "bb72b4e4",
               "html": "<div>
                           <!--0-->
                           <!--0-->
                           <!--0-->
                           <!--0-->
                       </div>",
-              "id": "b5dae465",
+              "id": "dcf43654",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[1],[3],[5],[7]]",
-              "targetKey": "cde164be",
+              "targetKey": "e6e8cb42",
             },
             {
               "bMap": "null",
@@ -1083,7 +1094,7 @@ describe('components and custom element', () => {
               "id": "372bc820",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -1094,7 +1105,7 @@ describe('components and custom element', () => {
               "id": "372bc820",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
@@ -1113,43 +1124,43 @@ describe('render and composition cases', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t4a5c2312, t8cd69a7f } from 'virtual:azoth-templates?id=4a5c2312&id=8cd69a7f';
+          "import { t05c79d3c, t10e4f7ba } from 'virtual:azoth-templates?id=05c79d3c&id=10e4f7ba';
 
-          const Item = name => t4a5c2312(name);
-          const Template = () => t8cd69a7f([2, 4, 7].map(Item),"text");
+          const Item = name => t05c79d3c(name);
+          const Template = () => t10e4f7ba([2, 4, 7].map(Item),"text");
           "
         `);
 
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "<li><!--0--></li>",
-              "id": "4a5c2312",
+              "id": "05c79d3c",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0]]",
-              "targetKey": "5feceb66",
+              "targetKey": "6e340b9c",
             },
             {
-              "bMap": "[0,0]",
-              "bindKey": "73348214",
+              "bMap": "[1,1]",
+              "bindKey": "9dcf97a1",
               "html": "<div><!--0--><!--0--></div>",
-              "id": "8cd69a7f",
+              "id": "10e4f7ba",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0],[1]]",
-              "targetKey": "83b97b85",
+              "targetKey": "b413f47d",
             },
           ]
         `);
 
     });
 
-    test.only('list composition', ({ expect }) => {
+    test('list composition', ({ expect }) => {
         const input = `        
             const Emoji = ({ name }) => <li>{name}</li>;
             const promise = fetchEmojis().then(emojis => emojis.map(Emoji));
@@ -1159,11 +1170,11 @@ describe('render and composition cases', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t4be044f9, tb2903d6d } from 'virtual:azoth-templates?id=4be044f9&id=b2903d6d';
+          "import { t05c79d3c, tac31183b } from 'virtual:azoth-templates?id=05c79d3c&id=ac31183b';
 
-          const Emoji = ({name}) => t4be044f9(name);
+          const Emoji = ({name}) => t05c79d3c(name);
           const promise = fetchEmojis().then(emojis => emojis.map(Emoji));
-          const Emojis = tb2903d6d(promise);
+          const Emojis = tac31183b(promise);
           document.body.append(Emojis);
           "
         `);
@@ -1171,25 +1182,25 @@ describe('render and composition cases', () => {
           [
             {
               "bMap": "[1]",
-              "bindKey": "6b86b273",
+              "bindKey": "4bf5122f",
               "html": "<li><!--0--></li>",
-              "id": "4be044f9",
+              "id": "05c79d3c",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0]]",
-              "targetKey": "5feceb66",
+              "targetKey": "6e340b9c",
             },
             {
               "bMap": "[1]",
-              "bindKey": "6b86b273",
+              "bindKey": "4bf5122f",
               "html": "<ul><!--0--></ul>",
-              "id": "b2903d6d",
+              "id": "ac31183b",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0]]",
-              "targetKey": "5feceb66",
+              "targetKey": "6e340b9c",
             },
           ]
         `);
@@ -1208,20 +1219,19 @@ describe('render and composition cases', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t191b5e03, t77e67b80, tb2903d6d, t44ba17ec, t4be044f9 } from 'virtual:azoth-templates?id=191b5e03&id=77e67b80&id=b2903d6d&id=44ba17ec&id=4be044f9';
+          "import { t191b5e03, t06fd0cf3, tac31183b, tb05f589f, t05c79d3c } from 'virtual:azoth-templates?id=191b5e03&id=06fd0cf3&id=ac31183b&id=b05f589f&id=05c79d3c';
 
           export const Loading = () => t191b5e03();
-          export const Cat = ({name}) => t77e67b80(name);
-          export const CatList = cats => tb2903d6d(cats.map(Cat));
-          export const CatCount = cats => t44ba17ec(cats.length);
-          export const CatName = name => t4be044f9(name);
-          export const CatNames = cats => tb2903d6d(cats.map(CatName));
+          export const Cat = ({name}) => t06fd0cf3(name);
+          export const CatList = cats => tac31183b(cats.map(Cat));
+          export const CatCount = cats => tb05f589f(cats.length);
+          export const CatName = name => t05c79d3c(name);
+          export const CatNames = cats => tac31183b(cats.map(CatName));
           "
         `);
     });
 
 });
-
 
 describe('controller', () => {
 
@@ -1239,38 +1249,40 @@ describe('controller', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "import { __rC } from 'azoth/runtime';
-          import { tae9f11ad, tbd90ea5e, t136c6d6b } from 'virtual:azoth-templates?id=ae9f11ad&id=bd90ea5e&id=136c6d6b';
-          const C = Updater.for(({status}, slottable) => tae9f11ad("status",slottable));
-          const Greeting = Controller.for(({name}) => tbd90ea5e(name));
+          import { t71052812, ta71d269a, te9ee46e2 } from 'virtual:azoth-templates?id=71052812&id=a71d269a&id=e9ee46e2';
+          const C = Updater.for(({status}, slottable) => t71052812("status",slottable));
+          const Greeting = Controller.for(({name}) => ta71d269a(name));
           const greeting = Greeting.render(data);
-          const t = __rC(C, { status: status, }, t136c6d6b(greeting), true);
+          const t = __rC(C, { status: status, }, te9ee46e2(greeting), true);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
-              "bMap": "[[1,0],0]",
-              "bindKey": "acd79dc7",
+              "bMap": "[0,1]",
+              "bindKey": "b413f47d",
               "html": "<p>
                           <!--0-->
                       </p>",
-              "id": "ae9f11ad",
+              "id": "71052812",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "["className"]",
+              "propertyNames": [
+                "className",
+              ],
               "tMap": "[-1,[1]]",
-              "targetKey": "8a918b5b",
+              "targetKey": "437cb43a",
             },
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "<span>Hello <!--0--></span>",
-              "id": "bd90ea5e",
+              "id": "a71d269a",
               "isDomFragment": false,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[1]]",
-              "targetKey": "6b86b273",
+              "targetKey": "4bf5122f",
             },
             {
               "bMap": "null",
@@ -1279,20 +1291,20 @@ describe('controller', () => {
               "id": "e3b0c442",
               "isDomFragment": false,
               "isEmpty": true,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "null",
               "targetKey": "",
             },
             {
-              "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bMap": "[1]",
+              "bindKey": "4bf5122f",
               "html": "<!--0-->",
-              "id": "136c6d6b",
+              "id": "e9ee46e2",
               "isDomFragment": true,
               "isEmpty": false,
-              "pMap": "null",
+              "propertyNames": null,
               "tMap": "[[0]]",
-              "targetKey": "5feceb66",
+              "targetKey": "6e340b9c",
             },
           ]
         `);

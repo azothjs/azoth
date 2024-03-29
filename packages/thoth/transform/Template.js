@@ -55,8 +55,8 @@ export class Template {
             });
         }
 
-        this.targetKey = this.tMap ? JSON.stringify(this.tMap) : '';
-        this.bindKey = this.bMap ? JSON.stringify(this.bMap) : '';
+        this.targetKey = this.tMap ? createHash(this.tMap) : '';
+        this.bindKey = this.bMap ? createHash(this.bMap) : '';
         this.id = createHash(this.html + this.bindKey + this.targetKey);
 
     }

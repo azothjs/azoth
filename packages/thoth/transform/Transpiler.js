@@ -2,6 +2,7 @@ import { generate } from 'astring';
 import { HtmlGenerator } from './HtmlGenerator.js';
 import { Generator } from './GeneratorBase.js';
 import { Analyzer } from './Analyzer.js';
+import { BIND } from './Template.js';
 
 export const templateModule = `virtual:azoth-templates`;
 
@@ -121,16 +122,7 @@ export class Transpiler extends Generator {
 
     ComposeComponent({ componentExpr: expr, props, slotFragment }, state) {
         state.write(`[`);
-        this[expr.type](expr, state);
-        if(props?.length) {
-            this.ComponentProps(props, state);
-        }
-        else if(slotFragment) state.write(`, null`);
-
-        if(slotFragment) {
-            state.write(', ');
-            this.JSXTemplate(slotFragment, state);
-        }
+        this.CompleteElement({ props, slotFragment }, expr, state);
         state.write(`]`);
     }
 
@@ -161,13 +153,14 @@ export class Transpiler extends Generator {
             // TODO: Dom lookup, JS .prop v['prop'], etc. 
             // refactor with code below
             state.write(` `);
-            if(type === 'spread') {
+            if(type === BIND.SPREAD) {
                 state.write(`...`);
             }
             else {
                 state.write(node.name.name, node.name);
                 state.write(`: `);
             }
+            if(!expr) console.log(type, node);
             this[expr.type](expr, state);
             state.write(`,`);
         }

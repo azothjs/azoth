@@ -87,6 +87,11 @@ export function compose(anchor, input, keepLast, props, slottable) {
 const isRenderObject = obj => obj && typeof obj === 'object' && obj.render && typeof obj.render === 'function';
 
 export function composeComponent(anchor, [Constructor, props, slottable]) {
+    // if(anchor.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+    //     const fragment = anchor;
+    //     anchor = document.createComment('0');
+    //     fragment.appen
+    // }
     create(Constructor, props, slottable, anchor);
 }
 

@@ -220,13 +220,13 @@ describe('render generator', () => {
     test('simple', ({ compile, expect }) => {
         const code = compile(`name => <p>{name}</p>`);
 
-        expect(code).toMatchInlineSnapshot(`"__renderer("77e67b80", g5feceb66, b6b86b273, false, \`<p><!--0--></p>\`)"`);
+        expect(code).toMatchInlineSnapshot(`"__renderer("06fd0cf3", /* [[0]] */ g6e340b9c, /* [1] */ b4bf5122f, false, \`<p><!--0--></p>\`)"`);
     });
 
     test('static', ({ compile, expect }) => {
         const code = compile(`() => <p>static</p>`);
 
-        expect(code).toMatchInlineSnapshot(`"__renderer("a84dfd44", null, null, false, \`<p>static</p>\`)"`);
+        expect(code).toMatchInlineSnapshot(`"__renderer("a84dfd44", /* null */ null, /* null */ null, false, \`<p>static</p>\`)"`);
     });
 
 
@@ -237,7 +237,7 @@ describe('render generator', () => {
 
         expect(code).toMatchInlineSnapshot(
             `
-          "__renderer("dd5a4b50", g0f063ba9, b740a937d, false, \`<p>
+          "__renderer("dfc4524e", /* [-1,[1],[0,1]] */ g2408e793, /* [0,1,1] */ bfbb59ed1, false, \`<p>
                       <!--0--> <span data-bind>hey <!--0-->!</span>
                   </p>\`)"
         `
@@ -248,7 +248,7 @@ describe('render generator', () => {
         const template = preParse(`name => <p>{name}</p>`, expect);
         const code = makeRenderer(template, { noContent: true });
 
-        expect(code).toMatchInlineSnapshot(`"__renderer("77e67b80", g5feceb66, b6b86b273, false)"`);
+        expect(code).toMatchInlineSnapshot(`"__renderer("06fd0cf3", /* [[0]] */ g6e340b9c, /* [1] */ b4bf5122f, false)"`);
     });
 
 
@@ -267,12 +267,12 @@ describe('render generator', () => {
         const mapped = initial.templates.map(makeRenderer);
         expect(mapped).toMatchInlineSnapshot(`
           [
-            "__renderer("191b5e03", null, null, false, \`<p>loading...</p>\`)",
-            "__renderer("77e67b80", g5feceb66, b6b86b273, false, \`<p><!--0--></p>\`)",
-            "__renderer("b2903d6d", g5feceb66, b6b86b273, false, \`<ul><!--0--></ul>\`)",
-            "__renderer("44ba17ec", g5feceb66, b6b86b273, false, \`<p><!--0--> cats</p>\`)",
-            "__renderer("4be044f9", g5feceb66, b6b86b273, false, \`<li><!--0--></li>\`)",
-            "__renderer("b2903d6d", g5feceb66, b6b86b273, false, \`<ul><!--0--></ul>\`)",
+            "__renderer("191b5e03", /* null */ null, /* null */ null, false, \`<p>loading...</p>\`)",
+            "__renderer("06fd0cf3", /* [[0]] */ g6e340b9c, /* [1] */ b4bf5122f, false, \`<p><!--0--></p>\`)",
+            "__renderer("ac31183b", /* [[0]] */ g6e340b9c, /* [1] */ b4bf5122f, false, \`<ul><!--0--></ul>\`)",
+            "__renderer("b05f589f", /* [[0]] */ g6e340b9c, /* [1] */ b4bf5122f, false, \`<p><!--0--> cats</p>\`)",
+            "__renderer("05c79d3c", /* [[0]] */ g6e340b9c, /* [1] */ b4bf5122f, false, \`<li><!--0--></li>\`)",
+            "__renderer("ac31183b", /* [[0]] */ g6e340b9c, /* [1] */ b4bf5122f, false, \`<ul><!--0--></ul>\`)",
           ]
         `);
     });

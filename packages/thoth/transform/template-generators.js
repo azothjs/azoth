@@ -15,14 +15,14 @@ export function makeTargets(template) {
     return elLength ? `(r,t) => [${values.join()}]` : `r => [${values.join()}]`;
 }
 
-export function makeRenderer({ isEmpty, id, targetKey, bindKey, isDomFragment, html }, options) {
+export function makeRenderer({ isEmpty, id, targetKey, tMap, bindKey, bMap, isDomFragment, html }, options) {
     if(isEmpty) return `null`;
 
     const content = !options?.noContent;
     const target = targetKey ? `g${targetKey}` : `null`;
     const bind = bindKey ? `b${bindKey}` : `null`;
     let renderer = `__renderer(`;
-    renderer += `"${id}", ${target}, ${bind}, ${isDomFragment}`;
+    renderer += `"${id}", /* ${JSON.stringify(tMap)} */ ${target}, /* ${JSON.stringify(bMap)} */ ${bind}, ${isDomFragment}`;
     if(content) renderer += ', `' + `${html}` + '`';
     renderer += `)`;
 

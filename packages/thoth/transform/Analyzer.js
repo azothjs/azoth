@@ -202,10 +202,13 @@ export class Analyzer {
             const attr = attributes[i];
             if(attr.type === 'JSXSpreadAttribute') {
                 this.#bind(BIND.SPREAD, attr, attr.argument, i);
+                continue;
             }
-            else if(bindAll || attr.value?.type === 'JSXExpressionContainer') {
-                this.#bind(BIND.PROP, attr, attr.value.expression, i);
-            }
+            let expr = attr.value;
+            const isJSXExpr = expr?.type === 'JSXExpressionContainer';
+            if(!isJSXExpr && !bindAll) continue;
+            if(isJSXExpr) expr = expr.expression;
+            this.#bind(BIND.PROP, attr, expr, i);
         }
     }
 
