@@ -3,42 +3,50 @@ import { makeTargets, makeRenderer, makeBind } from './template-generators.js';
 import { parse, generate as _generate } from '../compiler.js';
 import { describe, test, beforeEach } from 'vitest';
 
-function preParse(input, expect) {
+function preParse(input) {
+    return preParseAll(input)[0];
+}
+
+function preParseAll(input) {
     const ast = parse(input);
     const initial = _generate(ast);
-    const template = initial.templates[0];
-    expect(template.node.type).toBe('JSXElement');
-    return template;
+    return initial.templates;
 }
 
 describe('targets generator', () => {
 
     beforeEach(context => {
         context.compile = code => {
-            const template = preParse(code, context.expect);
+            const template = preParse(code);
             return makeTargets(template);
+        };
+        context.compileAll = code => {
+            return preParseAll(code).map(makeTargets);
         };
     });
 
-    test('simple', ({ compile, expect }) => {
-        const code = compile(`name => <p>{name}</p>`);
-        expect(code).toMatchInlineSnapshot(`"r => [r.childNodes[0]]"`);
+    test('composes', ({ compile, expect }) => {
+        const code = compile(`name => <p>hello {name} <Display/></p>`);
+        expect(code).toMatchInlineSnapshot(
+            `"r => [r.childNodes[1],r.childNodes[3]]"`
+        );
     });
 
-    test('edge case', ({ expect }) => {
-        const input = `
+    test('fragment composes', ({ compile, expect }) => {
+        const code = compile(`name => <><p>hello</p><Display/></>`);
+        expect(code).toMatchInlineSnapshot(`"r => [r.childNodes[1]]"`);
+    });
+
+    test('edge case', ({ compileAll, expect }) => {
+        const code = compileAll(`
             export const Loading = () => <p>loading...</p>;
             export const Cat = ({ name }) => <p>{name}</p>;
             export const CatList = cats => <ul>{cats.map(Cat)}</ul>;
             export const CatCount = cats => <p>{cats.length} cats</p>;
             export const CatName = (name) => <li>{name}</li>;
             export const CatNames = cats => <ul>{cats.map(CatName)}</ul>;
-        `;
-
-        const ast = parse(input);
-        const initial = _generate(ast);
-        const mapped = initial.templates.map(makeTargets);
-        expect(mapped).toMatchInlineSnapshot(`
+        `);
+        expect(code).toMatchInlineSnapshot(`
           [
             "null",
             "r => [r.childNodes[0]]",

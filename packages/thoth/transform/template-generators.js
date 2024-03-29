@@ -6,13 +6,16 @@ export function makeTargets(template) {
     const { length: elLength } = boundElements;
     if(isStatic) return 'null';
 
-    const values = bindings.map(({ element, type, index }) => {
-        const { isRoot, queryIndex } = element;
-        const target = isRoot ? 'r' : `${'t'}[${queryIndex}]`;
-        return type === BIND.CHILD ? `${target}.childNodes[${index}]` : target;
-    });
+    const values = bindings
+        .map(({ element, type, index }) => {
+            const { isRoot, queryIndex } = element;
+            const target = isRoot ? 'r' : `${'t'}[${queryIndex}]`;
+            const isComposed = type === BIND.CHILD || type === BIND.COMPONENT;
+            return isComposed ? `${target}.childNodes[${index}]` : target;
+        })
+        .join(',');
 
-    return elLength ? `(r,t) => [${values.join()}]` : `r => [${values.join()}]`;
+    return elLength ? `(r,t) => [${values}]` : `r => [${values}]`;
 }
 
 export function makeRenderer({ isEmpty, id, targetKey, tMap, bindKey, bMap, isDomFragment, html }, options) {
@@ -22,7 +25,7 @@ export function makeRenderer({ isEmpty, id, targetKey, tMap, bindKey, bMap, isDo
     const target = targetKey ? `g${targetKey}` : `null`;
     const bind = bindKey ? `b${bindKey}` : `null`;
     let renderer = `__renderer(`;
-    renderer += `"${id}", /* ${JSON.stringify(tMap)} */ ${target}, /* ${JSON.stringify(bMap)} */ ${bind}, ${isDomFragment}`;
+    renderer += `"${id}", ${target}, ${bind}, ${isDomFragment}`;
     if(content) renderer += ', `' + `${html}` + '`';
     renderer += `)`;
 

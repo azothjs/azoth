@@ -333,20 +333,27 @@ function renderer(id, targets, makeBind, isFragment, content) {
     return templateRenderer(getBound);
 }
 
-const gf338800d = (r,t) => [t[0].childNodes[3]];
+const g6e340b9c = (r,t) => [t[0].childNodes[3]];
 
-const b5feceb66 = (ts) => {
+const bdbc1b4c9 = (ts) => {
   const t0 = ts[0];
   return (v0) => {
     composeComponent(t0, v0);
   };    
 };
 
-const g6b86b273 = (r) => [r.childNodes[1]];
+const g4bf5122f = r => [r.childNodes[1]];
 
-const g1762bad2 = (r,t) => [t[0],r.childNodes[3],r.childNodes[5]];
+const b4bf5122f = (ts) => {
+  const t0 = ts[0];
+  return (v0) => {
+    compose(t0, v0);
+  };    
+};
 
-const b1c402f25 = (ts) => {
+const gc99dda06 = (r,t) => [t[0],r.childNodes[3],r.childNodes[5]];
+
+const bfbb59ed1 = (ts) => {
   const t0 = ts[0], t1 = ts[1], t2 = ts[2];
   return (v0, v1, v2) => {
     t0.innerHTML = v0;
@@ -355,9 +362,9 @@ const b1c402f25 = (ts) => {
   };    
 };
 
-const tf0280d9c = renderer("f0280d9c", gf338800d, b5feceb66, true);
-const t3a34fe20 = renderer("3a34fe20", g6b86b273, b5feceb66, false);
-const t4b034012 = renderer("4b034012", g1762bad2, b1c402f25, false);
+const tf9490ef3 = renderer("f9490ef3", /* [[0,3]] */ g6e340b9c, /* [2] */ bdbc1b4c9, true);
+const tc039ec22 = renderer("c039ec22", /* [[1]] */ g4bf5122f, /* [1] */ b4bf5122f, false);
+const t465c3303 = renderer("465c3303", /* [0,[3],[5]] */ gc99dda06, /* [0,1,1] */ bfbb59ed1, false);
 
 async function fetchEmojis() {
     const res = await fetch('https://emojihub.yurace.pro/api/all');
@@ -367,11 +374,11 @@ async function fetchEmojis() {
 const List = fetchEmojis().then(emojis => EmojiList({
   emojis
 }));
-const App = tf0280d9c([List]);
+const App = tf9490ef3([List]);
 document.body.append(App);
 function EmojiList({emojis}) {
-  return t3a34fe20(emojis.map(Emoji));
+  return tc039ec22(emojis.map(Emoji));
 }
 function Emoji({name, unicode, htmlCode}) {
-  return t4b034012(htmlCode.join(''),name,unicode);
+  return t465c3303(htmlCode.join(''),name,unicode);
 }
