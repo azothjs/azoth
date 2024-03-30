@@ -87,6 +87,10 @@ export function compose(anchor, input, keepLast, props, slottable) {
 const isRenderObject = obj => obj && typeof obj === 'object' && obj.render && typeof obj.render === 'function';
 
 export function composeComponent(anchor, [Constructor, props, slottable]) {
+    createCompose(Constructor, props, slottable, anchor);
+}
+
+export function createCompose(Constructor, props, slottable, anchor) {
     const out = create(Constructor, props, slottable, anchor);
     if(out !== anchor) compose(anchor, out);
 }
@@ -146,18 +150,19 @@ function create(input, props, slottable, anchor) {
             }
 
             if(input instanceof SyncAsync) {
-                compose(anchor, input.sync, true, props, slottable);
-                compose(anchor, input.async, false, props, slottable);
+                createCompose(input.sync, props, slottable, anchor);
+                createCompose(input.async, props, slottable, anchor);
             }
             else if(input[Symbol.asyncIterator]) {
                 composeAsyncIterator(anchor, input, false, props, slottable);
             }
             else if(input instanceof Promise) {
                 input.then(value => {
-                    compose(anchor, create(value, props, slottable), true, null, null);
+                    createCompose(value, props, slottable, anchor);
                 });
             }
             else if(Array.isArray(input)) {
+                // TODO: map to createCompose
                 composeArray(anchor, input, false);
             }
             else {
@@ -238,8 +243,12 @@ function throwTypeErrorForObject(obj) {
     let message = '';
     try {
         const fnName = obj.constructor?.name;
-        if(fnName && fnName !== 'Object') {
-            message += `\n\nDid you forget to return a value from "${fnName}"?`;
+        if(fnName === 'Object') {
+            message += `\n\nDid you mean to include a "render" method?`;
+        }
+        else if(fnName) {
+            message += `\n\nDid you forget to return a value from "${fnName}"\
+if a function, or a "render" method if a class?`;
         }
         const json = JSON.stringify(obj, null, 2);
         message += `\n\nReceived as:\n\n${json}\n\n`;

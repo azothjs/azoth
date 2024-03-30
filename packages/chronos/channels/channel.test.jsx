@@ -41,11 +41,11 @@ describe('promise', () => {
 
         await find('felix', { exact: false });
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>felix<!--1--></p><p>duchess<!--1--></p><p>garfield<!--1--></p><!--3--><!--1-->"`
+            `"<p>felix<!--1--></p><p>duchess<!--1--></p><p>garfield<!--1--></p><!--3-->"`
         );
     });
 
-    test.only('transform, { start, init }', async ({ fixture, find, expect }) => {
+    test('transform, { start, init }', async ({ fixture, find, expect }) => {
         const promise = sleep(50).then(() => 'duchess');
 
         const Cat = channel(promise, name => {
@@ -59,7 +59,6 @@ describe('promise', () => {
 
 
         const cat = <Cat />;
-        console.log('*******', cat.childNodes.length, cat.childNodes[0].nodeType);
         fixture.append(cat);
         expect(fixture.innerHTML).toMatchInlineSnapshot(`"choose wisely<!--1-->"`);
 

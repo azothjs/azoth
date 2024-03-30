@@ -26,7 +26,7 @@ const RenderObject = {
         return runCompose(name, elementWithAnchor);
     }
 };
-const CONSTRUCTORS = [Component, ClassComp, RenderObject, ArrowComp];
+const CONSTRUCTORS = [Component, ClassComp, ArrowComp, RenderObject];
 
 function ComponentP({ name }) {
     return Promise.resolve(runCompose(name, elementWithAnchor));
@@ -52,47 +52,22 @@ describe('create element', () => {
     test('pin .prototype.constructor for function, arrow fn, class', ({ expect }) => {
         expect(Component.prototype.constructor).toBeDefined();
         expect(ClassComp.prototype.constructor).toBeDefined();
-        expect(ClassComp.prototype.constructor).toBeDefined();
         expect(ArrowComp.prototype?.constructor).not.toBeDefined();
         expect(RenderObject.prototype?.constructor).not.toBeDefined();
     });
 
-    describe.each(CONSTRUCTORS)('%o', Constructor => {
-        const expected = `<div>felix<!--1--></div>`;
-        test('prop-agation', ({ expect }) => {
-            const dom = createComponent(Constructor, { name: 'felix' });
-            expect(dom.outerHTML).toBe(expected);
-        });
-    });
+    const expected = `<div>felix<!--1--></div>`;
+    const create = Constructor => createComponent(Constructor, { name: 'felix' });
+    test('constructed values', async ({ expect }) => {
+        expect(create(Component).outerHTML).toBe(expected);
+        expect(create(ArrowComp).outerHTML).toBe(expected);
+        expect(create(RenderObject).outerHTML).toBe(expected);
+        expect(create(ClassComp).render().outerHTML).toBe(expected);
 
-    describe.each(ASYNC_CONSTRUCTORS)('%o', Constructor => {
-        const expected = `<div>felix<!--1--></div><!--1-->`;
-        test('prop-agation', async ({ expect, fixture, find }) => {
-            const dom = createComponent(Constructor, { name: 'felix' });
-            fixture.append(dom);
-            await find('felix');
-            expect(fixture.innerHTML).toBe(expected);
-        });
-    });
-
-    describe.each(CONSTRUCTORS.concat(ASYNC_CONSTRUCTORS))('promised %o', Constructor => {
-        const expected = `<div>felix<!--1--></div><!--1-->`;
-        test('prop-agation', async ({ expect, fixture, find }) => {
-            const dom = createComponent(Promise.resolve(Constructor), { name: 'felix' });
-            fixture.append(dom);
-            await find('felix');
-            expect(fixture.innerHTML).toBe(expected);
-        });
-    });
-
-    describe.each(CONSTRUCTORS.concat(ASYNC_CONSTRUCTORS))('promised %o', Constructor => {
-        const expected = `<div>felix<!--1--></div><!--1-->`;
-        test('prop-agation', async ({ expect, fixture, find }) => {
-            const dom = createComponent(Promise.resolve(Constructor), { name: 'felix' });
-            fixture.append(dom);
-            await find('felix');
-            expect(fixture.innerHTML).toBe(expected);
-        });
+        expect((await create(ComponentP)).outerHTML).toBe(expected);
+        expect((await create(RenderObject)).outerHTML).toBe(expected);
+        expect((await create(ArrowCompP)).outerHTML).toBe(expected);
+        expect((await create(ClassCompP).render())().outerHTML).toBe(expected);
     });
 
 });
@@ -142,12 +117,12 @@ describe('prop-agation', () => {
     test('Non-render class is error', async ({ expect }) => {
         class MyClass { }
         expect(() => {
-            createComponent(MyClass, { name: 'felix' });
+            composeComponent(null, [MyClass]);
         }).toThrowErrorMatchingInlineSnapshot(
             `
           [TypeError: Invalid compose {...} input type "object", value [object Object].
 
-          Did you forget to return a value from "MyClass"?
+          Did you forget to return a value from "MyClass"if a function, or a "render" method if a class?
 
           Received as:
 
@@ -171,7 +146,7 @@ describe('compose element', () => {
         });
     });
 
-    describe.only.each(CONSTRUCTORS.concat(ASYNC_CONSTRUCTORS))('Promised %o', Constructor => {
+    describe.each(CONSTRUCTORS.concat(ASYNC_CONSTRUCTORS))('Promised %o', Constructor => {
         const expected = `<div><div>felix<!--1--></div><!--1--></div>`;
         test('prop-agation', async ({ expect, fixture, find }) => {
             const { dom, anchor } = elementWithAnchor();
@@ -203,21 +178,51 @@ describe('compose element', () => {
 });
 
 describe('SyncAsync from', () => {
-    test('initial render', async ({ expect, fixture, find }) => {
-        const syncWrapper = SyncAsync.from('cat coming', ClassCompP);
-        const dom = createComponent(syncWrapper, { name: 'felix' });
+    test('basic render', async ({ expect, fixture, find }) => {
+        const syncWrapper = SyncAsync.from('sync cat', Promise.resolve('async cat'));
+        const dom = createComponent(syncWrapper);
         expect(dom).toMatchInlineSnapshot(`
           <DocumentFragment>
-            cat coming
+            sync cat
             <!--1-->
           </DocumentFragment>
         `);
 
         fixture.append(dom);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"cat coming<!--1-->"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"sync cat<!--1-->"`);
+
+        await find('async cat');
+        expect(fixture.innerHTML).toBe(`async cat<!--1-->`);
+    });
+
+    class Loading {
+        constructor({ name }) {
+            this.name = name;
+        }
+        render() {
+            return `Loading ${this.name}`;
+        }
+    }
+
+    test('creates', async ({ expect, fixture, find }) => {
+        const syncWrapper = SyncAsync.from(Loading, Promise.resolve(ClassComp));
+        const dom = createComponent(syncWrapper, { name: 'felix' });
+        expect(dom).toMatchInlineSnapshot(`
+          <DocumentFragment>
+            Loading felix
+            <!--1-->
+          </DocumentFragment>
+        `);
+
+        fixture.append(dom);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(
+            `"Loading felix<!--1-->"`
+        );
 
         await find('felix');
-        expect(fixture.innerHTML).toBe(`<div>felix<!--1--></div><!--1-->`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(
+            `"<div>felix<!--1--></div><!--1-->"`
+        );
     });
 });
 

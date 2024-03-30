@@ -15,7 +15,7 @@ beforeEach(context => {
 
 describe('promise', () => {
 
-    test.only('...transforms', async ({ fixture, find, expect, childHTML }) => {
+    test('...transforms', async ({ fixture, find, expect, childHTML }) => {
         const promise = Promise.resolve(['felix', 'duchess', 'stimpy']);
         const [Count, List, Map] = branch(
             promise,
@@ -42,7 +42,6 @@ describe('promise', () => {
             "<p><!--0--></p>",
             "<p><!--0--></p>",
             <!--3-->,
-            <!--1-->,
           ]
         `);
     });

@@ -181,16 +181,18 @@ describe('throws on invalid types', () => {
         expect(() => {
             compose(null, { name: 'felix' });
         }).toThrowErrorMatchingInlineSnapshot(`
-      [TypeError: Invalid compose {...} input type "object", value [object Object].
+          [TypeError: Invalid compose {...} input type "object", value [object Object].
 
-      Received as:
+          Did you mean to include a "render" method?
 
-      {
-        "name": "felix"
-      }
+          Received as:
 
-      ]
-    `);
+          {
+            "name": "felix"
+          }
+
+          ]
+        `);
     });
 
     test('throw on Symbol', ({ expect }) => {
