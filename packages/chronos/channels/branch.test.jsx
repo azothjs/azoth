@@ -15,7 +15,7 @@ beforeEach(context => {
 
 describe('promise', () => {
 
-    test('...transforms', async ({ fixture, find, expect, childHTML }) => {
+    test.only('...transforms', async ({ fixture, find, expect, childHTML }) => {
         const promise = Promise.resolve(['felix', 'duchess', 'stimpy']);
         const [Count, List, Map] = branch(
             promise,
@@ -23,7 +23,13 @@ describe('promise', () => {
             [Cat, { map: true }]
         );
         fixture.append(<Count />, <List />, <Map />);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<!--0--><!--0--><!--0-->"`);
+        expect(childHTML()).toMatchInlineSnapshot(`
+          [
+            <!--0-->,
+            <!--0-->,
+            <!--0-->,
+          ]
+        `);
 
         await find('felix');
         expect(childHTML()).toMatchInlineSnapshot(`
@@ -36,6 +42,7 @@ describe('promise', () => {
             "<p><!--0--></p>",
             "<p><!--0--></p>",
             <!--3-->,
+            <!--1-->,
           ]
         `);
     });

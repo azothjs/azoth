@@ -101,12 +101,11 @@ export class Controller {
 }
 
 export class Updater extends Controller {
-    #node = null;
+    ref = null;
     render(props) {
-        return this.#node ?? (this.#node = super.render(props));
+        return this.ref ?? (this.ref = super.render(props));
     }
     update(props) {
-        const node = this.#node;
-        node ? super.update(node, props) : this.render(props);
+        this.ref ? super.update(this.ref, props) : this.render(props);
     }
 }

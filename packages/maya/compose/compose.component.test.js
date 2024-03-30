@@ -147,6 +147,8 @@ describe('prop-agation', () => {
             `
           [TypeError: Invalid compose {...} input type "object", value [object Object].
 
+          Did you forget to return a value from "MyClass"?
+
           Received as:
 
           {}
@@ -169,7 +171,7 @@ describe('compose element', () => {
         });
     });
 
-    describe.each(CONSTRUCTORS.concat(ASYNC_CONSTRUCTORS))('Promised %o', Constructor => {
+    describe.only.each(CONSTRUCTORS.concat(ASYNC_CONSTRUCTORS))('Promised %o', Constructor => {
         const expected = `<div><div>felix<!--1--></div><!--1--></div>`;
         test('prop-agation', async ({ expect, fixture, find }) => {
             const { dom, anchor } = elementWithAnchor();

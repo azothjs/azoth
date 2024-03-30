@@ -6,6 +6,8 @@ export function resolveArgs(transform, options) {
         transform = null;
     }
 
+    // TODO: validate transform is function
+
     const init = options?.init;
     const start = options?.start;
     const map = !!options?.map;

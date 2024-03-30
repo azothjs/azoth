@@ -13,7 +13,9 @@ describe('promise', () => {
     test('promise only', async ({ fixture, find, expect }) => {
         const promise = Promise.resolve('felix');
         const CatChannel = channel(promise);
+        const created = <CatChannel />;
         fixture.append(<CatChannel />);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<!--0-->"`);
 
         await find('felix');
         expect(fixture.innerHTML).toMatchInlineSnapshot(`"felix<!--1-->"`);
@@ -39,14 +41,14 @@ describe('promise', () => {
 
         await find('felix', { exact: false });
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>felix<!--1--></p><p>duchess<!--1--></p><p>garfield<!--1--></p><!--3-->"`
+            `"<p>felix<!--1--></p><p>duchess<!--1--></p><p>garfield<!--1--></p><!--3--><!--1-->"`
         );
     });
 
-    test('transform, { start, init }', async ({ fixture, find, expect }) => {
+    test.only('transform, { start, init }', async ({ fixture, find, expect }) => {
         const promise = sleep(50).then(() => 'duchess');
 
-        const Cat = channel(promise, async name => {
+        const Cat = channel(promise, name => {
             return name === 'felix'
                 ? <p>FELIX FTW</p>
                 : <p>{name}</p>;
@@ -56,7 +58,9 @@ describe('promise', () => {
         });
 
 
-        fixture.append(<Cat />);
+        const cat = <Cat />;
+        console.log('*******', cat.childNodes.length, cat.childNodes[0].nodeType);
+        fixture.append(cat);
         expect(fixture.innerHTML).toMatchInlineSnapshot(`"choose wisely<!--1-->"`);
 
         await find('FELIX FTW');

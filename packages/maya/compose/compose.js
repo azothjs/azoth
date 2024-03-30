@@ -87,27 +87,17 @@ export function compose(anchor, input, keepLast, props, slottable) {
 const isRenderObject = obj => obj && typeof obj === 'object' && obj.render && typeof obj.render === 'function';
 
 export function composeComponent(anchor, [Constructor, props, slottable]) {
-    create(Constructor, props, slottable, anchor);
+    const out = create(Constructor, props, slottable, anchor);
+    if(out !== anchor) compose(anchor, out);
 }
 
 export function createComponent(Constructor, props, slottable) {
-    const result = create(Constructor, props, slottable);
+    const result = create(Constructor, props, slottable, null);
 
-    // result is returned to caller, not composed by Azoth,
-    // force to be of type Node or null:
-    // strings and numbers into text nodes
-    // non-values to null
-    const type = typeof result;
-    switch(true) {
-        case type === 'string':
-        case type === 'number':
+    switch(typeof result) {
+        case 'string':
+        case 'number':
             return document.createTextNode(result);
-        case result === undefined:
-        case result === null:
-        case result === true:
-        case result === false:
-        case result === IGNORE:
-            return null;
         default:
             return result;
     }
@@ -115,61 +105,66 @@ export function createComponent(Constructor, props, slottable) {
 
 function create(input, props, slottable, anchor) {
     const type = typeof input;
+
     switch(true) {
         case input instanceof Node:
             if(props) Object.assign(input, props);
         // eslint-disable-next-line no-fallthrough
         case type === 'string':
+            return input;
         case type === 'number':
+        case type === 'bigint':
+            return `${input}`;
         case input === undefined:
         case input === null:
         case input === true:
         case input === false:
         case input === '':
         case input === IGNORE:
-            return anchor ? void compose(anchor, input) : input;
+            return null;
+        // class and function(){}
         case !!(input.prototype?.constructor): {
             // eslint-disable-next-line new-cap
-            return create(new input(props, slottable), null, null, anchor);
+            return new input(props, slottable);
         }
-        case type === 'function':
-            return create(input(props, slottable), null, null, anchor);
+        // arrow () => {}
+        case type === 'function': {
+            return input(props, slottable) ?? null;
+        }
         case type !== 'object': {
             throwTypeError(input, type);
             break;
         }
         case isRenderObject(input):
-            return create(input.render(props, slottable), null, null, anchor);
+            return input.render(props, slottable) ?? null;
         default: {
-            // these inputs require a comment anchor to which they can render
-            if(!anchor) anchor = document.createComment('0');
+            let container = anchor;
+            if(!container) {
+                anchor = document.createComment('0');
+                container = document.createDocumentFragment();
+                container.append(anchor);
+            }
 
-            if(input[Symbol.asyncIterator]) {
+            if(input instanceof SyncAsync) {
+                compose(anchor, input.sync, true, props, slottable);
+                compose(anchor, input.async, false, props, slottable);
+            }
+            else if(input[Symbol.asyncIterator]) {
                 composeAsyncIterator(anchor, input, false, props, slottable);
             }
             else if(input instanceof Promise) {
                 input.then(value => {
-                    create(value, props, slottable, anchor);
+                    compose(anchor, create(value, props, slottable), true, null, null);
                 });
             }
             else if(Array.isArray(input)) {
                 composeArray(anchor, input, false);
             }
-            else if(input instanceof SyncAsync) {
-                // REASSIGN anchor! sync input will compose _before_
-                // anchor is appended to DOM, need container until then
-                const commentAnchor = anchor;
-                anchor = document.createDocumentFragment();
-                anchor.append(commentAnchor);
-
-                create(input.sync, props, slottable, commentAnchor);
-                create(input.async, props, slottable, commentAnchor);
-            }
             else {
                 throwTypeErrorForObject(input, type);
             }
 
-            return anchor;
+            return container;
         }
     }
 }
@@ -242,8 +237,12 @@ ${footer}`
 function throwTypeErrorForObject(obj) {
     let message = '';
     try {
+        const fnName = obj.constructor?.name;
+        if(fnName && fnName !== 'Object') {
+            message += `\n\nDid you forget to return a value from "${fnName}"?`;
+        }
         const json = JSON.stringify(obj, null, 2);
-        message = `\n\nReceived as:\n\n${json}\n\n`;
+        message += `\n\nReceived as:\n\n${json}\n\n`;
     }
     catch(ex) {
         /* no-op */

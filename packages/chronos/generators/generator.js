@@ -8,13 +8,17 @@ export function generator(transformArg, options) {
         hasStart, hasInit
     } = resolveArgs(transformArg, options);
 
-    const maybeTransform = payload => transform ? transform(payload) : payload;
+    const maybeTransform = transform
+        ? map
+            ? payload => payload && payload.map ? payload.map(transform) : payload
+            : payload => transform(payload)
+        : payload => payload;
+
     let onDeck = hasStart && hasInit ? maybeTransform(init) : undefined;
     const relay = { resolve: null };
 
     function dispatch(payload) {
-        if(map) payload = payload?.map(transform);
-        else payload = maybeTransform(payload);
+        payload = maybeTransform(payload);
 
         if(relay.resolve) relay.resolve(payload);
         else onDeck = payload;
@@ -47,7 +51,7 @@ export function generator(transformArg, options) {
     }
 
     if(hasInit) {
-        const value = transform ? transform(init) : init;
+        const value = maybeTransform(init);
         return [SyncAsync.from(value, asyncIterator), dispatch];
     }
 
