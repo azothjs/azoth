@@ -43,9 +43,7 @@ export function compose(anchor, input, keepLast, props, slottable) {
         case type === 'function': {
             // will throw if function is class,
             // unlike create or compose element
-            let out = slottable
-                ? input(props, slottable)
-                : props ? input(props) : input();
+            let out = input(props, slottable);
             compose(anchor, out, keepLast);
             break;
         }
