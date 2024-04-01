@@ -23,7 +23,7 @@ function get(id, isFragment = false, content) {
     return template;
 }
 
-const bindings = new Map(); // cache
+const bindings = new WeakMap(); // cache
 // TODO: implement cleanup actions on nodes
 export function clearBind(node) {
     if(bindings.has(node)) bindings.delete(node);
