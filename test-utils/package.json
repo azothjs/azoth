@@ -1,6 +1,5 @@
 {
     "name": "test-utils",
-    "version": "1.0.0",
     "description": "shared test utils",
     "author": "martypdx",
     "license": "MIT",

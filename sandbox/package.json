@@ -1,6 +1,5 @@
 {
     "name": "sandbox",
-    "version": "1.0.0",
     "description": "dev sandbox for working with azoth",
     "type": "module",
     "scripts": {

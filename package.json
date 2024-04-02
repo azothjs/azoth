@@ -1,6 +1,6 @@
 {
     "name": "azothjs",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "private": "true",
     "description": "azothjs monorepo",
     "author": "Marty Nelson",
@@ -16,7 +16,8 @@
         "start:docs": "pnpm -F docs start",
         "test": "vitest",
         "test:CI": "CI=true vitest",
-        "lint": "eslint packages"
+        "lint": "eslint packages",
+        "changie": "pnpm changeset"
     },
     "devDependencies": {
         "@changesets/cli": "^2.27.1",
