@@ -1,6 +1,6 @@
 {
     "name": "@azothjs/chronos",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "description": "Asynchronous data and layout management",
     "author": "Marty Nelson",
     "license": "MIT",

@@ -1231,6 +1231,55 @@ describe('render and composition cases', () => {
         `);
     });
 
+    test('nested elements with children', ({ expect }) => {
+        const input = `
+            const t1 = <li>{priority}{exit}</li>
+            const t2 = <li>
+                <h1>{priority}</h1>
+                <p>{exit}</p>
+            </li>
+        `;
+
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "import { td6226395, t63f1381f } from 'virtual:azoth-templates?id=d6226395&id=63f1381f';
+
+          const t1 = td6226395(priority,exit);
+          const t2 = t63f1381f(priority,exit);
+          "
+        `);
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "bMap": "[1,1]",
+              "bindKey": "9dcf97a1",
+              "html": "<li><!--0--><!--0--></li>",
+              "id": "d6226395",
+              "isDomFragment": false,
+              "isEmpty": false,
+              "propertyNames": null,
+              "tMap": "[[0],[1]]",
+              "targetKey": "b413f47d",
+            },
+            {
+              "bMap": "[1,1]",
+              "bindKey": "9dcf97a1",
+              "html": "<li>
+                          <h1 data-bind><!--0--></h1>
+                          <p data-bind><!--0--></p>
+                      </li>",
+              "id": "63f1381f",
+              "isDomFragment": false,
+              "isEmpty": false,
+              "propertyNames": null,
+              "tMap": "[[0,0],[1,0]]",
+              "targetKey": "96a296d2",
+            },
+          ]
+        `);
+    });
+
 });
 
 describe('controller', () => {

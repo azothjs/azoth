@@ -66,6 +66,16 @@ describe('targets generator', () => {
             `"(r,t) => [r,r.childNodes[1],t[0].childNodes[1]]"`
         );
     });
+
+    test('nested binding targets', ({ compile, expect }) => {
+        const code = compile(`const t = <li>
+            <h1>{priority}</h1>
+            <p>{exit}</p>
+        </li>;`);
+        expect(code).toMatchInlineSnapshot(
+            `"(r,t) => [t[0].childNodes[0],t[1].childNodes[0]]"`
+        );
+    });
 });
 
 describe('bind generator', () => {
