@@ -27,23 +27,23 @@ test('basic plugin', ({ expect }) => {
 
     expect(code)
         .toMatchInlineSnapshot(`
-          "import { tf89f8a98, tb550bd5b } from 'virtual:azoth-templates?id=f89f8a98&id=b550bd5b';
+          "import { t92e0405b, tcc6d7af4 } from 'virtual:azoth-templates?id=92e0405b&id=cc6d7af4';
 
-          tf89f8a98(status,spread,world,[Component, { prop1: prop1, ...obj, option: "static", }, tb550bd5b(name)]);
+          t92e0405b(status,spread,world,[Component, { prop1: prop1, ...obj, option: "static", }, tcc6d7af4(name)]);
           "
         `);
 
     expect(template).toMatchInlineSnapshot(`
       {
         "bMap": "[0,4,1,2]",
-        "bindKey": "2cccbf9b",
+        "bindKey": "8ba55e59",
         "html": "<div>
               <p title="static" data-bind>
                   Hello <!--0-->
               </p>
               <!--0-->
           </div>",
-        "id": "f89f8a98",
+        "id": "92e0405b",
         "imports": [],
         "isDomFragment": false,
         "isEmpty": false,
@@ -52,7 +52,7 @@ test('basic plugin', ({ expect }) => {
           "className",
         ],
         "tMap": "[0,0,[0,1],[3]]",
-        "targetKey": "88185d12",
+        "targetKey": "deb2f2b5",
       }
     `);
 });
@@ -66,28 +66,28 @@ test('fragment w/ component', ({ expect }) => {
     </>`;
 
     expect(code).toMatchInlineSnapshot(`
-      "import { tafdcadae } from 'virtual:azoth-templates?id=afdcadae';
+      "import { t914853a3 } from 'virtual:azoth-templates?id=914853a3';
 
-      tafdcadae([Title]);
+      t914853a3([Title]);
       "
     `);
 
     expect(template).toMatchInlineSnapshot(`
       {
         "bMap": "[2]",
-        "bindKey": "dbc1b4c9",
+        "bindKey": "d4735e3a",
         "html": "<h1>Hello Sandbox</h1>
               <div data-bind>
                   <!--0-->
               </div>",
-        "id": "afdcadae",
+        "id": "914853a3",
         "imports": [],
         "isDomFragment": true,
         "isEmpty": false,
         "isStatic": false,
         "propertyNames": null,
         "tMap": "[[0,1]]",
-        "targetKey": "6e340b9c",
+        "targetKey": "83b97b85",
       }
     `);
 });
