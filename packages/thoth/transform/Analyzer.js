@@ -127,7 +127,7 @@ export class Analyzer {
     JSXFragmentRoot(node) {
         this.#pushElement(node);
         if(node.openingFragment) {
-            this.JSXAttributes(node.openingFragment.attributes, false);
+            this.JSXComponentAttributes(node.openingFragment.attributes);
         }
         this.JSXChildren(node);
         this.#popElement();
@@ -142,7 +142,7 @@ export class Analyzer {
         this.#pushElement(node);
 
         if(node.isComponent) {
-            this.JSXAttributes(node.openingElement.attributes, true);
+            this.JSXComponentAttributes(node.openingElement.attributes);
             if(node.children.length) {
                 node.slotFragment = {
                     type: 'JSXFragment',
@@ -154,7 +154,7 @@ export class Analyzer {
                 };
             }
         } else {
-            this.JSXAttributes(node.openingElement.attributes, false);
+            this.JSXAttributes(node.openingElement.attributes, true);
             this.JSXChildren(node);
         }
 
@@ -197,16 +197,24 @@ export class Analyzer {
         }
     }
 
-    JSXAttributes(attributes, bindAll = false) {
+    JSXComponentAttributes(attributes) {
+        this.JSXAttributes(attributes, false);
+    }
+
+    JSXAttributes(attributes, jsxOnly = true) {
         for(var i = 0; i < attributes.length; i++) {
             const attr = attributes[i];
             if(attr.type === 'JSXSpreadAttribute') {
                 this.#bind(BIND.SPREAD, attr, attr.argument, i);
                 continue;
             }
+
             let expr = attr.value;
             const isJSXExpr = expr?.type === 'JSXExpressionContainer';
-            if(!isJSXExpr && !bindAll) continue;
+            if(jsxOnly && !isJSXExpr) continue;
+
+            // element attributes = static html
+            // component props = code gen js obj literal prop
             if(isJSXExpr) expr = expr.expression;
             this.#bind(BIND.PROP, attr, expr, i);
         }
