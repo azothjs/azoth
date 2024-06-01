@@ -190,8 +190,8 @@ function clear(anchor) {
         const { previousSibling } = node;
         if(!previousSibling) break;
 
+        // TODO: how to guard for azoth comments only?
         if(previousSibling.nodeType === Node.COMMENT_NODE) {
-            // TODO: how to guard for azoth comments only?
             clear(previousSibling);
         }
 
@@ -205,7 +205,8 @@ function clear(anchor) {
 
 function composeArray(anchor, array, keepLast) {
     if(!keepLast) clear(anchor);
-    // TODO: optimize arrays here if Node[]
+    // TODO: optimize arrays here if Node[] research shows gain.
+    // vanillajs-1 in jsperf benchmarks has specific numbers
     for(let i = 0; i < array.length; i++) {
         compose(anchor, array[i], true);
     }
@@ -220,7 +221,9 @@ async function composeStream(anchor, stream, keepLast) {
 }
 
 async function composeAsyncIterator(anchor, iterator, keepLast, props, slottable) {
-    // TODO: use iterator and intercept system messages
+    // TODO: use iterator directly and 
+    // - control return when removed, and maybe throws on error
+    // - possible yield/return semantics for third communication channel
     for await(const value of iterator) {
         compose(anchor, value, keepLast, props, slottable);
     }
