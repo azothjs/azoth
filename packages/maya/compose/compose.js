@@ -82,7 +82,12 @@ export function compose(anchor, input, keepLast, props, slottable) {
     }
 }
 
-const isRenderObject = obj => obj && typeof obj === 'object' && obj.render && typeof obj.render === 'function';
+/**
+ * Duck type test for render object
+ * @param {object} obj 
+ * @returns {boolean}
+ */
+const isRenderObject = obj => typeof obj?.render === 'function';
 
 export function composeComponent(anchor, [Constructor, props, slottable]) {
     createCompose(Constructor, props, slottable, anchor);
@@ -94,11 +99,14 @@ export function createCompose(Constructor, props, slottable, anchor) {
 }
 
 export function createComponent(Constructor, props, slottable) {
-    const result = create(Constructor, props, slottable, null);
+    let result = create(Constructor, props, slottable, null);
 
     switch(typeof result) {
-        case 'string':
         case 'number':
+        case 'bigint':
+            result = `${result}`;
+        // eslint-disable-next-line no-fallthrough
+        case 'string':
             return document.createTextNode(result);
         default:
             return result;

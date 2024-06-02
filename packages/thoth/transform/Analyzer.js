@@ -23,6 +23,7 @@ export class Analyzer {
     constructor(node) {
         this.#analyze(node);
 
+        // order cannot be determined until after full analysis
         const boundElements = [...this.#boundElements].sort(byOrder);
         for(let i = 0; i < boundElements.length; i++) {
             boundElements[i].queryIndex = i;
@@ -102,7 +103,7 @@ export class Analyzer {
                 throw new TypeError(`Unexpected binding type "${type}", expected "BIND.PROP" or "BIND.SPREAD"`);
             }
 
-            // early exit! components get bindings as props
+            // early exit! components get bindings as obj literal props
             element.props.push(binding);
             return;
         }

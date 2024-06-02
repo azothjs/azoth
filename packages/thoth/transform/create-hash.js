@@ -1,5 +1,5 @@
 
-const { subtle } = globalThis.crypto;
+// const { subtle } = globalThis.crypto;
 const encoder = new TextEncoder();
 
 // export async function createHash(data, { algorithm = 'SHA-1', length = 8 } = {}) {

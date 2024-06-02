@@ -81,6 +81,7 @@ describe('html render', () => {
         );
     });
 
+
     function getTargets(r, boundEls) {
         return [boundEls[0]];
     }

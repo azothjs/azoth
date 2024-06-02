@@ -1,7 +1,10 @@
 import { describe, test } from 'vitest';
 import { IGNORE, compose } from './compose.js';
 import {
-    elements, elementWithAnchor, elementWithText, elementWithTextAnchor,
+    elements,
+    elementWithAnchor,
+    elementWithText,
+    elementWithTextAnchor,
     $anchor
 } from 'test-utils/elements';
 
@@ -20,7 +23,7 @@ describe('append and remove', () => {
     test('surrounding sibling content', ({ expect }) => {
         const value = 'World';
         const results = elements.map(create => {
-            return `${create.name.padEnd(28, ' ')}${run(value, create)}`;
+            return create.name.padEnd(28, ' ') + run(value, create);
         });
 
         expect(results).toMatchInlineSnapshot(`

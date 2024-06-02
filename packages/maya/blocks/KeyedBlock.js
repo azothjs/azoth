@@ -67,11 +67,10 @@ export class KeyedBlock {
     }
 
     swapById(a, b) {
-        const { container } = this;
         const aNode = this.getById(a);
         const bNode = this.getById(b);
         const beforeB = bNode.previousElementSibling;
         aNode.replaceWith(bNode);
-        beforeB ? beforeB.after(aNode) : container.prepend(aNode);
+        beforeB ? beforeB.after(aNode) : this.container.prepend(aNode);
     }
 }

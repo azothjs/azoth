@@ -1,6 +1,6 @@
 import { describe, test, beforeEach } from 'vitest';
 import 'test-utils/with-resolvers-polyfill';
-import { $div, elementWithText, elementWithAnchor } from 'test-utils/elements';
+import { $element, elementWithText, elementWithAnchor } from 'test-utils/elements';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { runCompose } from './compose.test.js';
 import { SyncAsync, composeComponent, createComponent } from './compose.js';
@@ -74,7 +74,7 @@ describe('create element', () => {
 
 describe('prop-agation', () => {
     test('Node props', async ({ expect }) => {
-        const div = $div();
+        const div = $element();
         const dom = createComponent(div, { textContent: 'felix' });
         expect(dom).toMatchInlineSnapshot(`
           <div>
@@ -93,9 +93,9 @@ describe('prop-agation', () => {
         };
 
         async function* Numbers() {
-            yield doAsync($div('one'));
-            yield doAsync($div('two'));
-            yield doAsync($div('three'));
+            yield doAsync($element('one'));
+            yield doAsync($element('two'));
+            yield doAsync($element('three'));
         }
 
         const dom = createComponent(Numbers(), { className: 'number' });

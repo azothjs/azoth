@@ -2,7 +2,7 @@ import { describe, test } from 'vitest';
 import { compose } from './compose.js';
 import {
     elementWithAnchor, elementWithText,
-    $text, $div, $anchor
+    $text, $element, $anchor
 } from 'test-utils/elements';
 import { run } from './compose.test.js';
 
@@ -68,7 +68,7 @@ describe('values (non-async)', () => {
         number: 42,
         TextNode: $text('node'),
         CommentNode: $anchor('node'),
-        Element: $div(),
+        Element: $element(),
     });
 
     test(ACCEPTED.names.join(), ({ expect }) => {
@@ -86,7 +86,7 @@ describe('values (non-async)', () => {
 
     test('function call composed', ({ expect }) => {
         const runFn = fn => run(fn, elementWithAnchor);
-        expect(runFn($div)).toMatchInlineSnapshot(
+        expect(runFn($element)).toMatchInlineSnapshot(
             `"<div><div></div><!--1--></div>"`
         );
         expect(runFn(() => 'text from function')).toMatchInlineSnapshot(

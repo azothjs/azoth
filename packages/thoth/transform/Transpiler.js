@@ -114,6 +114,7 @@ export class Transpiler extends Generator {
                 this.ComposeComponent(node, state);
                 continue;
             }
+
             this[expr.type](expr, state);
         }
 

@@ -20,6 +20,7 @@ export const DOMRenderer = {
         template.innerHTML = html;
         return template.content;
     },
+
     getById(id) {
         const template = document.getElementById(id);
         if(!template) {
@@ -38,6 +39,7 @@ export const DOMRenderer = {
             return [clone, targets];
         };
     },
+
     bound(dom) {
         return dom.querySelectorAll(QUERY_SELECTOR);
     }
