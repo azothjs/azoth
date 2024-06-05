@@ -1,6 +1,6 @@
 {
     "name": "@azothjs/vite-plugin",
-    "version": "0.4.2",
+    "version": "0.4.3",
     "description": "azoth plugins for vite",
     "author": "Marty Nelson",
     "license": "MIT",
