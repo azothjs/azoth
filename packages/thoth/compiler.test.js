@@ -1116,6 +1116,36 @@ describe('components and custom element', () => {
 
 describe('render and composition cases', () => {
 
+    test('simple render', ({ expect }) => {
+        const input = `
+            const Item = name => <p>{name}</p>;
+        `;
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "import { t77e67b80 } from 'virtual:azoth-templates?id=77e67b80';
+
+          const Item = name => t77e67b80(name);
+          "
+        `);
+
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "bMap": "[1]",
+              "bindKey": "6b86b273",
+              "html": "<p><!--0--></p>",
+              "id": "77e67b80",
+              "isDomFragment": false,
+              "isEmpty": false,
+              "propertyNames": null,
+              "tMap": "[[0]]",
+              "targetKey": "5feceb66",
+            },
+          ]
+        `);
+    });
+
     test('map in block', ({ expect }) => {
         const input = `
             const Item = name => <li>{name}</li>;
