@@ -27,23 +27,23 @@ test('basic plugin', ({ expect }) => {
 
     expect(code)
         .toMatchInlineSnapshot(`
-          "import { t92e0405b, tcc6d7af4 } from 'virtual:azoth-templates?id=92e0405b&id=cc6d7af4';
+          "import { t68d13b11, tcc6d7af4 } from 'virtual:azoth-templates?id=68d13b11&id=cc6d7af4';
 
-          t92e0405b(status,spread,world,[Component, { prop1: prop1, ...obj, option: "static", }, tcc6d7af4(name)]);
+          t68d13b11(status,spread,world,[Component, { prop1: prop1, ...obj, option: "static", }, tcc6d7af4(name)]);
           "
         `);
 
     expect(template).toMatchInlineSnapshot(`
       {
         "bMap": "[0,4,1,2]",
-        "bindKey": "8ba55e59",
+        "bindKey": "2a2feb86",
         "html": "<div>
               <p title="static" data-bind>
                   Hello <!--0-->
               </p>
               <!--0-->
           </div>",
-        "id": "92e0405b",
+        "id": "68d13b11",
         "imports": [],
         "isDomFragment": false,
         "isEmpty": false,

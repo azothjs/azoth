@@ -27,18 +27,18 @@ describe('JSX dom literals', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t08c985bf } from 'virtual:azoth-templates?id=08c985bf';
+          "import { te6c2b6be } from 'virtual:azoth-templates?id=e6c2b6be';
 
-          const t = t08c985bf(status,name);
+          const t = te6c2b6be(status,name);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
           [
             {
               "bMap": "[0,1]",
-              "bindKey": "c339ed9e",
+              "bindKey": "4e0c0070",
               "html": "<p>Hello <!--0--></p>",
-              "id": "08c985bf",
+              "id": "e6c2b6be",
               "isDomFragment": false,
               "isEmpty": false,
               "propertyNames": [
@@ -97,9 +97,9 @@ describe('JSX dom literals', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { tb1f5ad01 } from 'virtual:azoth-templates?id=b1f5ad01';
+          "import { ta47c7248 } from 'virtual:azoth-templates?id=a47c7248';
 
-          const t = tb1f5ad01("my-class","felix","this is","azoth","two","and...","span-class","ul-footer","footer");
+          const t = ta47c7248("my-class","felix","this is","azoth","two","and...","span-class","ul-footer","footer");
           "
         `);
 
@@ -107,7 +107,7 @@ describe('JSX dom literals', () => {
           [
             {
               "bMap": "[0,1,1,1,1,1,0,1,1]",
-              "bindKey": "d435024a",
+              "bindKey": "eb5ef6f1",
               "html": "<div>
                       <p data-bind><!--0--></p>
                       <p>static</p>
@@ -123,7 +123,7 @@ describe('JSX dom literals', () => {
                       <custom-element></custom-element>
                       <!--0-->
                   </div>",
-              "id": "b1f5ad01",
+              "id": "a47c7248",
               "isDomFragment": false,
               "isEmpty": false,
               "propertyNames": [
@@ -148,9 +148,9 @@ describe('JSX dom literals', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { tfcd1ffcb } from 'virtual:azoth-templates?id=fcd1ffcb';
+          "import { t2b753c89 } from 'virtual:azoth-templates?id=2b753c89';
 
-          const t = tfcd1ffcb("className","name","class","class-name");
+          const t = t2b753c89("className","name","class","class-name");
           "
         `);
 
@@ -158,9 +158,9 @@ describe('JSX dom literals', () => {
           [
             {
               "bMap": "[0,-1,-2,-3]",
-              "bindKey": "2329cdfb",
+              "bindKey": "59709254",
               "html": "<input required>",
-              "id": "fcd1ffcb",
+              "id": "2b753c89",
               "isDomFragment": false,
               "isEmpty": false,
               "propertyNames": [
@@ -717,9 +717,9 @@ describe('components and custom element', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t1d4ac292 } from 'virtual:azoth-templates?id=1d4ac292';
+          "import { t862565ef } from 'virtual:azoth-templates?id=862565ef';
 
-          document.body.append(t1d4ac292(prop));
+          document.body.append(t862565ef(prop));
           "
         `);
 
@@ -727,9 +727,9 @@ describe('components and custom element', () => {
           [
             {
               "bMap": "[0]",
-              "bindKey": "5feceb66",
+              "bindKey": "5a0f450d",
               "html": "<custom-element></custom-element>",
-              "id": "1d4ac292",
+              "id": "862565ef",
               "isDomFragment": false,
               "isEmpty": false,
               "propertyNames": [
@@ -1347,8 +1347,8 @@ describe('controller', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "import { __rC } from 'azoth/runtime';
-          import { tdd5eeb7f, tfe4e62e3, t13fcceb0 } from 'virtual:azoth-templates?id=dd5eeb7f&id=fe4e62e3&id=13fcceb0';
-          const C = Updater.for(({status}, slottable) => tdd5eeb7f("status",slottable));
+          import { t5b1a405c, tfe4e62e3, t13fcceb0 } from 'virtual:azoth-templates?id=5b1a405c&id=fe4e62e3&id=13fcceb0';
+          const C = Updater.for(({status}, slottable) => t5b1a405c("status",slottable));
           const Greeting = Controller.for(({name}) => tfe4e62e3(name));
           const greeting = Greeting.render(data);
           const t = __rC(C, { status: status, }, t13fcceb0(greeting));
@@ -1358,11 +1358,11 @@ describe('controller', () => {
           [
             {
               "bMap": "[0,1]",
-              "bindKey": "c339ed9e",
+              "bindKey": "4e0c0070",
               "html": "<p>
                           <!--0-->
                       </p>",
-              "id": "dd5eeb7f",
+              "id": "5b1a405c",
               "isDomFragment": false,
               "isEmpty": false,
               "propertyNames": [

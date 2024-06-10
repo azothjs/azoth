@@ -255,7 +255,7 @@ describe('render generator', () => {
 
         expect(code).toMatchInlineSnapshot(
             `
-          "__renderer("916d14ae", g534bf81d, b8a15bc59, false, \`<p>
+          "__renderer("1d618ea9", g534bf81d, b8477292e, false, \`<p>
                       <!--0--> <span data-bind>hey <!--0-->!</span>
                   </p>\`)"
         `

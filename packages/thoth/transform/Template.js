@@ -56,7 +56,10 @@ export class Template {
         }
 
         this.targetKey = this.tMap ? createHash(this.tMap.join(';')) : '';
-        this.bindKey = this.bMap ? createHash(this.bMap.join(';')) : '';
+        this.bindKey = this.bMap ? createHash(
+            this.bMap.join(';') +
+            (this.propertyNames ? this.propertyNames.join(';') : '')
+        ) : '';
         this.id = createHash(this.html + this.bindKey + this.targetKey);
 
     }
