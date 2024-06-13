@@ -19,7 +19,6 @@ export function channel(async, transformArg, options) {
     }
 
     let hasSync = sync !== undefined;
-    // if(hasSync && transform) sync = transform(sync);
     if(hasSync && transform) sync = map ? sync?.map(transform) : transform(sync);
 
     let onDeck;
