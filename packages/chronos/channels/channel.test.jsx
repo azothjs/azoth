@@ -13,7 +13,6 @@ describe('promise', () => {
     test('promise only', async ({ fixture, find, expect }) => {
         const promise = Promise.resolve('felix');
         const CatChannel = channel(promise);
-        const created = <CatChannel />;
         fixture.append(<CatChannel />);
         expect(fixture.innerHTML).toMatchInlineSnapshot(`"<!--0-->"`);
 

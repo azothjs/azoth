@@ -90,7 +90,15 @@ export function compose(anchor, input, keepLast, props, slottable) {
 const isRenderObject = obj => typeof obj?.render === 'function';
 
 export function composeComponent(anchor, [Constructor, props, slottable]) {
+    // if renderer "updating":
+    // - get render source, by anchor
+    // - call render with props/slottable
+    // - return
+
     createCompose(Constructor, props, slottable, anchor);
+    // if renderer "recording"
+    // - store render source, by anchor
+
 }
 
 export function createCompose(Constructor, props, slottable, anchor) {
