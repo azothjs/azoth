@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { beforeEach, test } from 'vitest';
 import { resolve } from 'node:path';
 import JSONStream from './json-stream.js';

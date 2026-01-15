@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+// @vitest-environment node
 import { test } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';

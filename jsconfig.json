@@ -1,7 +1,9 @@
 {
     "compilerOptions": {
-        "module": "ES6",
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
         "strict": true,
-        // "checkJs": true
+        "types": ["vitest"],
+        "jsx": "preserve"
     }
 }

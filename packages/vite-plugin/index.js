@@ -1,5 +1,6 @@
 import { compile, templateModule, makeTargets, makeRenderer, makeBind } from '@azothjs/thoth';
 import { createFilter } from '@rollup/pluginutils';
+import { transform as esbuildTransform } from 'esbuild';
 import path from 'node:path';
 
 export const targetModule = `virtual:azoth-target`;
@@ -17,7 +18,7 @@ const RESOLVED = {
 export default function azothPlugin(options) {
     options = options ?? {};
 
-    const { include, exclude, extension = /\.jsx$/ } = options;
+    const { include, exclude, extension = /\.[jt]sx$/ } = options;
     const filter = createFilter(include, exclude);
 
     const programTemplates = new Map();
@@ -60,8 +61,18 @@ export default function azothPlugin(options) {
             }
         },
 
-        transform(source, id) {
+        async transform(source, id) {
             if(!filter(id) || !extension.test(id)) return null;
+
+            // Strip TypeScript from .tsx files, preserving JSX for Thoth
+            if(id.endsWith('.tsx')) {
+                const result = await esbuildTransform(source, {
+                    loader: 'tsx',
+                    jsx: 'preserve',
+                    sourcefile: path.basename(id),
+                });
+                source = result.code;
+            }
 
             let { code, templates, map } = compile(source, {
                 generate: { sourceFile: path.basename(id) }

@@ -79,7 +79,7 @@ describe('values (non-async)', () => {
             "number       42                <div>42<!--1--></div>",
             "TextNode     [object Text]     <div>node<!--1--></div>",
             "CommentNode  [object Comment]  <div><!--node--><!--1--></div>",
-            "Element      <div></div>       <div><div></div><!--1--></div>",
+            "Element      [object HTMLDivElement]<div><div></div><!--1--></div>",
           ]
         `);
     });

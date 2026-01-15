@@ -1,6 +1,7 @@
 import { SyncAsync } from '@azothjs/maya/compose';
 import { resolveArgs } from '../resolve-args.js';
 
+
 export function generator(transformArg, options) {
     const {
         transform,
@@ -8,10 +9,11 @@ export function generator(transformArg, options) {
         hasStart, hasInit
     } = resolveArgs(transformArg, options);
 
+    const maybeMap = payload => payload?.map ? payload.map(transform) : payload;
     const maybeTransform = transform
         ? map
-            ? payload => payload && payload.map ? payload.map(transform) : payload
-            : payload => transform(payload)
+            ? payload => payload?.then ? payload.then(maybeMap) : maybeMap(payload)
+            : payload => payload?.then ? payload.then(transform) : transform(payload)
         : payload => payload;
 
     let onDeck = hasStart && hasInit ? maybeTransform(init) : undefined;

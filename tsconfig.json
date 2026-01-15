@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "noEmit": true,
+        "types": ["vitest"],
+        "jsx": "preserve",
+        "baseUrl": ".",
+        "paths": {
+            "test-utils/*": ["./test-utils/*"]
+        }
+    },
+    "include": [
+        "packages/**/*.ts",
+        "packages/**/*.tsx",
+        "packages/**/*.d.ts",
+        "test-utils/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}

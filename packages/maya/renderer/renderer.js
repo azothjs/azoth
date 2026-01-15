@@ -31,14 +31,24 @@ export function clearBind(node) {
 
 // stack
 const injectable = [];
-function inject(node, callback) {
+function pushInject(node) {
     injectable.push(node);
-    callback();
+}
+function popInjectWithCheck(node) {
     const popped = injectable.pop();
+    // when might this happen?
     if(popped !== node) {
-        // TODO: display html like object for compose
         throw new Error('Injectable stack error');
     }
+}
+
+// stack
+const recordable = [];
+function pushRecord() {
+    recordable.push(true);
+}
+function popRecord(node) {
+    return recordable.pop();
 }
 
 const templateRenderer = getBound => (...args) => {
@@ -96,8 +106,32 @@ export class Controller {
         return this.renderFn(props);
     }
     update(node, props) {
-        inject(node, () => this.renderFn(props));
+        pushInject(node);
+        this.renderFn(props);
+        popInjectWithCheck(node);
     }
+}
+
+let record = false;
+
+function update(fn) {
+    let hasRendered = false;
+    let out = null;
+
+    return function render(props) {
+        if(!hasRendered) {
+            pushRecord();
+            out = fn(props);
+            popRecord();
+            hasRendered = true;
+        }
+        else {
+            pushInject(out);
+            fn(props);
+            popInjectWithCheck(out);
+        }
+        return out;
+    };
 }
 
 export class Updater extends Controller {
