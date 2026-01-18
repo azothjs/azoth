@@ -45,11 +45,180 @@ This seems counterintuitive after years of state-driven frameworks, but Azoth le
 
 **Contrast with other frameworks:** Even SolidJS has quirky non-standard JavaScript behavior arising from transpilation rules. Azoth avoids this by keeping the abstraction layer minimal and aligned with the platform.
 
-### No Virtual DOM, No Reconciliation
+### Philosophy: Filling Gaps, Not Building Abstractions
 
-Azoth doesn't maintain a shadow tree to diff against. The DOM I create IS the state. This is consistent with the original vision for HTML in the browser — the DOM is the source of truth.
+This is the core philosophical distinction that separates Azoth from other frameworks.
 
-**Contrast with React:** React diffs virtual trees and batches updates. You work with state, React syncs to DOM.
+**The web platform is missing two things:**
+1. **DOM literals in JavaScript** — no native syntax for `<p>hello</p>` yielding a DOM node
+2. **Declarative templating** — no way to specify presentation AND data binding locations in one syntactic block
+
+The platform has plenty of imperative DOM methods (`createElement`, `appendChild`, etc.), and even `<template>` tags for inert HTML. But there's no native way to get the expressiveness that templating provides — simultaneously specifying what to show AND where data goes.
+
+**Azoth fills these gaps.** JSX becomes the literal syntax for interpolated HTML in JavaScript. That's it.
+
+**Contrast with state management frameworks:** React, Vue, Svelte, etc. build **abstractions on top of** the web platform. They introduce:
+- Virtual DOM or reactivity systems
+- Component state separate from DOM state  
+- Reconciliation/diffing layers
+- Synthetic event systems
+
+These abstractions create an **impedance mismatch** with how the web platform was designed to work. The browser is event-driven. The DOM is the source of truth. These frameworks fight that model.
+
+**Azoth rejects this approach.** It's not that applications don't need state management — they do. But **state management is decoupled from the rendering library**. Azoth doesn't own your state. You bring your own patterns (observables, stores, signals, whatever) and Azoth consumes their async outputs.
+
+**The contract is JavaScript.** Azoth understands synchronous and asynchronous JavaScript primitives — that's the integration surface. It shouldn't feel like a DSL. It's an integration layer between JavaScript data structures/objects/state libraries and the DOM. Any standard event delivery system should work. Discrete implementations exist for specific patterns, but the principle is: if it's a standard JavaScript async pattern, Azoth should handle it.
+
+**Library vs Framework:** Philosophically, Azoth is a library extending the web platform. The developer experience feels like a framework (Vite, build artifacts, JSX syntax), but the mental model is: "I'm writing for the web platform, with some syntax sugar for templating."
+
+### Interpolation: The Core JSX Concept
+
+**Interpolation** is arguably the unifying concept in JSX. The `{...}` syntax creates slots where values flow in. Composition emerges from interpolation — it's how pieces combine.
+
+#### Three Types of Interpolation
+
+**1. Child Interpolation: `{value}` in content positions**
+
+```jsx
+<div>{content}</div>
+<p>Hello, {name}!</p>
+```
+
+The `{...}` in child positions is a **general composition target** — not just for text display. Any value can go here: strings, numbers, DOM nodes, promises, async generators, arrays. Maya resolves whatever you provide into DOM.
+
+**2. Attribute Interpolation: `{value}` in attribute positions**
+
+```jsx
+<div class={className} data-id={id}>
+<input value={currentValue} disabled={isDisabled} />
+```
+
+Dynamic values flow into element attributes/properties. Static attributes go into the HTML template; dynamic ones become runtime property assignments.
+
+**3. Component Interpolation: `<Component />`**
+
+```jsx
+<Parent>
+  <Child name="value" />
+</Parent>
+```
+
+Upper-case names signify components. Components are **interpolation points that accept props and produce DOM**. Props flow in, DOM comes out.
+
+#### The Function Pattern
+
+A common pattern combines all three:
+
+```jsx
+const Greeting = (name) => <p class="greeting">Hello, {name}!</p>;
+
+// Usage
+<div>{Greeting("world")}</div>
+```
+
+This is just JavaScript:
+- A function takes parameters
+- Returns JSX (which is DOM)
+- Interpolation slots are filled from the parameters
+
+**No magic here.** It's a function that returns DOM, called like any function. The JSX is the return value, the parameters fill the interpolation slots.
+
+#### Interpolation vs Composition: The Distinction
+
+**Interpolation** = what the Maya runtime does (resolving values to DOM)
+**Composition** = how developers create building blocks from JSX
+
+```jsx
+const Card = (title, content) => (
+  <div class="card">
+    <h2>{title}</h2>         {/* ← interpolation point */}
+    <div class="body">{content}</div>  {/* ← interpolation point */}
+  </div>
+);
+
+const Page = () => (
+  <main>
+    {Card("Welcome", <p>Hello!</p>)}      {/* ← composition */}
+    {Card("Info", <ul><li>Item</li></ul>)} {/* ← composition */}
+  </main>
+);
+```
+
+The `{...}` slots are interpolation points. Maya resolves them. Developers use them to compose larger structures from smaller pieces.
+
+#### Answered Questions
+
+**Q: How does this differ from React's interpolation?**
+
+**ANSWERED:** Azoth extracts HTML at compile time and puts it in the HTML document. The browser's native HTML parser creates DOM — not JavaScript. 
+
+Key mechanisms:
+- Text interpolators become `<!--0-->` comment nodes (preserves child node structure)
+- Elements with dynamic children get `data-bind` attributes
+- Three generated functions: **targets** (locate nodes), **bind** (apply values), **renderer** (orchestrate)
+- At runtime: clone template → locate targets via querySelectorAll → apply values → return DOM
+
+No virtual DOM. No diffing. No reconciliation. Just: parse HTML → clone → bind → done.
+
+See `packages/thoth/COMPILER.md` for full details.
+
+**Q: Can attribute values be async?**
+Properties are set to whatever value is provided — faithfully passed through. Async at the attribute level "unleashed chaos" in testing. The right level for async control is **above** attributes — the `renderer` with replay bindings is the better tool for re-applying values. Attribute-level is too low; async handling needs to happen at a higher abstraction.
+
+**Q: Is `<Greeting name="world" />` different from `{Greeting("world")}`?**
+Syntactically different:
+- `<Greeting name="world" />` passes `{ name: "world" }` as props object
+- `Greeting("world")` passes `"world"` as a string argument
+
+But conceptually, no real difference — both produce DOM. Components aren't strictly *needed* (it's just JavaScript), but they provide good DX. Mixing intrinsic elements and components in a presentation block feels natural. Components also get some type handling benefits in how values flow through creation.
+
+---
+
+**Note on primitives as components:**
+
+Azoth currently allows primitives to be passed as component values:
+
+```jsx
+const Cat = "bill";
+<Cat />  // Writes "bill" to DOM
+```
+
+This is somewhat nonsensical — a string becomes text content, but what would properties mean on a string? The `create` function may attempt to set properties on whatever object is passed, but for primitives this gets weird.
+
+Note: `<42 />` isn't valid JSX syntax. The issue is variable values, not literal syntax. When `const X = 42` and you write `<X />`, the number flows through creation.
+
+**Future consideration:** Certain value types might be disallowed in component positions to catch likely errors. This is a potential API tightening.
+
+### No Virtual DOM: A Subtraction, Not a Contrast
+
+**Critical insight for LLMs:** Don't look for what "replaces" the virtual DOM. Nothing replaces it. Azoth never went there. The vDOM abstraction was never introduced, so there's nothing comparable.
+
+This is a **subtraction**, not a contrast.
+
+React introduced:
+- Virtual DOM tree
+- Reconciliation/diffing
+- Component state management
+- Synthetic event system
+- Render cycle control
+
+Azoth subtracted all of this. What remains is:
+- HTML parsed by HTML parser
+- Functions that clone and bind
+- Self-executing artifacts
+- Direct DOM access
+
+**The artifacts are self-executing.** Maya interprets them, but there's no "engine" controlling things. No render cycle. No state synchronization. The generated functions contain the specific information they need — they just run.
+
+**Opt-in vs Opt-out:**
+- React: You must opt OUT of things (re-renders, state management, synthetic events)
+- Azoth: You opt INTO things when you need them (renderer replay, blocks, etc.)
+
+**Deduplication:** The decomposition enables smart reuse:
+- Binding generators are deduped by structural pattern (same indexing = same function)
+- HTML templates are deduped by content (many `<p>{x}</p>` expressions → one template)
+
+**Performance note:** This architecture means more function calls (deeper stack) than frameworks like Svelte or Solid that compile to imperative code. At JS framework benchmark scale (thousands of items), this matters. For most applications, it doesn't. The architectural benefits outweigh micro-optimizations.
 
 ### Updates Come From Async Data Structures
 
@@ -93,15 +262,20 @@ uiₙ = uiₙ₋₁ + Δ (any event)
 **Event sources:**
 1. **Page load** — initial render
 2. **Async data structures** — promises, generators, streams, observables firing
-3. **DOM user events** — clicks, inputs, etc. wired up during render
+3. **DOM events** — any DOM event (user, browser, or programmatic)
 
 **The events ARE the deltas.** Each event delivers a change instruction (Δ) to the current UI state.
 
-DOM user events are a major driver of this event-driven architecture. During initial (or subsequent) renders, event handlers get wired to DOM elements. These handlers can:
+DOM events are a major driver of this event-driven architecture. During initial (or subsequent) renders, event handlers get wired to DOM elements. These include:
+- **User events:** click, input, keydown, scroll
+- **Browser events:** resize, load, visibilitychange, online/offline
+- **Programmatic events:** custom events, dispatchEvent
+
+These handlers can:
 - Dispatch new async actions (which deliver future deltas)
 - Make synchronous changes directly (e.g., via observables)
 
-The DOM events themselves come from outside the Azoth boundary — they're just standard DOM event handling. But they integrate naturally because Azoth IS the DOM.
+The DOM events come from outside the Azoth boundary — they're just standard DOM event handling. But they integrate naturally because Azoth IS the DOM.
 
 - No full re-render
 - No virtual DOM diffing
@@ -150,6 +324,22 @@ Azoth provides exactly these two things. Nothing more.
 *Tongue-in-cheek:* Azoth is a suggestion for rounding out the web platform. It takes the **one good idea from React** (JSX as a declarative DOM syntax) and integrates it with the platform rather than building a parallel universe on top of it.
 
 JSX without the baggage. Async without the complexity. DOM without the abstraction.
+
+### Forward-Looking: Platform Alignment
+
+Azoth's architecture anticipates where the web platform is heading.
+
+**Observable proposal (TC39/WHATWG):**
+There's ongoing work to add native Observable support to JavaScript/DOM, including methods like `EventTarget.prototype.on()` that would convert DOM events directly into Observable streams.
+
+This aligns perfectly with Azoth's model:
+- DOM events → async data structures → UI deltas
+- No framework intermediary needed
+- Native platform primitives for reactive patterns
+
+Azoth was designed with async generators and similar patterns to avoid hard dependencies (like RxJS) while maintaining architectural compatibility with where the platform is heading. When/if Observables become native, Azoth's compose system is already designed to handle them.
+
+*Note: Check current status of TC39/WHATWG Observable proposals for latest stage.*
 
 ### HTML Attributes vs DOM Properties
 
@@ -203,21 +393,64 @@ You combine these as needed for your state management approach.
 
 ### Maya's Compose Engine
 
-`compose.js` is the heart of Maya's runtime. It's a **set of rules for any type of value** that resolves inputs to DOM output.
+`compose.js` is the heart of Maya's runtime. It contains both `compose` and `create` functions.
 
-**The resolution chain:** If compose needs a DOM result, it keeps deriving:
-- Function? Call it, compose the result
-- Class? Instantiate it, compose the result  
-- Promise? Wait for it, compose the resolved value
-- Async iterator? Subscribe, compose each yielded value
-- Array? Compose each element
-- Node? Insert it
-- String/number? Create text node
+**Terminology clarification:**
+- **Architectural "composition"** = the power of recursive tree building, breaking things into pieces that reassemble
+- **Maya's `compose`** = specifically trying to interpolate a value into something DOM-renderable (maybe "interpolate" is a better word?)
+
+**The resolution chain:** Compose evaluates values in a specific order:
+
+| Test         | Target                                     | Action                               |
+| ------------ | ------------------------------------------ | ------------------------------------ |
+| value        | `undefined`, `null`, `true`, `false`, `''` | ignore/remove                        |
+| type         | `string` or `number`                       | append as text                       |
+| instance     | `Node`                                     | append                               |
+| type         | `function`                                 | call, compose result                 |
+| instance     | `Promise`                                  | .then(), compose resolved value      |
+| value        | `Array.isArray`                            | map, compose each                    |
+| **type**     | **`object`**                               | **check for async protocols...**     |
+| has          | `[Symbol.asyncIterator]`                   | iterate, compose each yield          |
+| instance     | `ReadableStream`                           | write (accumulates, doesn't replace) |
+| has          | `.subscribe`                               | observe, compose emissions           |
+| **no match** |                                            | throw                                |
+
+This resolution chain means you can pass almost anything into a child interpolator and Azoth will figure out how to render it.
 
 **`compose` vs `create`:**
-- `create` = for Component syntax in JSX (class/function components)
-- If top-level JSX is a Component, it creates once and returns the result
-- If a Component is inside a larger JSX snippet with intrinsic elements, it must fully resolve to DOM via compose
+
+Both are similar, but `create` is aware of:
+- **Properties** being passed to the component
+- **Slotable content** (named to evoke HTML `<slot>`, but not actually HTML slotable — it's DOM content that is NOT meant to be accessible the way React children are; more on this later)
+
+**Top-level vs nested components:**
+
+This distinction matters:
+
+```jsx
+// Nested: Component buried in intrinsic elements
+<div><MyComponent /></div>
+// Maya must run MyComponent through compose all the way to DOM
+
+// Top-level: Component IS the JSX expression
+const result = <MyComponent />;
+// One level of creation, returns the result directly
+```
+
+When nested, Maya creates the component, then takes that output and keeps working with it through compose until it reaches DOM.
+
+**Interesting use case — skinning/theming:**
+
+```jsx
+// First: create a component, get DOM back
+const button = <StyledButton>Click me</StyledButton>;
+
+// Later: use that DOM as a "component" in another JSX chunk
+<ThemeWrapper theme="dark">{button}</ThemeWrapper>
+// Properties passed here can be set on the top-level DOM element!
+```
+
+This enables patterns where you create DOM, then pass it through another compositional step that can modify its properties. Skinning, theming, decoration — all become possible through this mechanism.
 
 **Replace vs Accumulate:**
 - Default behavior: new values **replace** previous content
@@ -304,6 +537,73 @@ In generic state management frameworks, you do state management the same way eve
 
 This requires more upfront thinking but produces more efficient, purpose-built solutions rather than one-size-fits-all approaches.
 
+### Layout Management, Not State Management
+
+A reframing from hypermedia thinking: **the focus is on layout management instead of state management**.
+
+```jsx
+// State-driven thinking (React)
+const [items, setItems] = useState([]);
+useEffect(() => { fetchItems().then(setItems); }, []);
+return <List items={items} />;
+
+// Layout-driven thinking (Azoth)
+return <div>{fetchItems().then(items => <List items={items}/>)}</div>;
+```
+
+In the layout-driven approach:
+- We're not asking "what data do I need to store?"
+- We're asking "what layout change happens when this data arrives?"
+- The async data source IS the layout instruction
+- Error handling happens in context (try/catch, .catch)
+
+```jsx
+// Error handling in layout context
+async function loadList() {
+    try {
+        const items = await fetchItems();
+        return <List items={items}/>;
+    } catch(err) {
+        return <Oops error={err}/>;
+    }
+}
+
+return <div>{loadList()}</div>;
+```
+
+### State Management Integration: Channels (Chronos)
+
+While Azoth doesn't own state management, there's a **state management integration layer** in the Chronos package that provides helpers for orchestrating changes.
+
+**The `use()` function** — the primary channel API:
+
+```jsx
+const [CatCount, CatList] = use(fetchCats(), 
+    cats => cats.length,                              // Transform 1: extract count
+    [Cat, { map: true, startWith: <Loading/> }]       // Transform 2: map to components
+);
+
+return <>
+    <header><h1>😸 <CatCount/> Cats</h1></header>
+    <main><ul><CatList/></ul></main>
+</>;
+```
+
+**What channels provide:**
+- Connect async data sources to UI layout
+- Transform data through multiple outputs
+- Manage subscription lifecycles
+- Orchestrate complex change patterns
+
+**Supporting helpers:**
+- `tee` — split an async source to multiple feeds
+- `branch` — combine tee with per-feed transforms
+- `act` — perform side effects from async sources (e.g., `act(theme$, t => html.className = t)`)
+
+**The burden:** Without "just update state and everything re-renders," you must orchestrate the types of changes expected in your application. This is the hypermedia mindset — intentional change sets, not arbitrary state updates.
+
+**Named pattern:** When working with async data in Azoth, **use the channel pattern**.
+
 ---
 
 ## Questions I Have
@@ -314,9 +614,17 @@ This requires more upfront thinking but produces more efficient, purpose-built s
 
 3. **Components:** I know components exist but we haven't touched them. Are they functions? Classes? Something else?
 
-4. ~~**Fragments:**~~ **ANSWERED:** Nothing special. `<>...</>` returns a standard DocumentFragment. Thoth may collapse unnecessary fragments during compilation, but otherwise they work as expected per the DOM spec.
+4. **Slotable content vs React children:** You mentioned slotable content is "NOT meant to be accessible the way React children are." What does this mean practically? In React, `props.children` is a first-class thing components manipulate. Is Azoth's slotable content more opaque? Does the component just render it without introspecting it?
 
-5. ~~**The runtime exports:**~~ **ANSWERED:** `compose` = resolve any value to DOM and insert at anchor. `createComponent` = instantiate a component and return result. `composeComponent` = instantiate and compose into an anchor. `renderer` = cache DOM + replay bindings for "UI = f(state)" sections.
+5. ~~**Fragments:**~~ **ANSWERED:** Nothing special. `<>...</>` returns a standard DocumentFragment. Thoth may collapse unnecessary fragments during compilation, but otherwise they work as expected per the DOM spec.
+
+6. ~~**The runtime exports:**~~ **ANSWERED:** `compose` = resolve any value to DOM and insert at anchor. `createComponent` = instantiate a component and return result. `composeComponent` = instantiate and compose into an anchor. `renderer` = cache DOM + replay bindings for "UI = f(state)" sections.
+
+7. **Channels relationship:** Is `use()` the primary channel API? How do `tee`, `branch`, and `act` relate to it? Are they alternatives or complementary?
+
+8. **Delta taxonomy:** The hypermedia model talks about "well-known changes" and HTMX has "swaps" and "adds." Is there a formal taxonomy of delta types in Azoth? Or is it just replace/accumulate?
+
+9. **Unsubscription:** How do channel subscriptions get cleaned up? Is it automatic when DOM is removed? Manual?
 
 ---
 
@@ -326,9 +634,11 @@ This requires more upfront thinking but produces more efficient, purpose-built s
 
 2. **Component lifecycle:** I assume there's mount/unmount behavior, but maybe DOM elements just... exist and get removed?
 
-3. **State management:** I assume something manages state, but you said there's "no direct tie to state management" — just primitives and async constructs.
+3. ~~**State management:**~~ **REFRAMED:** Nothing "manages state" in Azoth. State management is decoupled from rendering. You bring your own patterns (observables, stores, whatever) and Azoth consumes their async outputs through channels. The right framing: **layout management, not state management**.
 
 4. ~~**Expecting a framework boundary:**~~ **CONFIRMED:** Azoth has no such boundary. There's no "inside Azoth" vs "escaping Azoth" — it's all just JavaScript and DOM. Use any web platform API directly.
+
+5. **Terminology drift:** I might slip into React terminology. Watch for: "hooks" (use "channels"), "re-render" (use "delta/update"), "lifecycle" (there isn't one — DOM just exists), "state" (use "async data source").
 
 ---
 
@@ -342,4 +652,46 @@ This requires more upfront thinking but produces more efficient, purpose-built s
 
 ---
 
-*Last updated: Based on smoke.test.tsx work and pivot-feasibility planning*
+*Last updated: Documentation review pass — added channels, layout management framing, compose evaluation table*
+
+---
+
+## Context Not Yet Captured
+
+*Notes for LLM reboot - conversational knowledge not in this doc:*
+
+### Testing Infrastructure
+- Tests run in **Vitest browser mode** (real Chrome via webdriverio), not jsdom
+- Inline snapshots with `/* HTML */` comment enable syntax highlighting
+- `fixture()` helper pattern: clears body, appends node, returns innerHTML
+- Tests written in `.tsx` for TypeScript checking despite Azoth being JS
+- Type assertions (`as HTMLParagraphElement`) used since `JSX.Element = Node` is broad
+
+### Build Pipeline for TSX
+- Azoth's Thoth compiler (Acorn-based) can't parse TypeScript
+- Solution: `esbuild.transform` strips TS types before Thoth processes JSX
+- See `packages/vite-plugin/TSX-SUPPORT.md` for details
+
+### Project Context
+- This mental model doc is part of a **documentation strategy for AI adoption**
+- Related project: `ai-era-innovation` repo, conference talk on AI + non-dominant frameworks
+- The Azoth framework is being used for a **real estate agent dashboard** project
+- Strategy doc: `ai-era-innovation/strategies/documentation-patterns.md`
+
+### What This Doc Is For
+- Iterative refinement of LLM understanding
+- User corrects misconceptions, LLM updates doc
+- Goal: reduce React pattern drift when generating Azoth code
+
+### Scratchpad Documentation
+- `azoth/docs/scratchpad/` contains rough but accurate docs on:
+  - Channels and the `use()` API
+  - JSX composition patterns and the full evaluation table
+  - Async child composition with error handling
+- These are candidates for cleanup once the mental model stabilizes
+
+### Still Needs Deep Exploration
+- The blocks system (keyed, anchored) for sophisticated list management
+- Slotable content mechanics vs React children
+- Component instantiation patterns (functions vs classes)
+- Subscription cleanup and lifecycle

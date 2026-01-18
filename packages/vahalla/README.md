@@ -32,3 +32,28 @@ test('element', ({ expect }) => {
 - Type assertions for specific element types: `as HTMLParagraphElement`
 - `document.body` as fixture container (universal, always available)
 - Inline snapshots keep expected output visible with test code
+
+## Sandbox: Empirical JSX Testing
+
+`sandbox.test.tsx` is a scratch file for quickly testing Azoth JSX behavior.
+
+**Usage:**
+```bash
+pnpm test packages/vahalla/sandbox.test.tsx
+```
+
+**What it's for:**
+- Test JSX patterns and see the DOM output
+- Verify interpolation, lists, components
+- Debug unexpected rendering behavior
+- Quickly verify assumptions
+
+**How to use it:**
+1. Open `sandbox.test.tsx`
+2. Modify the `scratch` test with your JSX
+3. Run the test
+4. Inspect the snapshot output
+
+**The primary interface is JSX** — treat it as HTML that returns DOM.
+
+**Deep exploration:** If you need to investigate Azoth internals (maya, thoth), create a sandbox test alongside that specific package. Keep internal exploration separate from developer-facing JSX tests.
