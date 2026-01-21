@@ -695,3 +695,27 @@ return <>
 - Slotable content mechanics vs React children
 - Component instantiation patterns (functions vs classes)
 - Subscription cleanup and lifecycle
+
+---
+
+## Known Issues
+
+*Bugs and unexpected behaviors discovered during development:*
+
+### JSX Comments Render as "1" Text Nodes
+
+**Issue:** Commented-out JSX components using `{/* <Component /> */}` syntax cause spurious "1" text nodes to appear in the DOM between sibling elements.
+
+**Reproduction:**
+```jsx
+<main>
+    <Header />
+    {/* <OldComponent /> */}
+    <NewComponent />
+</main>
+```
+Results in a "1" text node appearing between `<Header>` and `<NewComponent>` in the rendered DOM.
+
+**Workaround:** Remove commented-out JSX entirely rather than leaving it in place. Use version control to preserve old code instead of inline comments.
+
+**Status:** Open — likely related to how Thoth compiles JSX comments or how Maya's anchor system handles empty interpolation slots.
