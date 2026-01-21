@@ -237,7 +237,7 @@ function assessElement(node) {
     // TODO: <namespaces:el and <member.express.ion
     const isCustom = node.isCustomElement = identifier.name.includes('-');
     node.isVoidElement = !isCustom && voidElements.has(identifier.name);
-    const isComponent = node.isComponent = !isCustom && /^[A-Z$][a-zA-Z]*$/.test(identifier.name);
+    const isComponent = node.isComponent = !isCustom && /^[A-Z$][a-zA-Z0-9]*$/.test(identifier.name);
     if(isComponent) {
         node.props = [];
         node.componentExpr = identifier;
