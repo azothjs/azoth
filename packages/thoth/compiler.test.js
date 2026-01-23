@@ -743,6 +743,61 @@ describe('components and custom element', () => {
 
     });
 
+    test('boolean props without values', ({ expect }) => {
+        const input = `
+            const c = <Component flag />;
+            const cProps = <Component flag other={value} />;
+            const nested = <div><Component flag /></div>;
+        `;
+        const { code, templates } = compile(input);
+
+        expect(code).toMatchInlineSnapshot(`
+          "import { __rC } from 'azoth/runtime';
+          import { tddcfc908 } from 'virtual:azoth-templates?id=ddcfc908';
+          const c = __rC(Component, { flag: true, });
+          const cProps = __rC(Component, { flag: true, other: value, });
+          const nested = tddcfc908([Component, { flag: true, }]);
+          "
+        `);
+        expect(templates).toMatchInlineSnapshot(`
+          [
+            {
+              "bMap": "null",
+              "bindKey": "",
+              "html": "",
+              "id": "e3b0c442",
+              "isDomFragment": false,
+              "isEmpty": true,
+              "propertyNames": null,
+              "tMap": "null",
+              "targetKey": "",
+            },
+            {
+              "bMap": "null",
+              "bindKey": "",
+              "html": "",
+              "id": "e3b0c442",
+              "isDomFragment": false,
+              "isEmpty": true,
+              "propertyNames": null,
+              "tMap": "null",
+              "targetKey": "",
+            },
+            {
+              "bMap": "[2]",
+              "bindKey": "d4735e3a",
+              "html": "<div><!--0--></div>",
+              "id": "ddcfc908",
+              "isDomFragment": false,
+              "isEmpty": false,
+              "propertyNames": null,
+              "tMap": "[[0]]",
+              "targetKey": "5feceb66",
+            },
+          ]
+        `);
+    });
+
     test('top level components: empty and with props', ({ expect }) => {
         const input = `
             const c = <Component/>;

@@ -30,4 +30,3 @@ function Emoji({ name, unicode, htmlCode }) {
     </li>;
 }
 
-

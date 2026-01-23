@@ -719,3 +719,32 @@ Results in a "1" text node appearing between `<Header>` and `<NewComponent>` in 
 **Workaround:** Remove commented-out JSX entirely rather than leaving it in place. Use version control to preserve old code instead of inline comments.
 
 **Status:** Open — likely related to how Thoth compiles JSX comments or how Maya's anchor system handles empty interpolation slots.
+
+### Boolean Props Without Values (Fixed)
+
+**Issue:** Using boolean props without explicit values on custom components caused Thoth to error with `Cannot read properties of null (reading 'type')` in `Transpiler.ComponentProps`.
+
+**Reproduction:**
+```jsx
+// This now works:
+<MyComponent flag />
+
+// Equivalent to:
+<MyComponent flag={true} />
+```
+
+**Root Cause:** In `Analyzer.JSXAttributes`, when processing component props (where `jsxOnly=false`), attributes without values had `expr=null`. The code didn't handle this case before passing to `Transpiler.ComponentProps`, which crashed when accessing `expr.type`.
+
+**Fix:** In `Analyzer.js`, when `expr` is null for component props, create a synthetic boolean literal:
+```javascript
+// Boolean shorthand: <Component flag /> means flag={true}
+if(!jsxOnly && expr === null) {
+    expr = { type: 'Literal', value: true };
+}
+```
+
+**Note:** This only affected custom components. Native HTML elements already handled boolean attributes normally via a different code path (`jsxOnly=true` skips non-expression attributes).
+
+**Status:** Fixed — Boolean shorthand now works like JSX/React.
+
+**Context:** Discovered while refactoring `FubClientsStage.jsx` where `<FubSimpleRow muted />` caused the error.

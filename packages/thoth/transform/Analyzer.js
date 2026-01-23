@@ -217,6 +217,10 @@ export class Analyzer {
             // element attributes = static html
             // component props = code gen js obj literal prop
             if(isJSXExpr) expr = expr.expression;
+            // Boolean shorthand: <Component flag /> means flag={true}
+            if(!jsxOnly && expr === null) {
+                expr = { type: 'Literal', value: true };
+            }
             this.#bind(BIND.PROP, attr, expr, i);
         }
     }
