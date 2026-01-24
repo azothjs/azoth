@@ -173,7 +173,6 @@ describe('bind generator', () => {
         );
     });
 
-
     test('edge case', ({ expect }) => {
         const input = `
             export const Loading = () => <p>loading...</p>;

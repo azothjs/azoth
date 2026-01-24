@@ -698,6 +698,96 @@ return <>
 
 ---
 
+## Component Children (Slottable)
+
+Azoth components can receive children, but the mechanism differs from React.
+
+### Component Signature
+
+```jsx
+// Props as first arg, slottable (children) as second arg
+const Card = ({ class: className }, slottable) => (
+    <div class={`card${className ? ` ${className}` : ''}`}>
+        {slottable}
+    </div>
+);
+```
+
+### Key Differences from React
+
+1. **Second argument, not a prop:** Children are passed as the second argument to the component function, not as `props.children`.
+
+2. **Called "slottable":** The convention is to name it `slottable` rather than `children` to emphasize the difference.
+
+3. **You receive DOM, not virtual DOM:** In React, `children` are React elements you can manipulate (clone, map, filter). In Azoth, `slottable` is actual DOM content. Don't try to "muck about" with it — just render it.
+
+4. **Composition, not manipulation:** Achieve the same patterns by composing components (nesting) rather than manipulating children programmatically.
+
+### Usage
+
+```jsx
+// Definition
+const Card = ({ class: className }, slottable) => (
+    <div class={`card${className ? ` ${className}` : ''}`}>
+        {slottable}
+    </div>
+);
+
+// Usage - content becomes slottable
+<Card class="stats">
+    <h2 class="card-title">Title</h2>
+    <div class="content">...</div>
+</Card>
+```
+
+### Compiled Output
+
+Looking at the compiler tests, component children compile to:
+
+```javascript
+// Input:
+const c = <Component><p>content</p></Component>;
+
+// Output:
+const c = __rC(Component, null, templateFn());
+//              ^Component  ^props  ^children template
+```
+
+The third argument to `__rC` is a template function that creates the DOM for the children.
+
+### Testing and Development Environments
+
+Azoth has several testing environments, each with a specific purpose:
+
+**Valhalla (`packages/vahalla/`):**
+- Browser-based tests via Vitest browser mode + Chrome
+- Tests the **developer-facing JSX API** at the integration level
+- Use for component patterns, rendering behavior, JSX-to-DOM verification
+- Add tests here when investigating bugs at the API level
+
+**vite-test (`vite-test/`):**
+- A minimal Vite bootstrap project
+- Verifies that Azoth works correctly in a standard Vite build environment
+- **Build system integration test** — does Azoth + Vite produce a working app?
+- Keep minimal; it's not a test suite, it's a smoke test for the build
+
+**Thoth compiler tests (`packages/thoth/compiler.test.js`):**
+- Tests the compiler/transpiler output directly
+- Use for testing compilation behavior, generated code, template structure
+- Add tests here for parser/transpiler-level issues
+
+**Happy-dom vs real browsers:** When encountering errors in Node-based test environments (like happy-dom), verify the pattern works in a real browser first. Some DOM behaviors differ between implementations.
+
+### See Also
+
+- `packages/vahalla/components.test.tsx` — API-level tests for component patterns
+- `packages/vahalla/README.md` — Testing conventions and inline snapshot format
+- `packages/thoth/compiler.test.js` — "component child templates" and "compose component" tests
+- `packages/thoth/transform/Analyzer.js` — How children are analyzed
+- `packages/thoth/transform/Transpiler.js` — How children are transpiled
+
+---
+
 ## Known Issues
 
 *Bugs and unexpected behaviors discovered during development:*
@@ -748,3 +838,81 @@ if(!jsxOnly && expr === null) {
 **Status:** Fixed — Boolean shorthand now works like JSX/React.
 
 **Context:** Discovered while refactoring `FubClientsStage.jsx` where `<FubSimpleRow muted />` caused the error.
+
+### Dynamic Bindings Require DOM Property Names (Not Attribute Names)
+
+**Issue:** Dynamic attribute bindings use DOM property assignment, not `setAttribute()`. This means you must use the DOM property name (`className`) rather than the HTML attribute name (`class`).
+
+**Root Cause:** In `makeBind()` (template-generators.js), dynamic values are assigned directly to DOM properties:
+```javascript
+t0.className = v0;  // Works - className is a DOM property
+t0["class"] = v0;   // Fails - "class" is not a valid DOM property
+```
+
+**Reproduction:**
+```jsx
+// Static attribute — WORKS (goes into HTML template directly)
+<div class="card">content</div>
+// Output: <div class="card">content</div>
+
+// Dynamic with attribute name — BROKEN
+<div class={myClass}>content</div>
+// Output: <div>content</div>  ← class missing!
+
+// Dynamic with property name — WORKS
+<div className={myClass}>content</div>
+// Output: <div class="highlighted">content</div>
+```
+
+**Common attribute → property mappings:**
+- `class` → `className`
+- `for` → `htmlFor`
+- `readonly` → `readOnly`
+- `tabindex` → `tabIndex`
+
+**Documented behavior:** See line ~359: "Attributes need attribute names, properties need DOM property names."
+
+**Future work:** A translation layer could allow developers to use either name interchangeably (90% complete in separate project).
+
+**Workaround:** Use `className` for dynamic class bindings, `class` for static.
+
+**Status:** Known limitation — documented, workaround available. Future: attribute-to-property translation layer.
+
+### Component with Dynamic Binding Inside Slottable (Under Investigation)
+
+**Issue:** A component with dynamic bindings (e.g., `{title}`) used inside another component's slottable crashes at runtime.
+
+**Reproduction:**
+```jsx
+const CardTitle = ({ title }) => (
+    <h2 class="card-title">{title}</h2>
+);
+
+const Card = (props, slottable) => (
+    <div class="card">{slottable}</div>
+);
+
+// This crashes:
+<Card>
+    <CardTitle title="Performance Stats" />
+</Card>
+```
+
+**Error:** `TypeError: Cannot read properties of undefined (reading 'data')` at compose.js line 201 in `clear(anchor)` function.
+
+**Observations:**
+- Works: Same pattern in Valhalla tests (components defined inline in same file)
+- Fails: wre-dashboards (components imported from separate file)
+
+**Under investigation:** Need to isolate the variable (inline vs imported) with controlled experiment in Valhalla.
+
+**Workaround:** Use imperative DOM manipulation:
+```jsx
+export const CardTitle = ({ title }) => {
+    const h2 = <h2 class="card-title"></h2>;
+    h2.textContent = title;
+    return h2;
+};
+```
+
+**Status:** Open — root cause unknown, investigating.

@@ -1,6 +1,19 @@
 # Valhalla - Azoth End-to-End Testing
 
-Browser-based tests verifying Azoth JSX compilation and rendering.
+Browser-based tests verifying Azoth JSX compilation and rendering at the API level.
+
+## Purpose
+
+Valhalla tests the **developer-facing JSX interface** — treating JSX as HTML that returns DOM. This is distinct from:
+
+- **vite-test/**: A minimal Vite bootstrap project that verifies Azoth works correctly in a standard Vite build environment. Use for build system integration testing.
+- **packages/thoth/compiler.test.js**: Compiler-level tests for the Thoth transpiler. Use for testing compilation output.
+
+**When to add tests here:**
+- Testing component patterns (props, slottable, nesting)
+- Verifying JSX-to-DOM behavior
+- Documenting idiomatic Azoth patterns
+- Investigating rendering bugs at the API level
 
 ## Setup
 
@@ -28,10 +41,29 @@ test('element', ({ expect }) => {
 
 ## Conventions
 
-- Use `/* HTML */` comment for snapshot syntax highlighting
+- **Use `/* HTML */` comment** before inline snapshots for syntax highlighting
 - Type assertions for specific element types: `as HTMLParagraphElement`
 - `document.body` as fixture container (universal, always available)
 - Inline snapshots keep expected output visible with test code
+
+## Test Files
+
+- **smoke.test.tsx**: Core JSX-to-DOM behavior (elements, DOM APIs)
+- **components.test.tsx**: Component patterns (props, slottable, nesting)
+- **sandbox.test.tsx**: Scratch file for quick experiments
+
+## Running Tests
+
+```bash
+# Run all Valhalla tests
+pnpm test packages/vahalla/
+
+# Run specific test file
+pnpm test packages/vahalla/components.test.tsx
+
+# Update snapshots
+pnpm test packages/vahalla/components.test.tsx -- -u
+```
 
 ## Sandbox: Empirical JSX Testing
 
