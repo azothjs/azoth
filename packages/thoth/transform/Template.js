@@ -55,7 +55,7 @@ export class Template {
             });
         }
 
-        this.targetKey = this.tMap ? createHash(this.tMap.join(';')) : '';
+        this.targetKey = this.tMap ? createHash(JSON.stringify(this.tMap)) : '';
         this.bindKey = this.bMap ? createHash(
             this.bMap.join(';') +
             (this.propertyNames ? this.propertyNames.join(';') : '')

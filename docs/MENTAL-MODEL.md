@@ -878,41 +878,83 @@ t0["class"] = v0;   // Fails - "class" is not a valid DOM property
 
 **Status:** Known limitation — documented, workaround available. Future: attribute-to-property translation layer.
 
-### Component with Dynamic Binding Inside Slottable (Under Investigation)
+### Template targetKey Collision Bug (Fixed)
 
-**Issue:** A component with dynamic bindings (e.g., `{title}`) used inside another component's slottable crashes at runtime.
+**Issue:** Components with child content bindings on root elements could crash at runtime with `TypeError: Cannot read properties of undefined (reading 'data')`.
 
-**Reproduction:**
-```jsx
-const CardTitle = ({ title }) => (
-    <h2 class="card-title">{title}</h2>
-);
+**Root Cause:** The `targetKey` hash in `Template.js` used `Array.join(';')` which flattens nested arrays:
 
-const Card = (props, slottable) => (
-    <div class="card">{slottable}</div>
-);
+```javascript
+// OLD (buggy):
+this.targetKey = this.tMap ? createHash(this.tMap.join(';')) : '';
 
-// This crashes:
-<Card>
-    <CardTitle title="Performance Stats" />
-</Card>
+// [0].join(';') === "0"
+// [[0]].join(';') === "0"  // COLLISION!
 ```
 
-**Error:** `TypeError: Cannot read properties of undefined (reading 'data')` at compose.js line 201 in `clear(anchor)` function.
+The `tMap` structure differs based on binding location:
+- **Property on child element:** `tMap = [queryIndex]` e.g., `[0]`
+- **Child content on root:** `tMap = [[childIndex]]` e.g., `[[0]]`
 
-**Observations:**
-- Works: Same pattern in Valhalla tests (components defined inline in same file)
-- Fails: wre-dashboards (components imported from separate file)
+When two templates collided on `targetKey`, the vite-plugin's deduplication reused the wrong target function.
 
-**Under investigation:** Need to isolate the variable (inline vs imported) with controlled experiment in Valhalla.
-
-**Workaround:** Use imperative DOM manipulation:
+**Example collision:**
 ```jsx
-export const CardTitle = ({ title }) => {
-    const h2 = <h2 class="card-title"></h2>;
-    h2.textContent = title;
-    return h2;
-};
+// Template A: property binding on CHILD element (img)
+const Header = () => <header><img src={logo} /></header>;
+// tMap: [0] → targets child via querySelectorAll('[data-bind]')[0]
+
+// Template B: child content on ROOT element (h2)
+const Title = ({ title }) => <h2>{title}</h2>;
+// tMap: [[0]] → targets root's childNodes[0]
+
+// Both hashed to same targetKey!
+// If Header loads first, its target function (r,t) => [t[0]] 
+// gets reused for Title, but Title's h2 has no data-bind attribute,
+// so t[0] is undefined → crash
 ```
 
-**Status:** Open — root cause unknown, investigating.
+**Fix:** Use `JSON.stringify()` to preserve array structure:
+
+```javascript
+// NEW (fixed):
+this.targetKey = this.tMap ? createHash(JSON.stringify(this.tMap)) : '';
+
+// JSON.stringify([0]) === "[0]"
+// JSON.stringify([[0]]) === "[[0]]"  // Different!
+```
+
+**Status:** Fixed (see `packages/thoth/compiler.test.js` "targetKey must distinguish root vs child element bindings" test)
+
+---
+
+## Template Key Hashing Strategy
+
+The compiler generates three hash keys for template deduplication:
+
+### targetKey
+Hash of `JSON.stringify(tMap)` — identifies the target function that locates DOM nodes to bind.
+
+**tMap structure:**
+- Child/component bindings on root: `[[childIndex]]`
+- Child/component bindings on child: `[[queryIndex, childIndex]]`
+- Property bindings: `[queryIndex]` (or `-1` for root)
+
+### bindKey
+Hash of `bMap.join(';') + propertyNames?.join(';')` — identifies the bind function that applies values.
+
+**bMap structure:**
+- `BIND.CHILD (1)` or `BIND.COMPONENT (2)`: positive number (binding type)
+- `BIND.PROP (3)`: negative number (index into propertyNames × -1)
+
+### Template ID
+Hash of `html + bindKey + targetKey` — unique identifier for the entire template.
+
+### Future Considerations
+
+The current approach duplicates property names across templates. For large projects with many elements using common properties (e.g., `className`, `onClick`), this could be optimized:
+
+1. **Property name interning:** Use indexes into a shared property name table
+2. **Trade-off:** Smaller payload vs. extra indirection at runtime
+
+The bindKey already uses indexes for property names within a template, but doesn't share across templates. Whether this optimization is worthwhile depends on actual payload sizes in production builds.

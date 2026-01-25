@@ -237,7 +237,7 @@ describe('render generator', () => {
     test('simple', ({ compile, expect }) => {
         const code = compile(`name => <p>{name}</p>`);
 
-        expect(code).toMatchInlineSnapshot(`"__renderer("77e67b80", g5feceb66, b6b86b273, false, \`<p><!--0--></p>\`)"`);
+        expect(code).toMatchInlineSnapshot(`"__renderer("15aa2705", gdb407f11, b6b86b273, false, \`<p><!--0--></p>\`)"`);
     });
 
     test('static', ({ compile, expect }) => {
@@ -254,7 +254,7 @@ describe('render generator', () => {
 
         expect(code).toMatchInlineSnapshot(
             `
-          "__renderer("1d618ea9", g534bf81d, b8477292e, false, \`<p>
+          "__renderer("2ce4ea27", gedc11336, b8477292e, false, \`<p>
                       <!--0--> <span data-bind>hey <!--0-->!</span>
                   </p>\`)"
         `
@@ -265,7 +265,7 @@ describe('render generator', () => {
         const template = preParse(`name => <p>{name}</p>`, expect);
         const code = makeRenderer(template, { noContent: true });
 
-        expect(code).toMatchInlineSnapshot(`"__renderer("77e67b80", g5feceb66, b6b86b273, false)"`);
+        expect(code).toMatchInlineSnapshot(`"__renderer("15aa2705", gdb407f11, b6b86b273, false)"`);
     });
 
 
@@ -285,11 +285,11 @@ describe('render generator', () => {
         expect(mapped).toMatchInlineSnapshot(`
           [
             "__renderer("191b5e03", null, null, false, \`<p>loading...</p>\`)",
-            "__renderer("77e67b80", g5feceb66, b6b86b273, false, \`<p><!--0--></p>\`)",
-            "__renderer("b2903d6d", g5feceb66, b6b86b273, false, \`<ul><!--0--></ul>\`)",
-            "__renderer("44ba17ec", g5feceb66, b6b86b273, false, \`<p><!--0--> cats</p>\`)",
-            "__renderer("4be044f9", g5feceb66, b6b86b273, false, \`<li><!--0--></li>\`)",
-            "__renderer("b2903d6d", g5feceb66, b6b86b273, false, \`<ul><!--0--></ul>\`)",
+            "__renderer("15aa2705", gdb407f11, b6b86b273, false, \`<p><!--0--></p>\`)",
+            "__renderer("3fcf8b87", gdb407f11, b6b86b273, false, \`<ul><!--0--></ul>\`)",
+            "__renderer("2c4a6c0f", gdb407f11, b6b86b273, false, \`<p><!--0--> cats</p>\`)",
+            "__renderer("fbb7e8b4", gdb407f11, b6b86b273, false, \`<li><!--0--></li>\`)",
+            "__renderer("3fcf8b87", gdb407f11, b6b86b273, false, \`<ul><!--0--></ul>\`)",
           ]
         `);
     });

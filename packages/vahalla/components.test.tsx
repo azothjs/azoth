@@ -18,24 +18,38 @@ function fixture(node: Node): string {
 
 describe('slottable with nested components', () => {
 
-    test('wre-dashboards pattern: wrapper with Card + CardTitle + content', ({ expect }) => {
-        // Matches actual wre-dashboards pattern:
-        // - Card and CardTitle imported from separate file
-        // - Used inside a wrapper component (like ZillowStats)
-        // - Card contains CardTitle PLUS additional content (div)
-        
+    test('vanilla imported CardTitle with dynamic title', ({ expect }) => {
+        const el = <ImportedCardTitle title="Hello" />;
+        expect(fixture(el)).toMatchInlineSnapshot(
+            /* HTML */ `"<h2 class="card-title">Hello<!--1--></h2>"`
+        );
+    });
+
+    test('STATIC title in wrapper', ({ expect }) => {
         const StatsCard = () => (
             <ImportedCard>
-                <ImportedCardTitle title="My Title" />
+                <ImportedCardTitle title="Static Title" />
                 <div class="stats-content">Some content here</div>
             </ImportedCard>
         );
-        
         const el = <StatsCard />;
-        
-        // WORKS in Valhalla - still can't reproduce wre-dashboards crash
         expect(fixture(el)).toMatchInlineSnapshot(
-            /* HTML */ `"<div class="card"><h2 class="card-title">My Title<!--1--></h2><div class="stats-content">Some content here</div><!--1--></div>"`
+            /* HTML */ `"<div class="card"><h2 class="card-title">Static Title<!--1--></h2><!--1-->
+                <div class="stats-content">Some content here</div><!--1--></div>"`
+        );
+    });
+
+    test('DYNAMIC title in wrapper (prop flows through)', ({ expect }) => {
+        const StatsCard = ({ title }) => (
+            <ImportedCard>
+                <ImportedCardTitle title={title} />
+                <div class="stats-content">Some content here</div>
+            </ImportedCard>
+        );
+        const el = <StatsCard title="Dynamic Title" />;
+        expect(fixture(el)).toMatchInlineSnapshot(
+            /* HTML */ `"<div class="card"><h2 class="card-title">Dynamic Title<!--1--></h2><!--1-->
+                <div class="stats-content">Some content here</div><!--1--></div>"`
         );
     });
 
@@ -64,10 +78,9 @@ describe('dynamic class attributes', () => {
         const el = <Box className="highlighted" />;
         
         // Works because element.className = value
-        expect(fixture(el)).toMatchInlineSnapshot(/* HTML */ `
-      "<div class="card"><h2 class="card-title">My Title<!--1--></h2><!--1-->
-                      <div class="stats-content">Some content here</div><!--1--></div>"
-    `);
+        expect(fixture(el)).toMatchInlineSnapshot(
+            /* HTML */ `"<div class="highlighted">content</div>"`
+        );
     });
 
 });
