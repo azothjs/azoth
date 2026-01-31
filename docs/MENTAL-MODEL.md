@@ -575,6 +575,30 @@ return <div>{loadList()}</div>;
 
 While Azoth doesn't own state management, there's a **state management integration layer** in the Chronos package that provides helpers for orchestrating changes.
 
+**Channels are async-to-DOM pipelines:**
+```
+Promise/AsyncIterator → transform → DOM replacement
+```
+
+The `channel()` function:
+1. Takes an async source (Promise or async iterator)
+2. Optionally a transform function that converts data → JSX
+3. Returns something usable as a component: `<Channel />`
+
+When the async source fires, the transform runs and the result replaces the previous DOM at that anchor point.
+
+**`start` vs `init` options:**
+- `start`: An arbitrary value to render synchronously before async arrives (does NOT go through transform)
+- `init`: An initial value that DOES go through the transform function
+
+```jsx
+// start: shows "Loading..." literally, then shows transformed result
+channel(promise, Cat, { start: 'Loading...' });
+
+// init: shows Cat({ name: 'felix' }) immediately, then Cat(resolved data)
+channel(promise, Cat, { init: { name: 'felix' } });
+```
+
 **The `use()` function** — the primary channel API:
 
 ```jsx
@@ -620,11 +644,13 @@ return <>
 
 6. ~~**The runtime exports:**~~ **ANSWERED:** `compose` = resolve any value to DOM and insert at anchor. `createComponent` = instantiate a component and return result. `composeComponent` = instantiate and compose into an anchor. `renderer` = cache DOM + replay bindings for "UI = f(state)" sections.
 
-7. **Channels relationship:** Is `use()` the primary channel API? How do `tee`, `branch`, and `act` relate to it? Are they alternatives or complementary?
+7. ~~**Channels relationship:**~~ **PARTIALLY ANSWERED:** `channel()` is the core function that connects async sources to DOM. It takes an async source (Promise or async iterator), optional transform, and options. `tee` splits a source to multiple feeds. `branch` combines tee with per-feed transforms. `act` performs side effects.
 
 8. **Delta taxonomy:** The hypermedia model talks about "well-known changes" and HTMX has "swaps" and "adds." Is there a formal taxonomy of delta types in Azoth? Or is it just replace/accumulate?
 
 9. **Unsubscription:** How do channel subscriptions get cleaned up? Is it automatic when DOM is removed? Manual?
+
+10. **Channel error handling:** Where do fetch errors get caught when using channels? In the transform function? Does channel have error handling built in? *(Noted for future exploration once dashboard is working)*
 
 ---
 
@@ -791,6 +817,35 @@ Azoth has several testing environments, each with a specific purpose:
 ## Known Issues
 
 *Bugs and unexpected behaviors discovered during development:*
+
+### Component Props are Null When Not Provided
+
+**Issue:** When a component is called without any props (`<Card>content</Card>`), the props argument is `null` rather than an empty object `{}`. This breaks destructuring in the component signature.
+
+**Reproduction:**
+```jsx
+// Component expects to destructure props
+export const Card = ({ class: className }, slottable) => ( ... );
+
+// Called without props
+<Card><p>Content</p></Card>  // CRASHES: Cannot destructure property 'class' of 'null'
+```
+
+**Workaround:** Handle null props in the component:
+```jsx
+export const Card = (props, slottable) => {
+    const className = props?.class;
+    return <div className={...}>{slottable}</div>;
+};
+```
+
+**Expected behavior:** Props should be `{}` when not provided, matching React's DX where destructuring always works.
+
+**Location:** Likely in Thoth compilation or Maya's `create()` function in `compose.js`.
+
+**Status:** Open — needs investigation in Thoth/Maya.
+
+---
 
 ### JSX Comments Render as "1" Text Nodes
 
