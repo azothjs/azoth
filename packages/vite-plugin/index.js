@@ -143,17 +143,34 @@ export default function azothPlugin(options) {
         name: 'azoth-inject-template-html',
         apply: 'build',
         enforce: 'post',
-        transformIndexHtml(html) {
+        // Use generateBundle instead of transformIndexHtml to ensure
+        // all modules are transformed before injecting templates.
+        // This fixes multi-page builds where shared chunks cause
+        // templates to be missing from some HTML files.
+        // Use generateBundle instead of transformIndexHtml to ensure
+        // all modules are transformed before injecting templates.
+        // This fixes multi-page builds where shared chunks cause
+        // templates to be missing from some HTML files.
+        generateBundle(options, bundle) {
             const templateHtml = [...programTemplates.entries()]
                 .map(([id, { html }]) => {
                     return `\n    <template id="${id}">${html}</template>`;
                 })
                 .join('');
 
-            const useBody = !html.includes(TEMPLATE_COMMENT);
-            const replace = useBody ? BODY_START : TEMPLATE_COMMENT;
-            const replacement = makeReplacement(templateHtml, useBody ? BODY_START : '');
-            return html.replace(replace, replacement);
+            for(const [fileName, asset] of Object.entries(bundle)) {
+                if(!fileName.endsWith('.html')) continue;
+                if(asset.type !== 'asset') continue;
+
+                const html = asset.source;
+                const useBody = !html.includes(TEMPLATE_COMMENT);
+                // Match <body> with optional attributes (e.g., <body class="...">)
+                const bodyMatch = html.match(/<body[^>]*>/);
+                const bodyTag = bodyMatch ? bodyMatch[0] : BODY_START;
+                const replace = useBody ? bodyTag : TEMPLATE_COMMENT;
+                const replacement = makeReplacement(templateHtml, useBody ? bodyTag : '');
+                asset.source = html.replace(replace, replacement);
+            }
         },
     };
 
