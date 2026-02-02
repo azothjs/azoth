@@ -246,6 +246,20 @@ describe('render generator', () => {
         expect(code).toMatchInlineSnapshot(`"__renderer("a84dfd44", null, null, false, \`<p>static</p>\`)"`);
     });
 
+    test('jsx comments are ignored', ({ compile, expect }) => {
+        // JSX comments {/* ... */} should not generate anchor placeholders
+        const code = compile(`({ title }) => <div>
+            {/* Title is optional */}
+            {title && <h1>{title}</h1>}
+        </div>`);
+
+        // Only one <!--0--> for the conditional, none for the comment
+        expect(code).toMatchInlineSnapshot(`"__renderer("77ff2813", g24227028, b6b86b273, false, \`<div>
+            
+            <!--0-->
+        </div>\`)"`);
+    });
+
 
     test('props and elements', ({ compile, expect }) => {
         const code = compile(`const t = <p className={"className"}>

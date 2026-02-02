@@ -93,6 +93,8 @@ export class HtmlGenerator extends Generator {
 
     // {...}
     JSXExpressionContainer(node, state) {
+        // Skip empty expressions (comments: {/* ... */})
+        if(node.expression?.type === 'JSXEmptyExpression') return;
         state.write(this.childReplace);
     }
 
