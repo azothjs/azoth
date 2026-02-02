@@ -9,16 +9,16 @@ Channels are a rendering concern (subscribing to async data), not a data utility
 ### Create Channel component
 Add a built-in `<Channel>` component that wraps the `channel()` function with props:
 - `async` - Promise or async iterable for data
-- `as` - Component to render with data
+- `as` - Render function that receives data directly: `as={data => <View {...data} />}`
 - `loading` - Loading state element (optional, defaults to nothing)
 
-Example usage:
+The `as` function receives data directly, giving consumers control over prop mapping:
 ```jsx
-<Channel 
-    async={fetchData()} 
-    as={MyView}
-    loading={<Loading />}
-/>
+// Array data — pass as prop
+<Channel async={results$} as={r => <SearchResults results={r} />} />
+
+// Object data — spread as props
+<Channel async={fetchUserContext()} as={data => <LandingPageView {...data} />} />
 ```
 
 Currently prototyped in `wre-dashboards/src/components/shared/Channel.jsx`.
