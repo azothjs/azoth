@@ -23,6 +23,22 @@ Example usage:
 
 Currently prototyped in `wre-dashboards/src/components/shared/Channel.jsx`.
 
+## Chronos
+
+### Rename generator to stream
+The `generator()` function should be renamed to `stream()`:
+- `stream` works as both verb and noun
+- `generator` describes implementation, not purpose
+- Return value names: `[asyncIterator, push]` instead of `[asyncIterator, dispatch]`
+
+```js
+// Before
+const [results$, dispatch] = generator(transform);
+
+// After
+const [results$, push] = stream(transform);
+```
+
 ## Compose
 
 ### Accept null from components
