@@ -81,6 +81,24 @@ Notice what's happening:
 - Event timing knowledge (pointerdown fires before focus) — standard browser behavior
 - **Instance-scoped state** — `wasFocused` is local to each component instance via closure
 
+#### The Unlock: Component = Constructor
+
+React's `UI = fn(state)` model means:
+- Functions re-run constantly
+- Closures capture stale values
+- You need `useRef`, `useCallback`, `useMemo` to escape the re-render trap
+- The framework fights the language
+
+Azoth's model: **component = constructor**
+- Runs once, returns DOM
+- Closures just work
+- Local variables are instance state
+- JavaScript works like JavaScript
+
+The "unlock" is realizing the platform (JS + DOM) was already good. React's abstractions were solving problems *it created*, not problems inherent to building UIs.
+
+Once you stop thinking in `UI = fn(state)`, you unlock the platform: DOM + JS.
+
 **In React, this would require:**
 ```jsx
 const ref = useRef();
