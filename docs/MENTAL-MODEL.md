@@ -45,6 +45,53 @@ This seems counterintuitive after years of state-driven frameworks, but Azoth le
 
 **Contrast with other frameworks:** Even SolidJS has quirky non-standard JavaScript behavior arising from transpilation rules. Azoth avoids this by keeping the abstraction layer minimal and aligned with the platform.
 
+#### Real-World Example: Tap-to-Dismiss Tooltips
+
+This production code implements mobile-friendly tooltips with tap-to-dismiss behavior:
+
+```jsx
+const StatCard = ({ label, info, value }) => {
+    // Toggle focus on tap (for mobile dismiss)
+    // Check on pointerdown BEFORE focus changes, then act on click
+    let wasFocused = false;
+    const handlePointerDown = (e) => {
+        wasFocused = document.activeElement === e.currentTarget;
+    };
+    const handleClick = (e) => {
+        if(wasFocused) {
+            e.currentTarget.blur();
+        }
+    };
+
+    return (
+        <div class="stat-card">
+            <span class="stat-label" tabindex="0" onpointerdown={handlePointerDown} onclick={handleClick}>
+                {label}
+            </span>
+            <span class="stat-value">{value}</span>
+        </div>
+    );
+};
+```
+
+Notice what's happening:
+- `document.activeElement` — native DOM API, just works
+- `e.currentTarget.blur()` — real DOM method on the actual element
+- `onpointerdown`, `onclick` — direct DOM event listeners, no synthetic events
+- Event timing knowledge (pointerdown fires before focus) — standard browser behavior
+- **Instance-scoped state** — `wasFocused` is local to each component instance via closure
+
+**In React, this would require:**
+```jsx
+const ref = useRef();
+const [isFocused, setIsFocused] = useState(false);
+// Plus synthetic event handling
+// Plus useEffect for focus management
+// Plus careful consideration of re-render timing
+```
+
+**With Azoth:** it's just JavaScript and DOM. The framework gets out of the way.
+
 ### Philosophy: Filling Gaps, Not Building Abstractions
 
 This is the core philosophical distinction that separates Azoth from other frameworks.
