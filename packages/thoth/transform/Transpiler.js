@@ -138,7 +138,11 @@ export class Transpiler extends Generator {
         if(props?.length) {
             this.ComponentProps(props, state);
         }
-        else if(slotFragment) state.write(`, null`);
+        else {
+            // Always emit empty object so components can safely destructure props
+            // <Component /> -> __rC(Component, {}) not __rC(Component)
+            state.write(`, {}`);
+        }
 
         if(slotFragment) {
             state.write(', ');

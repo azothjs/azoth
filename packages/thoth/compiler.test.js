@@ -808,7 +808,7 @@ describe('components and custom element', () => {
         expect(code).toMatchInlineSnapshot(`
           "import { __rC } from 'azoth/runtime';
 
-          const c = __rC(Component);
+          const c = __rC(Component, {});
           const cProps = __rC(Component, { prop: value, ...spread, attr: "static", });
           "
         `);
@@ -852,7 +852,7 @@ describe('components and custom element', () => {
         expect(code).toMatchInlineSnapshot(`
           "import { t862eb095 } from 'virtual:azoth-templates?id=862eb095';
 
-          const component = t862eb095([Component, { prop: value, prop2: "literal", }],[GotNoPropsAsYouCanSee]);
+          const component = t862eb095([Component, { prop: value, prop2: "literal", }],[GotNoPropsAsYouCanSee, {}]);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
@@ -890,8 +890,8 @@ describe('components and custom element', () => {
         expect(code).toMatchInlineSnapshot(`
           "import { __rC } from 'azoth/runtime';
           import { t6e8375c4 } from 'virtual:azoth-templates?id=6e8375c4';
-          const $A = __rC(A);
-          const $B = __rC(B);
+          const $A = __rC(A, {});
+          const $B = __rC(B, {});
           const dom = t6e8375c4($A,$B);
           "
         `);
@@ -959,12 +959,12 @@ describe('components and custom element', () => {
         expect(code).toMatchInlineSnapshot(`
           "import { __rC } from 'azoth/runtime';
           import { t15aa2705, t982d9e3e, t9155678a } from 'virtual:azoth-templates?id=15aa2705&id=982d9e3e&id=9155678a';
-          const c = __rC(Component, null, t15aa2705("test"));
-          const cTrim = __rC(Component, null, t15aa2705("test"));
-          const cTrimStart = __rC(Component, null, t15aa2705("test"));
-          const cTrimEnd = __rC(Component, null, t15aa2705("test"));
-          const cText = __rC(Component, null, t982d9e3e());
-          const cFrag = __rC(Component, null, t9155678a(1,2));
+          const c = __rC(Component, {}, t15aa2705("test"));
+          const cTrim = __rC(Component, {}, t15aa2705("test"));
+          const cTrimStart = __rC(Component, {}, t15aa2705("test"));
+          const cTrimEnd = __rC(Component, {}, t15aa2705("test"));
+          const cText = __rC(Component, {}, t982d9e3e());
+          const cFrag = __rC(Component, {}, t9155678a(1,2));
           "
         `);
 
@@ -1121,7 +1121,7 @@ describe('components and custom element', () => {
         expect(code).toMatchInlineSnapshot(`
           "import { t4c71fc70, t372bc820 } from 'virtual:azoth-templates?id=4c71fc70&id=372bc820';
 
-          const component = t4c71fc70([Component],[Component, { prop: value, prop2: "literal", }],[Component, null, t372bc820()],[Component, { prop: value, prop2: "literal", }, t372bc820()]);
+          const component = t4c71fc70([Component, {}],[Component, { prop: value, prop2: "literal", }],[Component, {}, t372bc820()],[Component, { prop: value, prop2: "literal", }, t372bc820()]);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`

@@ -1,10 +1,10 @@
-# Valhalla - Azoth End-to-End Testing
+# Vahalla - Azoth End-to-End Testing
 
 Browser-based tests verifying Azoth JSX compilation and rendering at the API level.
 
 ## Purpose
 
-Valhalla tests the **developer-facing JSX interface** — treating JSX as HTML that returns DOM. This is distinct from:
+Vahalla tests the **developer-facing JSX interface** — treating JSX as HTML that returns DOM. This is distinct from:
 
 - **vite-test/**: A minimal Vite bootstrap project that verifies Azoth works correctly in a standard Vite build environment. Use for build system integration testing.
 - **packages/thoth/compiler.test.js**: Compiler-level tests for the Thoth transpiler. Use for testing compilation output.
@@ -14,6 +14,7 @@ Valhalla tests the **developer-facing JSX interface** — treating JSX as HTML t
 - Verifying JSX-to-DOM behavior
 - Documenting idiomatic Azoth patterns
 - Investigating rendering bugs at the API level
+- Capturing Azoth-specific behaviors that differ from React
 
 ## Setup
 
@@ -34,7 +35,7 @@ function fixture(node: Node): string {
 }
 
 test('element', ({ expect }) => {
-    const p = <p>hello</p> as HTMLParagraphElement;
+    const p = <p>hello</p>;
     expect(fixture(p)).toMatchInlineSnapshot(/* HTML */ `"<p>hello</p>"`);
 });
 ```
@@ -42,20 +43,100 @@ test('element', ({ expect }) => {
 ## Conventions
 
 - **Use `/* HTML */` comment** before inline snapshots for syntax highlighting
-- Type assertions for specific element types: `as HTMLParagraphElement`
 - `document.body` as fixture container (universal, always available)
 - Inline snapshots keep expected output visible with test code
 
+## TypeScript and DOM Types
+
+Azoth JSX returns actual DOM elements, but TypeScript types them as generic `Node`. This works fine for composition—nesting components, appending to DOM, etc.
+
+### When to Use Type Assertions
+
+Use `as` assertions when you need to interact with the element via DOM APIs:
+
+```typescript
+// Composition - no assertion needed, Node is sufficient
+const page = (
+    <main>
+        <Card title="Stats"><StatValue value={42} /></Card>
+    </main>
+);
+
+// DOM manipulation - assert to access specific properties
+const input = <input type="text" /> as HTMLInputElement;
+input.focus();      // TypeScript knows .focus() exists
+input.value = 'hi'; // And .value
+```
+
+### Component Authors
+
+It doesn't hurt to annotate components with their actual return type. This is most useful when the component will be interacted with via DOM APIs:
+
+```typescript
+// Video player - consumers likely need HTMLVideoElement properties
+const VideoPlayer = ({ src }) => (
+    <video src={src} controls />
+) as HTMLVideoElement;
+
+// Simple display component - Node is fine, no annotation needed
+const Greeting = ({ name }) => <p>Hello, {name}</p>;
+```
+
+If consumers will use your component as a specific DOM element (video player, canvas, form inputs), annotating helps. For pure display components, the generic `Node` type works and avoids ceremony.
+
+### TypeScript Doesn't Enforce HTML Content Models
+
+Note: TypeScript does not validate semantic HTML nesting. You can put `<div>` inside `<p>` without type errors (though browsers will fix the invalid nesting at runtime).
+
+### Running Type Checks
+
+```bash
+# From vahalla package
+pnpm typecheck
+
+# From workspace root
+./node_modules/.bin/tsc -p packages/vahalla/tsconfig.json
+```
+
+### Configuration
+
+`tsconfig.json` extends the root config with test-friendly settings:
+- `noImplicitAny: false` - allows flexible test signatures
+- `allowImportingTsExtensions: true` - supports `.tsx` imports
+
+For intentional type violations (like testing runtime behavior of missing args), use `// @ts-expect-error` with a comment explaining why.
+
 ## Test Files
 
-- **smoke.test.tsx**: Core JSX-to-DOM behavior (elements, DOM APIs)
-- **components.test.tsx**: Component patterns (props, slottable, nesting)
-- **sandbox.test.tsx**: Scratch file for quick experiments
+### smoke.test.tsx
+Core JSX-to-DOM behavior. Verifies the fundamental principle: JSX produces DOM elements.
+- Static elements
+- DOM APIs work on JSX output
+
+### components.test.tsx
+Comprehensive component pattern tests. Documents Azoth-specific behaviors:
+
+| Section | What it tests |
+|---------|---------------|
+| **Slottable with nested components** | How children are passed to components |
+| **Dynamic class attributes** | `class={var}` vs `className={var}` behavior |
+| **Component invocation** | `<Component/>` vs `Component()` props behavior |
+| **Element binding positions** | Root vs child element bindings |
+
+**Key documented behaviors:**
+- `<Component />` passes `{}` (empty object, enables destructuring)
+- `<Component foo={bar}/>` passes `{ foo: bar }`
+- `Component()` direct call passes `undefined`
+- `class={var}` doesn't work (use `className={var}`)
+- Root vs child element bindings produce different template structures
+
+### sandbox.test.tsx
+Scratch file for quick experiments. Not for permanent tests.
 
 ## Running Tests
 
 ```bash
-# Run all Valhalla tests
+# Run all Vahalla tests
 pnpm test packages/vahalla/
 
 # Run specific test file
@@ -63,6 +144,9 @@ pnpm test packages/vahalla/components.test.tsx
 
 # Update snapshots
 pnpm test packages/vahalla/components.test.tsx -- -u
+
+# TypeScript check
+pnpm --filter valhalla typecheck
 ```
 
 ## Sandbox: Empirical JSX Testing
@@ -78,7 +162,7 @@ pnpm test packages/vahalla/sandbox.test.tsx
 - Test JSX patterns and see the DOM output
 - Verify interpolation, lists, components
 - Debug unexpected rendering behavior
-- Quickly verify assumptions
+- Quickly verify assumptions before codifying
 
 **How to use it:**
 1. Open `sandbox.test.tsx`
@@ -89,3 +173,12 @@ pnpm test packages/vahalla/sandbox.test.tsx
 **The primary interface is JSX** — treat it as HTML that returns DOM.
 
 **Deep exploration:** If you need to investigate Azoth internals (maya, thoth), create a sandbox test alongside that specific package. Keep internal exploration separate from developer-facing JSX tests.
+
+## Adding New Tests
+
+When you discover Azoth behavior worth documenting:
+
+1. **Verify empirically** in sandbox.test.tsx first
+2. **Create permanent test** in components.test.tsx with explanatory comments
+3. **Update this README** if it's a major behavior category
+4. Consider cross-referencing compiler-level tests in thoth if relevant

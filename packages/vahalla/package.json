@@ -8,5 +8,9 @@
         "url": "git+https://github.com/azothjs/azoth.git",
         "directory": "packages/valhalla"
     },
-    "type": "module"
+    "type": "module",
+    "scripts": {
+        "test": "vitest run",
+        "typecheck": "tsc -p tsconfig.json"
+    }
 }
