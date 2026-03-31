@@ -959,6 +959,30 @@ if(!jsxOnly && expr === null) {
 
 **Context:** Discovered while refactoring `FubClientsStage.jsx` where `<FubSimpleRow muted />` caused the error.
 
+### Spread Children Syntax Not Supported
+
+**Issue:** The JSX spread-in-children syntax `{...array}` is not supported by Azoth's compiler. Use `{array}` instead — arrays are valid child expressions and each element is appended as a child.
+
+**Broken:**
+```jsx
+const items = ['a', 'b', 'c'].map(x => <li>{x}</li>);
+<ul>{...items}</ul>  // Syntax error in Azoth compiler
+```
+
+**Correct:**
+```jsx
+const items = ['a', 'b', 'c'].map(x => <li>{x}</li>);
+<ul>{items}</ul>     // Works — array elements appended as children
+```
+
+**Context:** The `{...expr}` syntax in JSX children position is non-standard. React never officially supported it, though some Babel configurations may have compiled it by coincidence (since children become arguments to `createElement` and `...array` would spread into those arguments). Some frameworks like Solid explicitly support `SpreadChild` for reactivity tracking purposes.
+
+In Azoth, since JSX compiles to direct DOM operations, there's no semantic difference between "pass an array" and "spread an array's contents" — both result in appending each element. The simpler `{array}` form is the correct pattern.
+
+**Status:** Not a bug — documented authoring guidance. No compiler change needed.
+
+---
+
 ### Dynamic Bindings Require DOM Property Names (Not Attribute Names)
 
 **Issue:** Dynamic attribute bindings use DOM property assignment, not `setAttribute()`. This means you must use the DOM property name (`className`) rather than the HTML attribute name (`class`).
