@@ -1,5 +1,6 @@
 {
     "name": "docs",
+    "private": true,
     "author": "Marty Nelson",
     "license": "MIT",
     "description": "Azoth Docs",
