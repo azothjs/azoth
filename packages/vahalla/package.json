@@ -1,5 +1,6 @@
 {
     "name": "valhalla",
+    "private": true,
     "description": "Testing ground where warriors feast, fight, and train in preparation for the great battle of Ragnarok",
     "author": "Marty Nelson",
     "license": "MIT",
