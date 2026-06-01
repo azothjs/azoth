@@ -850,7 +850,7 @@ The third argument to `__rC` is a template function that creates the DOM for the
 
 Azoth has several testing environments, each with a specific purpose:
 
-**Valhalla (`packages/vahalla/`):**
+**Valhalla (`packages/valhalla/`):**
 - Browser-based tests via Vitest browser mode + Chrome
 - Tests the **developer-facing JSX API** at the integration level
 - Use for component patterns, rendering behavior, JSX-to-DOM verification
@@ -871,8 +871,8 @@ Azoth has several testing environments, each with a specific purpose:
 
 ### See Also
 
-- `packages/vahalla/components.test.tsx` — API-level tests for component patterns
-- `packages/vahalla/README.md` — Testing conventions and inline snapshot format
+- `packages/valhalla/components.test.tsx` — API-level tests for component patterns
+- `packages/valhalla/README.md` — Testing conventions and inline snapshot format
 - `packages/thoth/compiler.test.js` — "component child templates" and "compose component" tests
 - `packages/thoth/transform/Analyzer.js` — How children are analyzed
 - `packages/thoth/transform/Transpiler.js` — How children are transpiled

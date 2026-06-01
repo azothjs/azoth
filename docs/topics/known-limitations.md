@@ -87,7 +87,7 @@ function Layout() {
 
 **Future work:** An attribute-to-property translation layer is in progress and would let either name work.
 
-**Linked code:** `packages/vahalla/components.test.tsx` — see the `dynamic class attributes` describe block, which documents both the broken (`class={var}`) and correct (`className={var}`) forms in a snapshot.
+**Linked code:** `packages/valhalla/components.test.tsx` — see the `dynamic class attributes` describe block, which documents both the broken (`class={var}`) and correct (`className={var}`) forms in a snapshot.
 
 **See also:** [attributes-and-properties](attributes-and-properties.md) for the full discussion of the attribute/property split.
 
@@ -269,7 +269,7 @@ const Card = ({ class: className }, slottable) => …;
 
 If you see `props?.x` defensive access in older code, that's the reason — no longer necessary.
 
-**Linked code:** `packages/vahalla/components.test.tsx` — `component invocation` describe block snapshots the `{}` vs `undefined` distinction across JSX and direct-call forms.
+**Linked code:** `packages/valhalla/components.test.tsx` — `component invocation` describe block snapshots the `{}` vs `undefined` distinction across JSX and direct-call forms.
 
 ---
 
@@ -303,7 +303,7 @@ The fix switched to `JSON.stringify(tMap)` for hashing, which preserves structur
 
 If you hit a behavior that surprised you and isn't on this page, that's signal worth surfacing. Two ways to capture it:
 
-1. **Reproduce in `packages/vahalla/sandbox.test.tsx`** — minimal JSX that demonstrates the issue, with a snapshot of the actual (wrong) output. Saves anyone investigating from re-deriving the repro.
+1. **Reproduce in `packages/valhalla/sandbox.test.tsx`** — minimal JSX that demonstrates the issue, with a snapshot of the actual (wrong) output. Saves anyone investigating from re-deriving the repro.
 2. **Add an entry here** — even a stub with status `Open` is more useful than nothing. The entry shape above is the template.
 
 The honest inventory is the working surface. Don't hesitate to add to it.

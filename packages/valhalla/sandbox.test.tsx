@@ -7,7 +7,7 @@
  * 
  * Usage:
  * 1. Write JSX in the sandbox test
- * 2. Run: pnpm test packages/vahalla/sandbox.test.tsx
+ * 2. Run: pnpm test packages/valhalla/sandbox.test.tsx
  * 3. Inspect the snapshot output
  * 
  * The primary Azoth interface is JSX — treat it as HTML that returns DOM.

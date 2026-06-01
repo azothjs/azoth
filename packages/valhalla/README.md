@@ -1,10 +1,10 @@
-# Vahalla - Azoth End-to-End Testing
+# Valhalla — Azoth End-to-End Testing
 
 Browser-based tests verifying Azoth JSX compilation and rendering at the API level.
 
 ## Purpose
 
-Vahalla tests the **developer-facing JSX interface** — treating JSX as HTML that returns DOM. This is distinct from:
+Valhalla tests the **developer-facing JSX interface** — treating JSX as HTML that returns DOM. This is distinct from:
 
 - **vite-test/**: A minimal Vite bootstrap project that verifies Azoth works correctly in a standard Vite build environment. Use for build system integration testing.
 - **packages/thoth/compiler.test.js**: Compiler-level tests for the Thoth transpiler. Use for testing compilation output.
@@ -91,11 +91,11 @@ Note: TypeScript does not validate semantic HTML nesting. You can put `<div>` in
 ### Running Type Checks
 
 ```bash
-# From vahalla package
+# From valhalla package
 pnpm typecheck
 
 # From workspace root
-./node_modules/.bin/tsc -p packages/vahalla/tsconfig.json
+./node_modules/.bin/tsc -p packages/valhalla/tsconfig.json
 ```
 
 ### Configuration
@@ -136,14 +136,14 @@ Scratch file for quick experiments. Not for permanent tests.
 ## Running Tests
 
 ```bash
-# Run all Vahalla tests
-pnpm test packages/vahalla/
+# Run all Valhalla tests
+pnpm test packages/valhalla/
 
 # Run specific test file
-pnpm test packages/vahalla/components.test.tsx
+pnpm test packages/valhalla/components.test.tsx
 
 # Update snapshots
-pnpm test packages/vahalla/components.test.tsx -- -u
+pnpm test packages/valhalla/components.test.tsx -- -u
 
 # TypeScript check
 pnpm --filter valhalla typecheck
@@ -155,7 +155,7 @@ pnpm --filter valhalla typecheck
 
 **Usage:**
 ```bash
-pnpm test packages/vahalla/sandbox.test.tsx
+pnpm test packages/valhalla/sandbox.test.tsx
 ```
 
 **What it's for:**
