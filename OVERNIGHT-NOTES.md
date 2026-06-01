@@ -115,18 +115,54 @@ The "Layout management, not state management" sentence belongs in the talk, not 
 
 New `packages/valhalla/index.md` maps topics → files for LLM navigation. Planned-but-not-yet-created test files listed in there as TODOs (`text-interpolation`, `async-children`, `channels`, `fragments`, `compose-resolution`).
 
-## VTest snapshot investigation (running in background)
+## VTest snapshot investigation — RESOLVED
 
-Spawned a subagent (background) to:
-1. Reproduce the multi-inline-snapshot + `/* HTML */` directive failure in `/tmp/vitest-snapshot-repro/`
-2. Identify root cause if possible
-3. Attempt a fix in `/tmp/vitest-fork/` only if the fix is shallow
+Bug **reproduced cleanly** and **root-caused**. Fix is **4 characters** total and verified working. Candidate PR branch ready locally.
 
-Time budget: 90 minutes; falls back to "documented repro only" if deep. Will report to `/tmp/vitest-investigation-report.md`.
+**Vitest version tested:** 4.1.7 in the repro project. Bug also present on vitest `main` at 5.0.0-beta.3. Azoth's `vitest ^4.0.17` is vulnerable.
 
-**Status at time of writing this:** still running. Check `/tmp/vitest-investigation-report.md` for the result when you wake up. (If not present yet, the agent is still working or timed out.)
+**Failure mode that bites Azoth:**
 
-If the report recommends a PR upstream, the candidate branch is at `/tmp/vitest-fork/`. Don't push it without reviewing.
+- Multiple `toMatchInlineSnapshot(/* HTML */ \`…\`)` calls in one file → on update, **only the last snapshot in the file gets written**. The preceding ones stay empty. The runner reports "N snapshots updated" so the failure is silent.
+- Single `/* HTML */` call works fine. Multiple calls *without* the comment directive work fine. The combination is the bug.
+
+**Root cause:** `packages/snapshot/src/port/inlineSnapshot.ts`, the `defaultStartObjectRegex` and `defaultStartRegex` (lines 52 and 162). The comment-skip alternative uses greedy `[\s\S]*` — with multiple `/* HTML */` directives in one file, the regex matches from the first call's `/*` to the **last** call's `*/`. The computed `startIndex` ends up inside the last call's template literal; MagicString then coalesces the overlapping `overwrite()` calls onto that one slot.
+
+**Fix:** `[\s\S]*` → `[\s\S]*?` in both regexes. Block comments can't legally contain `*/`, so the lazy form is semantically equivalent for valid input. 4 chars total.
+
+**Candidate PR ready at `/tmp/vitest-fork/`:**
+- Branch: `fix/inline-snapshot-greedy-comment-regex`
+- Commit: `376093c` — `fix(snapshot): make comment-skip regex non-greedy in inline snapshot updater`
+- Changes:
+  - `packages/snapshot/src/port/inlineSnapshot.ts` (4 chars across two regexes)
+  - `test/e2e/snapshots/fixtures/inline-multiple-calls/comment-directive.test.ts` (new fixture)
+  - `test/e2e/snapshots/inline-multiple-calls.test.ts` (new driver test, fails without fix, passes with)
+
+**Verification done:**
+- Repro project (`/tmp/vitest-snapshot-repro/`) confirms all 3 snapshots update with patched dist.
+- Vitest's existing `inline-multiple-calls.test.ts` (5 tests) plus the new regression test: **6/6 pass with fix**.
+- Broader `--project snapshots` run: 42/48 pass with fix vs 41/48 without (the +1 is the new test; the 6 pre-existing failures are unrelated browser/JSDOM tests requiring chromium — not regressions from this fix).
+- Manually toggled fix on/off and rebuilt to confirm the new regression test fails without and passes with.
+
+**Recommendation: open PR upstream.** Tiny, well-tested, generally applicable. The PR would be against `vitest-dev/vitest`.
+
+**Until that lands, the Azoth workaround is to use `// HTML` line comments** instead of `/* HTML */` block comments in inline snapshots:
+
+```ts
+// Works (fix needed for block-comment form):
+expect(fixture(el)).toMatchInlineSnapshot(/* HTML */ `"<p>hi</p>"`);
+
+// Works today (line-comment form is bounded by newline, doesn't trip greediness):
+expect(fixture(el)).toMatchInlineSnapshot(// HTML
+    `"<p>hi</p>"`);
+```
+
+The line-comment branch of the regex is bounded by `\n`, so it doesn't have the greediness problem. Same syntax-highlighter behavior in editors that recognize the directive in either form.
+
+**For decisions you'll make in the morning:**
+- Open the PR against vitest upstream? Branch is at `/tmp/vitest-fork`.
+- Switch the new valhalla test files to `// HTML` line-comment form as a defensive measure until the PR lands? Currently they use `/* HTML */` block-comment form (copied from the original components.test.tsx convention). If you regenerate snapshots before the fix lands, the bug will bite.
+- Full investigation report at `/tmp/vitest-investigation-report.md` for the deeper detail.
 
 ## Pruning hit-list (out of scope this pass)
 
@@ -190,7 +226,7 @@ The whole topic surface is ~3500 lines. Voice consistency was the highest risk �
 In rough priority order:
 
 1. **Verify and merge `docs/organize`** to main once tests pass and you've reviewed the voice.
-2. **Read the VTest investigation report** and decide upstream PR vs workaround.
+2. **Open the vitest PR** from `/tmp/vitest-fork` (branch `fix/inline-snapshot-greedy-comment-regex`, commit `376093c`). Tiny, tested, ready. Then either wait for it to land before regenerating valhalla snapshots, or switch the new test files to `// HTML` line comments as a workaround.
 3. **Backlog: prune** the superseded docs (`docs/maya.md`, `docs/hypermedia.md`, `docs/scratchpad/`, `docs/ASYNC-PATTERNS.md`, `docs/async-rendering-patterns.md`).
 4. **Backlog: fill the planned test files** in valhalla (text-interpolation, async-children, channels, fragments, compose-resolution).
 5. **Decide the `consume` vs `act` naming** and update accordingly (one direction).
