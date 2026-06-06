@@ -302,6 +302,39 @@ describe('Channel with Observable source', () => {
 
 });
 
+describe('Channel with error prop', () => {
+
+    test('promise rejection rendered via error transform', async ({ expect }) => {
+        const { promise, reject } = Promise.withResolvers<JSX.Element>();
+        const root = fixture();
+        root.append(<main><Channel source={promise} error={(err: Error) => <p class="err">{err.message}</p>} /></main>);
+
+        reject(new Error('fetch failed'));
+        await microtasks();
+
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><p class="err">fetch failed<!--1--></p><!--1--></main>"`
+        );
+    });
+
+    test('async iterator error replaces with error transform output', async ({ expect }) => {
+        async function* gen() {
+            yield <p>felix</p>;
+            throw new Error('source broke');
+        }
+        const root = fixture();
+        root.append(<main><Channel source={gen()} error={(err: Error) => <p class="err">{err.message}</p>} /></main>);
+
+        await macrotask();
+
+        // After the error, the error transform's output is the final value
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><p class="err">source broke<!--1--></p><!--1--></main>"`
+        );
+    });
+
+});
+
 describe('Channel — equivalent class and instance forms', () => {
 
     test('<Channel> JSX produces a Channel instance', async ({ expect }) => {

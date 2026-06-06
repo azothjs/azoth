@@ -225,3 +225,81 @@ describe('Channel with Observable source', () => {
 
 });
 
+describe('Channel error transform', () => {
+
+    test('Promise rejection with `error` prop yields error transform result', async ({ expect }) => {
+        const promise = Promise.reject(new Error('boom'));
+        const c = new Channel({
+            source: promise,
+            error: err => `oops: ${err.message}`
+        });
+        await expect(c.source).resolves.toBe('oops: boom');
+    });
+
+    test('Promise rejection without `error` prop propagates', async ({ expect }) => {
+        const promise = Promise.reject(new Error('boom'));
+        const c = new Channel({ source: promise });
+        await expect(c.source).rejects.toThrow(/boom/);
+    });
+
+    test('async iterator throwing with `error` yields error transform then ends', async ({ expect }) => {
+        async function* gen() {
+            yield 'felix';
+            throw new Error('source broke');
+        }
+        const c = new Channel({
+            source: gen(),
+            error: err => `[error: ${err.message}]`
+        });
+        const collected = [];
+        for await(const v of c.source) collected.push(v);
+        expect(collected).toEqual(['felix', '[error: source broke]']);
+    });
+
+    test('async iterator throwing without `error` propagates', async ({ expect }) => {
+        async function* gen() {
+            yield 'felix';
+            throw new Error('source broke');
+        }
+        const c = new Channel({ source: gen() });
+        const collected = [];
+        await expect(async () => {
+            for await(const v of c.source) collected.push(v);
+        }).rejects.toThrow(/source broke/);
+        expect(collected).toEqual(['felix']);
+    });
+
+    test('observable error with `error` prop yields error result and completes', async ({ expect }) => {
+        const obs = {
+            subscribe(observer) {
+                queueMicrotask(() => {
+                    observer.next('felix');
+                    observer.error(new Error('source broke'));
+                });
+                return { unsubscribe() {} };
+            }
+        };
+        const c = new Channel({
+            source: obs,
+            error: err => `[error: ${err.message}]`
+        });
+        const collected = [];
+        for await(const v of c.source) collected.push(v);
+        expect(collected).toEqual(['felix', '[error: source broke]']);
+    });
+
+    test('error transform output bypasses the `as` value transform', async ({ expect }) => {
+        // The `as` transform shouldn't be applied to the error result —
+        // the user's `error` prop is responsible for producing renderable
+        // output directly.
+        const promise = Promise.reject(new Error('boom'));
+        const c = new Channel({
+            source: promise,
+            as: v => v.toUpperCase(),
+            error: err => err.message  // returns "boom", not "BOOM"
+        });
+        await expect(c.source).resolves.toBe('boom');
+    });
+
+});
+

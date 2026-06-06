@@ -36,7 +36,7 @@ export class Channel {
             source,
             as: rawTransform,
             map,
-            // `error` prop is reserved for a future error-transform pass.
+            error: errorTransform,
         } = props || {};
 
         // `map` wraps the transform to apply per-element on array-shaped
@@ -62,34 +62,38 @@ export class Channel {
         }
 
         this.initial = initial;
-        this.source = makeAsyncStream(resolvedSource, transform);
+        this.source = makeAsyncStream(resolvedSource, transform, errorTransform);
     }
 }
 
-function makeAsyncStream(source, transform) {
+function makeAsyncStream(source, transform, errorTransform) {
     if(source === undefined || source === null) {
         return source;
     }
     switch(true) {
-        case source instanceof Promise:
-            return transform ? source.then(transform) : source;
+        case source instanceof Promise: {
+            let p = transform ? source.then(transform) : source;
+            if(errorTransform) p = p.catch(errorTransform);
+            return p;
+        }
         case source instanceof ReadableStream:
             // compose.js handles ReadableStream natively (chunk-by-chunk
-            // accumulate). If a transform is provided, pipe through a
-            // TransformStream so each chunk is transformed before compose
-            // sees it.
+            // accumulate). With a transform, pipe through a TransformStream
+            // so each chunk is transformed.
+            // Note: errorTransform is not yet wired into the ReadableStream
+            // path — stream errors propagate uncaught for now (see TODO.md).
             return transform ? source.pipeThrough(new TransformStream({
                 transform(chunk, controller) {
                     controller.enqueue(transform(chunk));
                 }
             })) : source;
         case !!source[Symbol.asyncIterator]:
-            return fromAsyncIterator(source, transform);
+            return fromAsyncIterator(source, transform, errorTransform);
         case typeof source.subscribe === 'function':
             // Observable shape per the TC39 proposal (RxJS-compatible).
             // Convert to an async iterator so compose's existing
             // async-iteration path handles it.
-            return fromObservable(source, transform);
+            return fromObservable(source, transform, errorTransform);
         default:
             throw new TypeError(
                 `Channel: unsupported source type "${typeof source}". ` +
@@ -99,9 +103,15 @@ function makeAsyncStream(source, transform) {
     }
 }
 
-async function* fromAsyncIterator(iter, transform) {
-    for await(const value of iter) {
-        yield transform ? transform(value) : value;
+async function* fromAsyncIterator(iter, transform, errorTransform) {
+    try {
+        for await(const value of iter) {
+            yield transform ? transform(value) : value;
+        }
+    }
+    catch(err) {
+        if(errorTransform) yield errorTransform(err);
+        else throw err;
     }
 }
 
@@ -110,11 +120,13 @@ const COMPLETE = Symbol('Channel.observable.complete');
 
 // Internal export — used by compose.js for observable-in-child-slot
 // handling. Not part of the public Channel API surface.
-export async function* fromObservable(observable, transform) {
-    const queue = [];
-    let pending = null;       // { resolve, reject } when consumer is awaiting
+export async function* fromObservable(observable, transform, errorTransform) {
+    const queue = [];           // normal `next` values (go through transform)
+    let pending = null;         // { resolve, reject } when consumer is awaiting
     let completed = false;
     let errored = null;
+    let errorValue = undefined; // result of errorTransform(err); bypasses transform
+    let hasErrorValue = false;
 
     const subscription = observable.subscribe({
         next(value) {
@@ -128,11 +140,23 @@ export async function* fromObservable(observable, transform) {
             }
         },
         error(err) {
-            errored = err;
-            if(pending) {
-                const { reject } = pending;
-                pending = null;
-                reject(err);
+            if(errorTransform) {
+                errorValue = errorTransform(err);
+                hasErrorValue = true;
+                completed = true;
+                if(pending) {
+                    const { resolve } = pending;
+                    pending = null;
+                    resolve(COMPLETE);
+                }
+            }
+            else {
+                errored = err;
+                if(pending) {
+                    const { reject } = pending;
+                    pending = null;
+                    reject(err);
+                }
             }
         },
         complete() {
@@ -153,12 +177,18 @@ export async function* fromObservable(observable, transform) {
                 continue;
             }
             if(errored) throw errored;
-            if(completed) return;
+            if(completed) {
+                if(hasErrorValue) {
+                    hasErrorValue = false;
+                    yield errorValue;  // bypasses transform
+                }
+                return;
+            }
 
             const value = await new Promise((resolve, reject) => {
                 pending = { resolve, reject };
             });
-            if(value === COMPLETE) return;
+            if(value === COMPLETE) continue;  // loop checks completed/errorValue
             yield transform ? transform(value) : value;
         }
     }
