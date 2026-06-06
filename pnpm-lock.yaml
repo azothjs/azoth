@@ -116,7 +116,11 @@ importers:
         specifier: ^0.7.4
         version: 0.7.6
 
-  packages/valhalla: {}
+  packages/valhalla:
+    devDependencies:
+      '@azothjs/maya':
+        specifier: workspace:*
+        version: link:../maya
 
   packages/vite-plugin:
     dependencies:
