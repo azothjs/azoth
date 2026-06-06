@@ -3,7 +3,8 @@ import 'test-utils/with-resolvers-polyfill';
 import { $element, elementWithText, elementWithAnchor } from 'test-utils/elements';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { runCompose } from './compose.test.js';
-import { Channel, composeComponent, createComponent } from './compose.js';
+import { composeComponent, createComponent } from './compose.js';
+import { Channel } from '../channels/channel.js';
 
 beforeEach(fixtureSetup);
 
@@ -73,15 +74,11 @@ describe('create element', () => {
 });
 
 describe('prop-agation', () => {
-    // Removed: 'Node props' and 'Node from async iterator with props' tested
-    // the DOM-overlay (skinning) behavior — passing a pre-built Node as a
-    // "component" and having props overlaid via Object.assign. That path
-    // was removed: component invocation means "construct"; modifying an
-    // existing node is a separate concern. If skinning becomes a real
-    // need, it'll get its own primitive.
-    test.skip.todo('skinning replacement primitive (if needed)');
 
-    test('skinning skipped — see todo above', async ({ expect, fixture, find }) => {
+    test('async iterator in component position', async ({ expect, fixture, find }) => {
+        // Each yielded Node passes through and replaces the prior. Props
+        // are NOT overlaid on the Node (skinning was removed); the
+        // component-invocation contract is "construct," not "modify."
         let resolve = null;
         const doAsync = async (value) => {
             const { promise, resolve: res } = Promise.withResolvers();
@@ -95,7 +92,6 @@ describe('prop-agation', () => {
             yield doAsync($element('three'));
         }
 
-        // Without prop overlay: nodes pass through as-is
         const dom = createComponent(Numbers());
         fixture.append(dom);
 
@@ -175,10 +171,10 @@ describe('compose element', () => {
 
 });
 
-describe('Channel from', () => {
-    test('basic render', async ({ expect, fixture, find }) => {
-        const syncWrapper = new Channel({ source: Promise.resolve('async cat') }, 'sync cat');
-        const dom = createComponent(syncWrapper);
+describe('Channel in component position', () => {
+    test('initial childNodes render sync; source resolves into slot', async ({ expect, fixture, find }) => {
+        const channel = new Channel({ source: Promise.resolve('async cat') }, 'sync cat');
+        const dom = createComponent(channel);
         expect(dom).toMatchInlineSnapshot(`
           <DocumentFragment>
             sync cat
@@ -192,49 +188,4 @@ describe('Channel from', () => {
         await find('async cat');
         expect(fixture.innerHTML).toBe(`async cat<!--1-->`);
     });
-
-    class Loading {
-        constructor({ name }) {
-            this.name = name;
-        }
-        render() {
-            return `Loading ${this.name}`;
-        }
-    }
-
-    // TODO: this test exercises `Channel({source: Promise.resolve(SomeClass)}, ...)`
-    // — a class-in-source-promise pattern where the class was instantiated
-    // with outer props when the promise resolved. After the compose
-    // subtractions, the Channel branch routes through compose() (value
-    // position), which doesn't instantiate classes (classes need `new`).
-    // The pattern is uncommon in practice — typically promises resolve to
-    // data, not constructors. If we re-add support, it's via making
-    // compose() handle the function-vs-class dispatch the way create() does.
-    test.skip('creates', async ({ expect, fixture, find }) => {
-        // Channel's initial used to be a class that got instantiated with
-        // outer props on consumption. After the compose subtractions, the
-        // Channel branch routes through compose() (value position), which
-        // doesn't instantiate classes. Instead, the caller instantiates
-        // the initial themselves.
-        const loadingInstance = new Loading({ name: 'felix' });
-        const syncWrapper = new Channel({ source: Promise.resolve(ClassComp) }, loadingInstance);
-        const dom = createComponent(syncWrapper, { name: 'felix' });
-        expect(dom).toMatchInlineSnapshot(`
-          <DocumentFragment>
-            Loading felix
-            <!--1-->
-          </DocumentFragment>
-        `);
-
-        fixture.append(dom);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"Loading felix<!--1-->"`
-        );
-
-        await find('felix');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div>felix<!--1--></div><!--1-->"`
-        );
-    });
 });
-

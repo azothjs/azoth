@@ -69,32 +69,31 @@ the async value to take its place when it arrives. That's the Channel
 pattern.
 
 ```jsx
-import { Channel } from '@azothjs/maya/compose';
+import { Channel } from '@azothjs/maya/channels';
 
 <div>
-    {Channel.from(
-        <p>Loading…</p>,
-        fetchData().then(data => <Results data={data} />),
-    )}
+    <Channel source={fetchData().then(data => <Results data={data} />)}>
+        <p>Loading…</p>
+    </Channel>
 </div>
 ```
 
 `new Channel({ source, as }, childNodes)` returns an instance that
 `compose` knows how to unpack: `childNodes` (the JSX children, or the
-second constructor arg) composes synchronously as the initial render,
+second constructor arg) composes synchronously as the initial render;
 the `source` drives subsequent updates at the same slot. `as` optionally
 transforms each value the source produces.
 
-Most authors don't construct `Channel` directly. The JSX form is the
-usual surface:
+The JSX form above IS the constructor call — the class is the component.
+Direct construction is equivalent and occasionally useful:
 
-    <Channel source={fetchResults()} as={SearchResults}>
-        <p>Loading…</p>
-    </Channel>
+    const profile = new Channel(
+        { source: fetchProfile(), as: ProfileCard },
+        <Loading />
+    );
 
-That JSX invocation IS the constructor call — the class is the
-component. See [async-and-channels](async-and-channels.md) for the full
-surface (`source`, `as`, `map`, children).
+See [async-and-channels](async-and-channels.md) for the full surface
+(`source`, `as`, `error`, `map`, children).
 
 ## blocks — list management
 

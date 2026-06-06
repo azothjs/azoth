@@ -27,16 +27,15 @@ position in the DOM.
 | `Promise`                           | `instanceof Promise`              | Resolved value composed into the slot      |
 | Async iterator / async generator    | `[Symbol.asyncIterator]` present  | Each yielded value **replaces** the previous |
 | `ReadableStream`                    | `instanceof ReadableStream`       | Each chunk **accumulates** at the slot     |
-| Observable                          | `.subscribe` / `.on` (planned)    | Each emission replaces the previous (planned) |
+| Observable                          | `.subscribe` is a function        | Each emission replaces the previous        |
 
 A Promise delivers a single value. An async iterator delivers a sequence,
 with each value taking the slot from the previous. A `ReadableStream` is
 the exception — it appends rather than replaces, matching how streams are
-typically consumed.
-
-Observables (`.subscribe` / `.on`) are reserved in the compose dispatch
-table for upcoming work; today the established async sources are Promises
-and async iterators, with streams in the accumulating role.
+typically consumed. Observables follow the TC39 proposal shape (also
+RxJS-compatible): each `next` value replaces, `complete` ends iteration,
+`error` re-throws unless wrapped in a [Channel](#channel--the-canonical-surface)
+with an `error` prop.
 
 ## Plain async patterns first
 
@@ -74,23 +73,9 @@ fallback DOM through the same channel.
 ## Channel: sync render + async update
 
 Often you want something on screen *immediately* and the async value to
-take over when it arrives. That's the Channel pattern: a synchronous
-value composed right away, plus an async source for future values.
-
-```jsx
-import { Channel } from '@azothjs/maya/compose';
-
-<div>
-    {Channel.from(
-        <p>Loading…</p>,
-        fetchData().then(data => <Results data={data} />)
-    )}
-</div>
-```
-
-The first argument composes immediately; the second drives subsequent
-updates at the same slot. The `<Channel>` JSX form (below) is the usual
-way to produce these. Full mechanics live in
+take over when it arrives. That's the Channel pattern — a synchronous
+initial render, plus an async source for future values. The canonical
+surface is the `<Channel>` JSX component below; full mechanics live in
 [maya-runtime](maya-runtime.md).
 
 ## `<Channel>` — the canonical surface
@@ -113,7 +98,7 @@ import { Channel } from '@azothjs/maya/channels';
 
 | Prop      | Type     | Description                                                                                              |
 | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `source`  | required | The async data source. `Promise`, async iterable, `ReadableStream`, or `Observable` (anything with `.subscribe`). May also be another `Channel` instance (unwrapped). |
+| `source`  | required | The async data source. `Promise`, async iterable, `ReadableStream`, or `Observable` (anything with `.subscribe`). |
 | `as`      | optional | Transform function `data → DOM`. A component reference works directly: `as={Cat}` is the same as `as={data => <Cat {...data} />}` when the data shape matches the props. |
 | `error`   | optional | Transform function `error → DOM`. When the source produces an error, the result is rendered in place. Without an `error` prop, source errors propagate uncaught. |
 | `map`     | optional | Boolean. When the source's value is an array, applies `as` per element instead of to the whole array. Has no effect on non-array values. |
@@ -133,9 +118,6 @@ The source can be any of:
 - **Observable** (anything with `.subscribe`) — TC39 proposal shape;
   RxJS-compatible. Each emitted `next` value replaces; `complete`
   ends iteration; `error` flows through the `error` prop if provided.
-- **Channel** — unwrapped. The wrapped Channel's `.initial` becomes the
-  outer Channel's initial (passed through `as`); the wrapped `.source`
-  drives subsequent updates.
 
 ### Examples
 

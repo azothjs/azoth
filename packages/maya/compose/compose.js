@@ -1,11 +1,6 @@
-import { Channel, fromObservable } from '../channels/channel.js';
+import { Channel } from '../channels/channel.js';
 
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
-
-// Re-export Channel from compose for back-compat. Channel was defined here
-// (then as SyncAsync) and is referenced via @azothjs/maya/compose throughout
-// the codebase. The canonical home is now @azothjs/maya/channels.
-export { Channel };
 
 export function compose(anchor, input, keepLast, props, childNodes) {
     if(keepLast !== true) keepLast = false;
@@ -65,7 +60,7 @@ export function compose(anchor, input, keepLast, props, childNodes) {
         case !!input[Symbol.asyncIterator]:
             composeAsyncIterator(anchor, input, keepLast, props, childNodes);
             break;
-        case isRenderObject(input): {
+        case typeof input?.render === 'function': {
             let out = childNodes
                 ? input.render(props, childNodes)
                 : props ? input.render(props) : input.render();
@@ -74,21 +69,22 @@ export function compose(anchor, input, keepLast, props, childNodes) {
         }
         case typeof input.subscribe === 'function':
             // Observable shape per the TC39 proposal (RxJS-compatible).
-            // Convert to an async iterator and reuse the existing path.
-            composeAsyncIterator(anchor, fromObservable(input), keepLast, props, childNodes);
+            // Subscribe directly: each `next` value flows through compose.
+            // Errors re-throw — surfaces as unhandled, matching how a raw
+            // async iterator throwing in this slot behaves. Complete is a
+            // no-op; the slot keeps its last value. Use <Channel error={...}>
+            // for handled errors.
+            input.subscribe({
+                next(value) { compose(anchor, value, keepLast, props, childNodes); },
+                error(err) { throw err; },
+                complete() { }
+            });
             break;
         default: {
             throwTypeErrorForObject(input);
         }
     }
 }
-
-/**
- * Duck type test for render object
- * @param {object} obj 
- * @returns {boolean}
- */
-const isRenderObject = obj => typeof obj?.render === 'function';
 
 export function composeComponent(anchor, [Constructor, props, childNodes]) {
     // if renderer "updating":
@@ -161,7 +157,7 @@ function create(input, props, childNodes, anchor) {
             throwTypeError(input, type);
             break;
         }
-        case isRenderObject(input):
+        case typeof input?.render === 'function':
             return input.render(props, childNodes) ?? null;
         default: {
             let container = anchor;

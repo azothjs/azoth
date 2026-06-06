@@ -83,29 +83,6 @@ describe('Channel — construction', () => {
         expect(collected).toEqual(['FELIX', 'DUCHESS']);
     });
 
-    test('Channel-wrapped source (unwraps and applies transform to wrapped initial)', async ({ expect }) => {
-        async function* gen() {
-            yield 'duchess';
-        }
-        const wrapped = new Channel({ source: gen() }, 'felix');
-        const c = new Channel({
-            source: wrapped,
-            as: name => name.toUpperCase()
-        });
-        expect(c.initial).toBe('FELIX'); // transform applied to wrapped initial
-        const collected = [];
-        for await(const v of c.source) collected.push(v);
-        expect(collected).toEqual(['DUCHESS']);
-    });
-
-    test('throws when Channel-wrapped source combined with childNodes', ({ expect }) => {
-        const wrapped = new Channel({ source: Promise.resolve('duchess') }, 'felix');
-        const node = document.createTextNode('loading');
-        expect(() => {
-            new Channel({ source: wrapped }, node);
-        }).toThrow(/cannot be combined with a Channel-wrapped source/);
-    });
-
     test('throws on unsupported source type', ({ expect }) => {
         expect(() => {
             new Channel({ source: 42 });

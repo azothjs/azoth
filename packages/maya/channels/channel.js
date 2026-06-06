@@ -1,33 +1,31 @@
 /**
- * Channel — the duck-typed object compose recognizes, AND the JSX component
- * that produces it. One class, two roles, one definition.
+ * Channel — recognized by compose via `instanceof Channel`. The class IS
+ * the JSX component: one class, two roles, one definition.
  *
- *   JSX component form:
+ *   JSX form:
  *     <Channel source={x} as={Y}>loading</Channel>
- *     → new Channel({ source: x, as: Y }, loadingDom)
  *
- *   Direct class form (equivalent):
+ *   Direct (equivalent):
  *     new Channel({ source: x, as: Y }, loadingDom)
  *
  * Both produce an instance with `.initial` and `.source`. compose.js
  * checks `instanceof Channel` to recognize either.
  *
  * Props:
- *   - `source` — Promise, async iterable, or another Channel.
+ *   - `source` — Promise, async iterable, ReadableStream, or Observable
+ *                (anything with `.subscribe`).
  *   - `as`     — optional transform; applied to each value the source
  *                produces.
- *   - `map`    — optional boolean. When the source value is an array,
- *                applies `as` per element instead of to the whole array.
- *                Has no effect on non-array values (transform applies
- *                directly).
+ *   - `error`  — optional transform; applied to errors from the source.
+ *                Without it, source errors propagate uncaught.
+ *                (ReadableStream errors are not yet wired through this
+ *                path — see TODO.md.)
+ *   - `map`    — optional boolean. When the source value has `.map`
+ *                (Array, TypedArray, etc.), applies `as` per element
+ *                instead of to the whole collection.
  *
  * Children (JSX) or the second constructor argument (direct) become the
  * initial render value. The initial value does NOT go through `as`.
- *
- * Source unwrap: if `source` is itself a Channel (e.g. one returned by
- * chronos's `reduce()` paired with an initial elsewhere — uncommon),
- * the constructor unwraps it and applies `as` to the wrapped initial.
- * Passing both a Channel-wrapped source AND children throws.
  */
 export class Channel {
 
@@ -56,65 +54,54 @@ export class Channel {
             transform = value => value?.map ? value.map(inner) : inner(value);
         }
 
-        let initial = childNodes;
-
-        let resolvedSource = source;
-        if(source instanceof Channel) {
-            if(initial !== undefined) {
-                throw new TypeError(
-                    'Channel: childNodes cannot be combined with a Channel-wrapped source'
-                );
-            }
-            initial = transform ? transform(source.initial) : source.initial;
-            resolvedSource = source.source;
-        }
-
-        this.#initial = initial;
-        this.#source = makeAsyncStream(resolvedSource, transform, errorTransform);
+        this.#initial = childNodes;
+        this.#source = makeSource(source, transform, errorTransform);
     }
 
     get initial() { return this.#initial; }
     get source() { return this.#source; }
 }
 
-function makeAsyncStream(source, transform, errorTransform) {
+function makeSource(source, transform, errorTransform) {
     if(source === undefined || source === null) {
         return source;
     }
     switch(true) {
-        case source instanceof Promise: {
-            let p = transform ? source.then(transform) : source;
-            if(errorTransform) p = p.catch(errorTransform);
-            return p;
-        }
+        case source instanceof Promise:
+            return fromPromise(source, transform, errorTransform);
         case source instanceof ReadableStream:
-            // compose.js handles ReadableStream natively (chunk-by-chunk
-            // accumulate). With a transform, pipe through a TransformStream
-            // so each chunk is transformed.
-            // Note: errorTransform is not yet wired into the ReadableStream
-            // path — stream errors propagate uncaught for now (see TODO.md).
-            return transform ? source.pipeThrough(new TransformStream({
-                transform(chunk, controller) {
-                    controller.enqueue(transform(chunk));
-                }
-            })) : source;
+            return fromReadableStream(source, transform);
         case !!source[Symbol.asyncIterator]:
-            return fromAsyncIterator(source, transform, errorTransform);
+            return fromAsyncIterable(source, transform, errorTransform);
         case typeof source.subscribe === 'function':
-            // Observable shape per the TC39 proposal (RxJS-compatible).
-            // Convert to an async iterator so compose's existing
-            // async-iteration path handles it.
             return fromObservable(source, transform, errorTransform);
         default:
             throw new TypeError(
                 `Channel: unsupported source type "${typeof source}". ` +
-                `Expected Promise, async iterable, ReadableStream, ` +
-                `Observable, or Channel-wrapped value.`
+                `Expected Promise, async iterable, ReadableStream, or Observable.`
             );
     }
 }
 
-async function* fromAsyncIterator(iter, transform, errorTransform) {
+function fromPromise(source, transform, errorTransform) {
+    let p = transform ? source.then(transform) : source;
+    if(errorTransform) p = p.catch(errorTransform);
+    return p;
+}
+
+function fromReadableStream(source, transform) {
+    // compose.js handles ReadableStream natively (chunk-by-chunk accumulate).
+    // With a transform, pipe through a TransformStream so each chunk is
+    // transformed. errorTransform is not yet wired into this path — stream
+    // errors propagate uncaught for now (see TODO.md).
+    return transform ? source.pipeThrough(new TransformStream({
+        transform(chunk, controller) {
+            controller.enqueue(transform(chunk));
+        }
+    })) : source;
+}
+
+async function* fromAsyncIterable(iter, transform, errorTransform) {
     try {
         for await(const value of iter) {
             yield transform ? transform(value) : value;
@@ -129,9 +116,7 @@ async function* fromAsyncIterator(iter, transform, errorTransform) {
 // Sentinel for observable completion — distinguishable from any user value.
 const COMPLETE = Symbol('Channel.observable.complete');
 
-// Internal export — used by compose.js for observable-in-child-slot
-// handling. Not part of the public Channel API surface.
-export async function* fromObservable(observable, transform, errorTransform) {
+async function* fromObservable(observable, transform, errorTransform) {
     const queue = [];           // normal `next` values (go through transform)
     let pending = null;         // { resolve, reject } when consumer is awaiting
     let completed = false;

@@ -3,7 +3,7 @@ import 'test-utils/with-resolvers-polyfill';
 import { elementWithAnchor } from 'test-utils/elements';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { runCompose } from './compose.test.js';
-import { Channel } from './compose.js';
+import { Channel } from '../channels/channel.js';
 
 beforeEach(fixtureSetup);
 
@@ -137,5 +137,49 @@ describe('async values', () => {
         expect(fixture.innerHTML).toMatchInlineSnapshot(
             `"<div>one<!--1--></div>"`
         );
+    });
+
+    test('observable (direct subscribe, each next replaces)', ({ expect, fixture }) => {
+        // Minimal TC39 Observable shape. compose subscribes directly and
+        // each `next` flows through compose like any other value.
+        let emit;
+        const observable = {
+            subscribe(observer) {
+                emit = (v) => observer.next(v);
+                return { unsubscribe() { } };
+            }
+        };
+
+        fixture.append(runCompose(observable, elementWithAnchor));
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div><!--0--></div>"`);
+
+        emit('felix');
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>felix<!--1--></div>"`);
+
+        emit('duchess');
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>duchess<!--1--></div>"`);
+    });
+
+    test('ReadableStream accumulates chunks', async ({ expect, fixture, find }) => {
+        let push, close;
+        const stream = new ReadableStream({
+            start(controller) {
+                push = (v) => controller.enqueue(v);
+                close = () => controller.close();
+            }
+        });
+
+        fixture.append(runCompose(stream, elementWithAnchor));
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div><!--0--></div>"`);
+
+        push('a');
+        await find('a');
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>a<!--1--></div>"`);
+
+        push('b');
+        await find('ab');
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>ab<!--2--></div>"`);
+
+        close();
     });
 });
