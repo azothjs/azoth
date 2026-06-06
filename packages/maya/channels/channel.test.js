@@ -225,6 +225,37 @@ describe('Channel with Observable source', () => {
 
 });
 
+describe('Compose subtractions — primitive-as-component', () => {
+
+    // These document the new throwing behavior. They live with the Channel
+    // tests because Channel is the canonical surface they touch, but the
+    // behavior comes from compose.js's create() function.
+
+    test('string in component position throws', async ({ expect }) => {
+        // Simulate: <Cat /> where Cat = "bill" — accidentally a string
+        const { createComponent } = await import('../compose/compose.js');
+        expect(() => createComponent('bill')).toThrow(/Cannot use string/);
+    });
+
+    test('number in component position throws', async ({ expect }) => {
+        const { createComponent } = await import('../compose/compose.js');
+        expect(() => createComponent(42)).toThrow(/Cannot use number/);
+    });
+
+    test('DOM Node still works as a component value (no skinning)', async ({ expect }) => {
+        // Passing a Node as a "component" returns the Node. Props are
+        // NOT overlaid via Object.assign (that path was removed).
+        const { createComponent } = await import('../compose/compose.js');
+        const node = document.createElement('div');
+        node.textContent = 'original';
+        const result = createComponent(node, { textContent: 'overlaid?' });
+        expect(result).toBe(node);
+        // Skinning is gone — textContent is NOT overwritten.
+        expect(node.textContent).toBe('original');
+    });
+
+});
+
 describe('Channel error transform', () => {
 
     test('Promise rejection with `error` prop yields error transform result', async ({ expect }) => {

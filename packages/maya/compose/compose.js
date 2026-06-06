@@ -29,7 +29,6 @@ export function compose(anchor, input, keepLast, props, childNodes) {
             replace(anchor, input, keepLast);
             break;
         case input instanceof Node:
-            if(props) Object.assign(input, props);
             replace(anchor, input, keepLast);
             break;
         case input instanceof Channel:
@@ -127,14 +126,12 @@ function create(input, props, childNodes, anchor) {
     const type = typeof input;
 
     switch(true) {
+        // A pre-built Node returned from a component or passed as a value
+        // is valid output. Props are NOT overlaid — component invocation
+        // means "construct"; if you want to modify a node, do it directly.
         case input instanceof Node:
-            if(props) Object.assign(input, props);
-        // eslint-disable-next-line no-fallthrough
-        case type === 'string':
             return input;
-        case type === 'number':
-        case type === 'bigint':
-            return `${input}`;
+        // Empty / nothing values render to no DOM.
         case input === undefined:
         case input === null:
         case input === true:
@@ -142,15 +139,24 @@ function create(input, props, childNodes, anchor) {
         case input === '':
         case input === IGNORE:
             return null;
-        // class and function(){}
+        // Function: invoke with props/childNodes.
         case !!(input.prototype?.constructor): {
+            // class and function(){} — invoked with `new`
             // eslint-disable-next-line new-cap
             return new input(props, childNodes);
         }
-        // arrow () => {}
         case type === 'function': {
+            // arrow () => {} — called directly
             return input(props, childNodes) ?? null;
         }
+        // Reject primitive-as-component. Strings, numbers, bigints in
+        // component position are almost always a mistake. Catch early.
+        case type === 'string':
+        case type === 'number':
+        case type === 'bigint':
+        case type === 'symbol':
+            throwPrimitiveAsComponent(input, type);
+            break;
         case type !== 'object': {
             throwTypeError(input, type);
             break;
@@ -165,20 +171,23 @@ function create(input, props, childNodes, anchor) {
                 container.append(anchor);
             }
 
+            // Channel and other value-bearing types go through compose
+            // (value position) rather than create (component position).
+            // create() now rejects primitives in component position; the
+            // initial/source of a Channel is a VALUE that may well be
+            // a primitive (a loading-state string, a number, etc.), so
+            // compose is the correct path.
             if(input instanceof Channel) {
-                createCompose(input.initial, props, childNodes, anchor);
-                createCompose(input.source, props, childNodes, anchor);
+                compose(anchor, input.initial);
+                compose(anchor, input.source, false, props, childNodes);
             }
             else if(input[Symbol.asyncIterator]) {
                 composeAsyncIterator(anchor, input, false, props, childNodes);
             }
             else if(input instanceof Promise) {
-                input.then(value => {
-                    createCompose(value, props, childNodes, anchor);
-                });
+                input.then(value => compose(anchor, value, false, props, childNodes));
             }
             else if(Array.isArray(input)) {
-                // TODO: map to createCompose
                 composeArray(anchor, input, false);
             }
             else {
@@ -255,6 +264,15 @@ function throwTypeError(input, type, footer = '') {
     throw new TypeError(`\
 Invalid compose {...} input type "${type}", value ${input}.\
 ${footer}`
+    );
+}
+
+function throwPrimitiveAsComponent(input, type) {
+    const display = type === 'symbol' ? 'Symbol' : JSON.stringify(input);
+    throw new TypeError(
+        `Cannot use ${type} (${display}) as a component. ` +
+        `Components must be functions, classes, or objects with a render() method. ` +
+        `If you want to render a primitive value, interpolate it directly: {value} instead of <Value/>.`
     );
 }
 
