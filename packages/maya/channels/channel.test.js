@@ -30,30 +30,32 @@ describe('Channel — construction', () => {
         await expect(c.source).resolves.toBe('Mr. felix');
     });
 
-    test('initial via prop (no transform applied)', ({ expect }) => {
-        const promise = Promise.resolve('felix');
-        const c = new Channel({
-            source: promise,
-            as: name => name.toUpperCase(),
-            initial: 'loading'  // does NOT go through `as`
-        });
-        expect(c.initial).toBe('loading');
-    });
-
     test('initial via childNodes (no transform applied)', ({ expect }) => {
         const loadingNode = document.createTextNode('loading…');
         const promise = Promise.resolve('felix');
-        const c = new Channel({ source: promise }, loadingNode);
+        const c = new Channel({
+            source: promise,
+            as: name => name.toUpperCase()
+        }, loadingNode);
+        // childNodes is the only initial — does NOT go through `as`
         expect(c.initial).toBe(loadingNode);
     });
 
-    test('initial prop takes precedence over childNodes', ({ expect }) => {
-        const loadingNode = document.createTextNode('child node');
-        const c = new Channel(
-            { source: Promise.resolve('felix'), initial: 'prop wins' },
-            loadingNode
-        );
-        expect(c.initial).toBe('prop wins');
+    test('map wraps transform for array-shaped values', async ({ expect }) => {
+        const promise = Promise.resolve([{ n: 1 }, { n: 2 }, { n: 3 }]);
+        const c = new Channel({
+            source: promise,
+            as: item => item.n,
+            map: true
+        });
+        await expect(c.source).resolves.toEqual([1, 2, 3]);
+    });
+
+    test('map without transform is a no-op (no wrapping)', async ({ expect }) => {
+        const arr = [1, 2, 3];
+        const promise = Promise.resolve(arr);
+        const c = new Channel({ source: promise, map: true });
+        await expect(c.source).resolves.toBe(arr);
     });
 
     test('async iterator source', async ({ expect }) => {
@@ -96,13 +98,6 @@ describe('Channel — construction', () => {
         expect(collected).toEqual(['DUCHESS']);
     });
 
-    test('throws when Channel-wrapped source combined with initial prop', ({ expect }) => {
-        const wrapped = Channel.from('felix', Promise.resolve('duchess'));
-        expect(() => {
-            new Channel({ source: wrapped, initial: 'something else' });
-        }).toThrow(/cannot be combined with a Channel-wrapped source/);
-    });
-
     test('throws when Channel-wrapped source combined with childNodes', ({ expect }) => {
         const wrapped = Channel.from('felix', Promise.resolve('duchess'));
         const node = document.createTextNode('loading');
@@ -117,8 +112,8 @@ describe('Channel — construction', () => {
         }).toThrow(/unsupported source type/);
     });
 
-    test('undefined source produces undefined .source (initial-only Channel)', ({ expect }) => {
-        const c = new Channel({ initial: 'hi' });
+    test('undefined source produces undefined .source (initial-only Channel via childNodes)', ({ expect }) => {
+        const c = new Channel({}, 'hi');
         expect(c.initial).toBe('hi');
         expect(c.source).toBeUndefined();
     });

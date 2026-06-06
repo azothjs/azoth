@@ -127,7 +127,7 @@ describe('throws', () => {
         expect(() => {
             channel(cat, { initial: 'duchess' });
         }).toThrowErrorMatchingInlineSnapshot(
-            `[TypeError: Channel: "initial" (or childNodes) cannot be combined with a Channel-wrapped source]`
+            `[TypeError: Channel: childNodes cannot be combined with a Channel-wrapped source]`
         );
     });
 

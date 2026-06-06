@@ -22,14 +22,22 @@ export class Channel {
     constructor(props, childNodes) {
         const {
             source,
-            as: transform,
+            as: rawTransform,
+            map,
             // `error` reserved for Phase 6 (error transform). Ignored for now.
-            initial: propInitial,
         } = props || {};
 
-        // Initial: explicit `initial` prop wins; otherwise childNodes from
-        // JSX (e.g. <Channel>loading</Channel>). Neither = no initial.
-        let initial = propInitial !== undefined ? propInitial : childNodes;
+        // `map` wraps the transform to apply per-element on array-shaped values.
+        // <Channel source={fetchUsers()} as={User} map/> renders each user.
+        let transform = rawTransform;
+        if(map && rawTransform) {
+            const inner = rawTransform;
+            transform = value => value?.map ? value.map(inner) : inner(value);
+        }
+
+        // Initial is just childNodes — the children of <Channel>loading</Channel>
+        // become the initial render. No separate `initial` prop.
+        let initial = childNodes;
 
         // Unwrap a Channel-wrapped source (e.g. one returned by chronos's
         // reduce()). The wrapped source's `initial` is part of the source's
@@ -38,7 +46,7 @@ export class Channel {
         if(source instanceof Channel) {
             if(initial !== undefined) {
                 throw new TypeError(
-                    'Channel: "initial" (or childNodes) cannot be combined with a Channel-wrapped source'
+                    'Channel: childNodes cannot be combined with a Channel-wrapped source'
                 );
             }
             initial = transform ? transform(source.initial) : source.initial;
@@ -110,19 +118,26 @@ export function channel(source, transformOrOptions, options) {
         transform = undefined;
     }
 
-    // Legacy `map` wraps transform to apply per-element on array values.
-    if(options?.map && transform) {
-        const inner = transform;
-        transform = value => value?.map ? value.map(inner) : inner(value);
-    }
-
     // Resolve initial: prefer explicit `initial` > legacy `start` (no
-    // transform) > legacy `init` (with transform applied).
+    // transform) > legacy `init` (with transform applied). The Channel class
+    // itself only takes initial via childNodes; this function pre-resolves
+    // and passes the result as the childNodes arg.
     let initial = options?.initial;
     if(initial === undefined) initial = options?.start;
     if(initial === undefined && options?.init !== undefined) {
-        initial = transform ? transform(options.init) : options.init;
+        // We need to apply transform to `init`, but the constructor will also
+        // apply transform to the wrapped initial if source is a Channel. To
+        // keep semantics, apply transform here and then route via childNodes
+        // (which never goes through transform in the constructor).
+        // The `map` wrap is applied below by the constructor — but to mirror
+        // legacy `init` semantics we need to apply the wrapped form.
+        let initTransform = transform;
+        if(options?.map && transform) {
+            const inner = transform;
+            initTransform = value => value?.map ? value.map(inner) : inner(value);
+        }
+        initial = initTransform ? initTransform(options.init) : options.init;
     }
 
-    return new Channel({ source, as: transform, initial });
+    return new Channel({ source, as: transform, map: options?.map }, initial);
 }

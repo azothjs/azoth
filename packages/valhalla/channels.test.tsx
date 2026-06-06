@@ -144,6 +144,38 @@ describe('Channel with async iterator source', () => {
 
 });
 
+describe('Channel with map prop (array iteration)', () => {
+
+    test('promise of array with as + map renders each element', async ({ expect }) => {
+        const promise = Promise.resolve([{ name: 'felix' }, { name: 'duchess' }]);
+        const root = fixture();
+        root.append(<main><Channel source={promise} as={({ name }) => <p>{name}</p>} map /></main>);
+
+        await flush();
+
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><p>felix<!--1--></p><p>duchess<!--1--></p><!--2--></main>"`
+        );
+    });
+
+    test('async iterator of arrays with map', async ({ expect }) => {
+        async function* gen() {
+            yield [{ name: 'felix' }];
+            yield [{ name: 'duchess' }, { name: 'garfield' }];
+        }
+        const root = fixture();
+        root.append(<main><Channel source={gen()} as={({ name }) => <p>{name}</p>} map /></main>);
+
+        await flush(3);
+
+        // Last yield replaces previous
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><p>duchess<!--1--></p><p>garfield<!--1--></p><!--2--></main>"`
+        );
+    });
+
+});
+
 describe('Channel — equivalent class and instance forms', () => {
 
     test('<Channel> JSX produces a Channel instance', async ({ expect }) => {
