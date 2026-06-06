@@ -1,6 +1,6 @@
 import { Multicast } from '../generators/Multicast.js';
 import { AsyncTypeError } from '../throw.js';
-import { channel } from './channel.js';
+import { channel } from '@azothjs/maya/channels';
 import { SyncAsync } from '@azothjs/maya/compose';
 
 export function branch(async, ...transforms) {

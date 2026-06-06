@@ -2,7 +2,7 @@ import { describe, test, beforeEach } from 'vitest';
 import '../with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { unicast } from '../generators/unicast.js';
-import { channel } from './channel.js';
+import { channel } from '@azothjs/maya/channels';
 import { sleep } from '../../../test-utils/sleep.js';
 import { Cat } from '../test-utils.jsx';
 
