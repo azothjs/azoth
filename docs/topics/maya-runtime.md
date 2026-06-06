@@ -62,35 +62,35 @@ The supporting helpers exported alongside `compose`:
 You rarely call these directly; the compiled code does. They're listed
 here because they show up in stack traces and in test files.
 
-## SyncAsync — render now, deliver later
+## Channel — render now, deliver later
 
 A common shape: you want something on screen *immediately*, and you want
-the async value to take its place when it arrives. That's the SyncAsync
+the async value to take its place when it arrives. That's the Channel
 pattern.
 
 ```jsx
-import { SyncAsync } from '@azothjs/maya/compose';
+import { Channel } from '@azothjs/maya/compose';
 
 <div>
-    {SyncAsync.from(
+    {Channel.from(
         <p>Loading…</p>,
         fetchData().then(data => <Results data={data} />),
     )}
 </div>
 ```
 
-`SyncAsync.from(syncValue, asyncDataStructure)` returns an object that
+`Channel.from(syncValue, asyncDataStructure)` returns an object that
 `compose` knows how to unpack: the first argument composes synchronously,
 the second drives subsequent updates at the same slot.
 
-Most authors don't construct `SyncAsync` directly. The `channel()`
+Most authors don't construct `Channel` directly. The `channel()`
 function from `@azothjs/chronos/channels` returns one whenever you supply
 a `start` or `init` value — the sync part is what `channel` puts in the
 slot first, the async part is the source. See
 [async-and-channels](async-and-channels.md) for that surface.
 
-The name `SyncAsync` is flagged as awkward — a rename is on the list (see
-[MENTAL-MODEL.md](../MENTAL-MODEL.md) on SyncAsync naming). The mechanic
+The name `Channel` is flagged as awkward — a rename is on the list (see
+[MENTAL-MODEL.md](../MENTAL-MODEL.md) on Channel naming). The mechanic
 is stable; the name may change.
 
 ## blocks — list management
@@ -199,7 +199,7 @@ section updates frequently enough that DOM creation cost matters.
 ## See also
 
 - [Composition](composition.md) — the full compose resolution chain
-- [Async and channels](async-and-channels.md) — `SyncAsync` in context,
+- [Async and channels](async-and-channels.md) — `Channel` in context,
   `channel()` as the canonical helper, Controller/Updater
 - [Components](components.md) — function and class forms; what compose
   passes to a component

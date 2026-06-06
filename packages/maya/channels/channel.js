@@ -1,4 +1,4 @@
-import { SyncAsync } from '../compose/compose.js';
+import { Channel } from '../compose/compose.js';
 import { resolveArgs } from './resolve-args.js';
 import { AsyncTypeError, InitOptionWithSyncWrappedAsyncProviderError } from './errors.js';
 
@@ -10,7 +10,7 @@ export function channel(async, transformArg, options) {
     } = resolveArgs(transformArg, options);
     let sync = init;
 
-    if(async instanceof SyncAsync) {
+    if(async instanceof Channel) {
         if(hasInit) {
             throw new InitOptionWithSyncWrappedAsyncProviderError();
         }
@@ -30,8 +30,8 @@ export function channel(async, transformArg, options) {
 
     const out = makeChannel(async, transform, map, onDeck);
 
-    if(hasStart) return SyncAsync.from(start, out);
-    if(hasSync) return SyncAsync.from(sync, out);
+    if(hasStart) return Channel.from(start, out);
+    if(hasSync) return Channel.from(sync, out);
     return out;
 }
 

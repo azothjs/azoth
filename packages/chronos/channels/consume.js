@@ -1,4 +1,4 @@
-import { SyncAsync } from '@azothjs/maya/compose';
+import { Channel } from '@azothjs/maya/compose';
 import { resolveArgs } from '../resolve-args.js';
 import { AsyncTypeError, InitOptionWithSyncWrappedAsyncProviderError } from '../throw.js';
 
@@ -14,7 +14,7 @@ export function consume(async, transform, options) {
     }
 
     let sync = init;
-    if(async instanceof SyncAsync) {
+    if(async instanceof Channel) {
         if(hasInit) throw new InitOptionWithSyncWrappedAsyncProviderError();
         sync = async.initial;
         async = async.source;

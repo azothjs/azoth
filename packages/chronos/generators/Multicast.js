@@ -1,4 +1,4 @@
-import { SyncAsync } from '@azothjs/maya/compose';
+import { Channel } from '@azothjs/maya/compose';
 import { generator } from './generator.js';
 
 export class Multicast {
@@ -8,7 +8,7 @@ export class Multicast {
 
     constructor(iter) {
         // TODO: track sync value and add to subscribers
-        this.#iter = (iter instanceof SyncAsync) ? iter.source : iter;
+        this.#iter = (iter instanceof Channel) ? iter.source : iter;
         this.start();
     }
 

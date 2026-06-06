@@ -1,6 +1,6 @@
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
-export class SyncAsync {
+export class Channel {
     static from(initial, source) {
         return new this(initial, source);
     }
@@ -33,10 +33,9 @@ export function compose(anchor, input, keepLast, props, childNodes) {
             break;
         case input instanceof Node:
             if(props) Object.assign(input, props);
-            if(childNodes) input.childNodes = childNodes;
             replace(anchor, input, keepLast);
             break;
-        case input instanceof SyncAsync:
+        case input instanceof Channel:
             compose(anchor, input.initial, keepLast);
             compose(anchor, input.source, keepLast, props, childNodes);
             break;
@@ -163,7 +162,7 @@ function create(input, props, childNodes, anchor) {
                 container.append(anchor);
             }
 
-            if(input instanceof SyncAsync) {
+            if(input instanceof Channel) {
                 createCompose(input.initial, props, childNodes, anchor);
                 createCompose(input.source, props, childNodes, anchor);
             }

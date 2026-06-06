@@ -1,4 +1,4 @@
-import { SyncAsync } from '@azothjs/maya/compose';
+import { Channel } from '@azothjs/maya/compose';
 import { resolveArgs } from '../resolve-args.js';
 
 
@@ -49,12 +49,12 @@ export function generator(transformArg, options) {
     let asyncIterator = generator();
 
     if(hasStart) {
-        return [SyncAsync.from(start, asyncIterator), dispatch];
+        return [Channel.from(start, asyncIterator), dispatch];
     }
 
     if(hasInit) {
         const value = maybeTransform(init);
-        return [SyncAsync.from(value, asyncIterator), dispatch];
+        return [Channel.from(value, asyncIterator), dispatch];
     }
 
     return [asyncIterator, dispatch];

@@ -1,4 +1,4 @@
-import { SyncAsync } from '@azothjs/maya/compose';
+import { Channel } from '@azothjs/maya/compose';
 
 export const Loading = () => <p>loading...</p>;
 
@@ -12,9 +12,9 @@ export const CatName = name => <li>{name}</li>;
 
 export const CatNames = cats => <ul>{cats?.map(CatName)}</ul>;
 
-export class SyncAsyncReader {
+export class ChannelReader {
     constructor(async) {
-        if(async instanceof SyncAsync) {
+        if(async instanceof Channel) {
             this.state = async.initial;
             async = async.source;
         }

@@ -71,17 +71,17 @@ An async function that returns DOM *is* a layout instruction. The Promise
 it returns flows into the slot. Errors caught inside the function return
 fallback DOM through the same channel.
 
-## SyncAsync: sync render + async update
+## Channel: sync render + async update
 
 Often you want something on screen *immediately* and the async value to
-take over when it arrives. That's the SyncAsync pattern: a synchronous
+take over when it arrives. That's the Channel pattern: a synchronous
 value composed right away, plus an async source for future values.
 
 ```jsx
-import { SyncAsync } from '@azothjs/maya/compose';
+import { Channel } from '@azothjs/maya/compose';
 
 <div>
-    {SyncAsync.from(
+    {Channel.from(
         <p>Loading…</p>,
         fetchData().then(data => <Results data={data} />)
     )}
@@ -89,7 +89,7 @@ import { SyncAsync } from '@azothjs/maya/compose';
 ```
 
 The first argument composes immediately; the second drives subsequent
-updates at the same slot. Most authors never construct `SyncAsync`
+updates at the same slot. Most authors never construct `Channel`
 directly — the `channel()` function (below) returns one when it makes
 sense. Full mechanics live in [maya-runtime](maya-runtime.md).
 
@@ -127,14 +127,14 @@ channel(asyncSource, transform, options)
 | `map`   | boolean   | If the async source yields arrays, apply `transform` to each item instead of the array as a whole. |
 
 `start` and `init` are mutually exclusive — `channel` throws if you supply
-both when the async source is already a `SyncAsync`.
+both when the async source is already a `Channel`.
 
 ### Return shape
 
 What `channel()` returns depends on what you gave it:
 
 - Promise input, no `start`/`init` → a Promise (the transformed result)
-- Promise input with `start`/`init` → a `SyncAsync` (sync part + the promise)
+- Promise input with `start`/`init` → a `Channel` (sync part + the promise)
 - Async iterator input → an async generator that yields transformed values
 - Async iterator with `start` → an async generator that yields `start`
   first, then transformed values
@@ -287,6 +287,6 @@ A subtraction, not a contrast. Things that simply do not exist:
 - [Components](components.md) — function/class form; the View pattern
 - [Workflow](workflow.md) — View + CardView in full, data ownership
 - [Hypermedia](hypermedia.md) — the events-as-deltas model
-- [Maya runtime](maya-runtime.md) — `SyncAsync`, compose internals
+- [Maya runtime](maya-runtime.md) — `Channel`, compose internals
 - [For LLMs](for-llms.md) — terminology discipline
 - [Known limitations](known-limitations.md) — current foot-guns

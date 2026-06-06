@@ -3,7 +3,7 @@ import 'test-utils/with-resolvers-polyfill';
 import { $element, elementWithText, elementWithAnchor } from 'test-utils/elements';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { runCompose } from './compose.test.js';
-import { SyncAsync, composeComponent, createComponent } from './compose.js';
+import { Channel, composeComponent, createComponent } from './compose.js';
 
 beforeEach(fixtureSetup);
 
@@ -177,9 +177,9 @@ describe('compose element', () => {
 
 });
 
-describe('SyncAsync from', () => {
+describe('Channel from', () => {
     test('basic render', async ({ expect, fixture, find }) => {
-        const syncWrapper = SyncAsync.from('sync cat', Promise.resolve('async cat'));
+        const syncWrapper = Channel.from('sync cat', Promise.resolve('async cat'));
         const dom = createComponent(syncWrapper);
         expect(dom).toMatchInlineSnapshot(`
           <DocumentFragment>
@@ -205,7 +205,7 @@ describe('SyncAsync from', () => {
     }
 
     test('creates', async ({ expect, fixture, find }) => {
-        const syncWrapper = SyncAsync.from(Loading, Promise.resolve(ClassComp));
+        const syncWrapper = Channel.from(Loading, Promise.resolve(ClassComp));
         const dom = createComponent(syncWrapper, { name: 'felix' });
         expect(dom).toMatchInlineSnapshot(`
           <DocumentFragment>

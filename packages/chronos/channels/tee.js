@@ -1,4 +1,4 @@
-import { SyncAsync } from '@azothjs/maya/compose';
+import { Channel } from '@azothjs/maya/compose';
 import { Multicast } from '../generators/Multicast.js';
 import { AsyncTypeError, BadTeeCountArgumentError } from '../throw.js';
 
@@ -9,7 +9,7 @@ export function tee(async, count = 2) {
     }
 
     let sync;
-    if(async instanceof SyncAsync) {
+    if(async instanceof Channel) {
         sync = async.initial;
         async = async.source;
     }
@@ -32,7 +32,7 @@ function makeTee(async, count, init) {
 function teePromise(promise, count, init) {
     const tees = [];
     for(let i = 0; i < count; i++) {
-        tees.push(init !== undefined ? SyncAsync.from(init, promise) : promise);
+        tees.push(init !== undefined ? Channel.from(init, promise) : promise);
     }
     return tees;
 }
@@ -42,7 +42,7 @@ function teeAsyncIterator(iterator, count, init) {
     const tees = [];
     for(let i = 0; i < count; i++) {
         const subscriber = multicast.subscriber();
-        tees.push(init ? SyncAsync.from(init, subscriber) : subscriber);
+        tees.push(init ? Channel.from(init, subscriber) : subscriber);
     }
     multicast.start();
     return tees;
