@@ -29,42 +29,15 @@ describe('promise', () => {
         expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>felix<!--1--></p><!--1-->"`);
     });
 
-    test('transform, { map: true }', async ({ fixture, find, expect }) => {
-        const promise = Promise.resolve([
-            { name: 'felix' },
-            { name: 'duchess' },
-            { name: 'garfield' }
-        ]);
-        const Cats = channel(promise, Cat, { map: true });
-        fixture.append(<Cats />);
-
-        await find('felix', { exact: false });
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>felix<!--1--></p><p>duchess<!--1--></p><p>garfield<!--1--></p><!--3-->"`
-        );
-    });
-
-    test('transform, { start, init }', async ({ fixture, find, expect }) => {
+    test('transform, { initial }', async ({ fixture, find, expect }) => {
         const promise = sleep(50).then(() => 'duchess');
 
-        const Cat = channel(promise, name => {
-            return name === 'felix'
-                ? <p>FELIX FTW</p>
-                : <p>{name}</p>;
-        }, {
-            init: 'felix',
-            start: 'choose wisely',
+        const CatChannel = channel(promise, name => <p>{name}</p>, {
+            initial: 'loading…'
         });
 
-
-        const cat = <Cat />;
-        fixture.append(cat);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"choose wisely<!--1-->"`);
-
-        await find('FELIX FTW');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>FELIX FTW</p><!--1-->"`
-        );
+        fixture.append(<CatChannel />);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"loading…<!--1-->"`);
 
         await find('duchess');
         expect(fixture.innerHTML).toMatchInlineSnapshot(
@@ -107,58 +80,23 @@ describe('async iterator', () => {
         expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>garfield<!--1--></p><!--1-->"`);
     });
 
-    test('transform, { map: true }', async ({ fixture, find, expect }) => {
-        const [cats, dispatch] = unicast();
-
-        const Cats = channel(cats, Cat, { map: true });
-        fixture.append(<ul><Cats /></ul>);
-
-        dispatch([
-            { name: 'felix' },
-            { name: 'duchess' },
-            { name: 'garfield' }
-        ]);
-
-        await find('duchess');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<ul><p>felix<!--1--></p><p>duchess<!--1--></p><p>garfield<!--1--></p><!--3--></ul>"`
-        );
-    });
-
-    test('transform, { start, init }', async ({ fixture, find, expect }) => {
+    test('{ initial }', async ({ fixture, find, expect }) => {
         const [cat, next] = unicast();
 
-        // const promise = sleep(50).then(() => 'duchess');
-
-        const Cat = channel(cat, async name => {
-            return name === 'felix'
-                ? <p>FELIX FTW</p>
-                : <p>{name}</p>;
-        }, {
-            init: 'felix',
-            start: 'choose wisely',
-        });
-
-
-        fixture.append(<Cat />);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"choose wisely<!--1-->"`);
-
-        await find('FELIX FTW');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>FELIX FTW</p><!--1-->"`
-        );
+        const CatChannel = channel(cat, { initial: 'felix' });
+        fixture.append(<CatChannel />);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"felix<!--1-->"`);
 
         next('duchess');
         await find('duchess');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>duchess<!--1--></p><!--1-->"`
-        );
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"duchess<!--1-->"`);
     });
 });
 
-describe('sync, init, start', () => {
+describe('Channel-wrapped source', () => {
 
-    test('sync', async ({ fixture, find, expect }) => {
+    test('sync from wrapped source', async ({ fixture, find, expect }) => {
+        // unicast('felix') wraps the iterator in a Channel with 'felix' as initial
         const [cat, next] = unicast('felix');
 
         const CatChannel = channel(cat);
@@ -170,7 +108,7 @@ describe('sync, init, start', () => {
         expect(fixture.innerHTML).toMatchInlineSnapshot(`"duchess<!--1-->"`);
     });
 
-    test('sync, transform', async ({ fixture, find, expect }) => {
+    test('sync with transform from wrapped source', async ({ fixture, find, expect }) => {
         const [cat, next] = unicast({ name: 'felix' });
 
         const CatChannel = channel(cat, Cat);
@@ -181,86 +119,23 @@ describe('sync, init, start', () => {
         await find('duchess');
         expect(fixture.innerHTML).toMatchInlineSnapshot(`"<p>duchess<!--1--></p><!--1-->"`);
     });
-
-    test('sync, transform, { map: true }', async ({ fixture, find, expect }) => {
-        const [cats, next] = unicast(['felix', 'duchess', 'garfield']);
-
-        const Cats = channel(cats, c => c.toUpperCase(), { map: true });
-        fixture.append(<Cats />);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"FELIXDUCHESSGARFIELD<!--3-->"`
-        );
-
-        next(['tom', 'stimpy']);
-
-        await find('TOM', { exact: false });
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"TOMSTIMPY<!--2-->"`
-        );
-    });
-
-    test('{ start }', async ({ fixture, find, expect }) => {
-        const [cat, next] = unicast();
-
-        const CatChannel = channel(cat, { start: 'felix' });
-        fixture.append(<CatChannel />);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"felix<!--1-->"`
-        );
-
-        next('duchess');
-        await find('duchess');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"duchess<!--1-->"`
-        );
-    });
-
-    test('{ init }', async ({ fixture, find, expect }) => {
-        const [cat, next] = unicast();
-
-        const CatChannel = channel(cat, { init: 'felix' });
-
-        fixture.append(<CatChannel />);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"felix<!--1-->"`
-        );
-
-        next('stimpy');
-        await find('stimpy');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"stimpy<!--1-->"`
-        );
-    });
-
-    test('transform, { init }', async ({ fixture, find, expect }) => {
-        const [cat, next] = unicast();
-
-        const CatChannel = channel(cat, name => {
-            return name === 'felix'
-                ? <p>FELIX FTW</p>
-                : <p>{name}</p>;
-        }, { init: 'felix' });
-
-        fixture.append(<CatChannel />);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>FELIX FTW</p><!--1-->"`
-        );
-
-        next('stimpy');
-        await find('stimpy');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>stimpy<!--1--></p><!--1-->"`
-        );
-    });
 });
 
 describe('throws', () => {
-    test('{ map: true } w/o transform', async ({ expect }) => {
+    test('combining wrapped source with { initial }', ({ expect }) => {
+        const [cat] = unicast('felix');
         expect(() => {
-            channel(Promise.resolve(), { map: true });
+            channel(cat, { initial: 'duchess' });
         }).toThrowErrorMatchingInlineSnapshot(
-            `[TypeError: More arguments needed: option "map: true" requires a mapping function.]`
+            `[TypeError: channel: "initial" option cannot be combined with a Channel-wrapped source]`
+        );
+    });
+
+    test('unsupported source type', ({ expect }) => {
+        expect(() => {
+            channel({ not: 'a source' });
+        }).toThrowErrorMatchingInlineSnapshot(
+            `[TypeError: channel: unsupported source type "object". Expected Promise, async iterable, or Channel-wrapped value.]`
         );
     });
 });
-

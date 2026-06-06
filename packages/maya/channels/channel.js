@@ -1,74 +1,80 @@
 import { Channel } from '../compose/compose.js';
-import { resolveArgs } from './resolve-args.js';
-import { AsyncTypeError, InitOptionWithSyncWrappedAsyncProviderError } from './errors.js';
 
-export function channel(async, transformArg, options) {
-    const {
-        transform,
-        init, start, map,
-        hasStart, hasInit
-    } = resolveArgs(transformArg, options);
-    let sync = init;
+/**
+ * channel(source, transform?, options?)
+ *
+ * Public option: { initial } — synchronous initial value rendered before
+ * the source produces its first value. Does NOT go through transform.
+ *
+ * Legacy options (deprecated, kept for compat with chronos's branch/tee/
+ * consume pipeline; will be removed when chronos is reworked):
+ *   - { start }: synonym for `initial` (no transform applied)
+ *   - { init }: initial value WITH transform applied
+ *   - { map }: applies transform to each element of an array-shaped value
+ */
+export function channel(source, transformOrOptions, options) {
+    // Polymorphic call shape: channel(source, options) when middle arg is
+    // options-shaped rather than a transform function. Only swap if `options`
+    // wasn't explicitly passed — otherwise respect the caller's positional intent
+    // (e.g. channel(promise, null, { initial: 'x' }) — middle arg is null
+    // "no transform", third arg is options).
+    let transform = transformOrOptions;
+    if(options === undefined && transformOrOptions !== undefined
+        && transformOrOptions !== null
+        && typeof transformOrOptions !== 'function') {
+        options = transformOrOptions;
+        transform = undefined;
+    }
 
-    if(async instanceof Channel) {
-        if(hasInit) {
-            throw new InitOptionWithSyncWrappedAsyncProviderError();
+    // Legacy `map` wraps transform to apply per-element on array values.
+    if(options?.map && transform) {
+        const inner = transform;
+        transform = value => value?.map ? value.map(inner) : inner(value);
+    }
+
+    // Resolve the user-supplied initial. Preference: explicit `initial` >
+    // legacy `start` (no transform) > legacy `init` (with transform).
+    let initial = options?.initial;
+    if(initial === undefined) initial = options?.start;
+    if(initial === undefined && options?.init !== undefined) {
+        initial = transform ? transform(options.init) : options.init;
+    }
+
+    // Unwrap a Channel-wrapped source (e.g. one returned by chronos's reduce()).
+    // The wrapped source's `initial` is part of the source's value pipeline, so
+    // the transform applies to it.
+    if(source instanceof Channel) {
+        if(initial !== undefined || options?.init !== undefined) {
+            throw new TypeError(
+                'channel: "initial" option cannot be combined with a Channel-wrapped source'
+            );
         }
-        sync = async.initial;
-        async = async.source;
+        const wrappedInitial = transform ? transform(source.initial) : source.initial;
+        const stream = makeAsyncStream(source.source, transform);
+        return Channel.from(wrappedInitial, stream);
     }
 
-    let hasSync = sync !== undefined;
-    if(hasSync && transform) sync = map ? sync?.map(transform) : transform(sync);
-
-    let onDeck;
-    if(hasStart && hasSync) {
-        onDeck = sync;
-        sync = undefined;
-        hasSync = false;
-    }
-
-    const out = makeChannel(async, transform, map, onDeck);
-
-    if(hasStart) return Channel.from(start, out);
-    if(hasSync) return Channel.from(sync, out);
-    return out;
+    const stream = makeAsyncStream(source, transform);
+    return initial !== undefined ? Channel.from(initial, stream) : stream;
 }
 
-function makeChannel(async, transform, map, onDeck) {
+function makeAsyncStream(source, transform) {
     switch(true) {
-        case async instanceof Promise: {
-            const promised = fromPromise(async, transform, map);
-            return onDeck ? toAsyncGenerator(onDeck, promised) : promised;
-        }
-        case !!async?.[Symbol.asyncIterator]:
-            return fromAsyncIterator(async, transform, map, onDeck);
+        case source instanceof Promise:
+            return transform ? source.then(transform) : source;
+        case !!source?.[Symbol.asyncIterator]:
+            return fromAsyncIterator(source, transform);
+        // ReadableStream and Observable support added in subsequent commits.
         default:
-            throw new AsyncTypeError(async);
+            throw new TypeError(
+                `channel: unsupported source type "${typeof source}". ` +
+                `Expected Promise, async iterable, or Channel-wrapped value.`
+            );
     }
 }
 
-function fromPromise(promise, transform, map) {
-    if(map) {
-        return promise.then(array => array?.map(transform));
-    }
-    return transform ? promise.then(transform) : promise;
-
-}
-
-async function* toAsyncGenerator(onDeck, promise) {
-    yield onDeck;
-    yield promise;
-}
-
-async function* fromAsyncIterator(iterator, transform, map, onDeck) {
-    if(onDeck) yield onDeck;
-
-    for await(const value of iterator) {
-        if(map) {
-            yield value?.map(transform);
-            continue;
-        }
+async function* fromAsyncIterator(iter, transform) {
+    for await(const value of iter) {
         yield transform ? transform(value) : value;
     }
 }
