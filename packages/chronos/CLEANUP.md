@@ -18,6 +18,42 @@ Chronos likely ends up as:
 The Channel concept (single source → transform → single downstream consumer)
 lives in maya. Chronos is the async-data plumbing underneath.
 
+## What landed
+
+### Sync return removed from chronos generators
+
+`generator()` and `reduce()` no longer return `Channel`-wrapped values.
+They return plain `[asyncIterator, dispatch]`. Tests that relied on the
+sync return (via `ChannelReader` or via JSX-mounting the result directly
+expecting an initial state) were updated or removed.
+
+- `generator.js`: option handling (init/start/map/onDeck) stripped.
+  Signature is now `generator(transform?)` → `[asyncIterator, dispatch]`.
+  Values dispatched before consumption begins are queued FIFO.
+- `reduce.js`: returns `[asyncIterator, dispatch]`. The caller has `init`
+  in scope and pairs it with `Channel.from(init, iter)` if they need an
+  initial render value.
+- `unicast.js`: removed. It was a thin wrapper over `generator()` with
+  an `{ init }` option; with `init` gone, it had no purpose distinct
+  from `generator()`. Users call `generator()` directly.
+- `Multicast.js`: kept. Still defensively unwraps Channel-typed inputs
+  (users may still pass Channels in from outside chronos). `subscriber`
+  no longer accepts options — its only argument is the per-feed transform.
+
+### What stayed in the legacy compat layer
+
+The `channel()` function in maya still accepts the legacy `{ init, start,
+map }` options. That layer exists for the chronos `branch.js`
+promise-path which calls into `channel()` with those options. To be
+removed when chronos's branch/tee/consume are reworked.
+
+The `map` semantic in branch.js's async-iterator path is now wrapped
+locally in `branchAsyncIterator` (rather than passing options into
+`generator()`). It uses chronos's historical "if array, map per
+element; else pass through unchanged" semantic, which is intentionally
+different from maya's Channel.map (which applies transform to non-array
+values too). Both are correct for their context.
+
 ## What needs rework
 
 ### `branch()` and `tee()` and `consume()`

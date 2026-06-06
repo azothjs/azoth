@@ -1,7 +1,7 @@
 import { describe, test, beforeEach } from 'vitest';
 import '../with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
-import { unicast } from '../generators/unicast.js';
+import { generator } from '../generators/generator.js';
 import { tee } from './tee.js';
 import { Channel } from '@azothjs/maya/compose';
 
@@ -45,7 +45,7 @@ describe('promise', () => {
 describe('async iterator', () => {
 
     test('default 2', async ({ expect, fixture, find }) => {
-        const [iterator, next] = unicast();
+        const [iterator, next] = generator();
         const Channels = tee(iterator);
         fixture.append(...Channels.map(C => <C />));
         expect(fixture.innerHTML).toMatchInlineSnapshot(
@@ -66,7 +66,7 @@ describe('async iterator', () => {
     });
 
     test('count', async ({ expect, fixture, find }) => {
-        const [iterator, next] = unicast();
+        const [iterator, next] = generator();
         const [one, two, three] = tee(iterator, 3);
         fixture.append(<p>{one} {two} {three}</p>);
         expect(fixture.innerHTML).toMatchInlineSnapshot(
@@ -86,26 +86,9 @@ describe('async iterator', () => {
         );
     });
 
-    test('with initial value', async ({ expect, fixture, find }) => {
-        const [iterator, next] = unicast('first');
-        const [one, two, three] = tee(iterator, 3);
-        fixture.append(<p>{one} {two} {three}</p>);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>first<!--1--> first<!--1--> first<!--1--></p>"`
-        );
-
-        next('pete');
-        await find('pete', { exact: false });
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>pete<!--1--> pete<!--1--> pete<!--1--></p>"`
-        );
-
-        next('repete');
-        await find('repete', { exact: false });
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<p>repete<!--1--> repete<!--1--> repete<!--1--></p>"`
-        );
-    });
+    // Removed: 'with initial value' test relied on unicast('first') returning
+    // a Channel with an initial value. chronos generators no longer return
+    // Channels.
 });
 
 describe('throws', () => {

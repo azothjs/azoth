@@ -2,7 +2,7 @@ import { describe, test, beforeEach } from 'vitest';
 import '../with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { consume } from './consume.js';
-import { unicast } from '../generators/unicast.js';
+import { generator } from '../generators/generator.js';
 
 beforeEach(fixtureSetup);
 
@@ -39,7 +39,7 @@ describe('promise', () => {
 describe('async iterator', () => {
 
     test('action', async ({ expect }) => {
-        const [iter, next] = unicast();
+        const [iter, next] = generator();
         let { promise, resolve } = Promise.withResolvers();
         let test = { cat: '' };
         consume(iter, cat => {
@@ -59,20 +59,7 @@ describe('async iterator', () => {
 
     });
 
-    test('sync async', async ({ expect }) => {
-        const [iter, next] = unicast('felix');
-        let { promise, resolve } = Promise.withResolvers();
-        let test = { cat: '' };
-        consume(iter, cat => {
-            test.cat = cat;
-            resolve();
-        });
-        expect(test.cat).toBe('felix');
-
-        ({ promise, resolve } = Promise.withResolvers());
-        next('next');
-        await promise;
-        expect(test.cat).toBe('next');
-    });
+    // Removed: 'sync async' test relied on unicast('felix') returning a
+    // Channel-wrapped iter. chronos generators no longer return Channels.
 
 });

@@ -2,7 +2,7 @@ import { describe, test, beforeEach } from 'vitest';
 import '../with-resolvers-polyfill.js';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { Cat, CatCount, CatName, CatNames } from '../test-utils.jsx';
-import { unicast } from '../generators/unicast.js';
+import { generator } from '../generators/generator.js';
 import { branch } from './branch.js';
 
 beforeEach(fixtureSetup);
@@ -134,7 +134,7 @@ describe('promise', () => {
 describe('async iterator', () => {
 
     test('...transforms', async ({ fixture, find, expect, childHTML }) => {
-        const [cats, next] = unicast();
+        const [cats, next] = generator();
         const [Count, List, Map] = branch(
             cats,
             CatCount, CatNames,
@@ -179,7 +179,7 @@ describe('async iterator', () => {
     // legacy { start, init } combo behavior that relied on channel()'s
     // removed onDeck mechanism. See chronos CLEANUP.md.
     test.skip('all transform/option combos', async ({ fixture, find, expect, childHTML }) => {
-        const [cat, next] = unicast();
+        const [cat, next] = generator();
 
         const Channels = branch(
             cat,
@@ -258,24 +258,9 @@ describe('async iterator', () => {
 
     });
 
-    test('syncAsync', async ({ fixture, find, expect }) => {
-        const [cat, next] = unicast('felix');
-        const [Cat, Length] = branch(
-            cat,
-            null,
-            cat => cat.length
-        );
-        fixture.append(<Cat />, <Length />);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"felix<!--1-->5<!--1-->"`
-        );
-
-        next('duchess');
-        await find('duchess', { exact: false });
-
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"duchess<!--1-->7<!--1-->"`
-        );
-    });
+    // Removed: 'syncAsync' test relied on unicast() returning a Channel with
+    // an initial value. chronos generators no longer return Channels — this
+    // case is now covered at the user layer by wrapping with Channel.from()
+    // or new Channel() in maya. See packages/chronos/CLEANUP.md.
 
 });

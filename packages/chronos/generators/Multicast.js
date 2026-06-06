@@ -27,8 +27,8 @@ export class Multicast {
         }
     }
 
-    subscriber(transform, options) {
-        const [iterator, next] = generator(transform, options);
+    subscriber(transform) {
+        const [iterator, next] = generator(transform);
         this.#iterators.push(iterator);
         this.#consumers.push(next);
         return iterator;

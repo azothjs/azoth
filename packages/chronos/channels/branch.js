@@ -47,7 +47,17 @@ function branchAsyncIterator(iterator, transforms) {
     const multicast = new Multicast(iterator);
     const branches = transforms.map(transform => {
         if(Array.isArray(transform)) { // #[transform, options];
-            return multicast.subscriber(transform[0], transform[1]);
+            let [fn, options] = transform;
+            // Legacy `map` wraps the transform to apply per-element on arrays.
+            // generator() no longer accepts options, so handle it here.
+            if(options?.map && fn) {
+                const inner = fn;
+                // Chronos's map: true semantic — apply per-element on array
+                // values; pass everything else through unchanged (so an
+                // undefined dispatch clears the rendered list cleanly).
+                fn = value => value?.map ? value.map(inner) : value;
+            }
+            return multicast.subscriber(fn);
         }
         return multicast.subscriber(transform);
     });
