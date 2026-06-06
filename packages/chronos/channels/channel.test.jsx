@@ -127,7 +127,7 @@ describe('throws', () => {
         expect(() => {
             channel(cat, { initial: 'duchess' });
         }).toThrowErrorMatchingInlineSnapshot(
-            `[TypeError: channel: "initial" option cannot be combined with a Channel-wrapped source]`
+            `[TypeError: Channel: "initial" (or childNodes) cannot be combined with a Channel-wrapped source]`
         );
     });
 
@@ -135,7 +135,7 @@ describe('throws', () => {
         expect(() => {
             channel({ not: 'a source' });
         }).toThrowErrorMatchingInlineSnapshot(
-            `[TypeError: channel: unsupported source type "object". Expected Promise, async iterable, or Channel-wrapped value.]`
+            `[TypeError: Channel: unsupported source type "object". Expected Promise, async iterable, or Channel-wrapped value.]`
         );
     });
 });

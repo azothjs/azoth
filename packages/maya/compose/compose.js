@@ -1,14 +1,11 @@
+import { Channel } from '../channels/channel.js';
+
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
-export class Channel {
-    static from(initial, source) {
-        return new this(initial, source);
-    }
-    constructor(initial, source) {
-        this.initial = initial;
-        this.source = source;
-    }
-}
+// Re-export Channel from compose for back-compat. Channel was defined here
+// (then as SyncAsync) and is referenced via @azothjs/maya/compose throughout
+// the codebase. The canonical home is now @azothjs/maya/channels.
+export { Channel };
 
 export function compose(anchor, input, keepLast, props, childNodes) {
     if(keepLast !== true) keepLast = false;
