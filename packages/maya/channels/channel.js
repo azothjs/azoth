@@ -31,6 +31,14 @@
  */
 export class Channel {
 
+    // Private fields make .initial and .source read-only after construction.
+    // The class is exported (it has to be — JSX needs the identifier), but
+    // instances are immutable to outside code. The conventional surface is
+    // <Channel> JSX or `new Channel(props, childNodes)`; direct mutation
+    // isn't part of the contract.
+    #initial;
+    #source;
+
     constructor(props, childNodes) {
         const {
             source,
@@ -61,9 +69,12 @@ export class Channel {
             resolvedSource = source.source;
         }
 
-        this.initial = initial;
-        this.source = makeAsyncStream(resolvedSource, transform, errorTransform);
+        this.#initial = initial;
+        this.#source = makeAsyncStream(resolvedSource, transform, errorTransform);
     }
+
+    get initial() { return this.#initial; }
+    get source() { return this.#source; }
 }
 
 function makeAsyncStream(source, transform, errorTransform) {

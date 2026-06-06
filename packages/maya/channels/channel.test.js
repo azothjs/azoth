@@ -288,6 +288,14 @@ describe('Channel error transform', () => {
         expect(collected).toEqual(['felix', '[error: source broke]']);
     });
 
+    test('Channel instance is read-only after construction', ({ expect }) => {
+        const c = new Channel({ source: Promise.resolve('x') });
+        // Attempting to write throws in strict mode (test files run as
+        // modules → strict). The getters expose the private fields read-only.
+        expect(() => { c.initial = 'something else'; }).toThrow(TypeError);
+        expect(() => { c.source = 'something else'; }).toThrow(TypeError);
+    });
+
     test('error transform output bypasses the `as` value transform', async ({ expect }) => {
         // The `as` transform shouldn't be applied to the error result —
         // the user's `error` prop is responsible for producing renderable
