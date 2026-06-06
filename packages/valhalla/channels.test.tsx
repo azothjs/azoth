@@ -199,6 +199,109 @@ describe('Channel with map prop (array iteration)', () => {
 
 });
 
+describe('Channel with ReadableStream source', () => {
+
+    test('stream chunks render via compose (accumulate semantics)', async ({ expect }) => {
+        const stream = new ReadableStream({
+            start(controller) {
+                controller.enqueue('felix');
+                controller.enqueue(' and ');
+                controller.enqueue('duchess');
+                controller.close();
+            }
+        });
+        const root = fixture();
+        root.append(<main><Channel source={stream} /></main>);
+
+        await macrotask();
+
+        // ReadableStream chunks accumulate in compose (chunks append rather
+        // than replace, matching the stream-as-payload mental model).
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main>felix and duchess<!--3--></main>"`
+        );
+    });
+
+    test('stream with transform pipes chunks through', async ({ expect }) => {
+        const stream = new ReadableStream({
+            start(controller) {
+                controller.enqueue('felix');
+                controller.enqueue('duchess');
+                controller.close();
+            }
+        });
+        const root = fixture();
+        root.append(<main><Channel source={stream} as={s => s.toUpperCase() + ' '} /></main>);
+
+        await macrotask();
+
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main>FELIX DUCHESS <!--2--></main>"`
+        );
+    });
+
+});
+
+describe('Channel with Observable source', () => {
+
+    // Minimal observable per the TC39 proposal — subscribe takes
+    // { next, error, complete } and returns { unsubscribe }.
+    function makeObservable<T>(values: T[]) {
+        return {
+            subscribe(observer: { next(v: T): void; complete(): void }) {
+                let cancelled = false;
+                (async () => {
+                    for(const v of values) {
+                        if(cancelled) return;
+                        observer.next(v);
+                        await Promise.resolve();
+                    }
+                    if(!cancelled) observer.complete();
+                })();
+                return { unsubscribe() { cancelled = true; } };
+            }
+        };
+    }
+
+    test('observable values render through Channel', async ({ expect }) => {
+        const obs = makeObservable([<p>felix</p>, <p>duchess</p>]);
+        const root = fixture();
+        root.append(<main><Channel source={obs} /></main>);
+
+        await macrotask();
+
+        // Like async iterator: last value replaces
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><p>duchess</p><!--1--></main>"`
+        );
+    });
+
+    test('observable with transform', async ({ expect }) => {
+        const obs = makeObservable([{ name: 'felix' }, { name: 'duchess' }]);
+        const root = fixture();
+        root.append(<main><Channel source={obs} as={({ name }) => <p>{name}</p>} /></main>);
+
+        await macrotask();
+
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><p>duchess<!--1--></p><!--1--></main>"`
+        );
+    });
+
+    test('observable in a child slot (no Channel wrap) — compose handles directly', async ({ expect }) => {
+        const obs = makeObservable([<p>direct</p>]);
+        const root = fixture();
+        root.append(<main>{obs}</main>);
+
+        await macrotask();
+
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><p>direct</p><!--1--></main>"`
+        );
+    });
+
+});
+
 describe('Channel — equivalent class and instance forms', () => {
 
     test('<Channel> JSX produces a Channel instance', async ({ expect }) => {

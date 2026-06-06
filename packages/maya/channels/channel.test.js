@@ -120,3 +120,108 @@ describe('Channel — construction', () => {
 
 });
 
+describe('Channel with ReadableStream source', () => {
+
+    test('preserves ReadableStream when no transform', ({ expect }) => {
+        const stream = new ReadableStream({
+            start(controller) {
+                controller.enqueue('a');
+                controller.enqueue('b');
+                controller.close();
+            }
+        });
+        const c = new Channel({ source: stream });
+        // Source passes through unchanged — compose.js handles ReadableStream
+        // natively (chunk-by-chunk accumulate).
+        expect(c.source).toBe(stream);
+    });
+
+    test('pipes through TransformStream when transform provided', async ({ expect }) => {
+        const stream = new ReadableStream({
+            start(controller) {
+                controller.enqueue('a');
+                controller.enqueue('b');
+                controller.close();
+            }
+        });
+        const c = new Channel({
+            source: stream,
+            as: s => s.toUpperCase()
+        });
+        expect(c.source).toBeInstanceOf(ReadableStream);
+        expect(c.source).not.toBe(stream); // a new piped stream
+
+        const reader = c.source.getReader();
+        const chunks = [];
+        while(true) {
+            const { value, done } = await reader.read();
+            if(done) break;
+            chunks.push(value);
+        }
+        expect(chunks).toEqual(['A', 'B']);
+    });
+
+});
+
+describe('Channel with Observable source', () => {
+
+    // A minimal observable shape per the TC39 proposal — subscribe takes
+    // an observer with { next, error, complete } methods and returns a
+    // subscription with .unsubscribe.
+    function makeObservable(emissions) {
+        return {
+            subscribe(observer) {
+                let cancelled = false;
+                (async () => {
+                    for(const value of emissions) {
+                        if(cancelled) return;
+                        observer.next(value);
+                        // Yield to microtask queue between emissions
+                        await Promise.resolve();
+                    }
+                    if(!cancelled) observer.complete();
+                })();
+                return { unsubscribe() { cancelled = true; } };
+            }
+        };
+    }
+
+    test('observable values flow through as async iteration', async ({ expect }) => {
+        const obs = makeObservable(['felix', 'duchess', 'garfield']);
+        const c = new Channel({ source: obs });
+        const collected = [];
+        for await(const v of c.source) collected.push(v);
+        expect(collected).toEqual(['felix', 'duchess', 'garfield']);
+    });
+
+    test('observable values flow through with transform', async ({ expect }) => {
+        const obs = makeObservable(['felix', 'duchess']);
+        const c = new Channel({
+            source: obs,
+            as: n => n.toUpperCase()
+        });
+        const collected = [];
+        for await(const v of c.source) collected.push(v);
+        expect(collected).toEqual(['FELIX', 'DUCHESS']);
+    });
+
+    test('observable error propagates through async iteration', async ({ expect }) => {
+        const obs = {
+            subscribe(observer) {
+                queueMicrotask(() => {
+                    observer.next('felix');
+                    observer.error(new Error('source broke'));
+                });
+                return { unsubscribe() {} };
+            }
+        };
+        const c = new Channel({ source: obs });
+        const collected = [];
+        await expect(async () => {
+            for await(const v of c.source) collected.push(v);
+        }).rejects.toThrow(/source broke/);
+        expect(collected).toEqual(['felix']);
+    });
+
+});
+

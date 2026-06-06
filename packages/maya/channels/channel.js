@@ -73,13 +73,28 @@ function makeAsyncStream(source, transform) {
     switch(true) {
         case source instanceof Promise:
             return transform ? source.then(transform) : source;
+        case source instanceof ReadableStream:
+            // compose.js handles ReadableStream natively (chunk-by-chunk
+            // accumulate). If a transform is provided, pipe through a
+            // TransformStream so each chunk is transformed before compose
+            // sees it.
+            return transform ? source.pipeThrough(new TransformStream({
+                transform(chunk, controller) {
+                    controller.enqueue(transform(chunk));
+                }
+            })) : source;
         case !!source[Symbol.asyncIterator]:
             return fromAsyncIterator(source, transform);
-        // ReadableStream and Observable support is planned; see TODO.md.
+        case typeof source.subscribe === 'function':
+            // Observable shape per the TC39 proposal (RxJS-compatible).
+            // Convert to an async iterator so compose's existing
+            // async-iteration path handles it.
+            return fromObservable(source, transform);
         default:
             throw new TypeError(
                 `Channel: unsupported source type "${typeof source}". ` +
-                `Expected Promise, async iterable, or Channel-wrapped value.`
+                `Expected Promise, async iterable, ReadableStream, ` +
+                `Observable, or Channel-wrapped value.`
             );
     }
 }
@@ -87,5 +102,70 @@ function makeAsyncStream(source, transform) {
 async function* fromAsyncIterator(iter, transform) {
     for await(const value of iter) {
         yield transform ? transform(value) : value;
+    }
+}
+
+// Sentinel for observable completion — distinguishable from any user value.
+const COMPLETE = Symbol('Channel.observable.complete');
+
+// Internal export — used by compose.js for observable-in-child-slot
+// handling. Not part of the public Channel API surface.
+export async function* fromObservable(observable, transform) {
+    const queue = [];
+    let pending = null;       // { resolve, reject } when consumer is awaiting
+    let completed = false;
+    let errored = null;
+
+    const subscription = observable.subscribe({
+        next(value) {
+            if(pending) {
+                const { resolve } = pending;
+                pending = null;
+                resolve(value);
+            }
+            else {
+                queue.push(value);
+            }
+        },
+        error(err) {
+            errored = err;
+            if(pending) {
+                const { reject } = pending;
+                pending = null;
+                reject(err);
+            }
+        },
+        complete() {
+            completed = true;
+            if(pending) {
+                const { resolve } = pending;
+                pending = null;
+                resolve(COMPLETE);
+            }
+        }
+    });
+
+    try {
+        while(true) {
+            if(queue.length > 0) {
+                const value = queue.shift();
+                yield transform ? transform(value) : value;
+                continue;
+            }
+            if(errored) throw errored;
+            if(completed) return;
+
+            const value = await new Promise((resolve, reject) => {
+                pending = { resolve, reject };
+            });
+            if(value === COMPLETE) return;
+            yield transform ? transform(value) : value;
+        }
+    }
+    finally {
+        // Unsubscribe whether we exited normally, threw, or were aborted.
+        if(typeof subscription?.unsubscribe === 'function') {
+            subscription.unsubscribe();
+        }
     }
 }

@@ -1,4 +1,4 @@
-import { Channel } from '../channels/channel.js';
+import { Channel, fromObservable } from '../channels/channel.js';
 
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
@@ -54,13 +54,17 @@ export function compose(anchor, input, keepLast, props, childNodes) {
         case Array.isArray(input):
             composeArray(anchor, input, keepLast);
             break;
-        // w/o the !! this causes intermittent failures :p maybe vitest/node thing?
-        case !!input[Symbol.asyncIterator]:
-            composeAsyncIterator(anchor, input, keepLast, props, childNodes);
-            break;
+        // ReadableStream must come before the asyncIterator check — modern
+        // ReadableStream implements [Symbol.asyncIterator], so without this
+        // ordering the stream would be consumed via for-await (replace
+        // semantics) instead of pipeTo (accumulate semantics).
         case input instanceof ReadableStream:
             // no props and childNodes propagation on streams
             composeStream(anchor, input, true);
+            break;
+        // w/o the !! this causes intermittent failures :p maybe vitest/node thing?
+        case !!input[Symbol.asyncIterator]:
+            composeAsyncIterator(anchor, input, keepLast, props, childNodes);
             break;
         case isRenderObject(input): {
             let out = childNodes
@@ -69,9 +73,11 @@ export function compose(anchor, input, keepLast, props, childNodes) {
             compose(anchor, out, keepLast);
             break;
         }
-        // TODO:
-        case !!input.subscribe:
-        case !!input.on:
+        case typeof input.subscribe === 'function':
+            // Observable shape per the TC39 proposal (RxJS-compatible).
+            // Convert to an async iterator and reuse the existing path.
+            composeAsyncIterator(anchor, fromObservable(input), keepLast, props, childNodes);
+            break;
         default: {
             throwTypeErrorForObject(input);
         }
