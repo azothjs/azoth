@@ -12,7 +12,7 @@ For framework conventions and how to add tests, see [`README.md`](./README.md).
 | Topic | File | What it covers |
 |---|---|---|
 | **JSX evaluates to DOM** | [`smoke.test.tsx`](./smoke.test.tsx) | `<p>hello</p>` returns an `HTMLParagraphElement`. Standard DOM APIs work directly on JSX output. |
-| **Slottable (children)** | [`slottable.test.tsx`](./slottable.test.tsx) | Children passed as the second argument; opaque DOM; composition by nesting. |
+| **ChildNodes (children)** | [`childNodes.test.tsx`](./childNodes.test.tsx) | Children passed as the second argument; opaque DOM; composition by nesting. |
 | **Attributes vs properties** | [`attributes.test.tsx`](./attributes.test.tsx) | Static attributes compile to HTML; dynamic interpolation assigns DOM properties. `class={var}` doesn't work — use `className={var}`. |
 | **Component invocation** | [`component-invocation.test.tsx`](./component-invocation.test.tsx) | `<Component/>` passes `{}`, `<Component foo={x}/>` passes `{foo: x}`, `Component()` passes `undefined`. Destructuring is safe under JSX invocation. |
 | **Element binding positions** | [`element-bindings.test.tsx`](./element-bindings.test.tsx) | Root vs child element bindings produce different template structures (tMap). Both patterns verified, including mixed cases. |

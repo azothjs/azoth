@@ -261,7 +261,7 @@ Previously, `<Card>content</Card>` invoked with no attributes passed `null` inst
 
 ```jsx
 // Older versions:
-const Card = ({ class: className }, slottable) => …;
+const Card = ({ class: className }, childNodes) => …;
 <Card>…</Card>     // TypeError: Cannot destructure property 'class' of 'null'
 ```
 
@@ -313,7 +313,7 @@ The honest inventory is the working surface. Don't hesitate to add to it.
 ## See also
 
 - [For LLMs](for-llms.md) — terminology discipline and stop-and-ask triggers
-- [Components](components.md) — function and class forms, props and slottable; includes the historical note on null props
+- [Components](components.md) — function and class forms, props and childNodes; includes the historical note on null props
 - [Attributes and properties](attributes-and-properties.md) — the static vs dynamic split, full class/className discussion
 - [Composition](composition.md) — what `{…}` slots accept
 - [JSX as DOM](jsx-as-dom.md) — the foundation that explains why DOM-property names matter

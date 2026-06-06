@@ -10,7 +10,7 @@ Valhalla tests the **developer-facing JSX interface** — treating JSX as HTML t
 - **packages/thoth/compiler.test.js**: Compiler-level tests for the Thoth transpiler. Use for testing compilation output.
 
 **When to add tests here:**
-- Testing component patterns (props, slottable, nesting)
+- Testing component patterns (props, childNodes, nesting)
 - Verifying JSX-to-DOM behavior
 - Documenting idiomatic Azoth patterns
 - Investigating rendering bugs at the API level
@@ -118,7 +118,7 @@ Comprehensive component pattern tests. Documents Azoth-specific behaviors:
 
 | Section | What it tests |
 |---------|---------------|
-| **Slottable with nested components** | How children are passed to components |
+| **ChildNodes with nested components** | How children are passed to components |
 | **Dynamic class attributes** | `class={var}` vs `className={var}` behavior |
 | **Component invocation** | `<Component/>` vs `Component()` props behavior |
 | **Element binding positions** | Root vs child element bindings |

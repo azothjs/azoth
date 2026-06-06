@@ -49,7 +49,7 @@ What's worth holding in mind here:
   marks the slot's position. New content goes before the anchor; the
   anchor stays put for the next composition.
 - A sibling function, `create`, is the same chain but aware of `props` and
-  `slottable`. It's what Maya uses when a component is the value being
+  `childNodes`. It's what Maya uses when a component is the value being
   composed.
 
 The supporting helpers exported alongside `compose`:

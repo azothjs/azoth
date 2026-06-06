@@ -10,7 +10,7 @@ export class SyncAsync {
     }
 }
 
-export function compose(anchor, input, keepLast, props, slottable) {
+export function compose(anchor, input, keepLast, props, childNodes) {
     if(keepLast !== true) keepLast = false;
     const type = typeof input;
 
@@ -33,17 +33,17 @@ export function compose(anchor, input, keepLast, props, slottable) {
             break;
         case input instanceof Node:
             if(props) Object.assign(input, props);
-            if(slottable) input.slottable = slottable;
+            if(childNodes) input.childNodes = childNodes;
             replace(anchor, input, keepLast);
             break;
         case input instanceof SyncAsync:
             compose(anchor, input.initial, keepLast);
-            compose(anchor, input.source, keepLast, props, slottable);
+            compose(anchor, input.source, keepLast, props, childNodes);
             break;
         case type === 'function': {
             // will throw if function is class,
             // unlike create or compose element
-            let out = input(props, slottable);
+            let out = input(props, childNodes);
             compose(anchor, out, keepLast);
             break;
         }
@@ -53,22 +53,22 @@ export function compose(anchor, input, keepLast, props, slottable) {
             break;
         }
         case input instanceof Promise:
-            input.then(value => compose(anchor, value, keepLast, props, slottable));
+            input.then(value => compose(anchor, value, keepLast, props, childNodes));
             break;
         case Array.isArray(input):
             composeArray(anchor, input, keepLast);
             break;
         // w/o the !! this causes intermittent failures :p maybe vitest/node thing?
         case !!input[Symbol.asyncIterator]:
-            composeAsyncIterator(anchor, input, keepLast, props, slottable);
+            composeAsyncIterator(anchor, input, keepLast, props, childNodes);
             break;
         case input instanceof ReadableStream:
-            // no props and slottable propagation on streams
+            // no props and childNodes propagation on streams
             composeStream(anchor, input, true);
             break;
         case isRenderObject(input): {
-            let out = slottable
-                ? input.render(props, slottable)
+            let out = childNodes
+                ? input.render(props, childNodes)
                 : props ? input.render(props) : input.render();
             compose(anchor, out, keepLast);
             break;
@@ -89,25 +89,25 @@ export function compose(anchor, input, keepLast, props, slottable) {
  */
 const isRenderObject = obj => typeof obj?.render === 'function';
 
-export function composeComponent(anchor, [Constructor, props, slottable]) {
+export function composeComponent(anchor, [Constructor, props, childNodes]) {
     // if renderer "updating":
     // - get render source, by anchor
-    // - call render with props/slottable
+    // - call render with props/childNodes
     // - return
 
-    createCompose(Constructor, props, slottable, anchor);
+    createCompose(Constructor, props, childNodes, anchor);
     // if renderer "recording"
     // - store render source, by anchor
 
 }
 
-export function createCompose(Constructor, props, slottable, anchor) {
-    const out = create(Constructor, props, slottable, anchor);
+export function createCompose(Constructor, props, childNodes, anchor) {
+    const out = create(Constructor, props, childNodes, anchor);
     if(out !== anchor) compose(anchor, out);
 }
 
-export function createComponent(Constructor, props, slottable) {
-    let result = create(Constructor, props, slottable, null);
+export function createComponent(Constructor, props, childNodes) {
+    let result = create(Constructor, props, childNodes, null);
 
     switch(typeof result) {
         case 'number':
@@ -121,7 +121,7 @@ export function createComponent(Constructor, props, slottable) {
     }
 }
 
-function create(input, props, slottable, anchor) {
+function create(input, props, childNodes, anchor) {
     const type = typeof input;
 
     switch(true) {
@@ -143,18 +143,18 @@ function create(input, props, slottable, anchor) {
         // class and function(){}
         case !!(input.prototype?.constructor): {
             // eslint-disable-next-line new-cap
-            return new input(props, slottable);
+            return new input(props, childNodes);
         }
         // arrow () => {}
         case type === 'function': {
-            return input(props, slottable) ?? null;
+            return input(props, childNodes) ?? null;
         }
         case type !== 'object': {
             throwTypeError(input, type);
             break;
         }
         case isRenderObject(input):
-            return input.render(props, slottable) ?? null;
+            return input.render(props, childNodes) ?? null;
         default: {
             let container = anchor;
             if(!container) {
@@ -164,15 +164,15 @@ function create(input, props, slottable, anchor) {
             }
 
             if(input instanceof SyncAsync) {
-                createCompose(input.initial, props, slottable, anchor);
-                createCompose(input.source, props, slottable, anchor);
+                createCompose(input.initial, props, childNodes, anchor);
+                createCompose(input.source, props, childNodes, anchor);
             }
             else if(input[Symbol.asyncIterator]) {
-                composeAsyncIterator(anchor, input, false, props, slottable);
+                composeAsyncIterator(anchor, input, false, props, childNodes);
             }
             else if(input instanceof Promise) {
                 input.then(value => {
-                    createCompose(value, props, slottable, anchor);
+                    createCompose(value, props, childNodes, anchor);
                 });
             }
             else if(Array.isArray(input)) {
@@ -236,12 +236,12 @@ async function composeStream(anchor, stream, keepLast) {
     }));
 }
 
-async function composeAsyncIterator(anchor, iterator, keepLast, props, slottable) {
+async function composeAsyncIterator(anchor, iterator, keepLast, props, childNodes) {
     // TODO: use iterator directly and 
     // - control return when removed, and maybe throws on error
     // - possible yield/return semantics for third communication channel
     for await(const value of iterator) {
-        compose(anchor, value, keepLast, props, slottable);
+        compose(anchor, value, keepLast, props, childNodes);
     }
 }
 

@@ -11,7 +11,7 @@ neutral prose.
 - [Composition](./composition.md) — the `{…}` slot mechanic; the
   compose resolution chain
 - [Components](./components.md) — function and class forms; component =
-  constructor; props and slottable
+  constructor; props and childNodes
 - [Attributes and properties](./attributes-and-properties.md) — static
   vs dynamic; the class/className foot-gun; SVG limitations
 

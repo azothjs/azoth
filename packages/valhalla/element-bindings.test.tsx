@@ -76,8 +76,8 @@ describe('element binding positions: root vs child', () => {
     test('nested components with different binding positions', ({ expect }) => {
         const Title = ({ text }) => <h2>{text}</h2>;
 
-        const Card = (props, slottable) => (
-            <div className={props?.class || 'card'}>{slottable}</div>
+        const Card = (props, childNodes) => (
+            <div className={props?.class || 'card'}>{childNodes}</div>
         );
 
         const el = (

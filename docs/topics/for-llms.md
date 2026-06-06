@@ -33,7 +33,7 @@ The same applies to:
   then get removed)
 - **Re-render cycle** (no render cycle — events deliver deltas)
 - **Synthetic events** (no `SyntheticEvent` — native DOM events directly)
-- **Virtual children** (no `React.Children` — slottable content is opaque DOM)
+- **Virtual children** (no `React.Children` — childNodes content is opaque DOM)
 
 These weren't replaced. They were never there. Don't introduce them.
 
@@ -69,7 +69,7 @@ When you encounter these patterns, pause before generating code:
    a class, an event handler, a closure, or a channel.
 
 3. **About to wrap children in `React.Children.map` or similar.** Azoth's
-   `slottable` is opaque DOM content, not introspectable virtual elements.
+   `childNodes` is opaque DOM content, not introspectable virtual elements.
    The pattern is composition (nesting), not manipulation. See
    [components.md](components.md).
 
@@ -122,7 +122,7 @@ yet. Surface that confusion. It's valuable.
 
 1. [JSX as DOM](jsx-as-dom.md) — the foundation
 2. [Composition](composition.md) — how `{…}` slots accept values
-3. [Components](components.md) — function and class forms; props and slottable
+3. [Components](components.md) — function and class forms; props and childNodes
 4. [Attributes and properties](attributes-and-properties.md) — static vs
    dynamic; class/className foot-gun
 5. [Async and Channels](async-and-channels.md) — promises, generators,

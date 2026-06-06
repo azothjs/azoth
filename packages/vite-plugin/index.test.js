@@ -22,7 +22,7 @@ test('basic plugin', ({ expect }) => {
             Hello {world}
         </p>
         <Component prop1={prop1} {...obj} option="static">
-            <p>{name} slottable!</p>
+            <p>{name} childNodes!</p>
         </Component>
     </div>`;
 

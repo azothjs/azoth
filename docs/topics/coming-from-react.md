@@ -103,7 +103,7 @@ input.focus();
 
 ### "I need to map over children"
 
-You can't introspect Azoth's `slottable`. The pattern is composition — pass
+You can't introspect Azoth's `childNodes`. The pattern is composition — pass
 specific components instead of generic children:
 
 ```jsx
@@ -113,7 +113,7 @@ specific components instead of generic children:
 <Card header={<HeaderBar/>} body={<Content/>}/>
 ```
 
-See [components](components.md) for the slottable model.
+See [components](components.md) for the childNodes model.
 
 ### "I need a context provider"
 
