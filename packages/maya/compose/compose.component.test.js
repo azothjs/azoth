@@ -179,7 +179,7 @@ describe('compose element', () => {
 
 describe('Channel from', () => {
     test('basic render', async ({ expect, fixture, find }) => {
-        const syncWrapper = Channel.from('sync cat', Promise.resolve('async cat'));
+        const syncWrapper = new Channel({ source: Promise.resolve('async cat') }, 'sync cat');
         const dom = createComponent(syncWrapper);
         expect(dom).toMatchInlineSnapshot(`
           <DocumentFragment>
@@ -205,7 +205,7 @@ describe('Channel from', () => {
     }
 
     test('creates', async ({ expect, fixture, find }) => {
-        const syncWrapper = Channel.from(Loading, Promise.resolve(ClassComp));
+        const syncWrapper = new Channel({ source: Promise.resolve(ClassComp) }, Loading);
         const dom = createComponent(syncWrapper, { name: 'felix' });
         expect(dom).toMatchInlineSnapshot(`
           <DocumentFragment>

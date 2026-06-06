@@ -13,9 +13,9 @@ import { TransformNotFunctionArgumentError } from '../throw.js';
  *   dispatch(3);   // iter yields 5
  *
  * If you need the initial state for synchronous rendering, you have it
- * in scope (you passed it in as `init`). Pair with maya's Channel:
- *
- *   const ch = Channel.from(init, iter);
+ * in scope (you passed it in as `init`). chronos does not assume any
+ * particular rendering library — pair the iterator with an initial
+ * value at your downstream layer if you need one.
  */
 export function reduce(reducer, init, initialAction = null) {
     if(reducer && typeof reducer !== 'function') {

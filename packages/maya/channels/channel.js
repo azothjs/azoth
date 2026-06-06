@@ -1,21 +1,33 @@
 /**
  * Channel — the duck-typed object compose recognizes, AND the JSX component
- * that produces it. One class, two roles.
- *
- *   class form (data, used internally and by chronos):
- *     Channel.from(initialValue, asyncSource)
+ * that produces it. One class, two roles, one definition.
  *
  *   JSX component form:
  *     <Channel source={x} as={Y}>loading</Channel>
  *     → new Channel({ source: x, as: Y }, loadingDom)
  *
- * Both produce an instance with `.initial` and `.source`. compose.js checks
- * `instanceof Channel` to recognize either.
+ *   Direct class form (equivalent):
+ *     new Channel({ source: x, as: Y }, loadingDom)
  *
- * The bare `channel(source, transform, options)` function below is a legacy
- * compat shim that accepts the old { init, start, map } options from the
- * chronos pipeline (branch/tee/consume). To be removed when chronos is
- * reworked — see packages/chronos/CLEANUP.md.
+ * Both produce an instance with `.initial` and `.source`. compose.js
+ * checks `instanceof Channel` to recognize either.
+ *
+ * Props:
+ *   - `source` — Promise, async iterable, or another Channel.
+ *   - `as`     — optional transform; applied to each value the source
+ *                produces.
+ *   - `map`    — optional boolean. When the source value is an array,
+ *                applies `as` per element instead of to the whole array.
+ *                Has no effect on non-array values (transform applies
+ *                directly).
+ *
+ * Children (JSX) or the second constructor argument (direct) become the
+ * initial render value. The initial value does NOT go through `as`.
+ *
+ * Source unwrap: if `source` is itself a Channel (e.g. one returned by
+ * chronos's `reduce()` paired with an initial elsewhere — uncommon),
+ * the constructor unwraps it and applies `as` to the wrapped initial.
+ * Passing both a Channel-wrapped source AND children throws.
  */
 export class Channel {
 
@@ -24,24 +36,20 @@ export class Channel {
             source,
             as: rawTransform,
             map,
-            // `error` reserved for Phase 6 (error transform). Ignored for now.
+            // `error` prop is reserved for a future error-transform pass.
         } = props || {};
 
-        // `map` wraps the transform to apply per-element on array-shaped values.
-        // <Channel source={fetchUsers()} as={User} map/> renders each user.
+        // `map` wraps the transform to apply per-element on array-shaped
+        // values. <Channel source={fetchUsers()} as={User} map/> renders
+        // one DOM node per user.
         let transform = rawTransform;
         if(map && rawTransform) {
             const inner = rawTransform;
             transform = value => value?.map ? value.map(inner) : inner(value);
         }
 
-        // Initial is just childNodes — the children of <Channel>loading</Channel>
-        // become the initial render. No separate `initial` prop.
         let initial = childNodes;
 
-        // Unwrap a Channel-wrapped source (e.g. one returned by chronos's
-        // reduce()). The wrapped source's `initial` is part of the source's
-        // value pipeline, so transform applies to it.
         let resolvedSource = source;
         if(source instanceof Channel) {
             if(initial !== undefined) {
@@ -56,18 +64,6 @@ export class Channel {
         this.initial = initial;
         this.source = makeAsyncStream(resolvedSource, transform);
     }
-
-    /**
-     * Direct construction for callers that already have a built async source
-     * and want to wrap it with an initial value. Bypasses the constructor's
-     * source-wrapping logic. Used by chronos's reduce() and similar.
-     */
-    static from(initial, source) {
-        const c = Object.create(Channel.prototype);
-        c.initial = initial;
-        c.source = source;
-        return c;
-    }
 }
 
 function makeAsyncStream(source, transform) {
@@ -79,7 +75,7 @@ function makeAsyncStream(source, transform) {
             return transform ? source.then(transform) : source;
         case !!source[Symbol.asyncIterator]:
             return fromAsyncIterator(source, transform);
-        // ReadableStream and Observable support added in subsequent commits.
+        // ReadableStream and Observable support is planned; see TODO.md.
         default:
             throw new TypeError(
                 `Channel: unsupported source type "${typeof source}". ` +
@@ -92,52 +88,4 @@ async function* fromAsyncIterator(iter, transform) {
     for await(const value of iter) {
         yield transform ? transform(value) : value;
     }
-}
-
-
-/**
- * Legacy function form. Delegates to `new Channel(...)`.
- *
- * Accepted options:
- *   - { initial }: synchronous initial value (no transform). Public.
- *
- * Legacy compat options (deprecated, kept for chronos pipeline; to be
- * removed when chronos is reworked):
- *   - { start }: synonym for `initial` (no transform applied).
- *   - { init }: initial value WITH transform applied.
- *   - { map }: wraps transform to apply per-element on array-shaped values.
- */
-export function channel(source, transformOrOptions, options) {
-    // Polymorphic: channel(source, options) when middle arg is options-shaped
-    // and `options` wasn't passed positionally.
-    let transform = transformOrOptions;
-    if(options === undefined && transformOrOptions !== undefined
-        && transformOrOptions !== null
-        && typeof transformOrOptions !== 'function') {
-        options = transformOrOptions;
-        transform = undefined;
-    }
-
-    // Resolve initial: prefer explicit `initial` > legacy `start` (no
-    // transform) > legacy `init` (with transform applied). The Channel class
-    // itself only takes initial via childNodes; this function pre-resolves
-    // and passes the result as the childNodes arg.
-    let initial = options?.initial;
-    if(initial === undefined) initial = options?.start;
-    if(initial === undefined && options?.init !== undefined) {
-        // We need to apply transform to `init`, but the constructor will also
-        // apply transform to the wrapped initial if source is a Channel. To
-        // keep semantics, apply transform here and then route via childNodes
-        // (which never goes through transform in the constructor).
-        // The `map` wrap is applied below by the constructor — but to mirror
-        // legacy `init` semantics we need to apply the wrapped form.
-        let initTransform = transform;
-        if(options?.map && transform) {
-            const inner = transform;
-            initTransform = value => value?.map ? value.map(inner) : inner(value);
-        }
-        initial = initTransform ? initTransform(options.init) : options.init;
-    }
-
-    return new Channel({ source, as: transform, map: options?.map }, initial);
 }

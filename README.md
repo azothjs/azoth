@@ -36,7 +36,7 @@ origin.
 | [`azoth`](packages/azoth) | Umbrella package; re-exports chronos, maya, vite-plugin | published |
 | [`@azothjs/thoth`](packages/thoth) | JSX compiler — extracts HTML, generates targets + bind + renderer | DOM target complete; HTML/SSR target in progress |
 | [`@azothjs/maya`](packages/maya) | Runtime — compose, blocks, renderer, replay bindings | DOM complete; HTML target in progress |
-| [`@azothjs/chronos`](packages/chronos) | Async-to-DOM channels — promises, iterators, streams → layout deltas | beta |
+| [`@azothjs/chronos`](packages/chronos) | Lightweight async-generator factories — `generator()`, `reduce()`. No rendering coupling. | beta |
 | [`@azothjs/vite-plugin`](packages/vite-plugin) | Vite integration with `.tsx` support via esbuild pre-pass | published |
 | [`jsonic`](packages/jsonic) | Streaming JSON parser (used by chronos) | alpha |
 | [`valhalla`](packages/valhalla) | API-level integration tests; also serves as worked-example reference for LLMs | active, private |
@@ -75,8 +75,6 @@ export default defineConfig({
 ## A quick taste
 
 ```jsx
-import { channel } from '@azothjs/chronos/channels';
-
 const Greeting = ({ name }) => <p>Hello, {name}!</p>;
 
 const App = () => (

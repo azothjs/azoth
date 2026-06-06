@@ -1,5 +1,5 @@
 import { describe, test } from 'vitest';
-import { Channel, channel } from './channel.js';
+import { Channel } from './channel.js';
 
 /**
  * Unit tests for the Channel class — construction logic only. These tests
@@ -87,7 +87,7 @@ describe('Channel — construction', () => {
         async function* gen() {
             yield 'duchess';
         }
-        const wrapped = Channel.from('felix', gen());
+        const wrapped = new Channel({ source: gen() }, 'felix');
         const c = new Channel({
             source: wrapped,
             as: name => name.toUpperCase()
@@ -99,7 +99,7 @@ describe('Channel — construction', () => {
     });
 
     test('throws when Channel-wrapped source combined with childNodes', ({ expect }) => {
-        const wrapped = Channel.from('felix', Promise.resolve('duchess'));
+        const wrapped = new Channel({ source: Promise.resolve('duchess') }, 'felix');
         const node = document.createTextNode('loading');
         expect(() => {
             new Channel({ source: wrapped }, node);
@@ -120,66 +120,3 @@ describe('Channel — construction', () => {
 
 });
 
-describe('Channel.from — factory bypass', () => {
-
-    test('bypasses constructor, takes (initial, source) directly', ({ expect }) => {
-        const source = Promise.resolve('felix');
-        const c = Channel.from('initial value', source);
-        expect(c.initial).toBe('initial value');
-        // .source is set directly, not wrapped through makeAsyncStream
-        expect(c.source).toBe(source);
-    });
-
-    test('factory result is still instanceof Channel', ({ expect }) => {
-        const c = Channel.from('x', Promise.resolve('y'));
-        expect(c).toBeInstanceOf(Channel);
-    });
-
-});
-
-describe('channel() legacy function — delegates to Channel', () => {
-
-    test('basic delegation returns Channel wrapping the source', async ({ expect }) => {
-        const promise = Promise.resolve('felix');
-        const c = channel(promise);
-        expect(c).toBeInstanceOf(Channel);
-        await expect(c.source).resolves.toBe('felix');
-    });
-
-    test('with transform', async ({ expect }) => {
-        const promise = Promise.resolve('felix');
-        const c = channel(promise, n => n.toUpperCase());
-        expect(c).toBeInstanceOf(Channel);
-        await expect(c.source).resolves.toBe('FELIX');
-    });
-
-    test('with { initial }', ({ expect }) => {
-        const promise = Promise.resolve('duchess');
-        const c = channel(promise, n => n.toUpperCase(), { initial: 'loading' });
-        expect(c).toBeInstanceOf(Channel);
-        expect(c.initial).toBe('loading');
-    });
-
-    test('legacy { start } as alias for initial', ({ expect }) => {
-        const promise = Promise.resolve('felix');
-        const c = channel(promise, { start: 'loading' });
-        expect(c).toBeInstanceOf(Channel);
-        expect(c.initial).toBe('loading');
-    });
-
-    test('legacy { init } applies transform to initial', ({ expect }) => {
-        const promise = Promise.resolve('duchess');
-        const c = channel(promise, n => n.toUpperCase(), { init: 'felix' });
-        expect(c).toBeInstanceOf(Channel);
-        expect(c.initial).toBe('FELIX'); // transform applied to init
-    });
-
-    test('legacy { map: true } wraps transform per-element', async ({ expect }) => {
-        const arr = [{ n: 1 }, { n: 2 }, { n: 3 }];
-        const promise = Promise.resolve(arr);
-        const c = channel(promise, item => item.n, { map: true });
-        expect(c).toBeInstanceOf(Channel);
-        await expect(c.source).resolves.toEqual([1, 2, 3]);
-    });
-
-});

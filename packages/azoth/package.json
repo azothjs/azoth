@@ -29,7 +29,7 @@
     "exports": {
         "./runtime": "./runtime.js",
         "./maya": "./maya.js",
-        "./chronos/channels": "./chronos/channels.js",
+        "./maya/channels": "./maya/channels.js",
         "./chronos/generators": "./chronos/generators.js",
         "./vite-plugin": "./vite-plugin.js"
     },

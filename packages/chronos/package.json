@@ -1,20 +1,17 @@
 {
     "name": "@azothjs/chronos",
     "version": "0.4.4",
-    "description": "Asynchronous data and layout management",
+    "description": "Lightweight async-generator factories",
     "author": "Marty Nelson",
     "license": "MIT",
     "keywords": [
-        "data",
+        "async generators",
         "streaming",
         "asynchronous",
         "chronos",
-        "layout channels",
-        "channels",
         "azoth",
         "azoth chronos",
-        "azoth generators",
-        "azoth channels"
+        "azoth generators"
     ],
     "repository": {
         "type": "git",
@@ -27,7 +24,6 @@
         "**/!(*test|*config).js"
     ],
     "exports": {
-        "./channels": "./channels/index.js",
         "./generators": "./generators/index.js"
     },
     "scripts": {
@@ -35,8 +31,5 @@
     },
     "devDependencies": {
         "test-utils": "workspace:*"
-    },
-    "dependencies": {
-        "@azothjs/maya": "workspace:^"
     }
 }

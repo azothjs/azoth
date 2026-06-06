@@ -103,7 +103,7 @@ describe('async values', () => {
     });
 
     test('sync render promise', async ({ expect, fixture, find }) => {
-        const syncWrapper = Channel.from('sync render', Promise.resolve('hi'));
+        const syncWrapper = new Channel({ source: Promise.resolve('hi') }, 'sync render');
         const dom = runCompose(syncWrapper, elementWithAnchor);
         fixture.append(dom);
         expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>sync render<!--1--></div>"`);
@@ -125,7 +125,7 @@ describe('async values', () => {
             yield doAsync('three');
         }
 
-        const syncWrapper = Channel.from('here come async numbers!', numbers());
+        const syncWrapper = new Channel({ source: numbers() }, 'here come async numbers!');
         fixture.append(runCompose(syncWrapper, elementWithAnchor));
         // initial render
         expect(fixture.innerHTML).toMatchInlineSnapshot(

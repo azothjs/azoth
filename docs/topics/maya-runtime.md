@@ -79,19 +79,22 @@ import { Channel } from '@azothjs/maya/compose';
 </div>
 ```
 
-`Channel.from(syncValue, asyncDataStructure)` returns an object that
-`compose` knows how to unpack: the first argument composes synchronously,
-the second drives subsequent updates at the same slot.
+`new Channel({ source, as }, childNodes)` returns an instance that
+`compose` knows how to unpack: `childNodes` (the JSX children, or the
+second constructor arg) composes synchronously as the initial render,
+the `source` drives subsequent updates at the same slot. `as` optionally
+transforms each value the source produces.
 
-Most authors don't construct `Channel` directly. The `channel()`
-function from `@azothjs/chronos/channels` returns one whenever you supply
-a `start` or `init` value — the sync part is what `channel` puts in the
-slot first, the async part is the source. See
-[async-and-channels](async-and-channels.md) for that surface.
+Most authors don't construct `Channel` directly. The JSX form is the
+usual surface:
 
-The name `Channel` is flagged as awkward — a rename is on the list (see
-[MENTAL-MODEL.md](../MENTAL-MODEL.md) on Channel naming). The mechanic
-is stable; the name may change.
+    <Channel source={fetchResults()} as={SearchResults}>
+        <p>Loading…</p>
+    </Channel>
+
+That JSX invocation IS the constructor call — the class is the
+component. See [async-and-channels](async-and-channels.md) for the full
+surface (`source`, `as`, `map`, children).
 
 ## blocks — list management
 

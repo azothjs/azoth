@@ -8,16 +8,11 @@
  * Values dispatched before consumption begins are queued (FIFO) and
  * yielded in order once the consumer starts iterating.
  *
- * This is chronos's lightweight async-generator factory. It does NOT
- * produce a Channel (the sync-initial-value concept lives in maya).
- * To pair a generator with an initial render value, wrap it:
- *
- *   const [iter, dispatch] = generator();
- *   <main><Channel source={iter}>loading…</Channel></main>
- *
- * Or, if you have a pre-known initial value to pair with the stream:
- *
- *   const ch = Channel.from(initialValue, iter);
+ * chronos's lightweight async-generator factory. Pure platform primitives:
+ * Promise.withResolvers + async function*. No dependency on maya or any
+ * downstream rendering concern. If a consumer wants to pair an initial
+ * render value with this stream, they do that at their own layer (e.g.
+ * maya's <Channel source={iter}>loading…</Channel>).
  */
 export function generator(transform) {
     const apply = typeof transform === 'function' ? transform : v => v;
