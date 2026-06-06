@@ -15,8 +15,8 @@ export const CatNames = cats => <ul>{cats?.map(CatName)}</ul>;
 export class SyncAsyncReader {
     constructor(async) {
         if(async instanceof SyncAsync) {
-            this.state = async.sync;
-            async = async.async;
+            this.state = async.initial;
+            async = async.source;
         }
         this.read(async);
     }

@@ -16,8 +16,8 @@ export function consume(async, transform, options) {
     let sync = init;
     if(async instanceof SyncAsync) {
         if(hasInit) throw new InitOptionWithSyncWrappedAsyncProviderError();
-        sync = async.sync;
-        async = async.async;
+        sync = async.initial;
+        async = async.source;
     }
 
     if(sync !== undefined) consumer(sync);

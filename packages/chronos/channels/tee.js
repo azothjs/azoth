@@ -10,8 +10,8 @@ export function tee(async, count = 2) {
 
     let sync;
     if(async instanceof SyncAsync) {
-        sync = async.sync;
-        async = async.async;
+        sync = async.initial;
+        async = async.source;
     }
 
     return makeTee(async, num, sync);

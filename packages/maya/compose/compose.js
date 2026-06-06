@@ -1,12 +1,12 @@
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
 export class SyncAsync {
-    static from(sync, async) {
-        return new this(sync, async);
+    static from(initial, source) {
+        return new this(initial, source);
     }
-    constructor(sync, async) {
-        this.sync = sync;
-        this.async = async;
+    constructor(initial, source) {
+        this.initial = initial;
+        this.source = source;
     }
 }
 
@@ -37,8 +37,8 @@ export function compose(anchor, input, keepLast, props, slottable) {
             replace(anchor, input, keepLast);
             break;
         case input instanceof SyncAsync:
-            compose(anchor, input.sync, keepLast);
-            compose(anchor, input.async, keepLast, props, slottable);
+            compose(anchor, input.initial, keepLast);
+            compose(anchor, input.source, keepLast, props, slottable);
             break;
         case type === 'function': {
             // will throw if function is class,
@@ -164,8 +164,8 @@ function create(input, props, slottable, anchor) {
             }
 
             if(input instanceof SyncAsync) {
-                createCompose(input.sync, props, slottable, anchor);
-                createCompose(input.async, props, slottable, anchor);
+                createCompose(input.initial, props, slottable, anchor);
+                createCompose(input.source, props, slottable, anchor);
             }
             else if(input[Symbol.asyncIterator]) {
                 composeAsyncIterator(anchor, input, false, props, slottable);

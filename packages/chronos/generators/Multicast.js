@@ -8,7 +8,7 @@ export class Multicast {
 
     constructor(iter) {
         // TODO: track sync value and add to subscribers
-        this.#iter = (iter instanceof SyncAsync) ? iter.async : iter;
+        this.#iter = (iter instanceof SyncAsync) ? iter.source : iter;
         this.start();
     }
 

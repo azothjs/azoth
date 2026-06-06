@@ -14,8 +14,8 @@ export function channel(async, transformArg, options) {
         if(hasInit) {
             throw new InitOptionWithSyncWrappedAsyncProviderError();
         }
-        sync = async.sync;
-        async = async.async;
+        sync = async.initial;
+        async = async.source;
     }
 
     let hasSync = sync !== undefined;

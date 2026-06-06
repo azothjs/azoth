@@ -6,8 +6,8 @@ import { SyncAsync } from '@azothjs/maya/compose';
 export function branch(async, ...transforms) {
 
     if(async instanceof SyncAsync) {
-        const sync = async.sync;
-        async = async.async;
+        const sync = async.initial;
+        async = async.source;
 
         transforms = transforms.map(transform => {
             let options = null;
