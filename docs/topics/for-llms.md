@@ -113,6 +113,32 @@ When a behavior matters, verify it:
 
 Don't claim a behavior without grounding. If you're guessing, say so.
 
+## Whitespace in JSX is preserved
+
+Azoth does not normalize whitespace. The newlines and indentation between
+JSX tags become text nodes in the output. If you're writing a worked
+example or a test snapshot, use single-line JSX to keep the input-to-HTML
+mapping clean:
+
+```jsx
+// Single line — output is "<main><p>hi</p></main>"
+root.append(<main><p>hi</p></main>);
+
+// Multi-line — output preserves the indentation as text
+root.append(
+    <main>
+        <p>hi</p>
+    </main>
+);
+// "<main>\n        <p>hi</p>\n    </main>"
+```
+
+Most rendered HTML hides this (browsers collapse whitespace in flow
+content), but it matters for `<pre>` / `<code>`, for snapshot tests, and
+for any layout that's whitespace-sensitive. See
+[authoring-style.md](authoring-style.md#whitespace-in-jsx-is-preserved-as-text)
+for the design rationale.
+
 ## Surface confusion
 
 If you're confused about something, there's a good chance it's not documented
