@@ -4,7 +4,6 @@ import { $element, elementWithText, elementWithAnchor } from 'test-utils/element
 import { fixtureSetup } from 'test-utils/fixtures';
 import { runCompose } from './compose.test.js';
 import { composeComponent, createComponent } from './compose.js';
-import { Channel } from '../channels/channel.js';
 
 beforeEach(fixtureSetup);
 
@@ -171,21 +170,3 @@ describe('compose element', () => {
 
 });
 
-describe('Channel in component position', () => {
-    test('initial childNodes render sync; source resolves into slot', async ({ expect, fixture, find }) => {
-        const channel = new Channel({ source: Promise.resolve('async cat') }, 'sync cat');
-        const dom = createComponent(channel);
-        expect(dom).toMatchInlineSnapshot(`
-          <DocumentFragment>
-            sync cat
-            <!--1-->
-          </DocumentFragment>
-        `);
-
-        fixture.append(dom);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"sync cat<!--1-->"`);
-
-        await find('async cat');
-        expect(fixture.innerHTML).toBe(`async cat<!--1-->`);
-    });
-});

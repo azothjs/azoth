@@ -182,17 +182,12 @@ function create(input, props, childNodes, anchor) {
                 container.append(anchor);
             }
 
-            // Channel and other value-bearing types go through compose
-            // (value position) rather than create (component position).
-            // create() now rejects primitives in component position; the
-            // initial/source of a Channel is a VALUE that may well be
-            // a primitive (a loading-state string, a number, etc.), so
-            // compose is the correct path.
-            if(input instanceof Channel) {
-                compose(anchor, input.initial);
-                compose(anchor, input.source, false, props, childNodes);
-            }
-            else if(input[Symbol.asyncIterator]) {
+            // Value-position types — JSX puts a CLASS in component position
+            // and the constructor branch above handles it. Pre-built instances
+            // (Channel, Promise, async iterable, array) reach create() only
+            // when the caller hands a value directly, which the compose()
+            // entry handles natively. Keep these as a safety net for now.
+            if(input[Symbol.asyncIterator]) {
                 composeAsyncIterator(anchor, input, false, props, childNodes);
             }
             else if(input instanceof Promise) {
