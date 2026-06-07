@@ -93,7 +93,7 @@ Direct construction is equivalent and occasionally useful:
     );
 
 See [async-and-channels](async-and-channels.md) for the full surface
-(`source`, `as`, `error`, `map`, children).
+(`source`, `as`, `error`, `map`, `append`, children).
 
 ## blocks — list management
 

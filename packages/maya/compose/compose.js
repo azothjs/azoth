@@ -26,10 +26,25 @@ export function compose(anchor, input, keepLast, props, childNodes) {
         case input instanceof Node:
             replace(anchor, input, keepLast);
             break;
-        case input instanceof Channel:
+        case input instanceof Channel: {
             compose(anchor, input.initial, keepLast);
-            compose(anchor, input.source, keepLast, props, childNodes);
+            const { source, append } = input;
+            // No source — initial-only Channel; leave the initial in place.
+            if(source === undefined || source === null) break;
+            if(source instanceof Promise) {
+                // Single value always replaces the initial. `append` has
+                // no effect on Promise sources (only one value to emit).
+                source.then(value => compose(anchor, value, false, props, childNodes));
+                break;
+            }
+            // Async iterable. Channel's makeSource normalizes async
+            // generators, Observables, and ReadableStreams into this shape.
+            // When `append` is true, composeAsyncIterator's firstReplaces
+            // flag makes the first value clear the initial and subsequent
+            // values accumulate.
+            composeAsyncIterator(anchor, source, append, props, childNodes, append);
             break;
+        }
         case type === 'function': {
             // will throw if function is class,
             // unlike create or compose element
@@ -243,12 +258,23 @@ async function composeStream(anchor, stream, keepLast) {
     }));
 }
 
-async function composeAsyncIterator(anchor, iterator, keepLast, props, childNodes) {
-    // TODO: use iterator directly and 
+async function composeAsyncIterator(
+    anchor, iterator, keepLast, props, childNodes, firstReplaces = false,
+) {
+    // TODO: use iterator directly and
     // - control return when removed, and maybe throws on error
     // - possible yield/return semantics for third communication channel
+    //
+    // `firstReplaces` is set by the Channel branch when `append` is true:
+    // the first iteration overrides keepLast to false so it clears the
+    // initial render; subsequent iterations honor keepLast (true →
+    // accumulate). For non-Channel callers, `firstReplaces` defaults to
+    // false so behavior is unchanged.
+    let first = true;
     for await(const value of iterator) {
-        compose(anchor, value, keepLast, props, childNodes);
+        const effective = (first && firstReplaces) ? false : keepLast;
+        compose(anchor, value, effective, props, childNodes);
+        first = false;
     }
 }
 

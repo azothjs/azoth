@@ -99,7 +99,12 @@ describe('Channel — construction', () => {
 
 describe('Channel with ReadableStream source', () => {
 
-    test('preserves ReadableStream when no transform', ({ expect }) => {
+    // Modern ReadableStream has [Symbol.asyncIterator], so Channel treats
+    // it via the async-iterable path. Channel doesn't preserve the stream
+    // identity — it wraps in an async generator so transform + error
+    // routing work uniformly across all iterable-shaped sources.
+
+    test('flows through async iteration', async ({ expect }) => {
         const stream = new ReadableStream({
             start(controller) {
                 controller.enqueue('a');
@@ -108,12 +113,12 @@ describe('Channel with ReadableStream source', () => {
             }
         });
         const c = new Channel({ source: stream });
-        // Source passes through unchanged — compose.js handles ReadableStream
-        // natively (chunk-by-chunk accumulate).
-        expect(c.source).toBe(stream);
+        const collected = [];
+        for await(const v of c.source) collected.push(v);
+        expect(collected).toEqual(['a', 'b']);
     });
 
-    test('pipes through TransformStream when transform provided', async ({ expect }) => {
+    test('transform applied per chunk', async ({ expect }) => {
         const stream = new ReadableStream({
             start(controller) {
                 controller.enqueue('a');
@@ -125,17 +130,61 @@ describe('Channel with ReadableStream source', () => {
             source: stream,
             as: s => s.toUpperCase()
         });
-        expect(c.source).toBeInstanceOf(ReadableStream);
-        expect(c.source).not.toBe(stream); // a new piped stream
+        const collected = [];
+        for await(const v of c.source) collected.push(v);
+        expect(collected).toEqual(['A', 'B']);
+    });
 
-        const reader = c.source.getReader();
-        const chunks = [];
-        while(true) {
-            const { value, done } = await reader.read();
-            if(done) break;
-            chunks.push(value);
-        }
-        expect(chunks).toEqual(['A', 'B']);
+    test('stream error caught by error transform', async ({ expect }) => {
+        // Per WHATWG Streams spec, calling controller.error() in the same
+        // tick as enqueue() resets the queue and discards pending chunks —
+        // so we test the pure-error path. Chunks that have already been
+        // *consumed* before the error fires still land (covered indirectly
+        // by the integration tests that push and read across ticks).
+        const stream = new ReadableStream({
+            start(controller) {
+                controller.error(new Error('stream broke'));
+            }
+        });
+        const c = new Channel({
+            source: stream,
+            error: err => `[err: ${err.message}]`
+        });
+        const collected = [];
+        for await(const v of c.source) collected.push(v);
+        expect(collected).toEqual(['[err: stream broke]']);
+    });
+
+    test('stream error without error transform propagates', async ({ expect }) => {
+        const stream = new ReadableStream({
+            start(controller) {
+                controller.error(new Error('stream broke'));
+            }
+        });
+        const c = new Channel({ source: stream });
+        await expect(async () => {
+            for await(const _ of c.source) { /* drain */ }
+        }).rejects.toThrow(/stream broke/);
+    });
+
+});
+
+describe('Channel append prop (construction)', () => {
+
+    test('append defaults to false when not provided', ({ expect }) => {
+        const c = new Channel({ source: Promise.resolve('x') });
+        expect(c.append).toBe(false);
+    });
+
+    test('append coerces presence-as-true (JSX attribute style)', ({ expect }) => {
+        const c = new Channel({ source: Promise.resolve('x'), append: true });
+        expect(c.append).toBe(true);
+    });
+
+    test('append is read-only after construction', ({ expect }) => {
+        const c = new Channel({ source: Promise.resolve('x'), append: true });
+        expect(() => { c.append = false; }).toThrow(TypeError);
+        expect(c.append).toBe(true);
     });
 
 });

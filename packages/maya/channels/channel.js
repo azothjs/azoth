@@ -12,30 +12,36 @@
  * checks `instanceof Channel` to recognize either.
  *
  * Props:
- *   - `source` — Promise, async iterable, ReadableStream, or Observable
- *                (anything with `.subscribe`).
+ *   - `source` — Promise, async iterable, or Observable (anything with
+ *                `.subscribe`). Async iterable covers async generators,
+ *                modern ReadableStreams (have `[Symbol.asyncIterator]`),
+ *                and any other AsyncIterable.
  *   - `as`     — optional transform; applied to each value the source
  *                produces.
  *   - `error`  — optional transform; applied to errors from the source.
  *                Without it, source errors propagate uncaught.
- *                (ReadableStream errors are not yet wired through this
- *                path — see TODO.md.)
  *   - `map`    — optional boolean. When the source value has `.map`
  *                (Array, TypedArray, etc.), applies `as` per element
  *                instead of to the whole collection.
+ *   - `append` — optional boolean. When set, the first source value
+ *                replaces the initial render and subsequent values
+ *                append rather than replace. Without it (the default),
+ *                each source value replaces the previous. Has no visible
+ *                effect on Promise sources (single value).
  *
  * Children (JSX) or the second constructor argument (direct) become the
  * initial render value. The initial value does NOT go through `as`.
  */
 export class Channel {
 
-    // Private fields make .initial and .source read-only after construction.
-    // The class is exported (it has to be — JSX needs the identifier), but
-    // instances are immutable to outside code. The conventional surface is
-    // <Channel> JSX or `new Channel(props, childNodes)`; direct mutation
-    // isn't part of the contract.
+    // Private fields make .initial, .source, and .append read-only after
+    // construction. The class is exported (it has to be — JSX needs the
+    // identifier), but instances are immutable to outside code. The
+    // conventional surface is <Channel> JSX or `new Channel(props, childNodes)`;
+    // direct mutation isn't part of the contract.
     #initial;
     #source;
+    #append;
 
     constructor(props, childNodes) {
         const {
@@ -43,6 +49,7 @@ export class Channel {
             as: rawTransform,
             map,
             error: errorTransform,
+            append,
         } = props || {};
 
         // `map` wraps the transform to apply per-element on array-shaped
@@ -56,10 +63,12 @@ export class Channel {
 
         this.#initial = childNodes;
         this.#source = makeSource(source, transform, errorTransform);
+        this.#append = !!append;
     }
 
     get initial() { return this.#initial; }
     get source() { return this.#source; }
+    get append() { return this.#append; }
 }
 
 function makeSource(source, transform, errorTransform) {
@@ -69,16 +78,17 @@ function makeSource(source, transform, errorTransform) {
     switch(true) {
         case source instanceof Promise:
             return fromPromise(source, transform, errorTransform);
-        case source instanceof ReadableStream:
-            return fromReadableStream(source, transform);
         case !!source[Symbol.asyncIterator]:
+            // Covers async generators, modern ReadableStreams, and any
+            // other AsyncIterable. Stream errors land in the try/catch
+            // and route through errorTransform like any other iter error.
             return fromAsyncIterable(source, transform, errorTransform);
         case typeof source.subscribe === 'function':
             return fromObservable(source, transform, errorTransform);
         default:
             throw new TypeError(
                 `Channel: unsupported source type "${typeof source}". ` +
-                `Expected Promise, async iterable, ReadableStream, or Observable.`
+                `Expected Promise, async iterable, or Observable.`
             );
     }
 }
@@ -87,18 +97,6 @@ function fromPromise(source, transform, errorTransform) {
     let p = transform ? source.then(transform) : source;
     if(errorTransform) p = p.catch(errorTransform);
     return p;
-}
-
-function fromReadableStream(source, transform) {
-    // compose.js handles ReadableStream natively (chunk-by-chunk accumulate).
-    // With a transform, pipe through a TransformStream so each chunk is
-    // transformed. errorTransform is not yet wired into this path — stream
-    // errors propagate uncaught for now (see TODO.md).
-    return transform ? source.pipeThrough(new TransformStream({
-        transform(chunk, controller) {
-            controller.enqueue(transform(chunk));
-        }
-    })) : source;
 }
 
 async function* fromAsyncIterable(iter, transform, errorTransform) {

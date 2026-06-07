@@ -30,12 +30,19 @@ position in the DOM.
 | Observable                          | `.subscribe` is a function        | Each emission replaces the previous        |
 
 A Promise delivers a single value. An async iterator delivers a sequence,
-with each value taking the slot from the previous. A `ReadableStream` is
-the exception — it appends rather than replaces, matching how streams are
-typically consumed. Observables follow the TC39 proposal shape (also
-RxJS-compatible): each `next` value replaces, `complete` ends iteration,
-`error` re-throws unless wrapped in a [Channel](#channel--the-canonical-surface)
-with an `error` prop.
+with each value taking the slot from the previous. A `ReadableStream` in
+a raw slot is the exception — chunks append rather than replace, matching
+how streams are typically consumed. Observables follow the TC39 proposal
+shape (also RxJS-compatible): each `next` value replaces, `complete` ends
+iteration, `error` re-throws unless wrapped in a
+[Channel](#channel--the-canonical-surface) with an `error` prop.
+
+When you wrap an async source in a `<Channel>` (see below), the semantic
+is uniform: each value **replaces** by default; opt into accumulation
+with the `append` prop. Channel treats `ReadableStream` as an async
+iterable (modern streams have `[Symbol.asyncIterator]`), so the
+accumulate-vs-replace decision is yours via `append` rather than implied
+by the source type.
 
 ## Plain async patterns first
 
@@ -98,26 +105,50 @@ import { Channel } from '@azothjs/maya/channels';
 
 | Prop      | Type     | Description                                                                                              |
 | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `source`  | required | The async data source. `Promise`, async iterable, `ReadableStream`, or `Observable` (anything with `.subscribe`). |
+| `source`  | required | The async data source. `Promise`, async iterable (covers async generators, `ReadableStream`, any AsyncIterable), or `Observable` (anything with `.subscribe`). |
 | `as`      | optional | Transform function `data → DOM`. A component reference works directly: `as={Cat}` is the same as `as={data => <Cat {...data} />}` when the data shape matches the props. |
 | `error`   | optional | Transform function `error → DOM`. When the source produces an error, the result is rendered in place. Without an `error` prop, source errors propagate uncaught. |
 | `map`     | optional | Boolean. When the source's value is an array, applies `as` per element instead of to the whole array. Has no effect on non-array values. |
-| children  | JSX      | Initial render value, shown before the source produces its first value. Does **not** go through `as`. |
+| `append`  | optional | Boolean. When set, the first source value replaces the initial render; subsequent values **append** rather than replace. Without it (the default), each source value replaces the previous. No visible effect on `Promise` sources (only one value). |
+| children  | JSX      | Initial render value, shown before the source produces its first value. Does **not** go through `as`. Replaced by the first source value. |
 
 ### Source types
 
-The source can be any of:
+Channel accepts three shapes:
 
 - **Promise** — resolves once; the resolved value (passed through `as`)
-  becomes the slot content.
+  becomes the slot content. `append` has no visible effect (only one
+  value).
 - **Async iterable** (anything with `[Symbol.asyncIterator]`) — each
-  yielded value replaces the previous content.
-- **ReadableStream** — chunks accumulate at the slot (matching the
-  stream-as-payload model). With `as`, each chunk is piped through a
-  `TransformStream` first.
+  yielded value replaces the previous; with `append`, the first value
+  replaces the initial render and subsequent values accumulate. This
+  category includes async generators, modern `ReadableStream` (which
+  implements `[Symbol.asyncIterator]`), and any other AsyncIterable.
 - **Observable** (anything with `.subscribe`) — TC39 proposal shape;
-  RxJS-compatible. Each emitted `next` value replaces; `complete`
-  ends iteration; `error` flows through the `error` prop if provided.
+  RxJS-compatible. Each `next` value replaces (or accumulates with
+  `append`); `complete` ends iteration; `error` flows through the `error`
+  prop if provided, otherwise propagates uncaught.
+
+### Replace vs append
+
+By default, Channel **replaces** the prior value at the slot on every
+source emission. This matches the most common pattern (loading state →
+resolved data; new event → updated view).
+
+When you want chunks to accumulate — chat messages streaming in, a
+progress log, partial-then-final results — set `append`. The first source
+value replaces the initial render (placeholder goes away); each
+subsequent value appends after the prior:
+
+```jsx
+<Channel source={chatStream} as={Message} append>
+    <p>Connecting…</p>
+</Channel>
+```
+
+Without `append`, the same `<Channel source={chatStream}>` would render
+only the most recent chunk. Pick based on intent, not on the source's
+data type.
 
 ### Examples
 
@@ -144,8 +175,11 @@ The source can be any of:
     <Loading />
 </Channel>
 
-// ReadableStream (chunks accumulate)
+// ReadableStream — replace by default (only the last chunk visible)
 <Channel source={response.body} as={chunk => decoder.decode(chunk)} />
+
+// ReadableStream with append — chunks accumulate (e.g. SSE-style fan-in)
+<Channel source={response.body} as={chunk => decoder.decode(chunk)} append />
 
 // Observable
 <Channel source={someObservable} as={Tile} />
@@ -230,9 +264,12 @@ If a child component needs the resolved value, either:
 - pass the async source and let the child put it in its own child slot,
 - or `await` the value before constructing the parent JSX.
 
-**`ReadableStream` accumulates; it does not replace.** Streams append each
-chunk at the slot. If you want replace semantics over time, use an async
-iterator instead.
+**Raw `ReadableStream` in a slot accumulates; `<Channel>`-wrapped streams
+replace by default.** Two different mental models for two different
+contexts. A raw `{stream}` interpolation is "stream-as-payload" — chunks
+append. A `<Channel source={stream}>` is "give me transformed values one
+at a time" — each replaces. Add `append` on the Channel to accumulate
+there too.
 
 **Async iterators are single-consumer.** A given async iterator can be
 read once. If you need to fan-out to multiple consumers, that's an

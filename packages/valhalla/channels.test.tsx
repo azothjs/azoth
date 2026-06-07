@@ -201,7 +201,13 @@ describe('Channel with map prop (array iteration)', () => {
 
 describe('Channel with ReadableStream source', () => {
 
-    test('stream chunks render via compose (accumulate semantics)', async ({ expect }) => {
+    // Channel treats ReadableStream as an async iterable (modern streams
+    // have [Symbol.asyncIterator]). Default is REPLACE — each chunk
+    // replaces the previous. Add `append` to accumulate. (Raw streams in
+    // a slot — without Channel — still accumulate via compose's
+    // ReadableStream special case.)
+
+    test('default (replace): each chunk replaces — only the last is visible', async ({ expect }) => {
         const stream = new ReadableStream({
             start(controller) {
                 controller.enqueue('felix');
@@ -215,14 +221,31 @@ describe('Channel with ReadableStream source', () => {
 
         await macrotask();
 
-        // ReadableStream chunks accumulate in compose (chunks append rather
-        // than replace, matching the stream-as-payload mental model).
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main>duchess<!--1--></main>"`
+        );
+    });
+
+    test('append: chunks accumulate after the first replaces any initial', async ({ expect }) => {
+        const stream = new ReadableStream({
+            start(controller) {
+                controller.enqueue('felix');
+                controller.enqueue(' and ');
+                controller.enqueue('duchess');
+                controller.close();
+            }
+        });
+        const root = fixture();
+        root.append(<main><Channel source={stream} append /></main>);
+
+        await macrotask();
+
         expect(root.innerHTML).toMatchInlineSnapshot(
             /* HTML */ `"<main>felix and duchess<!--3--></main>"`
         );
     });
 
-    test('stream with transform pipes chunks through', async ({ expect }) => {
+    test('append with transform: per-chunk transform applied, chunks accumulate', async ({ expect }) => {
         const stream = new ReadableStream({
             start(controller) {
                 controller.enqueue('felix');
@@ -231,7 +254,7 @@ describe('Channel with ReadableStream source', () => {
             }
         });
         const root = fixture();
-        root.append(<main><Channel source={stream} as={s => s.toUpperCase() + ' '} /></main>);
+        root.append(<main><Channel source={stream} as={s => s.toUpperCase() + ' '} append /></main>);
 
         await macrotask();
 
