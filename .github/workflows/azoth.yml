@@ -13,6 +13,13 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: latest
+    # Set up Chrome explicitly. ubuntu-latest does ship Chrome but
+    # webdriverio's session-creation handshake intermittently fails to
+    # connect — `setup-chrome` provides a known-good Chrome + ChromeDriver
+    # pair at predictable paths.
+    - uses: browser-actions/setup-chrome@latest
+      with:
+        install-chromedriver: true
     # Corepack picks up the pnpm version from package.json's packageManager
     # field, so we don't need to pin a version in the workflow.
     - run: corepack enable
