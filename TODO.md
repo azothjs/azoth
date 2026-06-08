@@ -72,17 +72,40 @@ usage tells us which residue actually matters.
 
 ## Components
 
-### TypeScript / JSDoc type definitions for built-in components
+### Typing review — d.ts + JSDoc for consumer type info
 
-`<Channel>` (and any future built-in components) should ship typed prop
-signatures so consumers get autocomplete + error checking. Open question:
-prop relationships JS can't easily express in types — e.g. `map` should
-only be allowable when `source` produces arrays, `eventType` should be
-required ⟺ source is EventTarget. JSDoc with `@template` + conditional
-types, or per-component `.d.ts` overloads.
+Doing valhalla in `.tsx` was the forcing function that uncovered gaps
+between runtime behavior and the type definitions. The runtime accepts
+considerably more than the types currently model. The review:
 
-The Channel public API is stable enough now that this is a real next
-step rather than a deferred one.
+**`DOMChild` (in `packages/azoth/jsx.d.ts`) is incomplete.** Today it's
+`string | number | boolean | Node | null | undefined | DOMChild[]`. compose
+also accepts at runtime — and should be reflected in the type:
+- `Promise<DOMChild>`
+- `AsyncIterable<DOMChild>`
+- `ReadableStream<DOMChild>`
+- Observable-shaped (`{ subscribe(...) }`)
+- Render objects (`{ render(props?, childNodes?) }`)
+- Function references (invoked with no args by compose)
+- `Channel` instances
+- `IGNORE` sentinel
+- `bigint`
+
+The mismatch surfaces concretely at `packages/valhalla/channels.test.tsx:317`
+where an observable-in-slot needs an `as unknown as JSX.Element` cast.
+
+**`<Channel>` props need typed signatures with constraint relationships:**
+- `eventType` required ⟺ `source` is an `EventTarget`
+- `map` meaningful only when source produces arrays
+- `error` transform returns must match what `as` returns
+- `append` boolean-presence semantics (JSX attribute style)
+
+JSDoc with `@template` + conditional types is one path; per-component
+`.d.ts` overloads another. Open question.
+
+**`pushable`, render-object form, class-component form, function-component
+form** also need typed surfaces. The public API is stable enough now that
+this work pays off; it's a real next step.
 
 ## Compose
 

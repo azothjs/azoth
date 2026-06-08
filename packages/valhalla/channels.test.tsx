@@ -314,7 +314,9 @@ describe('Channel with Observable source', () => {
     test('observable in a child slot (no Channel wrap) — compose handles directly', async ({ expect }) => {
         const obs = makeObservable([<p>direct</p>]);
         const root = fixture();
-        root.append(<main>{obs}</main>);
+        // Cast: compose accepts observable shapes in child slots at runtime
+        // but DOMChild doesn't model that yet — see "typing review" in TODO.md.
+        root.append(<main>{obs as unknown as JSX.Element}</main>);
 
         await macrotask();
 
