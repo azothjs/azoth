@@ -4,7 +4,7 @@ import inspect from 'vite-plugin-inspect';
 import azothPlugin from './packages/vite-plugin/index.js'
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { webdriverio } from '@vitest/browser-webdriverio';
+import { playwright } from '@vitest/browser-playwright';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -13,18 +13,11 @@ export default defineConfig({
         browser: {
             enabled: true,
             headless: true,
-            // --no-sandbox is required for headless Chrome in CI containers
-            // (GitHub Actions Ubuntu runners). Locally on macOS it's a no-op.
-            // --disable-dev-shm-usage avoids `/dev/shm` exhaustion in containers.
-            instances: [{
-                browser: 'chrome',
-                capabilities: {
-                    'goog:chromeOptions': {
-                        args: ['--no-sandbox', '--disable-dev-shm-usage'],
-                    },
-                },
-            }],
-            provider: webdriverio(),
+            // Playwright manages its own browser binaries (installed via
+            // `npx playwright install`). No host-Chrome dependency, no
+            // chromedriver version dance.
+            instances: [{ browser: 'chromium' }],
+            provider: playwright(),
         },
         // Node-specific tests that can't run in browser
         exclude: [

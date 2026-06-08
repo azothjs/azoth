@@ -13,13 +13,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: latest
-    # Set up Chrome explicitly. ubuntu-latest does ship Chrome but
-    # webdriverio's session-creation handshake intermittently fails to
-    # connect — `setup-chrome` provides a known-good Chrome + ChromeDriver
-    # pair at predictable paths.
-    - uses: browser-actions/setup-chrome@latest
-      with:
-        install-chromedriver: true
     # Corepack picks up the pnpm version from package.json's packageManager
     # field, so we don't need to pin a version in the workflow.
     - run: corepack enable
@@ -27,6 +20,9 @@ jobs:
     # and CI. The previous `pnpm update -r` step (added 2024 for workspace
     # linking) is no longer needed with modern pnpm.
     - run: pnpm install --frozen-lockfile
+    # Playwright manages its own browser binaries; --with-deps installs the
+    # Linux system libraries Chromium needs on the runner.
+    - run: pnpm exec playwright install --with-deps chromium
     - run: pnpm lint
     - run: pnpm test
       env:

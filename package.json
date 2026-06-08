@@ -23,20 +23,18 @@
         "@eslint/js": "^8.57.1",
         "@testing-library/dom": "^9.3.4",
         "@vitest/browser": "^4.0.17",
-        "@vitest/browser-webdriverio": "^4.0.17",
+        "@vitest/browser-playwright": "^4.1.8",
         "azoth": "workspace:./packages/azoth",
         "esbuild": "^0.27.2",
         "eslint": "^8.57.0",
         "globals": "^14.0.0",
         "happy-dom": "^13.10.1",
         "jsdom": "^27.4.0",
+        "playwright": "^1.60.0",
         "typescript": "^5.9.3",
         "vite": "^6.4.1",
         "vite-plugin-inspect": "^11.3.3",
         "vitest": "^4.0.17"
-    },
-    "dependencies": {
-        "webdriverio": "^8.35.1"
     },
     "packageManager": "pnpm@11.5.2+sha512.71c631e382066efc25625d5cf029075de07b61b37f6e27350fbd84b1bda5864c8c1967adc280776b45c30a715c0359a3be08fef42d5bb09e2b99029979692916"
 }
