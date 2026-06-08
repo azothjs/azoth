@@ -189,6 +189,150 @@ describe('Channel append prop (construction)', () => {
 
 });
 
+describe('Channel with EventTarget source', () => {
+
+    test('events dispatched on the target flow through as iteration', async ({ expect }) => {
+        const target = new EventTarget();
+        const c = new Channel({ source: target, eventType: 'ping' });
+
+        // Start iterating, then dispatch a few events.
+        const collected = [];
+        const consumer = (async () => {
+            for await(const event of c.source) {
+                collected.push(event.detail);
+                if(collected.length === 3) return;
+            }
+        })();
+
+        // Microtask gap so the iterator can park on its first await
+        await Promise.resolve();
+        target.dispatchEvent(new CustomEvent('ping', { detail: 'a' }));
+        target.dispatchEvent(new CustomEvent('ping', { detail: 'b' }));
+        target.dispatchEvent(new CustomEvent('ping', { detail: 'c' }));
+
+        await consumer;
+        expect(collected).toEqual(['a', 'b', 'c']);
+    });
+
+    test('only the configured eventType is consumed', async ({ expect }) => {
+        const target = new EventTarget();
+        const c = new Channel({ source: target, eventType: 'ping' });
+
+        const collected = [];
+        const consumer = (async () => {
+            for await(const event of c.source) {
+                collected.push(event.detail);
+                if(collected.length === 2) return;
+            }
+        })();
+
+        await Promise.resolve();
+        target.dispatchEvent(new CustomEvent('pong', { detail: 'ignored' }));
+        target.dispatchEvent(new CustomEvent('ping', { detail: 'a' }));
+        target.dispatchEvent(new CustomEvent('pong', { detail: 'also-ignored' }));
+        target.dispatchEvent(new CustomEvent('ping', { detail: 'b' }));
+
+        await consumer;
+        expect(collected).toEqual(['a', 'b']);
+    });
+
+    test('transform applied to each event', async ({ expect }) => {
+        const target = new EventTarget();
+        const c = new Channel({
+            source: target,
+            eventType: 'ping',
+            as: e => `[${e.detail}]`,
+        });
+
+        const collected = [];
+        const consumer = (async () => {
+            for await(const v of c.source) {
+                collected.push(v);
+                if(collected.length === 2) return;
+            }
+        })();
+
+        await Promise.resolve();
+        target.dispatchEvent(new CustomEvent('ping', { detail: 'a' }));
+        target.dispatchEvent(new CustomEvent('ping', { detail: 'b' }));
+
+        await consumer;
+        expect(collected).toEqual(['[a]', '[b]']);
+    });
+
+    test('transform exception routed through error transform', async ({ expect }) => {
+        const target = new EventTarget();
+        const c = new Channel({
+            source: target,
+            eventType: 'ping',
+            as: e => { throw new Error(`bad: ${e.detail}`); },
+            error: err => `caught: ${err.message}`,
+        });
+
+        const collected = [];
+        const consumer = (async () => {
+            for await(const v of c.source) collected.push(v);
+        })();
+
+        await Promise.resolve();
+        target.dispatchEvent(new CustomEvent('ping', { detail: 'x' }));
+        // After errorTransform yields, the iterator continues — but a
+        // throwing transform terminates the inner for-await; only one
+        // error value is emitted, then iteration ends.
+        await consumer;
+        expect(collected).toEqual(['caught: bad: x']);
+    });
+
+    test('listener is removed when consumer abandons iteration', async ({ expect }) => {
+        const target = new EventTarget();
+        // Spy on the underlying EventTarget methods.
+        const added = [];
+        const removed = [];
+        const originalAdd = target.addEventListener.bind(target);
+        const originalRemove = target.removeEventListener.bind(target);
+        target.addEventListener = (type, listener) => {
+            added.push(type);
+            originalAdd(type, listener);
+        };
+        target.removeEventListener = (type, listener) => {
+            removed.push(type);
+            originalRemove(type, listener);
+        };
+
+        const c = new Channel({ source: target, eventType: 'ping' });
+        const iter = c.source;
+
+        // Start iteration
+        const consumer = (async () => {
+            for await(const event of iter) {
+                if(event.detail === 'stop') return;
+            }
+        })();
+
+        await Promise.resolve();
+        expect(added).toEqual(['ping']);
+        expect(removed).toEqual([]);
+
+        target.dispatchEvent(new CustomEvent('ping', { detail: 'stop' }));
+        await consumer;
+
+        expect(removed).toEqual(['ping']);
+    });
+
+    test('throws when source is EventTarget but no eventType is provided', ({ expect }) => {
+        const target = new EventTarget();
+        expect(() => new Channel({ source: target })).toThrow(/no `eventType`/);
+    });
+
+    test('throws when eventType is provided but source is not an EventTarget', ({ expect }) => {
+        expect(() => new Channel({
+            source: Promise.resolve('x'),
+            eventType: 'ping',
+        })).toThrow(/source is not an EventTarget/);
+    });
+
+});
+
 describe('Channel with Observable source', () => {
 
     // A minimal observable shape per the TC39 proposal — subscribe takes

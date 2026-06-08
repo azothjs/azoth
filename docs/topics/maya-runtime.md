@@ -93,7 +93,8 @@ Direct construction is equivalent and occasionally useful:
     );
 
 See [async-and-channels](async-and-channels.md) for the full surface
-(`source`, `as`, `error`, `map`, `append`, children).
+(`source`, `eventType`, `as`, `error`, `map`, `append`, children) and the
+`pushable()` utility for bridging callback APIs into Channel.
 
 ## blocks — list management
 

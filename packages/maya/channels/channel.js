@@ -1,3 +1,5 @@
+import { pushable } from './pushable.js';
+
 /**
  * Channel — recognized by compose via `instanceof Channel`. The class IS
  * the JSX component: one class, two roles, one definition.
@@ -12,22 +14,28 @@
  * checks `instanceof Channel` to recognize either.
  *
  * Props:
- *   - `source` — Promise, async iterable, or Observable (anything with
- *                `.subscribe`). Async iterable covers async generators,
- *                modern ReadableStreams (have `[Symbol.asyncIterator]`),
- *                and any other AsyncIterable.
- *   - `as`     — optional transform; applied to each value the source
- *                produces.
- *   - `error`  — optional transform; applied to errors from the source.
- *                Without it, source errors propagate uncaught.
- *   - `map`    — optional boolean. When the source value has `.map`
- *                (Array, TypedArray, etc.), applies `as` per element
- *                instead of to the whole collection.
- *   - `append` — optional boolean. When set, the first source value
- *                replaces the initial render and subsequent values
- *                append rather than replace. Without it (the default),
- *                each source value replaces the previous. Has no visible
- *                effect on Promise sources (single value).
+ *   - `source`    — Promise, async iterable, Observable (anything with
+ *                   `.subscribe`), or EventTarget. Async iterable covers
+ *                   async generators, modern ReadableStreams (have
+ *                   `[Symbol.asyncIterator]`), and any other AsyncIterable.
+ *                   EventTarget requires `eventType`.
+ *   - `eventType` — required when `source` is an EventTarget; the name
+ *                   of the event to listen for (e.g. "click", "message").
+ *                   Mismatched with non-EventTarget sources is an error.
+ *   - `as`        — optional transform; applied to each value the source
+ *                   produces. For EventTarget, receives the Event object.
+ *   - `error`     — optional transform; applied to errors from the source.
+ *                   Without it, source errors propagate uncaught.
+ *                   (EventTarget has no error channel — this only catches
+ *                   transform exceptions for that source type.)
+ *   - `map`       — optional boolean. When the source value has `.map`
+ *                   (Array, TypedArray, etc.), applies `as` per element
+ *                   instead of to the whole collection.
+ *   - `append`    — optional boolean. When set, the first source value
+ *                   replaces the initial render and subsequent values
+ *                   append rather than replace. Without it (the default),
+ *                   each source value replaces the previous. Has no
+ *                   visible effect on Promise sources (single value).
  *
  * Children (JSX) or the second constructor argument (direct) become the
  * initial render value. The initial value does NOT go through `as`.
@@ -50,6 +58,7 @@ export class Channel {
             map,
             error: errorTransform,
             append,
+            eventType,
         } = props || {};
 
         // `map` wraps the transform to apply per-element on array-shaped
@@ -62,7 +71,7 @@ export class Channel {
         }
 
         this.#initial = childNodes;
-        this.#source = makeSource(source, transform, errorTransform);
+        this.#source = makeSource(source, transform, errorTransform, eventType);
         this.#append = !!append;
     }
 
@@ -71,9 +80,28 @@ export class Channel {
     get append() { return this.#append; }
 }
 
-function makeSource(source, transform, errorTransform) {
+function makeSource(source, transform, errorTransform, eventType) {
     if(source === undefined || source === null) {
         return source;
+    }
+    // eventType ⟺ EventTarget — pair the two together. Either both or
+    // neither; mismatch is a usage error worth surfacing at construction.
+    if(eventType) {
+        if(!(source instanceof EventTarget)) {
+            throw new TypeError(
+                `Channel: \`eventType\` was provided but source is not an EventTarget. ` +
+                `eventType is only valid with EventTarget sources (e.g. an element, ` +
+                `WebSocket, BroadcastChannel, MediaQueryList).`
+            );
+        }
+        return fromEventTarget(source, eventType, transform, errorTransform);
+    }
+    if(source instanceof EventTarget) {
+        throw new TypeError(
+            `Channel: source is an EventTarget but no \`eventType\` was provided. ` +
+            `Specify which event to listen for: ` +
+            `<Channel source={target} eventType="message" as={...}/>`
+        );
     }
     switch(true) {
         case source instanceof Promise:
@@ -88,7 +116,7 @@ function makeSource(source, transform, errorTransform) {
         default:
             throw new TypeError(
                 `Channel: unsupported source type "${typeof source}". ` +
-                `Expected Promise, async iterable, or Observable.`
+                `Expected Promise, async iterable, Observable, or EventTarget.`
             );
     }
 }
@@ -108,6 +136,32 @@ async function* fromAsyncIterable(iter, transform, errorTransform) {
     catch(err) {
         if(errorTransform) yield errorTransform(err);
         else throw err;
+    }
+}
+
+async function* fromEventTarget(target, eventType, transform, errorTransform) {
+    // pushable bridges the EventTarget's push model into pull-based async
+    // iteration. The listener pushes each event into the iterator; the
+    // try/finally guarantees we removeEventListener whether the consumer
+    // exits normally, throws, or is aborted (slot removed from the DOM).
+    const [iter, push] = pushable();
+    target.addEventListener(eventType, push);
+    try {
+        try {
+            for await(const event of iter) {
+                yield transform ? transform(event) : event;
+            }
+        }
+        catch(err) {
+            // EventTarget itself has no error channel — this catches
+            // exceptions thrown by `transform` for parity with other source
+            // types' error handling.
+            if(errorTransform) yield errorTransform(err);
+            else throw err;
+        }
+    }
+    finally {
+        target.removeEventListener(eventType, push);
     }
 }
 

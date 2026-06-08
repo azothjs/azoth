@@ -15,7 +15,7 @@
 > "what layout change happens when this data arrives?" That's the whole
 > mental model. Layout management, not state management.
 
-## The four async sources Azoth accepts
+## Async sources Azoth accepts
 
 Anywhere a `{…}` child slot accepts a value (see
 [composition](composition.md)), it also accepts an async data source. The
@@ -28,6 +28,7 @@ position in the DOM.
 | Async iterator / async generator    | `[Symbol.asyncIterator]` present  | Each yielded value **replaces** the previous |
 | `ReadableStream`                    | `instanceof ReadableStream`       | Each chunk **accumulates** at the slot     |
 | Observable                          | `.subscribe` is a function        | Each emission replaces the previous        |
+| `EventTarget`                       | `instanceof EventTarget` (Channel only) | Each event of the configured type renders via `as` |
 
 A Promise delivers a single value. An async iterator delivers a sequence,
 with each value taking the slot from the previous. A `ReadableStream` in
@@ -36,6 +37,9 @@ how streams are typically consumed. Observables follow the TC39 proposal
 shape (also RxJS-compatible): each `next` value replaces, `complete` ends
 iteration, `error` re-throws unless wrapped in a
 [Channel](#channel--the-canonical-surface) with an `error` prop.
+`EventTarget` is Channel-only — compose alone can't bridge events into
+the slot because there's no way to express which event type to listen
+for; the `eventType` prop on `<Channel>` fills that role.
 
 When you wrap an async source in a `<Channel>` (see below), the semantic
 is uniform: each value **replaces** by default; opt into accumulation
@@ -105,16 +109,17 @@ import { Channel } from '@azothjs/maya/channels';
 
 | Prop      | Type     | Description                                                                                              |
 | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `source`  | required | The async data source. `Promise`, async iterable (covers async generators, `ReadableStream`, any AsyncIterable), or `Observable` (anything with `.subscribe`). |
-| `as`      | optional | Transform function `data → DOM`. A component reference works directly: `as={Cat}` is the same as `as={data => <Cat {...data} />}` when the data shape matches the props. |
-| `error`   | optional | Transform function `error → DOM`. When the source produces an error, the result is rendered in place. Without an `error` prop, source errors propagate uncaught. |
-| `map`     | optional | Boolean. When the source's value is an array, applies `as` per element instead of to the whole array. Has no effect on non-array values. |
-| `append`  | optional | Boolean. When set, the first source value replaces the initial render; subsequent values **append** rather than replace. Without it (the default), each source value replaces the previous. No visible effect on `Promise` sources (only one value). |
-| children  | JSX      | Initial render value, shown before the source produces its first value. Does **not** go through `as`. Replaced by the first source value. |
+| `source`    | required | The async data source. `Promise`, async iterable (covers async generators, `ReadableStream`, any AsyncIterable), `Observable` (anything with `.subscribe`), or `EventTarget` (paired with `eventType`). |
+| `eventType` | required when `source` is an `EventTarget` | Name of the event to listen for (e.g. `"click"`, `"message"`). Mismatched with non-EventTarget sources is an error. |
+| `as`        | optional | Transform function `data → DOM`. A component reference works directly: `as={Cat}` is the same as `as={data => <Cat {...data} />}` when the data shape matches the props. For `EventTarget` sources, `as` receives the `Event` object. |
+| `error`     | optional | Transform function `error → DOM`. When the source produces an error, the result is rendered in place. Without an `error` prop, source errors propagate uncaught. (EventTarget sources have no error channel; this catches transform exceptions only.) |
+| `map`       | optional | Boolean. When the source's value is an array, applies `as` per element instead of to the whole array. Has no effect on non-array values. |
+| `append`    | optional | Boolean. When set, the first source value replaces the initial render; subsequent values **append** rather than replace. Without it (the default), each source value replaces the previous. No visible effect on `Promise` sources (only one value). |
+| children    | JSX      | Initial render value, shown before the source produces its first value. Does **not** go through `as`. Replaced by the first source value. |
 
 ### Source types
 
-Channel accepts three shapes:
+Channel accepts four shapes:
 
 - **Promise** — resolves once; the resolved value (passed through `as`)
   becomes the slot content. `append` has no visible effect (only one
@@ -128,6 +133,14 @@ Channel accepts three shapes:
   RxJS-compatible. Each `next` value replaces (or accumulates with
   `append`); `complete` ends iteration; `error` flows through the `error`
   prop if provided, otherwise propagates uncaught.
+- **EventTarget** (anything `instanceof EventTarget`) — paired with the
+  `eventType` prop. Each event of that type flows through `as` and lands
+  in the slot. Covers DOM elements (clicks, input), WebSockets (messages),
+  BroadcastChannel, MediaQueryList, and the many other platform APIs that
+  extend EventTarget. Channel registers the listener on construction and
+  removes it when the slot is abandoned. Once `EventTarget.prototype.when()`
+  ships (WICG Observable proposal), the same `target.when('event')` will
+  flow through the Observable detection branch automatically.
 
 ### Replace vs append
 
@@ -183,6 +196,16 @@ data type.
 
 // Observable
 <Channel source={someObservable} as={Tile} />
+
+// EventTarget — DOM element clicks
+<Channel source={button} eventType="click" as={() => <Toast/>}>
+    <Empty />
+</Channel>
+
+// EventTarget — WebSocket messages, append-style chat log
+<Channel source={socket} eventType="message" as={({data}) => <Message text={data}/>} append>
+    <p>Connecting…</p>
+</Channel>
 ```
 
 ### As a value, not just JSX
@@ -208,6 +231,39 @@ const profile = new Channel({ source: fetchProfile(), as: ProfileCard }, <Loadin
 ```
 
 Either form works; pick what reads cleaner where you're using it.
+
+## `pushable` — bridge from callback APIs to Channel
+
+When your source isn't already a Promise, async iterable, Observable, or
+EventTarget — e.g. a third-party library that gives you a callback API —
+`pushable()` bridges push-driven callbacks into the async-iterable shape
+Channel expects.
+
+```js
+import { pushable } from '@azothjs/maya/channels';
+
+const [events$, push] = pushable();
+someLibrary.onUpdate(value => push(value));
+
+// elsewhere in JSX:
+<Channel source={events$} as={Item} />
+```
+
+`pushable()` returns `[asyncIterator, pushFn]`. Values pushed before
+iteration are queued FIFO; values pushed while a consumer is awaiting
+wake it immediately. There is no transform — that's `Channel.as`'s job
+(or iterator helpers downstream). The single responsibility is the
+push-to-pull bridge.
+
+Async iterators are single-consumer; if you need fan-out, lift the
+source into an `EventTarget` (naturally multi-listener) and use
+Channel's EventTarget integration per consumer.
+
+`pushable` is also what Channel uses internally for its `EventTarget`
+support — `fromEventTarget(target, eventType, ...)` is essentially
+`pushable()` plus `addEventListener` plus listener cleanup. If you ever
+need a different platform-source-to-iterable bridge, `pushable` is the
+building block.
 
 ## The View + CardView idiom
 
@@ -279,6 +335,29 @@ itself is one-to-one (single source → single downstream).
 **Don't reach for `useState` or `useEffect`.** There are none. The async
 source is the data flow. The slot is where it lands. The transform is the
 shape. See [for-llms](for-llms.md) for terminology discipline.
+
+## IGNORE — skipping a value without clearing the slot
+
+`@azothjs/maya/compose` exports a sentinel `IGNORE`. When a source emits
+`IGNORE`, compose treats it as "do nothing for this emission" — the slot
+stays as it was. Distinct from `null` / `undefined` / `''`, which all
+**clear** the slot.
+
+```js
+import { IGNORE } from '@azothjs/maya/compose';
+
+async function* heartbeat() {
+    for await (const event of source) {
+        if (isHeartbeat(event)) yield IGNORE; // keep the current view
+        else yield <View {...event} />;
+    }
+}
+```
+
+Useful for sources that interleave meaningful values with bookkeeping
+events (heartbeats, ping/pongs, idle ticks). Today it's a small utility;
+if a clear authoring pattern shows demand for a dedicated prop or
+static, that's a future addition.
 
 ## What this is *not*
 

@@ -2,18 +2,21 @@
 
 ## Chronos
 
-### Rename `generator` to `stream`
+### Consolidate `generator` into maya `pushable`
 
-`generator()` describes implementation; `stream()` describes purpose and
-works as both verb and noun. Return-value names also change:
+The maya package now exports `pushable()` (in `@azothjs/maya/channels`)
+which is the same push-to-pull bridge `chronos.generator()` provides —
+minus the transform parameter (moved to call site / Channel.as /
+iterator helpers). pushable is canonical going forward.
 
-```js
-// Before
-const [results$, dispatch] = generator(transform);
-
-// After
-const [results$, push] = stream(transform);
-```
+To finish the consolidation:
+- Migrate `wre-dashboards` (and any other downstream) off
+  `azoth/chronos/generators` to `azoth/maya/channels`. The transform
+  argument used in `AgentSearch.jsx` line 14 becomes either an explicit
+  `await` at the call site or a `Channel.as` transform.
+- Remove `chronos/generators/generator.js` once no consumers remain.
+- The chronos package's role narrows further (or dissolves) — open
+  design question, not a blocker.
 
 ### Multicast disposition
 
@@ -24,6 +27,49 @@ chronos `channels/branch.js` that used it is gone). Either:
   primitive, OR
 - Defer entirely to RxJS / TC39 Observable for fan-out and remove.
 
+The EventTarget-based broadcast helper sketched as a future utility
+(see Channel section) may obviate Multicast entirely — EventTarget is
+naturally multi-listener, which is the actual ask.
+
+## Channel
+
+### Multi-listener broadcast helper (future utility)
+
+Async iterators are single-consumer. When code needs fan-out (one source
+→ multiple Channels), the right shape is to lift into an EventTarget
+(naturally multi-listener) rather than try to share an iterator. A small
+helper for "create EventTarget + push function" would smooth the DX:
+
+```js
+const [target, push] = broadcastTarget('change');
+push(value); // dispatches CustomEvent
+<Channel source={target} eventType="change" as={A} />
+<Channel source={target} eventType="change" as={B} />
+```
+
+Park until a real multi-listener use case shows up to shape the API.
+Naming, default eventType, CustomEvent boxing — all decisions that
+benefit from real usage informing them.
+
+### Cancel semantics / AbortController
+
+Channel currently has no way to signal "I'm done with this source" back
+upstream. Sources that hold resources (open WebSockets, ongoing fetches)
+keep going. Natural shape: an `AbortController` prop, hooked into compose's
+slot lifecycle. Defer until a real-world need surfaces; design is open.
+
+### Channel role evolution
+
+When async iterator helpers ship (Stage 2, est. 2027-2028), Channel's
+`as`/`error`/`map` props become "convenience over what you'd write with
+iterator helpers." The structural role narrows to: initial DOM
+(presentation), append directive (orchestration), cancel propagation
+(lifecycle).
+
+Don't preemptively split or rename. The right call right now is to not
+make a call. Re-evaluate when the platform shape clarifies and real
+usage tells us which residue actually matters.
+
 ## Components
 
 ### TypeScript / JSDoc type definitions for built-in components
@@ -31,10 +77,11 @@ chronos `channels/branch.js` that used it is gone). Either:
 `<Channel>` (and any future built-in components) should ship typed prop
 signatures so consumers get autocomplete + error checking. Open question:
 prop relationships JS can't easily express in types — e.g. `map` should
-only be allowable when `source` produces arrays. JSDoc with `@template` +
-conditional types, or per-component `.d.ts` overloads.
+only be allowable when `source` produces arrays, `eventType` should be
+required ⟺ source is EventTarget. JSDoc with `@template` + conditional
+types, or per-component `.d.ts` overloads.
 
-The Channel public API is now stable enough that this is a real next
+The Channel public API is stable enough now that this is a real next
 step rather than a deferred one.
 
 ## Compose
@@ -49,13 +96,59 @@ constructor returns (typically the new instance even when the body
 the full surface and aligning so authors can write `return null` to mean
 "render nothing" regardless of component form.
 
+### Performance research (parked)
+
+`compose` is the hot path. Older lore said "call functions with consistent
+arity for V8 perf" — that's no longer true. V8 8.9 (Feb 2021) removed the
+arguments adaptor frame; calling with fewer/more args than formal params
+no longer pays the adaptor cost. Source: v8.dev/blog/adaptor-frame.
+
+What still matters for hot dispatch code on modern engines:
+- Hidden class / shape stability on `anchor`, `props`, `input`
+- Monomorphic inline cache stability on property accesses
+- Function size relative to inlining thresholds
+- Avoiding deopts from mid-flight shape changes
+
+Park until a real regression motivates the work. Benchmarks need
+realistic render trees; speculative micro-optimization risks worse
+shape stability than the current code.
+
+## Platform tracking (informational)
+
+### Async iterator helpers (Stage 2, est. 2027-2028)
+
+When `AsyncIterator.prototype.map/filter/catch/...` ships, Channel's
+data-pipeline props become optional sugar for what iterator helpers
+express directly:
+
+```jsx
+// Today
+<Channel source={events$} as={Notification} error={ErrorBanner} />
+
+// When async iterator helpers ship
+<Channel source={events$.map(Notification).catch(ErrorBanner)} />
+```
+
+Both forms remain valid. The change is "data transforms can live upstream
+in the iterator chain instead of as Channel props." See Channel role
+evolution.
+
+### WICG Observable + `EventTarget.prototype.when()`
+
+Chrome 135+ has shipped Observable; Firefox is implementing. When
+`target.when('foo')` becomes widely available, our `fromEventTarget`
+shim becomes a polyfill (and may delete entirely — Observable-shape
+sources already flow through the existing `.subscribe` detection
+branch). No action now; track adoption.
+
 ## Docs
 
 ### Topic doc refresh
 
 `async-and-channels.md` and `maya-runtime.md` are aligned with the
-current API as of this branch. Still referencing the old `channel()`
-function form and/or `@azothjs/chronos/channels` imports:
+current API (including EventTarget + pushable as of this batch). Still
+referencing the old `channel()` function form and/or `@azothjs/chronos/channels`
+imports:
 
 - `docs/ASYNC-PATTERNS.md`
 - `docs/async-rendering-patterns.md`
@@ -74,7 +167,11 @@ MENTAL-MODEL.md may be left as-is since it's the historical artifact.
 
 `wre-dashboards/src/components/AgentDashboard/AiAnalysis/AiAnalysis.jsx`
 and adjacent files import from `azoth/chronos/channels`. That export
-path is gone in this branch (replaced by `azoth/maya/channels`).
+path is gone (replaced by `azoth/maya/channels`). Also:
+`AgentSearch.jsx` line 14 imports `generator as stream` from
+`azoth/chronos/generators` — migrate to `pushable` from
+`azoth/maya/channels` (transform moves to the call site or Channel.as).
+
 wre-dashboards needs updating before or after this branch merges,
 otherwise its build breaks.
 

@@ -358,6 +358,92 @@ describe('Channel with error prop', () => {
 
 });
 
+describe('Channel with EventTarget source', () => {
+
+    test('events from a target render via Channel.as', async ({ expect }) => {
+        const target = new EventTarget();
+        const root = fixture();
+        root.append(<main><Channel source={target} eventType="ping" as={(e: CustomEvent) => <p>{String(e.detail)}</p>}><p>waiting</p></Channel></main>);
+
+        // Initial render: childNodes are shown before any event
+        await macrotask();
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><p>waiting</p><!--1--></main>"`
+        );
+
+        target.dispatchEvent(new CustomEvent('ping', { detail: 'a' }));
+        await macrotask();
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><p>a<!--1--></p><!--1--></main>"`
+        );
+
+        target.dispatchEvent(new CustomEvent('ping', { detail: 'b' }));
+        await macrotask();
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><p>b<!--1--></p><!--1--></main>"`
+        );
+    });
+
+    test('append: events accumulate after replacing initial', async ({ expect }) => {
+        const target = new EventTarget();
+        const root = fixture();
+        root.append(<main><Channel source={target} eventType="msg" as={(e: CustomEvent) => <p>{String(e.detail)}</p>} append><p>connecting</p></Channel></main>);
+
+        await macrotask();
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><p>connecting</p><!--1--></main>"`
+        );
+
+        target.dispatchEvent(new CustomEvent('msg', { detail: 'one' }));
+        await macrotask();
+        // First event replaces the initial.
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><p>one<!--1--></p><!--1--></main>"`
+        );
+
+        target.dispatchEvent(new CustomEvent('msg', { detail: 'two' }));
+        await macrotask();
+        // Subsequent events accumulate.
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><p>one<!--1--></p><p>two<!--1--></p><!--2--></main>"`
+        );
+
+        target.dispatchEvent(new CustomEvent('msg', { detail: 'three' }));
+        await macrotask();
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><p>one<!--1--></p><p>two<!--1--></p><p>three<!--1--></p><!--3--></main>"`
+        );
+    });
+
+    test('DOM element as EventTarget — click counter', async ({ expect }) => {
+        const button = document.createElement('button');
+        button.textContent = 'click me';
+        let count = 0;
+
+        const root = fixture();
+        root.append(<main>{button}<Channel source={button} eventType="click" as={() => <span>clicks: {++count}</span>}><span>clicks: 0</span></Channel></main>);
+
+        await macrotask();
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><button>click me</button><!--1--><span>clicks: 0</span><!--1--></main>"`
+        );
+
+        button.click();
+        await macrotask();
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><button>click me</button><!--1--><span>clicks: 1<!--1--></span><!--1--></main>"`
+        );
+
+        button.click();
+        button.click();
+        await macrotask();
+        expect(root.innerHTML).toMatchInlineSnapshot(
+            /* HTML */ `"<main><button>click me</button><!--1--><span>clicks: 3<!--1--></span><!--1--></main>"`
+        );
+    });
+
+});
+
 describe('Channel — equivalent class and instance forms', () => {
 
     test('<Channel> JSX produces a Channel instance', async ({ expect }) => {
