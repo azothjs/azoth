@@ -120,6 +120,46 @@ Memory bounded by max-ever occupancy per site; dies with the instance.
 Future: when cancel semantics land (AbortController on Channel), prune
 is the natural teardown-hook site.
 
+## Composability: a tree of render functions
+
+The system composes by plain function composition. An app is a tree of
+render functions — most are dumb presentation (`props => DOM`), usable
+inside a rerenderer or not, no opt-in required. More complex functions
+protect their setup by wrapping their *return* in a rerenderer.
+Refetch-on-id when that's the intended behavior — re-call does it.
+It's a small set of rules devs can reason through, not a framework
+lifecycle to memorize. Function components are `props => DOM` by
+nature, so they're wrappable as-is.
+
+The comparative line: Svelte invented a syntax for control flow
+(`{#if}`). Solid writes JS that doesn't behave like JS (`<For>`,
+components that run once but look like they re-run). React forbids
+control flow around hooks. Azoth: control flow just works.
+
+DOM Parts note: the compiled binder IS a parts group —
+
+```js
+(ts) => {
+    const t0 = ts[0], t1 = ts[1];
+    return (v0, v1) => { __c(t0, v0); __c(t1, v1); };
+}
+```
+
+is precisely "DOM parts in a part group" per the WICG repo (early,
+multiple competing proposals). Azoth has working evidence to offer
+that conversation; tracked in TODO platform section.
+
+## Naming (open): `rerenderer` vs `render`
+
+The returned function is the interface — devs name their own
+(`const renderCard = …`). The factory name is what lives in the
+corpus. `render` as a bare export collides hard with Solid's
+`render(() => <App/>, el)` — same thunk-first signature, mount
+semantics — plus ReactDOM/preact `render`. An LLM completing
+`render(() => …)` will reach for a container argument. `rerenderer`
+is uglier and unambiguous; terminology discipline favors it. Not
+closed — Marty's call.
+
 ## Scope convention: wrap the narrowest expression
 
 **The armistice between re-execution and component-runs-once.** The

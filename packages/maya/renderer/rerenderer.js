@@ -52,6 +52,13 @@ class Rerenderer {
         }
         finally {
             const popped = stack.pop();
+            // Intentional throw-in-finally: this masks an in-flight
+            // exception from renderFn, which is acceptable because a
+            // corrupted stack is a framework invariant violation that
+            // supersedes user errors. Nested rerenderers pop in their own
+            // finally even on throw, so this can't fire from user code
+            // throwing — only from a genuine push/pop bug.
+            // eslint-disable-next-line no-unsafe-finally
             if(popped !== this) throw new Error('Rerenderer stack error');
             for(const site of this.#sites.values()) {
                 // cursor > 0: site participated — truncate (lists shrink).

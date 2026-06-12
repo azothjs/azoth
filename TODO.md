@@ -231,6 +231,25 @@ Both forms remain valid. The change is "data transforms can live upstream
 in the iterator chain instead of as Channel props." See Channel role
 evolution.
 
+### DOM Parts (WICG, early incubation)
+
+Azoth's compiled binders are literally "DOM parts in a part group"
+(see docs/design/rerenderer.md). The proposal space is early with
+multiple competing drafts — Azoth has working evidence (compiled
+part-groups + the Rerenderer's apply-values mechanism) to offer the
+direction conversation. Watch the repo; consider a position
+write-up once 2.0 ships.
+
+### Rerenderer follow-ons
+
+- Controller/Updater likely removable once blocks migrate onto
+  Rerenderer (legacy injectable path in renderer.js goes with them).
+- ListBlock may need variant behavior — or simply swaps a rerenderer
+  in per row. Decide during the blocks increment.
+- Valhalla API-level rerenderer tests (JSX-driven, crazy scenarios)
+  once increments (b)+(c) land — that's where confidence accrues;
+  refine code after.
+
 ### WICG Observable + `EventTarget.prototype.when()`
 
 Chrome 135+ has shipped Observable; Firefox is implementing. When
