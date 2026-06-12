@@ -300,4 +300,35 @@ describe('decomposition playground', () => {
         `);
     });
 
+    test('narrow-scope convention — component returns rerenderer(thunk)', ({ expect }) => {
+        const input = `
+            function Component() {
+                const name = asyncValueStream();
+                return rerenderer(() => <p>{name} {salutation}!</p>);
+            }
+        `;
+        expect(decompose(input)).toMatchInlineSnapshot(`
+          "
+          ==== code ====
+          import { t47556cd8 } from 'virtual:azoth-templates?id=47556cd8';
+
+          function Component() {
+              const name = asyncValueStream();
+              return rerenderer(() => t47556cd8(name,salutation));
+          }
+          ==== template 47556cd8 ====
+          html:     <p><!--0--> <!--0-->!</p>
+          targets:  r => [r.childNodes[0],r.childNodes[2]]
+          bind:     (ts) => {
+            const t0 = ts[0], t1 = ts[1];
+            return (v0, v1) => {
+              __c(t0, v0);
+              __c(t1, v1);
+            };    
+          }
+          renderer: __renderer("47556cd8", g356056d3, bac4750db, false)
+          "
+        `);
+    });
+
 });

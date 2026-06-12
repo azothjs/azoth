@@ -137,11 +137,17 @@ function create(input, props, childNodes, anchor) {
     const type = typeof input;
 
     switch(true) {
-        // A pre-built Node returned from a component or passed as a value
-        // is valid output. Props are NOT overlaid — component invocation
-        // means "construct"; if you want to modify a node, do it directly.
+        // Reject Node-as-component. This was the residue of the removed
+        // DOM-overlay (skinning) path: the Object.assign went, the
+        // passthrough lingered. Component invocation means "construct" —
+        // create needs to actually produce something. A pre-built Node is
+        // a VALUE: interpolate it ({node}), don't invoke it (<Node/>).
         case input instanceof Node:
-            return input;
+            throw new TypeError(
+                `Cannot use a DOM Node as a component. ` +
+                `Components construct DOM; a pre-built Node is a value. ` +
+                `Interpolate it instead: {node} rather than <Node/>.`
+            );
         // Empty / nothing values render to no DOM.
         case input === undefined:
         case input === null:

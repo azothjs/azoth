@@ -412,16 +412,15 @@ describe('Compose subtractions — primitive-as-component', () => {
         expect(() => createComponent(42)).toThrow(/Cannot use number/);
     });
 
-    test('DOM Node still works as a component value (no skinning)', async ({ expect }) => {
-        // Passing a Node as a "component" returns the Node. Props are
-        // NOT overlaid via Object.assign (that path was removed).
+    test('DOM Node in component position throws', async ({ expect }) => {
+        // The skinning subtraction, completed: first the Object.assign
+        // overlay was removed, now the passthrough too. Component
+        // invocation means "construct" — a pre-built Node is a value,
+        // interpolated as {node}, never invoked as <Node/>.
         const { createComponent } = await import('../compose/compose.js');
         const node = document.createElement('div');
-        node.textContent = 'original';
-        const result = createComponent(node, { textContent: 'overlaid?' });
-        expect(result).toBe(node);
-        // Skinning is gone — textContent is NOT overwritten.
-        expect(node.textContent).toBe('original');
+        expect(() => createComponent(node, { textContent: 'overlaid?' }))
+            .toThrow(/Cannot use a DOM Node as a component/);
     });
 
 });
