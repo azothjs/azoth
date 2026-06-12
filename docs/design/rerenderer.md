@@ -180,33 +180,106 @@ right instinct; closure identity now provides it).
 
 | In component position | Create | Update |
 |---|---|---|
-| function | call → DOM | **re-call** (bread and butter; remember the function; fresh DOM). Stability is recursively opt-in: a function wanting stable DOM returns its own `rerenderer(...)`. |
-| UIComponent (class or object literal) | construct / literal — props intake ONCE | `instance.update(newProps)` |
-| Channel | construct | open: update method (process TBD) or relax field privacy for an azoth-internal privileged path |
-| Node | **removed** — throws (landed 3dafed7). The skinning subtraction, completed: create must actually produce something. |
-| web component | intrinsic — tag in template HTML, attrs/props are binds; azoth doesn't intercept | rebind (see attr/prop table TODO: add custom-element validation cases) |
+| function | call → walk the chain (below) | re-invoke the **cached last link** with newProps; plain-DOM returns → re-call the function (setup re-fires — the documented cost) |
+| async function | call → Promise (composable) → chain stops at the function itself | re-call = re-fetch (often exactly right: new id → new fetch) |
+| UIComponent (class or object literal) | class: constructor intake; pre-made instance: `initialize(props)` | `instance.update(newProps)` |
+| Channel | construct | `update(newProps)` = instance-level `===` on the source ref; new ref → teardown + resubscribe (meets cancel semantics) |
+| Node | **removed** — throws (landed 3dafed7). Create must actually produce something. |
+| web component | intrinsic — tag in template HTML, attrs/props are binds; azoth doesn't intercept | rebind (see attr/prop TODO: custom-element validation cases) |
+
+### The chain rule (replaces "branding")
+
+The cached update object is **the end of the chain — the thing that
+yielded something composable.** Dispatch is structural: keep calling
+functions until a composable comes out; remember the last callable
+link at the anchor.
+
+```js
+function CatCard({ id }) {
+    const data = fetchCat(id);                 // setup — runs once
+    const select = () => selectCat(id);        // stable handler
+    const renderFn = rerenderer((props) =>
+        <div onclick={select}>cat #{props.id} {data}</div>);
+    return renderFn;                            // ← cached; re-invoked, not CatCard
+}
+
+rerenderer(props => <div><CatCard id={props.id}/></div>);
+```
+
+No brand/marker needed — position in the chain is the identity.
+compose already chain-walks functions; update remembers the last link.
+The component's props object flows to the cached updater as-is.
+
+**The closure/parameter contract**: the thunk's *parameters* are the
+update surface; its *closures* are the setup surface.
+`(props) => …props.id…` flows; `() => …id…` is frozen at setup. This
+is the explicit inverse of React's implicit re-run-everything. Future
+thoth lint: warn when a closure-captured prop is used inside a
+rerenderer thunk.
+
+### create() narrows (interpolators are the gourmands)
+
+Slots eat everything; component position eats clean. create() accepts:
+**function | class | UIComponent instance | Channel | null/undefined
+(no-op — dynamic `<C/>` where C is conditionally null renders
+nothing).** Arrays, IGNORE, booleans, and the default-label container
+dance: removed. `<Wha length={0}/>` where Wha is an array gets a
+TypeError, as it deserves.
+
+Promise-in-component-position is cut WITH its recovery idiom — lazy
+components are async functions:
+
+```js
+async function LazyCat(props) {
+    const { Cat } = await import('./cat.js');
+    return createComponent(Cat, props);
+}
+```
+
+Anything async arrives as a *return value*, where compose already
+handles it.
 
 ## UIComponent: unify class and render object (subtract to unlock)
 
 Today a class gets props twice — `new input(props, childNodes)` AND
 `render(props)` via the render-object path. The unification: props
-intake happens once (constructor for classes, literal property for
-object literals), `render()` takes no args, `update(newProps)` is the
-change channel. Class instances and object literals satisfy ONE
-protocol; "render object" stops being a separate dispatch type:
+intake happens ONCE per form — classes via constructor ("component =
+constructor"), pre-constructed instances (object literals) via
+`initialize(props)`, which is the literal's constructor moment.
+`render()` takes no args; `update(newProps)` is the change channel.
+One protocol, structurally satisfied by class or literal (TS
+interfaces are structural; optional methods via `?`):
 
 ```ts
 export interface UIComponent<Props extends object> {
-    props: Props;
-    render(): Node;
-    update(newProps: Props): void | Node;
+    initialize?(props: Props): void;           // intake for pre-constructed instances
+    initialRender?(): Composable;              // optional sync first paint
+    render(): Composable;                      // DOM — or a source compose subscribes
+    update(props: Props): void | Composable;   // void = handled internally; Composable = replace
 }
 ```
 
-`update` returning void = handled internally (the instance keeps its
-own refs / rerenderer). Returning a Node = replace prior output.
-Open: is `props` a contract compose relies on, or author convention?
-And `render(): Node` may widen to DOMChild in the typing review.
+Notes:
+- `props` as an interface property was REMOVED — intake is a method,
+  storage is the author's business. The contract-vs-convention
+  question dissolved rather than resolved.
+- `render()` may return a *source* — compose already dispatches on
+  the return value's type, so no `getSource()` second entry point is
+  needed (option B over option A).
+- Return type `Composable` = compose's full input surface (the
+  typing-review rename of DOMChild). Position taken: match the
+  runtime honestly (types are documentation, especially for the LLM
+  corpus). Counterargument on record: starting narrow (`Node`) and
+  widening later is the non-breaking direction.
+- `update` returning the same Node is a natural no-op under the ===
+  skip.
+- Channel conforms: constructor (no initialize), `initialRender() →
+  #initial`, `render() → #source`, `update(newProps)` → === on source
+  ref. The `instanceof Channel` special cases trend toward protocol
+  dispatch; the `append`/firstReplaces flag is the residual wrinkle
+  (protocol path reads an `append` property, or one small special
+  case stays).
+- Naming note: `initialize`/`initialRender` sit close; bikeshed later.
 
 ## Same-instance rebind: the === skip proposal
 
@@ -229,19 +302,37 @@ anchor remembers its last input, `compose(anchor, sameValue)` is a
 no-op — global idempotency, deeper change. Spike starts with (a);
 (b) stays on the table as the principled end-state.
 
+## Storage architecture (settled)
+
+The rerenderer instance holds two caches:
+
+1. **Factory sites** — closure identity → { node, bind, lastArgs },
+   with occurrence indexing and the lists-shrink-branches-sleep prune.
+2. **Anchor memory** — `WeakMap<anchorComment, { lastValue, updater }>`
+   — everything that flows through slots: the === skip (lastValue),
+   component-instance stability (the cached chain-end updater), and
+   the future home of subscription-encapsulation for teardown (cancel
+   semantics). compose consults it whenever a rerenderer is on the
+   stack. Anchors are per-slot, survive rebinds, and WeakMap means
+   slot memory dies with the DOM.
+
 ## Open questions for the spike
 
 1. ~~Expression vs thunk~~ — settled: thunk; typeof gate throws.
-2. **Slot-source vs rerender interplay** — largely addressed by the
-   === skip; what remains is defining replace semantics when the ref
-   DOES change while a source is mid-flight (subscription teardown =
-   future cancel semantics).
-3. **Channel update semantics** — option 1 (update method + process)
-   vs option 2 (relax privates / azoth-internal privileged access,
-   keeping public immutability). Workable either way; defer to spike.
-4. **UIComponent `props`** — contract or convention (above).
-5. Spike order: runtime Rerenderer (getNode + occurrence + prune +
-   typeof gate + === skip, test-backed) → thoth per-site factories →
-   compose per-type update dispatch (function re-call + UIComponent
-   update first). Intrinsic-only proves the core; UIComponent next;
-   Channel last.
+2. ~~Brand for rerenderables~~ — settled: unnecessary; the chain rule
+   is structural.
+3. ~~UIComponent props contract~~ — dissolved: intake is a method
+   (`initialize` for instances, constructor for classes).
+4. ~~Promise-of-component~~ — cut; async-function recovery idiom.
+5. **Channel update internals** — relax privates vs azoth-internal
+   privileged access (public immutability preserved either way).
+   Defer to the Channel increment.
+6. **render()/update() return type** — `Composable` position taken;
+   Marty may veto toward `Node`-narrow (widening later is
+   non-breaking).
+7. Spike order: (a) runtime Rerenderer — sites + anchor memory +
+   occurrence/prune + typeof gate + === skip, intrinsic-only,
+   test-backed; (b) thoth per-site factories; (c) compose per-type
+   update dispatch with the chain rule + create() narrowing;
+   (d) UIComponent protocol + initialize; (e) Channel conformance
+   last. Each its own increment.
