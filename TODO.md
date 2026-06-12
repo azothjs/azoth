@@ -1,5 +1,18 @@
 # Azoth TODO
 
+## Rerenderer (2.0 centerpiece — design captured, pre-spike)
+
+Design: `docs/design/rerenderer.md`. Re-execution + identity-keyed
+cache; per-call-site factories (closure identity as key); ordinal reuse
+for loops; lists-shrink-branches-sleep prune rule; narrowest-scope
+convention (components run once and RETURN their rerenderable);
+per-type update dispatch in compose. Spike order in the doc's open
+questions. Naming bikeshed (Rerender vs Rerenderer) deferred.
+
+Related blocks decision: KeyedBlock renames to **ListBlock**
+(js-framework-benchmark holdover name). AnchorBlock remains a cut
+candidate; Toggle TBD.
+
 ## Attribute vs property table (2.0 release-gating)
 
 Azoth currently does nothing here — WYSIWYG. Static JSX values compile
