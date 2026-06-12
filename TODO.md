@@ -1,5 +1,45 @@
 # Azoth TODO
 
+## Attribute vs property table (2.0 release-gating)
+
+Azoth currently does nothing here — WYSIWYG. Static JSX values compile
+into the HTML template string (attributes); dynamic values are applied
+as property assignment. So `class="x"` works but `class={x}` silently
+sets a useless expando property. Everyone will hit this.
+
+Plan (synthesized from two research passes, 2026-06-11):
+
+1. Seed a curated table from the frameworks that already paid this tax:
+   - Solid dom-expressions `constants.js` — most explicit; booleans,
+     tag-scoped PropAliases, Properties, SVGElements, namespaces
+   - Vue `shouldSetAsProp` — force-attribute traps that break the
+     `in el` heuristic (`form`, `list`@input, media `width/height`,
+     `sandbox`@iframe, enumerated attrs like `contenteditable`)
+   - Svelte `utils.js` — architectural template (only framework with
+     Azoth's compile-to-HTML-template-string shape). Critically:
+     `NON_STATIC_PROPERTIES` (`autofocus`, `muted`, `defaultValue`,
+     `defaultChecked`) — attrs that cannot live in a cloned template
+     string even when static. Azoth needs this category first-class.
+2. Merge dom-info's curated corrections (~/dev/azothjs/dom-info):
+   `allowFullscreen` casing, lowercase `autocomplete`, attrOnly buckets.
+   Fix dom-info's line-148 bug first (`notYetImplemented` missing
+   `[attr]` — guard always true, global-attr assertions silently
+   skipped), then re-run the 4-browser audit as validation.
+3. Output: one compiler-consumed table — JSX name → static-HTML-attr |
+   property | setAttribute | boolean | SVG-namespace (setAttributeNS
+   for xlink/xml) | non-static.
+4. Design wins that fall out: `class` AND `className` both work (static
+   compiles to HTML = no FOUC; dynamic applies via JS); SVG correctness.
+5. Dropped: @webref extraction pipeline. Reflection rules live in spec
+   prose, not IDL; tables are ~40-80 names total. Curated + empirically
+   audited beats generated here. webref may return as part of the
+   property-information upstream contribution.
+
+Related: reply to wooorm's open question on property-information #21
+(he asked whether dom-info's browser-audit should be pulled into his
+project, Feb 2025, awaiting Marty's answer). Comment first; PR if
+receptive; Azoth doesn't wait on the outcome.
+
 ## Chronos
 
 ### Consolidate `generator` into maya `pushable`
