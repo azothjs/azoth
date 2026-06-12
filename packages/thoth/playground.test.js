@@ -234,10 +234,10 @@ describe('decomposition playground', () => {
         expect(decompose(input)).toMatchInlineSnapshot(`
           "
           ==== code ====
-          import { t15aa2705 } from 'virtual:azoth-templates?id=15aa2705';
+          import { t15aa2705, t15aa2705_1 } from 'virtual:azoth-templates?id=15aa2705&id=15aa2705';
 
           const a = t15aa2705(x);
-          const b = t15aa2705(y);
+          const b = t15aa2705_1(y);
           ==== template 15aa2705 ====
           html:     <p><!--0--></p>
           targets:  r => [r.childNodes[0]]

@@ -103,14 +103,25 @@ export default function azothPlugin(options) {
     function loadTemplateModule(ids, isBuild) {
         const moduleImports = [`import { __renderer } from 'azoth/runtime';\n`];
 
-        const templates = ids.map(id => programTemplates.get(id));
-
         const targetGenerators = new Set();
         const bindGenerators = new Set();
 
-        const templateExports = templates.map(template => {
-            const { id, targetKey, bindKey, isEmpty } = template;
+        // Per-site factories: ids repeat in the query (one per call site,
+        // source order). The same numbering walk the Transpiler used
+        // produces matching export names (t{id}, t{id}_1, …). Each
+        // declaration is its own closure — the Rerenderer cache key —
+        // while the heavy assets (g, b, template html) stay deduped:
+        // the factory line is a one-line manifest of shared parts.
+        const siteCounts = new Map();
+
+        const templateExports = ids.map(id => {
+            const template = programTemplates.get(id);
+            const { targetKey, bindKey, isEmpty } = template;
             if(isEmpty) return '';
+
+            const n = siteCounts.get(id) ?? 0;
+            siteCounts.set(id, n + 1);
+            const name = n === 0 ? `t${id}` : `t${id}_${n}`;
 
             if(targetKey) {
                 if(!byTarget.has(targetKey)) byTarget.set(targetKey, template);
@@ -128,7 +139,7 @@ export default function azothPlugin(options) {
                 }
             }
 
-            return `export const t${id} = ${makeRenderer(template, { noContent: isBuild })};\n`;
+            return `export const ${name} = ${makeRenderer(template, { noContent: isBuild })};\n`;
 
         });
 

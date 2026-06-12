@@ -8,7 +8,13 @@ export const templateModule = `virtual:azoth-templates`;
 
 export class Transpiler extends Generator {
     templates = [];
-    uniqueIds = new Set();
+    // One entry per non-empty DOM-literal call site, in source order.
+    // Repeated template ids get per-site factory names (t{id}, t{id}_1, …)
+    // so each compiled call site receives its own factory declaration —
+    // closure identity is the Rerenderer cache key; deduped templates
+    // must not share a factory across sites.
+    sites = [];
+    siteCounts = new Map();
 
     constructor() {
         super();
@@ -29,7 +35,7 @@ export class Transpiler extends Generator {
     }
 
     getImports() {
-        const { templates, uniqueIds } = this;
+        const { templates, sites } = this;
         const namedImports = new Set();
 
         for(let template of templates) {
@@ -43,10 +49,12 @@ export class Transpiler extends Generator {
             imports.push(`import { ${[...namedImports].join(', ')} } from 'azoth/runtime';\n`);
         }
 
-        if(uniqueIds.size) {
-            const ids = [...uniqueIds];
-            const params = new URLSearchParams(ids.map(id => ['id', id]));
-            const names = ids.map(id => `t${id}`).join(', ');
+        if(sites.length) {
+            // Repeated ids in the query, in source order — the template
+            // module applies the same numbering walk to emit matching
+            // per-site export names.
+            const params = new URLSearchParams(sites.map(({ id }) => ['id', id]));
+            const names = sites.map(({ name }) => name).join(', ');
             imports.push(`import { ${names} } from '${templateModule}?${params.toString()}';\n`);
         }
 
@@ -65,8 +73,7 @@ export class Transpiler extends Generator {
         const analyzer = new Analyzer(node);
         const template = analyzer.template;
 
-        const { templates, uniqueIds } = this;
-        templates.push(template);
+        this.templates.push(template);
 
         // Short-circuit templates
         const { node: root } = template;
@@ -75,8 +82,6 @@ export class Transpiler extends Generator {
             this.CreateElement(root, state, true);
             return;
         }
-
-        if(template.id && !uniqueIds.has(template.id)) uniqueIds.add(template.id);
 
         this.DomLiteral(template, state);
     }
@@ -92,15 +97,22 @@ export class Transpiler extends Generator {
     }
 
     DomLiteral(template, state) {
-        const { id, boundElements, bindings, node, isEmpty } = template;
+        const { id, bindings, node, isEmpty } = template;
 
         // template service renderer call
-        const hasTargets = !!boundElements.length;
         if(isEmpty) {
             state.write('null', node);
             return;
         }
-        state.write(`t${id}(`, node);
+
+        // Per-site factory name: first occurrence of an id keeps t{id},
+        // repeats get t{id}_1, t{id}_2, … (registered for getImports).
+        const n = this.siteCounts.get(id) ?? 0;
+        this.siteCounts.set(id, n + 1);
+        const name = n === 0 ? `t${id}` : `t${id}_${n}`;
+        this.sites.push({ id, name });
+
+        state.write(`${name}(`, node);
 
         for(let i = 0; i < bindings.length; i++) {
             const { node, expr } = bindings[i];

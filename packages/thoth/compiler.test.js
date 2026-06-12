@@ -261,7 +261,7 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t4d7e131d, t286a9d57, te3b0c442 } from 'virtual:azoth-templates?id=4d7e131d&id=286a9d57&id=e3b0c442';
+          "import { t4d7e131d, t286a9d57 } from 'virtual:azoth-templates?id=4d7e131d&id=286a9d57';
 
           const fragment = t4d7e131d();
           const compose = t286a9d57(x);
@@ -339,14 +339,14 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t4d7e131d, t7c7d5ba2, t286a9d57, te3b0c442, te39bbbf6 } from 'virtual:azoth-templates?id=4d7e131d&id=7c7d5ba2&id=286a9d57&id=e3b0c442&id=e39bbbf6';
+          "import { t4d7e131d, t7c7d5ba2, t7c7d5ba2_1, t286a9d57, t286a9d57_1, te39bbbf6 } from 'virtual:azoth-templates?id=4d7e131d&id=7c7d5ba2&id=7c7d5ba2&id=286a9d57&id=286a9d57&id=e39bbbf6';
 
           const fragment = t4d7e131d();
           const single = t7c7d5ba2();
-          const fragInFrag = t7c7d5ba2();
+          const fragInFrag = t7c7d5ba2_1();
           const fragInFragCompose = t286a9d57(x);
           const empty = null;
-          const compose = t286a9d57(x);
+          const compose = t286a9d57_1(x);
           const text = te39bbbf6();
           "
         `);
@@ -451,12 +451,12 @@ describe('fragments', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t7c7d5ba2, t286a9d57 } from 'virtual:azoth-templates?id=7c7d5ba2&id=286a9d57';
+          "import { t7c7d5ba2, t7c7d5ba2_1, t286a9d57, t286a9d57_1 } from 'virtual:azoth-templates?id=7c7d5ba2&id=7c7d5ba2&id=286a9d57&id=286a9d57';
 
           const start = t7c7d5ba2();
-          const end = t7c7d5ba2();
+          const end = t7c7d5ba2_1();
           const composeStart = t286a9d57(x);
-          const composeEnd = t286a9d57(x);
+          const composeEnd = t286a9d57_1(x);
           "
         `);
 
@@ -958,11 +958,11 @@ describe('components and custom element', () => {
 
         expect(code).toMatchInlineSnapshot(`
           "import { __rC } from 'azoth/runtime';
-          import { t15aa2705, t982d9e3e, t9155678a } from 'virtual:azoth-templates?id=15aa2705&id=982d9e3e&id=9155678a';
+          import { t15aa2705, t15aa2705_1, t15aa2705_2, t15aa2705_3, t982d9e3e, t9155678a } from 'virtual:azoth-templates?id=15aa2705&id=15aa2705&id=15aa2705&id=15aa2705&id=982d9e3e&id=9155678a';
           const c = __rC(Component, {}, t15aa2705("test"));
-          const cTrim = __rC(Component, {}, t15aa2705("test"));
-          const cTrimStart = __rC(Component, {}, t15aa2705("test"));
-          const cTrimEnd = __rC(Component, {}, t15aa2705("test"));
+          const cTrim = __rC(Component, {}, t15aa2705_1("test"));
+          const cTrimStart = __rC(Component, {}, t15aa2705_2("test"));
+          const cTrimEnd = __rC(Component, {}, t15aa2705_3("test"));
           const cText = __rC(Component, {}, t982d9e3e());
           const cFrag = __rC(Component, {}, t9155678a(1,2));
           "
@@ -1119,9 +1119,9 @@ describe('components and custom element', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t4c71fc70, t372bc820 } from 'virtual:azoth-templates?id=4c71fc70&id=372bc820';
+          "import { t4c71fc70, t372bc820, t372bc820_1 } from 'virtual:azoth-templates?id=4c71fc70&id=372bc820&id=372bc820';
 
-          const component = t4c71fc70([Component, {}],[Component, { prop: value, prop2: "literal", }],[Component, {}, t372bc820()],[Component, { prop: value, prop2: "literal", }, t372bc820()]);
+          const component = t4c71fc70([Component, {}],[Component, { prop: value, prop2: "literal", }],[Component, {}, t372bc820()],[Component, { prop: value, prop2: "literal", }, t372bc820_1()]);
           "
         `);
         expect(templates).toMatchInlineSnapshot(`
@@ -1304,14 +1304,14 @@ describe('render and composition cases', () => {
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { t191b5e03, t15aa2705, t3fcf8b87, t2c4a6c0f, tfbb7e8b4 } from 'virtual:azoth-templates?id=191b5e03&id=15aa2705&id=3fcf8b87&id=2c4a6c0f&id=fbb7e8b4';
+          "import { t191b5e03, t15aa2705, t3fcf8b87, t2c4a6c0f, tfbb7e8b4, t3fcf8b87_1 } from 'virtual:azoth-templates?id=191b5e03&id=15aa2705&id=3fcf8b87&id=2c4a6c0f&id=fbb7e8b4&id=3fcf8b87';
 
           export const Loading = () => t191b5e03();
           export const Cat = ({name}) => t15aa2705(name);
           export const CatList = cats => t3fcf8b87(cats.map(Cat));
           export const CatCount = cats => t2c4a6c0f(cats.length);
           export const CatName = name => tfbb7e8b4(name);
-          export const CatNames = cats => t3fcf8b87(cats.map(CatName));
+          export const CatNames = cats => t3fcf8b87_1(cats.map(CatName));
           "
         `);
     });
