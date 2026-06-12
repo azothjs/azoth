@@ -149,16 +149,18 @@ is precisely "DOM parts in a part group" per the WICG repo (early,
 multiple competing proposals). Azoth has working evidence to offer
 that conversation; tracked in TODO platform section.
 
-## Naming (open): `rerenderer` vs `render`
+## Naming: `rerenderer` (settled 2026-06-12)
 
 The returned function is the interface — devs name their own
 (`const renderCard = …`). The factory name is what lives in the
 corpus. `render` as a bare export collides hard with Solid's
 `render(() => <App/>, el)` — same thunk-first signature, mount
 semantics — plus ReactDOM/preact `render`. An LLM completing
-`render(() => …)` will reach for a container argument. `rerenderer`
-is uglier and unambiguous; terminology discipline favors it. Not
-closed — Marty's call.
+`render(() => …)` will reach for a container argument.
+
+Settled: `rerenderer`. The LLMs are dishing the code, so name for
+the reader that can't be misread — and a name that faithfully
+describes itself has its own kind of beauty.
 
 ## Scope convention: wrap the narrowest expression
 
@@ -381,9 +383,11 @@ The rerenderer instance holds two caches:
    Defer to the Channel increment.
 6. ~~render()/update() return type~~ — settled: `Composable`, match
    the runtime.
-7. Spike order: (a) runtime Rerenderer — sites + anchor memory +
-   occurrence/prune + typeof gate + === skip, intrinsic-only,
-   test-backed; (b) thoth per-site factories; (c) compose per-type
-   update dispatch with the chain rule + create() narrowing;
-   (d) UIComponent protocol + initialize; (e) Channel conformance
-   last. Each its own increment.
+7. Spike order: ~~(a) runtime Rerenderer~~ (landed 2037a5f);
+   ~~(b) thoth per-site factories~~ (landed ce5afbd, plus the
+   latent empty-import fix); ~~(c) compose per-type update dispatch
+   with the chain rule + create() narrowing~~ (landed — chain rule
+   in composeComponent, walkChain, component memo on the anchor
+   entry, create() narrowed to function | class | render-object |
+   null/undefined); (d) UIComponent protocol + initialize;
+   (e) Channel conformance last. Each its own increment.

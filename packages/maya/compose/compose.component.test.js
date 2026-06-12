@@ -74,36 +74,29 @@ describe('create element', () => {
 
 describe('prop-agation', () => {
 
-    test('async iterator in component position', async ({ expect, fixture, find }) => {
-        // Each yielded Node passes through and replaces the prior. Props
-        // are NOT overlaid on the Node (skinning was removed); the
-        // component-invocation contract is "construct," not "modify."
-        let resolve = null;
-        const doAsync = async (value) => {
-            const { promise, resolve: res } = Promise.withResolvers();
-            resolve = () => res(value);
-            return promise;
-        };
-
+    test('async iterator in component position throws (values belong in slots)', async ({ expect }) => {
+        // Component position eats clean; interpolators are the gourmands.
+        // An async iterator is a VALUE — interpolate it: {iter}.
         async function* Numbers() {
-            yield doAsync($element('one'));
-            yield doAsync($element('two'));
-            yield doAsync($element('three'));
+            yield $element('one');
         }
+        expect(() => createComponent(Numbers()))
+            .toThrow(/Invalid compose/);
+    });
 
-        const dom = createComponent(Numbers());
+    test('async FUNCTION component works — async arrives as return value', async ({ expect, fixture, find }) => {
+        // The lazy-component idiom: the function is synchronous to create;
+        // its Promise return flows through compose's existing async path.
+        async function Lazy({ name }) {
+            const El = await Promise.resolve($element);
+            return El(name);
+        }
+        const { dom, anchor } = elementWithAnchor();
+        composeComponent(anchor, [Lazy, { name: 'lazy-cat' }]);
         fixture.append(dom);
-
-        resolve();
-        await find('one');
+        await find('lazy-cat');
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div>one</div><!--1-->"`
-        );
-
-        resolve();
-        await find('two');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div>two</div><!--1-->"`
+            `"<div><div>lazy-cat</div><!--1--></div>"`
         );
     });
 
@@ -139,28 +132,25 @@ describe('compose element', () => {
         });
     });
 
-    describe.each(CONSTRUCTORS.concat(ASYNC_CONSTRUCTORS))('Promised %o', Constructor => {
-        const expected = `<div><div>felix<!--1--></div><!--1--></div>`;
-        test('prop-agation', async ({ expect, fixture, find }) => {
-            const { dom, anchor } = elementWithAnchor();
+    test('Promise in component position throws — lazy components are async functions', ({ expect }) => {
+        const { anchor } = elementWithAnchor();
+        expect(() => {
             composeComponent(anchor, [Promise.resolve(Component), { name: 'felix' }]);
-            fixture.append(dom);
-            await find('felix');
-            expect(fixture.innerHTML).toBe(expected);
-        });
+        }).toThrow(/Invalid compose/);
     });
 
-    function ArrayList() {
-        return Promise.resolve([
-            elementWithText('one').dom,
-            elementWithText('two').dom,
-            elementWithText('three').dom,
-        ]);
-    }
-
-    test('Promised array component', async ({ expect, fixture, find }) => {
+    test('function returning a Promise of an array still composes', async ({ expect, fixture, find }) => {
+        // The capability the removed Promise-in-component-position used to
+        // carry, recovered as a function: async arrives as a return value.
+        function ArrayList() {
+            return Promise.resolve([
+                elementWithText('one').dom,
+                elementWithText('two').dom,
+                elementWithText('three').dom,
+            ]);
+        }
         const { dom, anchor } = elementWithAnchor();
-        composeComponent(anchor, [Promise.resolve(ArrayList)]);
+        composeComponent(anchor, [ArrayList]);
         fixture.append(dom);
         await find('one', { exact: false });
         expect(fixture.innerHTML).toMatchInlineSnapshot(

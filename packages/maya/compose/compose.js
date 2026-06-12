@@ -114,24 +114,62 @@ export function compose(anchor, input, keepLast, props, childNodes) {
 }
 
 export function composeComponent(anchor, [Constructor, props, childNodes]) {
-    // if renderer "updating":
-    // - get render source, by anchor
-    // - call render with props/childNodes
-    // - return
+    const rr = activeRerenderer();
+    if(rr) {
+        // The update verb. Same Constructor at this anchor → re-invoke
+        // the cached last link of the chain (the thing that yielded
+        // something composable). Different Constructor → teardown via
+        // ordinary replace (=== fails downstream).
+        const memo = rr.getComponent(anchor);
+        if(memo && memo.Constructor === Constructor && memo.updater) {
+            const { out, last } = walkChain(memo.updater(props, childNodes), props, childNodes);
+            if(last) memo.updater = last; // chain extended — track the new end
+            compose(anchor, out);
+            return;
+        }
+
+        const created = create(Constructor, props, childNodes);
+        const { out, last } = walkChain(created, props, childNodes);
+        rr.setComponent(anchor, {
+            Constructor,
+            // Plain functions re-call (setup re-fires — documented cost);
+            // constructibles re-construct until UIComponent.update lands.
+            updater: last ?? callableFor(Constructor),
+        });
+        compose(anchor, out);
+        return;
+    }
 
     createCompose(Constructor, props, childNodes, anchor);
-    // if renderer "recording"
-    // - store render source, by anchor
+}
 
+// The chain rule: keep calling function results until something
+// composable comes out; report the last callable link (the cached
+// update object) and the composable.
+function walkChain(current, props, childNodes) {
+    let last = null;
+    while(typeof current === 'function') {
+        last = current;
+        current = current(props, childNodes) ?? null;
+    }
+    return { out: current, last };
+}
+
+function callableFor(input) {
+    if(typeof input !== 'function') return null;
+    return input.prototype?.constructor
+        // eslint-disable-next-line new-cap
+        ? (props, childNodes) => new input(props, childNodes)
+        : input;
 }
 
 export function createCompose(Constructor, props, childNodes, anchor) {
-    const out = create(Constructor, props, childNodes, anchor);
+    const out = create(Constructor, props, childNodes);
     if(out !== anchor) compose(anchor, out);
 }
 
 export function createComponent(Constructor, props, childNodes) {
-    let result = create(Constructor, props, childNodes, null);
+    let result = create(Constructor, props, childNodes);
 
     switch(typeof result) {
         case 'number':
@@ -145,7 +183,11 @@ export function createComponent(Constructor, props, childNodes) {
     }
 }
 
-function create(input, props, childNodes, anchor) {
+// Component position eats clean; interpolators are the gourmands.
+// create() accepts: function | class | object-with-render (UIComponent
+// shape) | null/undefined (no-op — dynamic <C/> where C is conditionally
+// null renders nothing). Everything else throws.
+function create(input, props, childNodes) {
     const type = typeof input;
 
     switch(true) {
@@ -160,13 +202,11 @@ function create(input, props, childNodes, anchor) {
                 `Components construct DOM; a pre-built Node is a value. ` +
                 `Interpolate it instead: {node} rather than <Node/>.`
             );
-        // Empty / nothing values render to no DOM.
+        // Only null/undefined are component no-ops (conditional patterns:
+        // `cond ? Cat : null`). Booleans, '', and IGNORE fall through to
+        // the rejection cases — they're slot vocabulary, not components.
         case input === undefined:
         case input === null:
-        case input === true:
-        case input === false:
-        case input === '':
-        case input === IGNORE:
             return null;
         // Function: invoke with props/childNodes.
         case !!(input.prototype?.constructor): {
@@ -178,12 +218,13 @@ function create(input, props, childNodes, anchor) {
             // arrow () => {} — called directly
             return input(props, childNodes) ?? null;
         }
-        // Reject primitive-as-component. Strings, numbers, bigints in
-        // component position are almost always a mistake. Catch early.
+        // Reject primitive-as-component. Strings, numbers, bigints,
+        // booleans in component position are almost always a mistake.
         case type === 'string':
         case type === 'number':
         case type === 'bigint':
         case type === 'symbol':
+        case type === 'boolean':
             throwPrimitiveAsComponent(input, type);
             break;
         case type !== 'object': {
@@ -193,32 +234,16 @@ function create(input, props, childNodes, anchor) {
         case typeof input?.render === 'function':
             return input.render(props, childNodes) ?? null;
         default: {
-            let container = anchor;
-            if(!container) {
-                anchor = document.createComment('0');
-                container = document.createDocumentFragment();
-                container.append(anchor);
-            }
-
-            // Value-position types — JSX puts a CLASS in component position
-            // and the constructor branch above handles it. Pre-built instances
-            // (Channel, Promise, async iterable, array) reach create() only
-            // when the caller hands a value directly, which the compose()
-            // entry handles natively. Keep these as a safety net for now.
-            if(input[Symbol.asyncIterator]) {
-                composeAsyncIterator(anchor, input, false, props, childNodes);
-            }
-            else if(input instanceof Promise) {
-                input.then(value => compose(anchor, value, false, props, childNodes));
-            }
-            else if(Array.isArray(input)) {
-                composeArray(anchor, input, false);
-            }
-            else {
-                throwTypeErrorForObject(input, type);
-            }
-
-            return container;
+            // The former default-label container dance (Promise, async
+            // iterable, Array in component position) was removed. Lazy
+            // components are async functions:
+            //   async function Lazy(props) {
+            //       const { Cat } = await import('./cat.js');
+            //       return createComponent(Cat, props);
+            //   }
+            // Anything async arrives as a RETURN VALUE, where compose
+            // already handles it. Values belong in slots: {value}.
+            throwTypeErrorForObject(input);
         }
     }
 }

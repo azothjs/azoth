@@ -38,6 +38,9 @@ export function activeRerenderer() {
     return stack.length ? stack[stack.length - 1] : null;
 }
 
+// Distinguishes "no value stored yet" from a stored undefined.
+const NONE = Symbol('rerenderer.none');
+
 class Rerenderer {
     #sites = new Map();
     #anchors = new WeakMap();
@@ -100,8 +103,21 @@ class Rerenderer {
             memo.pass = this.#pass;
             return false;
         }
-        this.#anchors.set(anchor, { lastValue: value, pass: this.#pass });
+        this.#anchors.set(anchor, { lastValue: value, pass: this.#pass, component: null });
         return false;
+    }
+
+    // Component memory at a slot: { Constructor, updater } — the chain
+    // rule's cached last link. Lives on the same anchor entry as the
+    // === skip memo; both die with the DOM (WeakMap).
+    getComponent(anchor) {
+        return this.#anchors.get(anchor)?.component ?? null;
+    }
+
+    setComponent(anchor, component) {
+        const memo = this.#anchors.get(anchor);
+        if(memo) memo.component = component;
+        else this.#anchors.set(anchor, { lastValue: NONE, pass: 0, component });
     }
 }
 

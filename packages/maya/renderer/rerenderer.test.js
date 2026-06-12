@@ -1,5 +1,5 @@
 import { describe, test, beforeAll } from 'vitest';
-import { compose } from '../compose/compose.js';
+import { compose, composeComponent, createComponent } from '../compose/compose.js';
 import { renderer, RenderService } from './renderer.js';
 import { rerenderer } from './rerenderer.js';
 
@@ -160,6 +160,113 @@ describe('rerenderer — anchor memory (=== skip)', () => {
         // strings must BOTH render (no false skip on the append path).
         const node = fn(['a', 'a']);
         expect(node.textContent).toBe('aa');
+    });
+
+});
+
+describe('rerenderer — components inside the wrap (increment c)', () => {
+
+    // Simulates the compiled component slot: bind receives the tuple
+    // [Constructor, props] and calls composeComponent (what __cC does).
+    const componentBind = targets => {
+        const t0 = targets[0];
+        return v0 => composeComponent(t0, v0);
+    };
+    const makeHost = id =>
+        renderer(id, slotTargets, componentBind, false, `<p data-bind><!--0--></p>`);
+
+    test('chain rule: setup runs once, the returned rerenderable is re-invoked', ({ expect }) => {
+        const tCard = makeP('rr-c-card');
+        let setupCount = 0;
+
+        function CatCard({ id }) {
+            setupCount++; // the setup zone — must run ONCE
+            const renderFn = rerenderer(props => tCard(`cat #${props.id}`));
+            return renderFn;
+        }
+
+        const host = makeHost('rr-c-host');
+        const page = rerenderer(catId => host([CatCard, { id: catId }]));
+
+        const dom = page(1);
+        const card = dom.firstChild;
+        expect(setupCount).toBe(1);
+        expect(card.textContent).toBe('cat #1');
+
+        page(2);
+        expect(setupCount).toBe(1);              // setup protected
+        expect(dom.firstChild).toBe(card);        // same DOM
+        expect(card.textContent).toBe('cat #2');  // new props flowed
+    });
+
+    test('plain function component: re-called (setup re-fires), DOM still stable via site cache', ({ expect }) => {
+        const tCard = makeP('rr-c-plain');
+        let setupCount = 0;
+
+        const Cat = ({ name }) => {
+            setupCount++; // re-fires per pass — the documented re-call cost
+            return tCard(name);
+        };
+
+        const host = makeHost('rr-c-plainhost');
+        const page = rerenderer(name => host([Cat, { name }]));
+
+        const dom = page('felix');
+        const card = dom.firstChild;
+        expect(setupCount).toBe(1);
+        expect(card.textContent).toBe('felix');
+
+        page('duchess');
+        expect(setupCount).toBe(2);               // body re-ran
+        expect(dom.firstChild).toBe(card);         // but DOM is stable —
+        expect(card.textContent).toBe('duchess');  // Cat's template site cached
+    });
+
+    test('different Constructor at the same anchor: teardown and recreate', ({ expect }) => {
+        const tA = makeP('rr-c-swapa');
+        const tB = makeP('rr-c-swapb');
+        const A = ({ v }) => tA(`A:${v}`);
+        const B = ({ v }) => tB(`B:${v}`);
+
+        const host = makeHost('rr-c-swaphost');
+        const page = rerenderer((C, v) => host([C, { v }]));
+
+        const dom = page(A, 1);
+        const first = dom.firstChild;
+        expect(first.textContent).toBe('A:1');
+
+        page(B, 2);
+        const second = dom.firstChild;
+        expect(second).not.toBe(first);
+        expect(second.textContent).toBe('B:2');
+
+        // And back: A's template site was sleeping — node resurrects,
+        // but the component memo correctly re-walks the chain.
+        page(A, 3);
+        expect(dom.firstChild).toBe(first);
+        expect(first.textContent).toBe('A:3');
+    });
+
+});
+
+describe('create() narrowing — component position eats clean', () => {
+
+    test('array as component throws', ({ expect }) => {
+        const Wha = [1, 2, 3, 4];
+        expect(() => createComponent(Wha, { length: 0 }))
+            .toThrow(/Invalid compose/);
+    });
+
+    test('Promise as component throws (lazy = async function)', ({ expect }) => {
+        expect(() => createComponent(Promise.resolve('nope')))
+            .toThrow(/Invalid compose/);
+    });
+
+    test('boolean as component throws; null/undefined are no-ops', ({ expect }) => {
+        expect(() => createComponent(false)).toThrow(/Cannot use boolean/);
+        expect(() => createComponent(true)).toThrow(/Cannot use boolean/);
+        expect(createComponent(null)).toBe(null);
+        expect(createComponent(undefined)).toBe(null);
     });
 
 });
