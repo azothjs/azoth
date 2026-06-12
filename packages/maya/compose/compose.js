@@ -1,9 +1,21 @@
 import { Channel } from '../channels/channel.js';
+import { activeRerenderer } from '../renderer/rerenderer.js';
 
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
 export function compose(anchor, input, keepLast, props, childNodes) {
     if(keepLast !== true) keepLast = false;
+
+    // The identical value at an anchor is one instruction, not two.
+    // Only consulted during a synchronous rerender pass (async
+    // continuations run after the pass — stack empty, no skip), and
+    // only on the replace path: keepLast=true means accumulate, where
+    // a repeated value is a legitimate "add another."
+    if(!keepLast) {
+        const rr = activeRerenderer();
+        if(rr && rr.skipIfSame(anchor, input)) return;
+    }
+
     const type = typeof input;
 
     switch(true) {

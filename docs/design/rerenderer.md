@@ -253,33 +253,45 @@ interfaces are structural; optional methods via `?`):
 ```ts
 export interface UIComponent<Props extends object> {
     initialize?(props: Props): void;           // intake for pre-constructed instances
-    initialRender?(): Composable;              // optional sync first paint
-    render(): Composable;                      // DOM — or a source compose subscribes
+    render(): Composable;                      // DOM — or a source — or a Channel
     update(props: Props): void | Composable;   // void = handled internally; Composable = replace
 }
 ```
 
+FINAL (ruled 2026-06-12): three methods, each doing one thing.
+`initialRender` was not merged — it was **deleted**. The sync-then-
+async pattern is not a protocol concern; it's a value concern, and
+the value already exists: **Channel is the render pattern for
+sync+async.**
+
+```js
+const profileCard = {
+    initialize({ id }) { this.id = id; },
+    render() {
+        return <Channel source={fetchProfile(this.id)} as={ProfileView}><Loading/></Channel>;
+    },
+    update({ id }) { /* … */ }
+};
+```
+
 Notes:
+- A dual-purpose `initialize(props): Composable` (intake + first
+  paint) was considered and rejected: it re-implements Channel's
+  initial+source pairing inside the protocol, and the firstReplaces
+  machinery would leak into protocol dispatch. Protocol and value
+  compose; they never overlap.
 - `props` as an interface property was REMOVED — intake is a method,
-  storage is the author's business. The contract-vs-convention
-  question dissolved rather than resolved.
+  storage is the author's business.
 - `render()` may return a *source* — compose already dispatches on
-  the return value's type, so no `getSource()` second entry point is
-  needed (option B over option A).
+  the return value's type; no `getSource()` second entry point
+  (option B over option A).
 - Return type `Composable` = compose's full input surface (the
-  typing-review rename of DOMChild). Position taken: match the
-  runtime honestly (types are documentation, especially for the LLM
-  corpus). Counterargument on record: starting narrow (`Node`) and
-  widening later is the non-breaking direction.
+  typing-review rename of DOMChild). Settled: match the runtime.
 - `update` returning the same Node is a natural no-op under the ===
   skip.
-- Channel conforms: constructor (no initialize), `initialRender() →
-  #initial`, `render() → #source`, `update(newProps)` → === on source
-  ref. The `instanceof Channel` special cases trend toward protocol
-  dispatch; the `append`/firstReplaces flag is the residual wrinkle
-  (protocol path reads an `append` property, or one small special
-  case stays).
-- Naming note: `initialize`/`initialRender` sit close; bikeshed later.
+- **Channel does not conform to UIComponent — it is consumed by
+  UIComponents.** Channel only ever grows `update()`, for the
+  in-component-position case. compose gains zero pairing machinery.
 
 ## Same-instance rebind: the === skip proposal
 
@@ -327,9 +339,8 @@ The rerenderer instance holds two caches:
 5. **Channel update internals** — relax privates vs azoth-internal
    privileged access (public immutability preserved either way).
    Defer to the Channel increment.
-6. **render()/update() return type** — `Composable` position taken;
-   Marty may veto toward `Node`-narrow (widening later is
-   non-breaking).
+6. ~~render()/update() return type~~ — settled: `Composable`, match
+   the runtime.
 7. Spike order: (a) runtime Rerenderer — sites + anchor memory +
    occurrence/prune + typeof gate + === skip, intrinsic-only,
    test-backed; (b) thoth per-site factories; (c) compose per-type

@@ -1,5 +1,8 @@
 import { DOMRenderer } from './dom-renderer.js';
 import { HTMLRenderer } from './html-renderer.js';
+import { activeRerenderer } from './rerenderer.js';
+
+export { rerenderer, activeRerenderer } from './rerenderer.js';
 
 const templates = new Map(); // cache
 let renderEngine = DOMRenderer; // DOM or HTML engine
@@ -51,15 +54,25 @@ function popRecord(node) {
     return recordable.pop();
 }
 
-const templateRenderer = getBound => (...args) => {
-    const [root, bind] = getBound();
-    if(bind) bind(...args);
-    return root;
-};
-
 export function renderer(id, targets, makeBind, isFragment, content) {
     const create = get(id, isFragment, content);
 
+    // Per-declaration identity: the rerenderer's cache key. Each
+    // renderer() call is one compiled call site (per-site factory
+    // declarations) — closure identity IS the key, so deduped templates
+    // (same id, multiple sites) cannot collide across sites.
+    const siteKey = { id };
+
+    function buildFresh() {
+        const [node, boundEls] = create();
+        const nodes = targets ? targets(node, boundEls) : null;
+        const bind = makeBind ? makeBind(nodes) : null;
+        return { node, bind };
+    }
+
+    // Legacy injection path (Controller/Updater): a bare node pushed on
+    // the injectable stack, bind cached in the module WeakMap. Kept
+    // verbatim until blocks migrate onto Rerenderer.
     function getBound() {
         let bind = null;
         let boundEls = null;
@@ -75,10 +88,6 @@ export function renderer(id, targets, makeBind, isFragment, content) {
 
         if(!create) return [null, null];
 
-        // Honestly not sure this really needed, 
-        // use case would be list component optimize by
-        // not keeping bind functions?
-        // overhead is small as it is simple function
         if(node) boundEls = renderEngine.bound(node);
         else {
             // (destructuring re-assignment)
@@ -92,7 +101,19 @@ export function renderer(id, targets, makeBind, isFragment, content) {
         return [node, bind];
     }
 
-    return templateRenderer(getBound);
+    // templateRenderer inlined — the extra HOF layer bought nothing.
+    return (...args) => {
+        let root = null, bind = null;
+        const rr = activeRerenderer();
+        if(rr && create) {
+            ({ node: root, bind } = rr.getBound(siteKey, buildFresh));
+        }
+        else {
+            ([root, bind] = getBound());
+        }
+        if(bind) bind(...args);
+        return root;
+    };
 }
 
 export class Controller {
