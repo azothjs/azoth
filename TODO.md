@@ -100,15 +100,33 @@ slot lifecycle. Defer until a real-world need surfaces; design is open.
 
 ### Channel role evolution
 
-When async iterator helpers ship (Stage 2, est. 2027-2028), Channel's
-`as`/`error`/`map` props become "convenience over what you'd write with
-iterator helpers." The structural role narrows to: initial DOM
-(presentation), append directive (orchestration), cancel propagation
-(lifecycle).
+Channel carries two roles (named explicitly 2026-06-11 after
+considering a split):
 
-Don't preemptively split or rename. The right call right now is to not
-make a call. Re-evaluate when the platform shape clarifies and real
-usage tells us which residue actually matters.
+1. **Orchestrator** (the "Anchor" role) — control over compose:
+   initial DOM render, append directive, (future) cancel. Source-
+   agnostic: the slot doesn't care where the DOM came from — another
+   module's exported Channel, or (future) HTML streamed and parsed
+   from a server.
+2. **Transformer** — `as`, `map`, `error`. A stand-in until the
+   platform pulls transform duty into sources themselves (async
+   iterator helpers, Stage 2, est. 2027-28).
+
+Considered and rejected: splitting into `<Anchor source={...}>` +
+`channel(source, transform)`. The split is conceptually clean — it IS
+the end-state architecture — but: (a) the unified Channel degrades
+gracefully INTO the split, since source-side transforms already work
+today (`source={x.then(f)}`) and `as`/`error`/`map` simply become
+unused props when helpers land — no breaking change; the reverse
+re-merge would break; (b) it resurrects the lowercase `channel()`
+shape this branch just subtracted; (c) it pays a two-concept DX tax
+for the entire 2-3 year interim. Decision: stay flat. Revisit only
+when source transforms are native.
+
+Docs-pass note: the "module exports a Channel, consumer slots it into
+any DOM" separation-of-concerns pattern deserves a documented example
+(search box + paging + results in one module, Channel out — no
+component-tree demands). Connects to the hypermedia thesis.
 
 ## Components
 
