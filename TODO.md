@@ -43,6 +43,10 @@ Plan (synthesized from two research passes, 2026-06-11):
    for xlink/xml) | non-static.
 4. Design wins that fall out: `class` AND `className` both work (static
    compiles to HTML = no FOUC; dynamic applies via JS); SVG correctness.
+   Also: custom elements / web components need validation cases —
+   they're intrinsic to azoth (tag in template HTML, props are binds);
+   the table's custom-element rule (property-if-setter-else-attribute
+   per the framework survey) needs explicit test coverage.
 5. Dropped: @webref extraction pipeline. Reflection rules live in spec
    prose, not IDL; tables are ~40-80 names total. Curated + empirically
    audited beats generated here. webref may return as part of the

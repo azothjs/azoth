@@ -144,42 +144,104 @@ is possible — it's the React pattern, not ours).
 Web components are **intrinsic elements** for all of this: their tags
 live in the template HTML, their attrs/props are binds, update = rebind.
 
-## Components in slots: per-type update rules (sketch)
+## The API: higher-order function, settled
+
+```ts
+type Rerenderer = <Args extends any[], T>(
+    renderFn: (...args: Args) => T
+) => (...args: Args) => T;
+```
+
+A thunk/function in, the same signature out. The expression form
+(`rerenderer(<p>…</p>)`) hands rerenderer an already-evaluated Node —
+it throws at runtime ("you shall not pass"): `typeof renderFn !==
+'function'` is the gate. Exhibit in the playground ("narrow-scope
+convention" scenario): thoth compiles the JSX inside the thunk and
+leaves `rerenderer(() => t47556cd8(name,salutation))` intact — exactly
+the runtime's input shape.
+
+`rerenderer(App)` is type-legal and lol. Use is meant to be as narrow
+as possible — a tool in the layout-management bag. Primary use: render
+functions and intrinsic elements.
+
+## The trap, and the per-type wall
+
+The narrow-scope convention alone cannot contain components:
+`rerenderer(() => <div><Component/></div>)` hides a component inside an
+intrinsic wrap. Re-execution re-evaluates the `[Component, props]`
+tuple into the slot bind. So per-type update rules are unavoidable —
+they're the real wall, the convention is the guidance.
 
 `composeComponent` combines create with compose; update becomes the
 third verb, dispatched per type. compose.js restructures around this
 (the commented "recording/updating" scaffold at compose.js ~104-114 was
 this idea reaching for instance identity via the anchor — wrong key,
-right instinct; closure identity now provides it):
+right instinct; closure identity now provides it).
 
 | In component position | Create | Update |
 |---|---|---|
-| function | call → DOM | re-call (remember the function; fresh DOM) |
-| class | `new` → instance (remember the instance) | `instance.update(props)` |
-| render object | `.render()` | `.update(props)`; re-render if absent (maybe) |
-| Channel | construct | `Object.assign`? (open — collides with Channel immutability) |
-| Node | passthrough | static |
+| function | call → DOM | **re-call** (bread and butter; remember the function; fresh DOM). Stability is recursively opt-in: a function wanting stable DOM returns its own `rerenderer(...)`. |
+| UIComponent (class or object literal) | construct / literal — props intake ONCE | `instance.update(newProps)` |
+| Channel | construct | open: update method (process TBD) or relax field privacy for an azoth-internal privileged path |
+| Node | **removed** — throws (landed 3dafed7). The skinning subtraction, completed: create must actually produce something. |
+| web component | intrinsic — tag in template HTML, attrs/props are binds; azoth doesn't intercept | rebind (see attr/prop table TODO: add custom-element validation cases) |
 
-Function components get a sane default (re-call) and a sharper tool
-(return `rerenderer(...)` themselves, per the convention above).
+## UIComponent: unify class and render object (subtract to unlock)
+
+Today a class gets props twice — `new input(props, childNodes)` AND
+`render(props)` via the render-object path. The unification: props
+intake happens once (constructor for classes, literal property for
+object literals), `render()` takes no args, `update(newProps)` is the
+change channel. Class instances and object literals satisfy ONE
+protocol; "render object" stops being a separate dispatch type:
+
+```ts
+export interface UIComponent<Props extends object> {
+    props: Props;
+    render(): Node;
+    update(newProps: Props): void | Node;
+}
+```
+
+`update` returning void = handled internally (the instance keeps its
+own refs / rerenderer). Returning a Node = replace prior output.
+Open: is `props` a contract compose relies on, or author convention?
+And `render(): Node` may widen to DOMChild in the typing review.
+
+## Same-instance rebind: the === skip proposal
+
+Re-executing a thunk that closes over an async source re-passes the
+SAME object instance to the bind (`{name}` in the convention exhibit).
+Recomposing a single-consumer iterator starts a second racing consumer;
+recomposing a Channel re-shows its initial (flash) and races its
+source. Neither is ever wanted.
+
+Proposal: **identical value at a slot is idempotent** — if the incoming
+bind value `===` the previously bound value, skip. Not diffing (no
+structure inspected); the same layout instruction twice is one
+instruction. This makes master/detail work for free: same source ref →
+untouched; NEW source ref (detail switched) → full replace, new
+subscription.
+
+Placement options: (a) rerenderer site cache stores lastArgs, skips
+unchanged positions — contained blast radius; (b) compose-level: the
+anchor remembers its last input, `compose(anchor, sameValue)` is a
+no-op — global idempotency, deeper change. Spike starts with (a);
+(b) stays on the table as the principled end-state.
 
 ## Open questions for the spike
 
-1. **Expression vs thunk.** `rerenderer(<p>{name}</p>)` evaluates the
-   JSX before rerenderer sees it. Re-execution needs a callable: thunk
-   form (`rerenderer(() => …)`), or thoth compiles the expression form
-   into one (it knows every call site). Decide first — it shapes the
-   API.
-2. **Slot-source vs rerender interplay** (the standing Q2): an async
-   source composed at a slot self-updates without any rerenderer. What
-   happens when a rebind sweeps a slot a source is actively feeding?
-   Note: in the convention example above, `{name}` is a stream — the
-   rerenderer earns its keep for plain *values*, which sharpens when
-   you'd reach for it at all.
-3. **Channel update semantics** — `Object.assign` sketch vs private-
-   field immutability (deliberate, this branch). Unresolved.
-4. **Render object without `update`** — re-render or freeze? ("maybe"
-   status.)
-5. Spike order: runtime Rerenderer (getNode + occurrence + prune,
-   test-backed) → thoth per-site factories → compose per-type update
-   dispatch. Components last; intrinsic-only proves the core.
+1. ~~Expression vs thunk~~ — settled: thunk; typeof gate throws.
+2. **Slot-source vs rerender interplay** — largely addressed by the
+   === skip; what remains is defining replace semantics when the ref
+   DOES change while a source is mid-flight (subscription teardown =
+   future cancel semantics).
+3. **Channel update semantics** — option 1 (update method + process)
+   vs option 2 (relax privates / azoth-internal privileged access,
+   keeping public immutability). Workable either way; defer to spike.
+4. **UIComponent `props`** — contract or convention (above).
+5. Spike order: runtime Rerenderer (getNode + occurrence + prune +
+   typeof gate + === skip, test-backed) → thoth per-site factories →
+   compose per-type update dispatch (function re-call + UIComponent
+   update first). Intrinsic-only proves the core; UIComponent next;
+   Channel last.
