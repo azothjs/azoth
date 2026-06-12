@@ -186,17 +186,22 @@ imports:
 Pass through and update to `<Channel>` JSX + `@azothjs/maya/channels`.
 MENTAL-MODEL.md may be left as-is since it's the historical artifact.
 
-### Downstream: wre-dashboards imports
+### Downstream: wre-dashboards migration to 2.0
 
-`wre-dashboards/src/components/AgentDashboard/AiAnalysis/AiAnalysis.jsx`
-and adjacent files import from `azoth/chronos/channels`. That export
-path is gone (replaced by `azoth/maya/channels`). Also:
-`AgentSearch.jsx` line 14 imports `generator as stream` from
-`azoth/chronos/generators` — migrate to `pushable` from
-`azoth/maya/channels` (transform moves to the call site or Channel.as).
+wre-dashboards consumes published `azoth: ^1.4.5` from npm — NOT a file
+link. It is insulated from the branch merge AND from the 2.0 publish
+(caret ranges don't cross majors). Migration is a deliberate opt-in on
+its own schedule, against the published 2.0.
 
-wre-dashboards needs updating before or after this branch merges,
-otherwise its build breaks.
+What migrates when it does:
+- `azoth/chronos/channels` imports (AiAnalysis.jsx and adjacent) →
+  `azoth/maya/channels`
+- `AgentSearch.jsx` line 14: `generator as stream` from
+  `azoth/chronos/generators` → `pushable` from `azoth/maya/channels`
+  (transform moves to the call site or Channel.as)
+
+This migration doubles as the validation pass for the 2.0 migration
+story — first real consumer upgrade.
 
 ## External (not Azoth code)
 
