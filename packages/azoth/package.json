@@ -29,11 +29,10 @@
     "exports": {
         "./runtime": "./runtime.js",
         "./maya": "./maya.js",
-        "./chronos/channels": "./chronos/channels.js",
+        "./maya/channels": "./maya/channels.js",
         "./chronos/generators": "./chronos/generators.js",
         "./vite-plugin": "./vite-plugin.js"
     },
-    "packageManager": "^pnpm@8.15.1",
     "dependencies": {
         "@azothjs/chronos": "workspace:*",
         "@azothjs/maya": "workspace:*",

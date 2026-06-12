@@ -6,7 +6,7 @@
  * Slottable is Azoth's mechanism for passing children to components.
  * Unlike React's props.children, it's the second parameter:
  *
- *     const Card = (props, slottable) => <div>{slottable}</div>;
+ *     const Card = (props, childNodes) => <div>{childNodes}</div>;
  *
  * Slottable is opaque DOM content — compose by nesting, don't try to
  * introspect or manipulate it the way React.Children allows.
@@ -22,10 +22,10 @@ function fixture(node: Node): string {
     return document.body.innerHTML;
 }
 
-describe('slottable with nested components', () => {
+describe('childNodes with nested components', () => {
 
-    test('nested components with slottable and dynamic props', ({ expect }) => {
-        const Card = (props, slottable) => <div class="card">{slottable}</div>;
+    test('nested components with childNodes and dynamic props', ({ expect }) => {
+        const Card = (props, childNodes) => <div class="card">{childNodes}</div>;
         const CardTitle = ({ title }) => <h2 class="card-title">{title}</h2>;
 
         const StatsCard = ({ title }) => (

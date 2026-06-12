@@ -49,7 +49,7 @@ What's worth holding in mind here:
   marks the slot's position. New content goes before the anchor; the
   anchor stays put for the next composition.
 - A sibling function, `create`, is the same chain but aware of `props` and
-  `slottable`. It's what Maya uses when a component is the value being
+  `childNodes`. It's what Maya uses when a component is the value being
   composed.
 
 The supporting helpers exported alongside `compose`:
@@ -62,36 +62,39 @@ The supporting helpers exported alongside `compose`:
 You rarely call these directly; the compiled code does. They're listed
 here because they show up in stack traces and in test files.
 
-## SyncAsync — render now, deliver later
+## Channel — render now, deliver later
 
 A common shape: you want something on screen *immediately*, and you want
-the async value to take its place when it arrives. That's the SyncAsync
+the async value to take its place when it arrives. That's the Channel
 pattern.
 
 ```jsx
-import { SyncAsync } from '@azothjs/maya/compose';
+import { Channel } from '@azothjs/maya/channels';
 
 <div>
-    {SyncAsync.from(
-        <p>Loading…</p>,
-        fetchData().then(data => <Results data={data} />),
-    )}
+    <Channel source={fetchData().then(data => <Results data={data} />)}>
+        <p>Loading…</p>
+    </Channel>
 </div>
 ```
 
-`SyncAsync.from(syncValue, asyncDataStructure)` returns an object that
-`compose` knows how to unpack: the first argument composes synchronously,
-the second drives subsequent updates at the same slot.
+`new Channel({ source, as }, childNodes)` returns an instance that
+`compose` knows how to unpack: `childNodes` (the JSX children, or the
+second constructor arg) composes synchronously as the initial render;
+the `source` drives subsequent updates at the same slot. `as` optionally
+transforms each value the source produces.
 
-Most authors don't construct `SyncAsync` directly. The `channel()`
-function from `@azothjs/chronos/channels` returns one whenever you supply
-a `start` or `init` value — the sync part is what `channel` puts in the
-slot first, the async part is the source. See
-[async-and-channels](async-and-channels.md) for that surface.
+The JSX form above IS the constructor call — the class is the component.
+Direct construction is equivalent and occasionally useful:
 
-The name `SyncAsync` is flagged as awkward — a rename is on the list (see
-[MENTAL-MODEL.md](../MENTAL-MODEL.md) on SyncAsync naming). The mechanic
-is stable; the name may change.
+    const profile = new Channel(
+        { source: fetchProfile(), as: ProfileCard },
+        <Loading />
+    );
+
+See [async-and-channels](async-and-channels.md) for the full surface
+(`source`, `eventType`, `as`, `error`, `map`, `append`, children) and the
+`pushable()` utility for bridging callback APIs into Channel.
 
 ## blocks — list management
 
@@ -199,7 +202,7 @@ section updates frequently enough that DOM creation cost matters.
 ## See also
 
 - [Composition](composition.md) — the full compose resolution chain
-- [Async and channels](async-and-channels.md) — `SyncAsync` in context,
+- [Async and channels](async-and-channels.md) — `Channel` in context,
   `channel()` as the canonical helper, Controller/Updater
 - [Components](components.md) — function and class forms; what compose
   passes to a component

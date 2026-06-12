@@ -9,16 +9,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: pnpm/action-setup@v3
-      with:
-        version: 8
     - name: Use Node.js latest
       uses: actions/setup-node@v4
       with:
         node-version: latest
-    - run: pnpm install
-    # Needed for CI on GitHub
-    - run: pnpm update -r
+    # Corepack picks up the pnpm version from package.json's packageManager
+    # field, so we don't need to pin a version in the workflow.
+    - run: corepack enable
+    # --frozen-lockfile uses exact lockfile versions; no drift between local
+    # and CI. The previous `pnpm update -r` step (added 2024 for workspace
+    # linking) is no longer needed with modern pnpm.
+    - run: pnpm install --frozen-lockfile
+    # Playwright manages its own browser binaries; --with-deps installs the
+    # Linux system libraries Chromium needs on the runner.
+    - run: pnpm exec playwright install --with-deps chromium
     - run: pnpm lint
     - run: pnpm test
       env:

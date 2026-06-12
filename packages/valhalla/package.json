@@ -13,5 +13,8 @@
     "scripts": {
         "test": "vitest run",
         "typecheck": "tsc -p tsconfig.json"
+    },
+    "devDependencies": {
+        "@azothjs/maya": "workspace:*"
     }
 }

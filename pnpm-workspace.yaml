@@ -3,3 +3,11 @@ packages:
   - "./sandbox"
   - "./docs"
   - "./test-utils"
+allowBuilds:
+  # esbuild's postinstall sets up the binary — required for vite/transform.
+  esbuild: true
+  # We use Chrome via webdriverio. Edge / Firefox drivers not needed.
+  edgedriver: false
+  geckodriver: false
+  # Transitive dep of vite-plugin-inspect; postinstall is Vue version detection.
+  vue-demi: false

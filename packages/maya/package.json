@@ -27,6 +27,7 @@
     ],
     "exports": {
         "./blocks": "./blocks/blocks.js",
+        "./channels": "./channels/index.js",
         "./compose": "./compose/compose.js",
         "./renderer": "./renderer/renderer.js"
     },

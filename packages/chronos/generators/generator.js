@@ -1,61 +1,48 @@
-import { SyncAsync } from '@azothjs/maya/compose';
-import { resolveArgs } from '../resolve-args.js';
+/**
+ * generator(transform?) → [asyncIterator, dispatch]
+ *
+ * A push-driven async iterator. Each call to dispatch produces the next
+ * value the iterator yields. An optional transform is applied to each
+ * dispatched value before it's yielded.
+ *
+ * Values dispatched before consumption begins are queued (FIFO) and
+ * yielded in order once the consumer starts iterating.
+ *
+ * chronos's lightweight async-generator factory. Pure platform primitives:
+ * Promise.withResolvers + async function*. No dependency on maya or any
+ * downstream rendering concern. If a consumer wants to pair an initial
+ * render value with this stream, they do that at their own layer (e.g.
+ * maya's <Channel source={iter}>loading…</Channel>).
+ */
+export function generator(transform) {
+    const apply = typeof transform === 'function' ? transform : v => v;
 
-
-export function generator(transformArg, options) {
-    const {
-        transform,
-        init, start, map,
-        hasStart, hasInit
-    } = resolveArgs(transformArg, options);
-
-    const maybeMap = payload => payload?.map ? payload.map(transform) : payload;
-    const maybeTransform = transform
-        ? map
-            ? payload => payload?.then ? payload.then(maybeMap) : maybeMap(payload)
-            : payload => payload?.then ? payload.then(transform) : transform(payload)
-        : payload => payload;
-
-    let onDeck = hasStart && hasInit ? maybeTransform(init) : undefined;
-    const relay = { resolve: null };
+    let resolve = null;
+    const queue = [];
 
     function dispatch(payload) {
-        payload = maybeTransform(payload);
-
-        if(relay.resolve) relay.resolve(payload);
-        else onDeck = payload;
+        const value = apply(payload);
+        if(resolve) {
+            const r = resolve;
+            resolve = null;
+            r(value);
+        }
+        else {
+            queue.push(value);
+        }
     }
 
-    async function* generator() {
-        let promise = null;
-        let resolve = null;
-
-        // this handles:
-        // 1. maybeTransformed init when init is used with start
-        // 2. dispatch fires via synchronous call during render
-        while(onDeck !== undefined) {
-            const received = onDeck;
-            onDeck = undefined;
-            yield received;
-        }
-
+    async function* gen() {
         while(true) {
-            ({ promise, resolve } = Promise.withResolvers());
-            relay.resolve = resolve;
+            if(queue.length > 0) {
+                yield queue.shift();
+                continue;
+            }
+            const { promise, resolve: r } = Promise.withResolvers();
+            resolve = r;
             yield await promise;
         }
     }
 
-    let asyncIterator = generator();
-
-    if(hasStart) {
-        return [SyncAsync.from(start, asyncIterator), dispatch];
-    }
-
-    if(hasInit) {
-        const value = maybeTransform(init);
-        return [SyncAsync.from(value, asyncIterator), dispatch];
-    }
-
-    return [asyncIterator, dispatch];
+    return [gen(), dispatch];
 }

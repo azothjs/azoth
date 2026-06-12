@@ -33,7 +33,7 @@ The same applies to:
   then get removed)
 - **Re-render cycle** (no render cycle — events deliver deltas)
 - **Synthetic events** (no `SyntheticEvent` — native DOM events directly)
-- **Virtual children** (no `React.Children` — slottable content is opaque DOM)
+- **Virtual children** (no `React.Children` — childNodes content is opaque DOM)
 
 These weren't replaced. They were never there. Don't introduce them.
 
@@ -69,7 +69,7 @@ When you encounter these patterns, pause before generating code:
    a class, an event handler, a closure, or a channel.
 
 3. **About to wrap children in `React.Children.map` or similar.** Azoth's
-   `slottable` is opaque DOM content, not introspectable virtual elements.
+   `childNodes` is opaque DOM content, not introspectable virtual elements.
    The pattern is composition (nesting), not manipulation. See
    [components.md](components.md).
 
@@ -113,6 +113,32 @@ When a behavior matters, verify it:
 
 Don't claim a behavior without grounding. If you're guessing, say so.
 
+## Whitespace in JSX is preserved
+
+Azoth does not normalize whitespace. The newlines and indentation between
+JSX tags become text nodes in the output. If you're writing a worked
+example or a test snapshot, use single-line JSX to keep the input-to-HTML
+mapping clean:
+
+```jsx
+// Single line — output is "<main><p>hi</p></main>"
+root.append(<main><p>hi</p></main>);
+
+// Multi-line — output preserves the indentation as text
+root.append(
+    <main>
+        <p>hi</p>
+    </main>
+);
+// "<main>\n        <p>hi</p>\n    </main>"
+```
+
+Most rendered HTML hides this (browsers collapse whitespace in flow
+content), but it matters for `<pre>` / `<code>`, for snapshot tests, and
+for any layout that's whitespace-sensitive. See
+[authoring-style.md](authoring-style.md#whitespace-in-jsx-is-preserved-as-text)
+for the design rationale.
+
 ## Surface confusion
 
 If you're confused about something, there's a good chance it's not documented
@@ -122,7 +148,7 @@ yet. Surface that confusion. It's valuable.
 
 1. [JSX as DOM](jsx-as-dom.md) — the foundation
 2. [Composition](composition.md) — how `{…}` slots accept values
-3. [Components](components.md) — function and class forms; props and slottable
+3. [Components](components.md) — function and class forms; props and childNodes
 4. [Attributes and properties](attributes-and-properties.md) — static vs
    dynamic; class/className foot-gun
 5. [Async and Channels](async-and-channels.md) — promises, generators,

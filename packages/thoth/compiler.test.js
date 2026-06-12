@@ -1390,8 +1390,8 @@ describe('controller', () => {
 
     test('basic', ({ expect }) => {
         const input = `
-            const C = Updater.for(({ status }, slottable) => <p className={"status"}>
-                {slottable}
+            const C = Updater.for(({ status }, childNodes) => <p className={"status"}>
+                {childNodes}
             </p>);
             const Greeting = Controller.for( ({ name }) => <span>Hello {name}</span>)
             const greeting = Greeting.render(data);
@@ -1403,7 +1403,7 @@ describe('controller', () => {
         expect(code).toMatchInlineSnapshot(`
           "import { __rC } from 'azoth/runtime';
           import { t3514925d, tab8527d7, t286a9d57 } from 'virtual:azoth-templates?id=3514925d&id=ab8527d7&id=286a9d57';
-          const C = Updater.for(({status}, slottable) => t3514925d("status",slottable));
+          const C = Updater.for(({status}, childNodes) => t3514925d("status",childNodes));
           const Greeting = Controller.for(({name}) => tab8527d7(name));
           const greeting = Greeting.render(data);
           const t = __rC(C, { status: status, }, t286a9d57(greeting));

@@ -3,7 +3,7 @@ import 'test-utils/with-resolvers-polyfill';
 import { $element, elementWithText, elementWithAnchor } from 'test-utils/elements';
 import { fixtureSetup } from 'test-utils/fixtures';
 import { runCompose } from './compose.test.js';
-import { SyncAsync, composeComponent, createComponent } from './compose.js';
+import { composeComponent, createComponent } from './compose.js';
 
 beforeEach(fixtureSetup);
 
@@ -73,18 +73,11 @@ describe('create element', () => {
 });
 
 describe('prop-agation', () => {
-    test('Node props', async ({ expect }) => {
-        const div = $element();
-        const dom = createComponent(div, { textContent: 'felix' });
-        expect(dom).toMatchInlineSnapshot(`
-          <div>
-            felix
-          </div>
-        `);
 
-    });
-
-    test('Node from async iterator with props', async ({ expect, fixture, find }) => {
+    test('async iterator in component position', async ({ expect, fixture, find }) => {
+        // Each yielded Node passes through and replaces the prior. Props
+        // are NOT overlaid on the Node (skinning was removed); the
+        // component-invocation contract is "construct," not "modify."
         let resolve = null;
         const doAsync = async (value) => {
             const { promise, resolve: res } = Promise.withResolvers();
@@ -98,19 +91,19 @@ describe('prop-agation', () => {
             yield doAsync($element('three'));
         }
 
-        const dom = createComponent(Numbers(), { className: 'number' });
+        const dom = createComponent(Numbers());
         fixture.append(dom);
 
         resolve();
         await find('one');
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div class="number">one</div><!--1-->"`
+            `"<div>one</div><!--1-->"`
         );
 
         resolve();
         await find('two');
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div class="number">two</div><!--1-->"`
+            `"<div>two</div><!--1-->"`
         );
     });
 
@@ -175,54 +168,5 @@ describe('compose element', () => {
         );
     });
 
-});
-
-describe('SyncAsync from', () => {
-    test('basic render', async ({ expect, fixture, find }) => {
-        const syncWrapper = SyncAsync.from('sync cat', Promise.resolve('async cat'));
-        const dom = createComponent(syncWrapper);
-        expect(dom).toMatchInlineSnapshot(`
-          <DocumentFragment>
-            sync cat
-            <!--1-->
-          </DocumentFragment>
-        `);
-
-        fixture.append(dom);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"sync cat<!--1-->"`);
-
-        await find('async cat');
-        expect(fixture.innerHTML).toBe(`async cat<!--1-->`);
-    });
-
-    class Loading {
-        constructor({ name }) {
-            this.name = name;
-        }
-        render() {
-            return `Loading ${this.name}`;
-        }
-    }
-
-    test('creates', async ({ expect, fixture, find }) => {
-        const syncWrapper = SyncAsync.from(Loading, Promise.resolve(ClassComp));
-        const dom = createComponent(syncWrapper, { name: 'felix' });
-        expect(dom).toMatchInlineSnapshot(`
-          <DocumentFragment>
-            Loading felix
-            <!--1-->
-          </DocumentFragment>
-        `);
-
-        fixture.append(dom);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"Loading felix<!--1-->"`
-        );
-
-        await find('felix');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div>felix<!--1--></div><!--1-->"`
-        );
-    });
 });
 

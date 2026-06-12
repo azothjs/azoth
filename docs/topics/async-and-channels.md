@@ -15,7 +15,7 @@
 > "what layout change happens when this data arrives?" That's the whole
 > mental model. Layout management, not state management.
 
-## The four async sources Azoth accepts
+## Async sources Azoth accepts
 
 Anywhere a `{…}` child slot accepts a value (see
 [composition](composition.md)), it also accepts an async data source. The
@@ -27,16 +27,26 @@ position in the DOM.
 | `Promise`                           | `instanceof Promise`              | Resolved value composed into the slot      |
 | Async iterator / async generator    | `[Symbol.asyncIterator]` present  | Each yielded value **replaces** the previous |
 | `ReadableStream`                    | `instanceof ReadableStream`       | Each chunk **accumulates** at the slot     |
-| Observable                          | `.subscribe` / `.on` (planned)    | Each emission replaces the previous (planned) |
+| Observable                          | `.subscribe` is a function        | Each emission replaces the previous        |
+| `EventTarget`                       | `instanceof EventTarget` (Channel only) | Each event of the configured type renders via `as` |
 
 A Promise delivers a single value. An async iterator delivers a sequence,
-with each value taking the slot from the previous. A `ReadableStream` is
-the exception — it appends rather than replaces, matching how streams are
-typically consumed.
+with each value taking the slot from the previous. A `ReadableStream` in
+a raw slot is the exception — chunks append rather than replace, matching
+how streams are typically consumed. Observables follow the TC39 proposal
+shape (also RxJS-compatible): each `next` value replaces, `complete` ends
+iteration, `error` re-throws unless wrapped in a
+[Channel](#channel--the-canonical-surface) with an `error` prop.
+`EventTarget` is Channel-only — compose alone can't bridge events into
+the slot because there's no way to express which event type to listen
+for; the `eventType` prop on `<Channel>` fills that role.
 
-Observables (`.subscribe` / `.on`) are reserved in the compose dispatch
-table for upcoming work; today the established async sources are Promises
-and async iterators, with streams in the accumulating role.
+When you wrap an async source in a `<Channel>` (see below), the semantic
+is uniform: each value **replaces** by default; opt into accumulation
+with the `append` prop. Channel treats `ReadableStream` as an async
+iterable (modern streams have `[Symbol.asyncIterator]`), so the
+accumulate-vs-replace decision is yours via `append` rather than implied
+by the source type.
 
 ## Plain async patterns first
 
@@ -71,143 +81,189 @@ An async function that returns DOM *is* a layout instruction. The Promise
 it returns flows into the slot. Errors caught inside the function return
 fallback DOM through the same channel.
 
-## SyncAsync: sync render + async update
+## Channel: sync render + async update
 
 Often you want something on screen *immediately* and the async value to
-take over when it arrives. That's the SyncAsync pattern: a synchronous
-value composed right away, plus an async source for future values.
+take over when it arrives. That's the Channel pattern — a synchronous
+initial render, plus an async source for future values. The canonical
+surface is the `<Channel>` JSX component below; full mechanics live in
+[maya-runtime](maya-runtime.md).
+
+## `<Channel>` — the canonical surface
+
+`<Channel>` is a JSX component from `@azothjs/maya/channels`. The class
+IS the component — `<Channel ...>` JSX and `new Channel(...)` produce
+the same instance; one is just syntax for the other.
 
 ```jsx
-import { SyncAsync } from '@azothjs/maya/compose';
+import { Channel } from '@azothjs/maya/channels';
 
-<div>
-    {SyncAsync.from(
-        <p>Loading…</p>,
-        fetchData().then(data => <Results data={data} />)
-    )}
-</div>
+<main>
+    <Channel source={fetchProfile()} as={ProfileCard}>
+        <Loading />
+    </Channel>
+</main>
 ```
 
-The first argument composes immediately; the second drives subsequent
-updates at the same slot. Most authors never construct `SyncAsync`
-directly — the `channel()` function (below) returns one when it makes
-sense. Full mechanics live in [maya-runtime](maya-runtime.md).
+### Props
 
-## `channel()` — the canonical helper
+| Prop      | Type     | Description                                                                                              |
+| --------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `source`    | required | The async data source. `Promise`, async iterable (covers async generators, `ReadableStream`, any AsyncIterable), `Observable` (anything with `.subscribe`), or `EventTarget` (paired with `eventType`). |
+| `eventType` | required when `source` is an `EventTarget` | Name of the event to listen for (e.g. `"click"`, `"message"`). Mismatched with non-EventTarget sources is an error. |
+| `as`        | optional | Transform function `data → DOM`. A component reference works directly: `as={Cat}` is the same as `as={data => <Cat {...data} />}` when the data shape matches the props. For `EventTarget` sources, `as` receives the `Event` object. |
+| `error`     | optional | Transform function `error → DOM`. When the source produces an error, the result is rendered in place. Without an `error` prop, source errors propagate uncaught. (EventTarget sources have no error channel; this catches transform exceptions only.) |
+| `map`       | optional | Boolean. When the source's value is an array, applies `as` per element instead of to the whole array. Has no effect on non-array values. |
+| `append`    | optional | Boolean. When set, the first source value replaces the initial render; subsequent values **append** rather than replace. Without it (the default), each source value replaces the previous. No visible effect on `Promise` sources (only one value). |
+| children    | JSX      | Initial render value, shown before the source produces its first value. Does **not** go through `as`. Replaced by the first source value. |
 
-`channel()` from `@azothjs/chronos/channels` is the workhorse for piping
-an async source through a transform into a DOM slot.
+### Source types
+
+Channel accepts four shapes:
+
+- **Promise** — resolves once; the resolved value (passed through `as`)
+  becomes the slot content. `append` has no visible effect (only one
+  value).
+- **Async iterable** (anything with `[Symbol.asyncIterator]`) — each
+  yielded value replaces the previous; with `append`, the first value
+  replaces the initial render and subsequent values accumulate. This
+  category includes async generators, modern `ReadableStream` (which
+  implements `[Symbol.asyncIterator]`), and any other AsyncIterable.
+- **Observable** (anything with `.subscribe`) — TC39 proposal shape;
+  RxJS-compatible. Each `next` value replaces (or accumulates with
+  `append`); `complete` ends iteration; `error` flows through the `error`
+  prop if provided, otherwise propagates uncaught.
+- **EventTarget** (anything `instanceof EventTarget`) — paired with the
+  `eventType` prop. Each event of that type flows through `as` and lands
+  in the slot. Covers DOM elements (clicks, input), WebSockets (messages),
+  BroadcastChannel, MediaQueryList, and the many other platform APIs that
+  extend EventTarget. Channel registers the listener on construction and
+  removes it when the slot is abandoned. Once `EventTarget.prototype.when()`
+  ships (WICG Observable proposal), the same `target.when('event')` will
+  flow through the Observable detection branch automatically.
+
+### Replace vs append
+
+By default, Channel **replaces** the prior value at the slot on every
+source emission. This matches the most common pattern (loading state →
+resolved data; new event → updated view).
+
+When you want chunks to accumulate — chat messages streaming in, a
+progress log, partial-then-final results — set `append`. The first source
+value replaces the initial render (placeholder goes away); each
+subsequent value appends after the prior:
 
 ```jsx
-import { channel } from '@azothjs/chronos/channels';
-
-const profileCard = channel(fetchProfile(), ProfileCard, { start: <Loading /> });
-
-<div>{profileCard}</div>
-```
-
-### Signature
-
-```
-channel(asyncSource, transform, options)
-```
-
-- `asyncSource` — a `Promise` or async iterator. Required.
-- `transform` — a function `data → DOM`. A component reference works
-  directly (`as={Cat}` is the same as `as={data => <Cat {...data} />}` when
-  the data shape matches the props).
-- `options` — see below.
-
-### Options
-
-| Option  | Type      | Description                                                                                       |
-| ------- | --------- | ------------------------------------------------------------------------------------------------- |
-| `start` | any value | Initial DOM/value rendered immediately. **Does not** go through `transform`. Useful for loading UI. |
-| `init`  | any value | Initial value that **does** go through `transform`. Useful when seeding with a default data shape. |
-| `map`   | boolean   | If the async source yields arrays, apply `transform` to each item instead of the array as a whole. |
-
-`start` and `init` are mutually exclusive — `channel` throws if you supply
-both when the async source is already a `SyncAsync`.
-
-### Return shape
-
-What `channel()` returns depends on what you gave it:
-
-- Promise input, no `start`/`init` → a Promise (the transformed result)
-- Promise input with `start`/`init` → a `SyncAsync` (sync part + the promise)
-- Async iterator input → an async generator that yields transformed values
-- Async iterator with `start` → an async generator that yields `start`
-  first, then transformed values
-
-The return value goes wherever a value goes in JSX:
-
-```jsx
-// Promise + start: loading UI then resolved data
-const card = channel(fetchProfile(), ProfileCard, { start: <Loading /> });
-<div>{card}</div>
-
-// Async iterator with map: a list that grows
-async function* incoming() { /* yields arrays */ }
-const items = channel(incoming(), Cat, { map: true, start: <Empty /> });
-<ul>{items}</ul>
-
-// init: seed with default data through the same transform
-let count = 0;
-const counter = channel(asyncCount(), n => <span>{n}</span>, { init: count });
-<div>{counter}</div>
-```
-
-## Supporting helpers
-
-The `@azothjs/chronos/channels` module ships three helpers around
-`channel()`.
-
-**`tee(asyncSource, count = 2)`** — Split one async source into multiple
-independent feeds. Necessary because async iterators are single-consumer.
-
-```jsx
-const [a$, b$] = tee(events$);
-```
-
-**`branch(asyncSource, ...transforms)`** — Split *and* transform in one
-call. Each transform becomes its own channel.
-
-```jsx
-const [Count, List] = branch(fetchCats(),
-    cats => cats.length,
-    [Cat, { map: true, start: <Loading /> }],
-);
-```
-
-**`consume(asyncSource, sideEffect, options?)`** — Subscribe to an async
-source for side effects without producing DOM. The `start` option is
-rejected (there is nothing to render); `init` and `map` work as usual.
-
-```jsx
-consume(theme$, t => document.documentElement.className = t);
-```
-
-## The aspirational `<Channel>` JSX form
-
-A built-in `<Channel>` component is planned (tracked in
-[TODO.md](../../TODO.md)). The API will be:
-
-```jsx
-// Upcoming — not yet implemented
-<Channel async={results$} as={r => <SearchResults results={r} />} />
-
-<Channel async={fetchUserContext()} as={data => <LandingPageView {...data} />}>
-    <Loading />
+<Channel source={chatStream} as={Message} append>
+    <p>Connecting…</p>
 </Channel>
 ```
 
-- `async` — the async data source
-- `as` — the transform; receives data directly
-- children — initial content rendered until `async` delivers (equivalent
-  to the `start` option on `channel()`)
+Without `append`, the same `<Channel source={chatStream}>` would render
+only the most recent chunk. Pick based on intent, not on the source's
+data type.
 
-Until then, the `channel()` function with `{ start: <Loading /> }` is the
-established form, and `<Channel>` is being prototyped in downstream apps.
+### Examples
+
+```jsx
+// Promise + initial loading state
+<Channel source={fetchProfile()} as={ProfileCard}>
+    <Loading />
+</Channel>
+
+// Async iterator (e.g. SSE events)
+<Channel source={events$} as={Notification} />
+
+// Array data — map applies `as` per element
+<Channel source={fetchCats()} as={Cat} map>
+    <Empty />
+</Channel>
+
+// Error handling
+<Channel
+    source={fetchProfile()}
+    as={ProfileCard}
+    error={err => <ErrorBanner message={err.message}/>}
+>
+    <Loading />
+</Channel>
+
+// ReadableStream — replace by default (only the last chunk visible)
+<Channel source={response.body} as={chunk => decoder.decode(chunk)} />
+
+// ReadableStream with append — chunks accumulate (e.g. SSE-style fan-in)
+<Channel source={response.body} as={chunk => decoder.decode(chunk)} append />
+
+// Observable
+<Channel source={someObservable} as={Tile} />
+
+// EventTarget — DOM element clicks
+<Channel source={button} eventType="click" as={() => <Toast/>}>
+    <Empty />
+</Channel>
+
+// EventTarget — WebSocket messages, append-style chat log
+<Channel source={socket} eventType="message" as={({data}) => <Message text={data}/>} append>
+    <p>Connecting…</p>
+</Channel>
+```
+
+### As a value, not just JSX
+
+`<Channel>` at the top of a JSX expression returns the `Channel`
+instance — it's a class component (per the talk's "component =
+constructor"). You can hold it as a value and interpolate later:
+
+```jsx
+const profile = <Channel source={fetchProfile()} as={ProfileCard}>
+    <Loading />
+</Channel>;
+
+// Later, in some other JSX:
+<main>{profile}</main>
+```
+
+Equivalent to:
+
+```jsx
+const profile = new Channel({ source: fetchProfile(), as: ProfileCard }, <Loading/>);
+<main>{profile}</main>
+```
+
+Either form works; pick what reads cleaner where you're using it.
+
+## `pushable` — bridge from callback APIs to Channel
+
+When your source isn't already a Promise, async iterable, Observable, or
+EventTarget — e.g. a third-party library that gives you a callback API —
+`pushable()` bridges push-driven callbacks into the async-iterable shape
+Channel expects.
+
+```js
+import { pushable } from '@azothjs/maya/channels';
+
+const [events$, push] = pushable();
+someLibrary.onUpdate(value => push(value));
+
+// elsewhere in JSX:
+<Channel source={events$} as={Item} />
+```
+
+`pushable()` returns `[asyncIterator, pushFn]`. Values pushed before
+iteration are queued FIFO; values pushed while a consumer is awaiting
+wake it immediately. There is no transform — that's `Channel.as`'s job
+(or iterator helpers downstream). The single responsibility is the
+push-to-pull bridge.
+
+Async iterators are single-consumer; if you need fan-out, lift the
+source into an `EventTarget` (naturally multi-listener) and use
+Channel's EventTarget integration per consumer.
+
+`pushable` is also what Channel uses internally for its `EventTarget`
+support — `fromEventTarget(target, eventType, ...)` is essentially
+`pushable()` plus `addEventListener` plus listener cleanup. If you ever
+need a different platform-source-to-iterable bridge, `pushable` is the
+building block.
 
 ## The View + CardView idiom
 
@@ -235,23 +291,28 @@ export const AgentProfile = ({ async }) => (
 ```
 
 The `async` prop name is the convention — it says how the value is *used*,
-not what it contains. `CardView` internally calls `channel()` with a
-loading element. See [workflow](workflow.md) for the full pattern, the
-`CardView` implementation, and where data fetching lives.
+not what it contains. `CardView` internally constructs a `Channel` with
+the loading element as childNodes. See [workflow](workflow.md) for the
+full pattern, the `CardView` implementation, and where data fetching
+lives.
 
 ## Foot-guns
 
-**A channel passed as a prop is not auto-resolved.** Channels — and
-async sources in general — resolve only inside child interpolation slots.
-When you pass one as a prop, the prop receives the channel object, the
-Promise, or the async iterator itself.
+**A Channel (or async source) passed as a prop is not auto-resolved.**
+Async sources resolve only inside child interpolation slots. When you
+pass one as a prop, the prop receives the value as-is — the Promise,
+the iterator, or the Channel instance itself.
 
 ```jsx
-// Resolves: channel is in a child slot
-<div>{channel(fetchProfile(), ProfileCard)}</div>
+// Resolves: source flows through Channel in a child slot
+<main>
+    <Channel source={fetchProfile()} as={ProfileCard}>
+        <Loading/>
+    </Channel>
+</main>
 
-// Does NOT resolve: prop receives the channel as-is
-<Wrapper data={channel(fetchProfile(), ProfileCard)} />
+// Does NOT resolve: prop receives the Channel instance as-is
+<Wrapper data={<Channel source={fetchProfile()} as={ProfileCard}/>} />
 ```
 
 If a child component needs the resolved value, either:
@@ -259,17 +320,44 @@ If a child component needs the resolved value, either:
 - pass the async source and let the child put it in its own child slot,
 - or `await` the value before constructing the parent JSX.
 
-**`ReadableStream` accumulates; it does not replace.** Streams append each
-chunk at the slot. If you want replace semantics over time, use an async
-iterator instead.
+**Raw `ReadableStream` in a slot accumulates; `<Channel>`-wrapped streams
+replace by default.** Two different mental models for two different
+contexts. A raw `{stream}` interpolation is "stream-as-payload" — chunks
+append. A `<Channel source={stream}>` is "give me transformed values one
+at a time" — each replaces. Add `append` on the Channel to accumulate
+there too.
 
-**Async iterators are single-consumer.** Sharing requires `tee` or
-`branch`. Promises can be shared safely because each `.then()` receives
-the resolved value.
+**Async iterators are single-consumer.** A given async iterator can be
+read once. If you need to fan-out to multiple consumers, that's an
+observable concern — use RxJS or the TC39 Observable proposal. Channel
+itself is one-to-one (single source → single downstream).
 
 **Don't reach for `useState` or `useEffect`.** There are none. The async
 source is the data flow. The slot is where it lands. The transform is the
 shape. See [for-llms](for-llms.md) for terminology discipline.
+
+## IGNORE — skipping a value without clearing the slot
+
+`@azothjs/maya/compose` exports a sentinel `IGNORE`. When a source emits
+`IGNORE`, compose treats it as "do nothing for this emission" — the slot
+stays as it was. Distinct from `null` / `undefined` / `''`, which all
+**clear** the slot.
+
+```js
+import { IGNORE } from '@azothjs/maya/compose';
+
+async function* heartbeat() {
+    for await (const event of source) {
+        if (isHeartbeat(event)) yield IGNORE; // keep the current view
+        else yield <View {...event} />;
+    }
+}
+```
+
+Useful for sources that interleave meaningful values with bookkeeping
+events (heartbeats, ping/pongs, idle ticks). Today it's a small utility;
+if a clear authoring pattern shows demand for a dedicated prop or
+static, that's a future addition.
 
 ## What this is *not*
 
@@ -287,6 +375,6 @@ A subtraction, not a contrast. Things that simply do not exist:
 - [Components](components.md) — function/class form; the View pattern
 - [Workflow](workflow.md) — View + CardView in full, data ownership
 - [Hypermedia](hypermedia.md) — the events-as-deltas model
-- [Maya runtime](maya-runtime.md) — `SyncAsync`, compose internals
+- [Maya runtime](maya-runtime.md) — `Channel`, compose internals
 - [For LLMs](for-llms.md) — terminology discipline
 - [Known limitations](known-limitations.md) — current foot-guns

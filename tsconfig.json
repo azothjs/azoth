@@ -9,7 +9,6 @@
         "noEmit": true,
         "types": ["vitest"],
         "jsx": "preserve",
-        "baseUrl": ".",
         "paths": {
             "test-utils/*": ["./test-utils/*"]
         }

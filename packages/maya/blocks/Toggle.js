@@ -1,3 +1,3 @@
-export function Toggle({ on: predicate }, slottable) {
-    return payload => predicate(payload) ? slottable : null;
+export function Toggle({ on: predicate }, childNodes) {
+    return payload => predicate(payload) ? childNodes : null;
 }

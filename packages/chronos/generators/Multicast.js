@@ -1,14 +1,27 @@
-import { SyncAsync } from '@azothjs/maya/compose';
 import { generator } from './generator.js';
 
+/**
+ * Multicast — fans an async iterator out to multiple subscribers.
+ *
+ * Each subscriber gets its own push-driven async iterator (via generator()).
+ * When the input iterator yields, every subscriber's consumer is invoked
+ * with the value. When the input completes, all subscribers' iterators
+ * are returned.
+ *
+ * Subscribers may pass an optional transform that's applied to each value
+ * before it lands in their iterator.
+ *
+ * Multicast operates only on plain async iterators. The caller is
+ * responsible for unwrapping any higher-level wrappers (e.g. maya's
+ * Channel) before passing the iterator in.
+ */
 export class Multicast {
     #consumers = [];
     #iterators = [];
     #iter = null;
 
     constructor(iter) {
-        // TODO: track sync value and add to subscribers
-        this.#iter = (iter instanceof SyncAsync) ? iter.async : iter;
+        this.#iter = iter;
         this.start();
     }
 
@@ -20,15 +33,15 @@ export class Multicast {
             }
         }
 
-        // generator is complete
+        // input is complete — close all subscribers
         for(const iter of this.#iterators) {
             let done = false;
             while(!done) (done = await iter.return());
         }
     }
 
-    subscriber(transform, options) {
-        const [iterator, next] = generator(transform, options);
+    subscriber(transform) {
+        const [iterator, next] = generator(transform);
         this.#iterators.push(iterator);
         this.#consumers.push(next);
         return iterator;

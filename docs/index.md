@@ -89,7 +89,7 @@ practice-tested methodology.
 ## A larger example
 
 ```jsx
-import { channel } from '@azothjs/chronos/channels';
+import { Channel } from '@azothjs/maya/channels';
 
 const SearchResults = ({ results }) => (
     <ul>{results.map(r => <li>{r.title}</li>)}</ul>
@@ -98,9 +98,9 @@ const SearchResults = ({ results }) => (
 const Page = () => (
     <main>
         <h1>Results</h1>
-        {channel(fetchResults(), SearchResults, {
-            start: <p>Loading…</p>
-        })}
+        <Channel source={fetchResults()} as={SearchResults}>
+            <p>Loading…</p>
+        </Channel>
     </main>
 );
 

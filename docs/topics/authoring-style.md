@@ -190,6 +190,37 @@ When a component needs encapsulated state with methods that mutate DOM,
 Azoth instantiates classes from JSX directly. See
 [components](components.md) for the function and class contracts.
 
+## Whitespace in JSX is preserved as text
+
+Azoth doesn't normalize whitespace. What you write between tags is what
+runs:
+
+```jsx
+const a = <main><p>hi</p></main>;
+// → "<main><p>hi</p></main>"
+
+const b = (
+    <main>
+        <p>hi</p>
+    </main>
+);
+// → "<main>\n        <p>hi</p>\n    </main>"
+```
+
+The newlines and indentation become text nodes. For most rendered HTML
+this is invisible — browsers collapse whitespace in flow content. But:
+
+- **In `<pre>`, `<code>`, or any element with `white-space: pre`** etc.,
+  the whitespace shows up visually.
+- **In snapshot tests**, the indentation lands in the snapshot. Tests
+  meant as worked examples (e.g. valhalla `*.test.tsx`) read more
+  cleanly with single-line JSX so the input-to-HTML mapping stays
+  obvious.
+
+This is a deliberate design choice: the compiler shouldn't decide what
+counts as significant whitespace; that's a runtime concern. JSX as you
+wrote it is what runs — same as the rest of Azoth's design fidelity.
+
 ## What this is *not*
 
 This is a subtraction, not a contrast. Conventions Azoth doesn't impose:

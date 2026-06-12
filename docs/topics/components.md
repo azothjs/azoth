@@ -18,7 +18,7 @@
 
 ## Function form
 
-A component is a function. Signature: `(props, slottable) => <…/>`.
+A component is a function. Signature: `(props, childNodes) => <…/>`.
 
 ```jsx
 const Greeting = ({ name }) => <p>Hello, {name}!</p>;
@@ -27,7 +27,7 @@ document.body.append(<Greeting name="world" />);
 ```
 
 - First arg: `props` — an object of the attributes passed in JSX.
-- Second arg: `slottable` — the children passed in JSX, as DOM. See below.
+- Second arg: `childNodes` — the children passed in JSX, as DOM. See below.
 - Return: JSX, which is DOM. See [jsx-as-dom](jsx-as-dom.md).
 
 The function runs once per `<Greeting …/>` occurrence. No re-run, no
@@ -84,7 +84,7 @@ Usage is identical to a function component:
 ```
 
 The contract:
-- `constructor(props)` receives props (and `slottable` as second arg, if
+- `constructor(props)` receives props (and `childNodes` as second arg, if
   given).
 - `render()` returns the root DOM element.
 - Internal state lives as `this.*`. Methods mutate DOM directly.
@@ -119,15 +119,15 @@ Card()                // throws: cannot destructure undefined
 Prefer JSX invocation for components. Use direct calls only for utility
 functions that happen to return DOM.
 
-## Slottable (the second arg)
+## ChildNodes (the second arg)
 
 Children passed inside a component tag arrive as the second argument,
-conventionally named `slottable`:
+conventionally named `childNodes`:
 
 ```jsx
-const Card = ({ class: className }, slottable) => (
+const Card = ({ class: className }, childNodes) => (
     <div class={`card ${className ?? ''}`}>
-        {slottable}
+        {childNodes}
     </div>
 );
 
@@ -137,18 +137,18 @@ const Card = ({ class: className }, slottable) => (
 </Card>
 ```
 
-`slottable` is **opaque DOM** — a real node (or fragment of nodes) you can
+`childNodes` is **opaque DOM** — a real node (or fragment of nodes) you can
 render. It is **not** an introspectable structure. You cannot map it,
 filter it, count its children, or inspect its types. There is no
 `React.Children`-equivalent because there are no virtual children to walk.
 
 When you need to vary structure based on what's inside, compose with
-nested components — don't try to inspect the slottable.
+nested components — don't try to inspect the childNodes.
 
 ```jsx
 // Don't try this — there's nothing to introspect:
-const Bad = (props, slottable) => {
-    slottable.map(/* ... */);   // slottable is a DOM node, not an array
+const Bad = (props, childNodes) => {
+    childNodes.map(/* ... */);   // childNodes is a DOM node, not an array
 };
 
 // Do this — compose:
@@ -184,7 +184,7 @@ See [authoring-style](authoring-style.md) for the full conventions.
 
 - **About to write `props.children`**. Children arrive as the second
   argument, not on `props`. Destructure it from the function signature.
-- **About to map/filter `slottable`**. It's a DOM node, not a virtual
+- **About to map/filter `childNodes`**. It's a DOM node, not a virtual
   children array. Compose by nesting components instead.
 - **About to add `useState` for component-local state**. In a function
   component, use a local variable (the function runs once, the closure

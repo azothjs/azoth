@@ -1,16 +1,8 @@
+import { Channel } from '../channels/channel.js';
+
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
-export class SyncAsync {
-    static from(sync, async) {
-        return new this(sync, async);
-    }
-    constructor(sync, async) {
-        this.sync = sync;
-        this.async = async;
-    }
-}
-
-export function compose(anchor, input, keepLast, props, slottable) {
+export function compose(anchor, input, keepLast, props, childNodes) {
     if(keepLast !== true) keepLast = false;
     const type = typeof input;
 
@@ -32,18 +24,31 @@ export function compose(anchor, input, keepLast, props, slottable) {
             replace(anchor, input, keepLast);
             break;
         case input instanceof Node:
-            if(props) Object.assign(input, props);
-            if(slottable) input.slottable = slottable;
             replace(anchor, input, keepLast);
             break;
-        case input instanceof SyncAsync:
-            compose(anchor, input.sync, keepLast);
-            compose(anchor, input.async, keepLast, props, slottable);
+        case input instanceof Channel: {
+            compose(anchor, input.initial, keepLast);
+            const { source, append } = input;
+            // No source — initial-only Channel; leave the initial in place.
+            if(source === undefined || source === null) break;
+            if(source instanceof Promise) {
+                // Single value always replaces the initial. `append` has
+                // no effect on Promise sources (only one value to emit).
+                source.then(value => compose(anchor, value, false, props, childNodes));
+                break;
+            }
+            // Async iterable. Channel's makeSource normalizes async
+            // generators, Observables, and ReadableStreams into this shape.
+            // When `append` is true, composeAsyncIterator's firstReplaces
+            // flag makes the first value clear the initial and subsequent
+            // values accumulate.
+            composeAsyncIterator(anchor, source, append, props, childNodes, append);
             break;
+        }
         case type === 'function': {
             // will throw if function is class,
             // unlike create or compose element
-            let out = input(props, slottable);
+            let out = input(props, childNodes);
             compose(anchor, out, keepLast);
             break;
         }
@@ -53,61 +58,68 @@ export function compose(anchor, input, keepLast, props, slottable) {
             break;
         }
         case input instanceof Promise:
-            input.then(value => compose(anchor, value, keepLast, props, slottable));
+            input.then(value => compose(anchor, value, keepLast, props, childNodes));
             break;
         case Array.isArray(input):
             composeArray(anchor, input, keepLast);
             break;
-        // w/o the !! this causes intermittent failures :p maybe vitest/node thing?
-        case !!input[Symbol.asyncIterator]:
-            composeAsyncIterator(anchor, input, keepLast, props, slottable);
-            break;
+        // ReadableStream must come before the asyncIterator check — modern
+        // ReadableStream implements [Symbol.asyncIterator], so without this
+        // ordering the stream would be consumed via for-await (replace
+        // semantics) instead of pipeTo (accumulate semantics).
         case input instanceof ReadableStream:
-            // no props and slottable propagation on streams
+            // no props and childNodes propagation on streams
             composeStream(anchor, input, true);
             break;
-        case isRenderObject(input): {
-            let out = slottable
-                ? input.render(props, slottable)
+        // w/o the !! this causes intermittent failures :p maybe vitest/node thing?
+        case !!input[Symbol.asyncIterator]:
+            composeAsyncIterator(anchor, input, keepLast, props, childNodes);
+            break;
+        case typeof input?.render === 'function': {
+            let out = childNodes
+                ? input.render(props, childNodes)
                 : props ? input.render(props) : input.render();
             compose(anchor, out, keepLast);
             break;
         }
-        // TODO:
-        case !!input.subscribe:
-        case !!input.on:
+        case typeof input.subscribe === 'function':
+            // Observable shape per the TC39 proposal (RxJS-compatible).
+            // Subscribe directly: each `next` value flows through compose.
+            // Errors re-throw — surfaces as unhandled, matching how a raw
+            // async iterator throwing in this slot behaves. Complete is a
+            // no-op; the slot keeps its last value. Use <Channel error={...}>
+            // for handled errors.
+            input.subscribe({
+                next(value) { compose(anchor, value, keepLast, props, childNodes); },
+                error(err) { throw err; },
+                complete() { }
+            });
+            break;
         default: {
             throwTypeErrorForObject(input);
         }
     }
 }
 
-/**
- * Duck type test for render object
- * @param {object} obj 
- * @returns {boolean}
- */
-const isRenderObject = obj => typeof obj?.render === 'function';
-
-export function composeComponent(anchor, [Constructor, props, slottable]) {
+export function composeComponent(anchor, [Constructor, props, childNodes]) {
     // if renderer "updating":
     // - get render source, by anchor
-    // - call render with props/slottable
+    // - call render with props/childNodes
     // - return
 
-    createCompose(Constructor, props, slottable, anchor);
+    createCompose(Constructor, props, childNodes, anchor);
     // if renderer "recording"
     // - store render source, by anchor
 
 }
 
-export function createCompose(Constructor, props, slottable, anchor) {
-    const out = create(Constructor, props, slottable, anchor);
+export function createCompose(Constructor, props, childNodes, anchor) {
+    const out = create(Constructor, props, childNodes, anchor);
     if(out !== anchor) compose(anchor, out);
 }
 
-export function createComponent(Constructor, props, slottable) {
-    let result = create(Constructor, props, slottable, null);
+export function createComponent(Constructor, props, childNodes) {
+    let result = create(Constructor, props, childNodes, null);
 
     switch(typeof result) {
         case 'number':
@@ -121,18 +133,16 @@ export function createComponent(Constructor, props, slottable) {
     }
 }
 
-function create(input, props, slottable, anchor) {
+function create(input, props, childNodes, anchor) {
     const type = typeof input;
 
     switch(true) {
+        // A pre-built Node returned from a component or passed as a value
+        // is valid output. Props are NOT overlaid — component invocation
+        // means "construct"; if you want to modify a node, do it directly.
         case input instanceof Node:
-            if(props) Object.assign(input, props);
-        // eslint-disable-next-line no-fallthrough
-        case type === 'string':
             return input;
-        case type === 'number':
-        case type === 'bigint':
-            return `${input}`;
+        // Empty / nothing values render to no DOM.
         case input === undefined:
         case input === null:
         case input === true:
@@ -140,21 +150,30 @@ function create(input, props, slottable, anchor) {
         case input === '':
         case input === IGNORE:
             return null;
-        // class and function(){}
+        // Function: invoke with props/childNodes.
         case !!(input.prototype?.constructor): {
+            // class and function(){} — invoked with `new`
             // eslint-disable-next-line new-cap
-            return new input(props, slottable);
+            return new input(props, childNodes);
         }
-        // arrow () => {}
         case type === 'function': {
-            return input(props, slottable) ?? null;
+            // arrow () => {} — called directly
+            return input(props, childNodes) ?? null;
         }
+        // Reject primitive-as-component. Strings, numbers, bigints in
+        // component position are almost always a mistake. Catch early.
+        case type === 'string':
+        case type === 'number':
+        case type === 'bigint':
+        case type === 'symbol':
+            throwPrimitiveAsComponent(input, type);
+            break;
         case type !== 'object': {
             throwTypeError(input, type);
             break;
         }
-        case isRenderObject(input):
-            return input.render(props, slottable) ?? null;
+        case typeof input?.render === 'function':
+            return input.render(props, childNodes) ?? null;
         default: {
             let container = anchor;
             if(!container) {
@@ -163,20 +182,18 @@ function create(input, props, slottable, anchor) {
                 container.append(anchor);
             }
 
-            if(input instanceof SyncAsync) {
-                createCompose(input.sync, props, slottable, anchor);
-                createCompose(input.async, props, slottable, anchor);
-            }
-            else if(input[Symbol.asyncIterator]) {
-                composeAsyncIterator(anchor, input, false, props, slottable);
+            // Value-position types — JSX puts a CLASS in component position
+            // and the constructor branch above handles it. Pre-built instances
+            // (Channel, Promise, async iterable, array) reach create() only
+            // when the caller hands a value directly, which the compose()
+            // entry handles natively. Keep these as a safety net for now.
+            if(input[Symbol.asyncIterator]) {
+                composeAsyncIterator(anchor, input, false, props, childNodes);
             }
             else if(input instanceof Promise) {
-                input.then(value => {
-                    createCompose(value, props, slottable, anchor);
-                });
+                input.then(value => compose(anchor, value, false, props, childNodes));
             }
             else if(Array.isArray(input)) {
-                // TODO: map to createCompose
                 composeArray(anchor, input, false);
             }
             else {
@@ -236,12 +253,23 @@ async function composeStream(anchor, stream, keepLast) {
     }));
 }
 
-async function composeAsyncIterator(anchor, iterator, keepLast, props, slottable) {
-    // TODO: use iterator directly and 
+async function composeAsyncIterator(
+    anchor, iterator, keepLast, props, childNodes, firstReplaces = false,
+) {
+    // TODO: use iterator directly and
     // - control return when removed, and maybe throws on error
     // - possible yield/return semantics for third communication channel
+    //
+    // `firstReplaces` is set by the Channel branch when `append` is true:
+    // the first iteration overrides keepLast to false so it clears the
+    // initial render; subsequent iterations honor keepLast (true →
+    // accumulate). For non-Channel callers, `firstReplaces` defaults to
+    // false so behavior is unchanged.
+    let first = true;
     for await(const value of iterator) {
-        compose(anchor, value, keepLast, props, slottable);
+        const effective = (first && firstReplaces) ? false : keepLast;
+        compose(anchor, value, effective, props, childNodes);
+        first = false;
     }
 }
 
@@ -253,6 +281,15 @@ function throwTypeError(input, type, footer = '') {
     throw new TypeError(`\
 Invalid compose {...} input type "${type}", value ${input}.\
 ${footer}`
+    );
+}
+
+function throwPrimitiveAsComponent(input, type) {
+    const display = type === 'symbol' ? 'Symbol' : JSON.stringify(input);
+    throw new TypeError(
+        `Cannot use ${type} (${display}) as a component. ` +
+        `Components must be functions, classes, or objects with a render() method. ` +
+        `If you want to render a primitive value, interpolate it directly: {value} instead of <Value/>.`
     );
 }
 
