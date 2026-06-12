@@ -226,6 +226,42 @@ describe('decomposition playground', () => {
         `);
     });
 
+    test('dedupe — identical templates share one id (the rerender key collision)', ({ expect }) => {
+        const input = `
+            const a = <p>{x}</p>;
+            const b = <p>{y}</p>;
+        `;
+        expect(decompose(input)).toMatchInlineSnapshot(`
+          "
+          ==== code ====
+          import { t15aa2705 } from 'virtual:azoth-templates?id=15aa2705';
+
+          const a = t15aa2705(x);
+          const b = t15aa2705(y);
+          ==== template 15aa2705 ====
+          html:     <p><!--0--></p>
+          targets:  r => [r.childNodes[0]]
+          bind:     (ts) => {
+            const t0 = ts[0];
+            return (v0) => {
+              __c(t0, v0);
+            };    
+          }
+          renderer: __renderer("15aa2705", gdb407f11, b6b86b273, false)
+          ==== template 15aa2705 ====
+          html:     <p><!--0--></p>
+          targets:  r => [r.childNodes[0]]
+          bind:     (ts) => {
+            const t0 = ts[0];
+            return (v0) => {
+              __c(t0, v0);
+            };    
+          }
+          renderer: __renderer("15aa2705", gdb407f11, b6b86b273, false)
+          "
+        `);
+    });
+
     test('list map — template factory inside a callback', ({ expect }) => {
         const input = `
             const list = <ul>
