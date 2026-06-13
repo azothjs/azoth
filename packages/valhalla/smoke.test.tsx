@@ -16,7 +16,7 @@ describe('azoth tsx', () => {
     test('paragraph element', ({ expect }) => {
         const paragraph = <p>hello azoth</p> as HTMLParagraphElement;
 
-        expect(fixture(paragraph)).toMatchInlineSnapshot(/* HTML */ `"<p>hello azoth</p>"`);
+        expect(fixture(paragraph)).toMatchInlineSnapshot(`"<p>hello azoth</p>"`);
     });
 
     // DOM literals work with all standard DOM APIs

@@ -35,9 +35,7 @@ describe('element binding positions: root vs child', () => {
         const el = <Header /> as Element;
 
         // data-bind="" marker appears on elements with dynamic bindings
-        expect(fixture(el)).toMatchInlineSnapshot(
-            /* HTML */ `"<header><img alt="Logo" data-bind="" src="logo.png"></header>"`
-        );
+        expect(fixture(el)).toMatchInlineSnapshot(`"<header><img alt="Logo" data-bind="" src="logo.png"></header>"`);
 
         const img = el.querySelector('img');
         expect(img?.src).toContain('logo.png');
@@ -48,9 +46,7 @@ describe('element binding positions: root vs child', () => {
 
         const el = <CardTitle title="Dashboard" />;
 
-        expect(fixture(el)).toMatchInlineSnapshot(
-            /* HTML */ `"<h2 class="card-title">Dashboard<!--1--></h2>"`
-        );
+        expect(fixture(el)).toMatchInlineSnapshot(`"<h2 class="card-title">Dashboard<!--1--></h2>"`);
 
         expect(el.textContent).toBe('Dashboard');
     });
@@ -65,12 +61,10 @@ describe('element binding positions: root vs child', () => {
 
         const el = <ProfileCard name="Agent Smith" avatarUrl="avatar.jpg" />;
 
-        expect(fixture(el)).toMatchInlineSnapshot(
-            /* HTML */ `"<div class="profile">
+        expect(fixture(el)).toMatchInlineSnapshot(`"<div class="profile">
                 <img data-bind="" src="avatar.jpg" alt="Agent Smith">
                 <span data-bind="">Agent Smith<!--1--></span>
-            </div>"`
-        );
+            </div>"`);
     });
 
     test('nested components with different binding positions', ({ expect }) => {
@@ -87,10 +81,8 @@ describe('element binding positions: root vs child', () => {
             </Card>
         );
 
-        expect(fixture(el)).toMatchInlineSnapshot(
-            /* HTML */ `"<div class="featured"><h2>Featured Content<!--1--></h2><!--1-->
-                <p>Some description here</p><!--1--></div>"`
-        );
+        expect(fixture(el)).toMatchInlineSnapshot(`"<div class="featured"><h2>Featured Content<!--1--></h2><!--1-->
+                <p>Some description here</p><!--1--></div>"`);
     });
 
     test('multiple bindings at different depths', ({ expect }) => {
@@ -106,15 +98,13 @@ describe('element binding positions: root vs child', () => {
 
         const el = <DeepComponent a="deep" b="medium" c="attr" /> as Element;
 
-        expect(fixture(el)).toMatchInlineSnapshot(
-            /* HTML */ `"<div class="level-1">
+        expect(fixture(el)).toMatchInlineSnapshot(`"<div class="level-1">
                 <div class="level-2">
                     <span data-bind="">deep<!--1--></span>
                 </div>
                 <p data-bind="">medium<!--1--></p>
                 <footer data-bind="" data-value="attr">Footer</footer>
-            </div>"`
-        );
+            </div>"`);
 
         expect(el.querySelector('.level-2 span')?.textContent).toBe('deep');
         expect(el.querySelector('p')?.textContent).toBe('medium');

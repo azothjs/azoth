@@ -53,7 +53,7 @@ describe('sandbox', () => {
         // Your JSX here:
         const el = <p>sandbox ready</p>;
         
-        expect(fixture(el)).toMatchInlineSnapshot(/* HTML */ `"<p>sandbox ready</p>"`);
+        expect(fixture(el)).toMatchInlineSnapshot(`"<p>sandbox ready</p>"`);
     });
 
 });

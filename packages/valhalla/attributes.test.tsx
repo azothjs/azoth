@@ -34,7 +34,7 @@ describe('dynamic class attributes', () => {
         const el = <Box class="highlighted" />;
 
         // class attribute missing because element["class"] doesn't work
-        expect(fixture(el)).toMatchInlineSnapshot(/* HTML */ `"<div>content</div>"`);
+        expect(fixture(el)).toMatchInlineSnapshot(`"<div>content</div>"`);
     });
 
     test('className={var} DOES work — uses DOM property name', ({ expect }) => {
@@ -44,9 +44,7 @@ describe('dynamic class attributes', () => {
 
         const el = <Box className="highlighted" />;
 
-        expect(fixture(el)).toMatchInlineSnapshot(
-            /* HTML */ `"<div class="highlighted">content</div>"`
-        );
+        expect(fixture(el)).toMatchInlineSnapshot(`"<div class="highlighted">content</div>"`);
     });
 
 });
