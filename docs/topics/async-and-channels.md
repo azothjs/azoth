@@ -359,6 +359,24 @@ events (heartbeats, ping/pongs, idle ticks). Today it's a small utility;
 if a clear authoring pattern shows demand for a dedicated prop or
 static, that's a future addition.
 
+The same sentinel works as a **return from a rerenderer thunk** — keep the
+current DOM for this pass without clearing it:
+
+```js
+rerenderer(({ id }) => {
+    if (id === lastId) return IGNORE; // unchanged → keep current view
+    lastId = id;
+    return <Detail id={id} />;
+});
+```
+
+`return null` / `undefined` from a thunk would **clear** the slot — only
+`IGNORE` is a true no-op once a value reaches compose. (Note the contrast
+with a UIComponent's `update()`, where a bare `return;` *is* the no-op:
+there `composeComponent` intercepts `undefined` before it reaches compose.
+`IGNORE` is for the flows you can't intercept upstream — source emissions
+and thunk returns.)
+
 ## What this is *not*
 
 A subtraction, not a contrast. Things that simply do not exist:
