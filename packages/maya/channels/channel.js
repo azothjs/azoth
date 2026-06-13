@@ -101,7 +101,14 @@ export class Channel {
     // the source ref: unchanged → no-op (undefined; keep the running
     // subscription). Changed → abort this instance's consumption (prompt
     // internal teardown) and hand back a fresh Channel as the replacement;
-    // composeComponent caches and drives it (new initial + new source).
+    // composeComponent caches and drives it (new initial + new source), so
+    // the replacement becomes the live instance for the next update.
+    //
+    // A switch makes THIS instance spent: its subscription is aborted and the
+    // rerenderer no longer holds it. A reference kept to it elsewhere is stale
+    // (Channel has no imperative surface beyond update(), which on a spent
+    // instance just builds another detached Channel). Don't hold Channel refs
+    // across rerenders — the JSX site owns the lifecycle.
     update(props, childNodes) {
         if((props?.source) === this.#sourceRef) return;
         this.#controller.abort();

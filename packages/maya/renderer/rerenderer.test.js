@@ -510,4 +510,21 @@ describe('rerenderer — Channel update verb (increment e)', () => {
         expect(a.calls.subscribe).toBe(1);    // old not re-touched
     });
 
+    test('successive switches: each replacement becomes the live instance, torn down on the next', async ({ expect }) => {
+        const a = observable(), b = observable(), c = observable();
+        const host = makeHost('rr-e-chain');
+        const page = rerenderer(src =>
+            host([Channel, { source: src }, document.createTextNode('…')]));
+
+        page(a.obs); await tick();
+        page(b.obs); await tick();            // a torn down; b is now the cached instance
+        page(c.obs); await tick();            // b torn down → proves b became the update target
+
+        expect(a.calls.unsubscribe).toBe(1);
+        expect(b.calls.subscribe).toBe(1);
+        expect(b.calls.unsubscribe).toBe(1);  // the re-cache chained: b was live, then replaced
+        expect(c.calls.subscribe).toBe(1);
+        expect(c.calls.unsubscribe).toBe(0);  // c is the current live instance
+    });
+
 });
