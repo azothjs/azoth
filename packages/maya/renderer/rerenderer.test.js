@@ -247,6 +247,40 @@ describe('rerenderer — components inside the wrap (increment c)', () => {
         expect(first.textContent).toBe('A:3');
     });
 
+    test('nested components: chains stay stable through two host levels', ({ expect }) => {
+        const tCard = makeP('rr-nest-card');
+        let pageSetup = 0, cardSetup = 0;
+
+        // Inner component: setup once, returns its rerenderable.
+        function Card({ label }) {
+            cardSetup++;
+            return rerenderer(props => tCard(`card:${props.label}`));
+        }
+
+        // Outer component: hosts Card, itself returns a rerenderable.
+        // Two composeComponent levels nest, each with its own anchor memo.
+        function Page({ label }) {
+            pageSetup++;
+            const cardHost = makeHost('rr-nest-cardhost');
+            return rerenderer(props => cardHost([Card, { label: props.label }]));
+        }
+
+        const pageHost = makeHost('rr-nest-pagehost');
+        const app = rerenderer(label => pageHost([Page, { label }]));
+
+        const dom = app('felix');
+        const card = dom.firstChild.firstChild; // pageHost > Page-host > card
+        expect(pageSetup).toBe(1);
+        expect(cardSetup).toBe(1);
+        expect(card.textContent).toBe('card:felix');
+
+        app('duchess');
+        expect(pageSetup).toBe(1);                     // outer setup protected
+        expect(cardSetup).toBe(1);                     // inner setup protected too
+        expect(dom.firstChild.firstChild).toBe(card);  // deepest node stable
+        expect(card.textContent).toBe('card:duchess'); // props flowed through both
+    });
+
 });
 
 describe('create() narrowing — component position eats clean', () => {
