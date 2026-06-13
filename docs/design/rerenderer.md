@@ -389,5 +389,12 @@ The rerenderer instance holds two caches:
    with the chain rule + create() narrowing~~ (landed — chain rule
    in composeComponent, walkChain, component memo on the anchor
    entry, create() narrowed to function | class | render-object |
-   null/undefined); (d) UIComponent protocol + initialize;
-   (e) Channel conformance last. Each its own increment.
+   null/undefined); ~~(d) UIComponent protocol + initialize~~ (landed —
+   intake once per form (class via constructor, object literal via
+   `initialize(props, childNodes)`), `render()` no-args, and the update
+   verb: a UIComponent (has `update()`) caches its instance and
+   `update(props, childNodes)` drives change — void = handled internally,
+   Composable = replace under the === skip. `create()` preserves the
+   instance, compose drives `render()`. `update` is additive — gated on
+   the instance having `update()`, so render-only objects keep re-render
+   semantics); (e) Channel conformance last. Each its own increment.

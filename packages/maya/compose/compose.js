@@ -87,13 +87,12 @@ export function compose(anchor, input, keepLast, props, childNodes) {
         case !!input[Symbol.asyncIterator]:
             composeAsyncIterator(anchor, input, keepLast, props, childNodes);
             break;
-        case typeof input?.render === 'function': {
-            let out = childNodes
-                ? input.render(props, childNodes)
-                : props ? input.render(props) : input.render();
-            compose(anchor, out, keepLast);
+        case typeof input?.render === 'function':
+            // Drive a UIComponent to DOM. Intake (props/childNodes) happened
+            // at construction; render() takes no args. The change channel is
+            // update(), not re-render — see composeComponent.
+            compose(anchor, input.render(), keepLast);
             break;
-        }
         case typeof input.subscribe === 'function':
             // Observable shape per the TC39 proposal (RxJS-compatible).
             // Subscribe directly: each `next` value flows through compose.
@@ -116,31 +115,57 @@ export function compose(anchor, input, keepLast, props, childNodes) {
 export function composeComponent(anchor, [Constructor, props, childNodes]) {
     const rr = activeRerenderer();
     if(rr) {
-        // The update verb. Same Constructor at this anchor → re-invoke
-        // the cached last link of the chain (the thing that yielded
-        // something composable). Different Constructor → teardown via
-        // ordinary replace (=== fails downstream).
+        // The update verb. Same Constructor at this anchor → update in
+        // place. Different Constructor → fall through to create (=== fails
+        // downstream → ordinary replace).
         const memo = rr.getComponent(anchor);
-        if(memo && memo.Constructor === Constructor && memo.updater) {
-            const { out, last } = walkChain(memo.updater(props, childNodes), props, childNodes);
-            if(last) memo.updater = last; // chain extended — track the new end
-            compose(anchor, out);
-            return;
+        if(memo && memo.Constructor === Constructor) {
+            // UIComponent: the instance IS the update surface. render() ran
+            // once at construction; update() is the change channel — void
+            // means it drove its own DOM, a Composable return replaces (and
+            // the === skip makes "returned the same node" a no-op).
+            if(memo.instance) {
+                const out = memo.instance.update(props, childNodes);
+                if(out !== undefined) compose(anchor, out);
+                return;
+            }
+            // Function chain: re-invoke the cached last link.
+            if(memo.updater) {
+                const { out, last } = walkChain(memo.updater(props, childNodes), props, childNodes);
+                if(last) memo.updater = last; // chain extended — track the new end
+                compose(anchor, out);
+                return;
+            }
         }
 
         const created = create(Constructor, props, childNodes);
         const { out, last } = walkChain(created, props, childNodes);
-        rr.setComponent(anchor, {
-            Constructor,
-            // Plain functions re-call (setup re-fires — documented cost);
-            // constructibles re-construct until UIComponent.update lands.
-            updater: last ?? callableFor(Constructor),
-        });
-        compose(anchor, out);
+        // A UIComponent (has update()) caches its instance for the update
+        // verb. Everything else caches its chain end: plain functions
+        // re-call (setup re-fires — the documented cost); constructibles
+        // without update() re-construct.
+        if(isUIComponent(out)) {
+            rr.setComponent(anchor, { Constructor, instance: out });
+            compose(anchor, out.render()); // first paint; node tracked for === skip
+        }
+        else {
+            rr.setComponent(anchor, { Constructor, updater: last ?? callableFor(Constructor) });
+            compose(anchor, out);
+        }
         return;
     }
 
     createCompose(Constructor, props, childNodes, anchor);
+}
+
+// The UIComponent shape: render() to paint, update() as the change channel.
+// Both required — the instance path calls each. render-only objects fall to
+// the chain path (re-render); a missing update() is not a UIComponent.
+function isUIComponent(value) {
+    return value !== null
+        && typeof value === 'object'
+        && typeof value.render === 'function'
+        && typeof value.update === 'function';
 }
 
 // The chain rule: keep calling function results until something
@@ -232,7 +257,13 @@ function create(input, props, childNodes) {
             break;
         }
         case typeof input?.render === 'function':
-            return input.render(props, childNodes) ?? null;
+            // Pre-constructed instance (object literal). Intake via
+            // initialize — the literal's constructor moment. Construction
+            // PRESERVES the instance (so `const c = <C/>` keeps it, and a
+            // component's non-DOM Composable return survives); compose
+            // drives render() to DOM later, when position demands it.
+            input.initialize?.(props, childNodes);
+            return input;
         default: {
             // The former default-label container dance (Promise, async
             // iterable, Array in component position) was removed. Lazy

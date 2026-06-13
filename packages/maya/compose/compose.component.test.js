@@ -22,8 +22,9 @@ class ClassComp {
 const ArrowComp = ({ name }) => runCompose(name, elementWithAnchor);
 
 const RenderObject = {
-    render({ name }) {
-        return runCompose(name, elementWithAnchor);
+    initialize({ name }) { this.name = name; },
+    render() {
+        return runCompose(this.name, elementWithAnchor);
     }
 };
 const CONSTRUCTORS = [Component, ClassComp, ArrowComp, RenderObject];
@@ -40,8 +41,9 @@ class ClassCompP {
     }
 }
 const RenderObjectP = {
-    async render({ name }) {
-        return runCompose(name, elementWithAnchor);
+    initialize({ name }) { this.name = name; },
+    async render() {
+        return runCompose(this.name, elementWithAnchor);
     }
 };
 const ArrowCompP = async ({ name }) => runCompose(name, elementWithAnchor);
@@ -61,11 +63,12 @@ describe('create element', () => {
     test('constructed values', async ({ expect }) => {
         expect(create(Component).outerHTML).toBe(expected);
         expect(create(ArrowComp).outerHTML).toBe(expected);
-        expect(create(RenderObject).outerHTML).toBe(expected);
+        // create() preserves the instance (construct phase); render() drives to DOM.
+        expect(create(RenderObject).render().outerHTML).toBe(expected);
         expect(create(ClassComp).render().outerHTML).toBe(expected);
 
         expect((await create(ComponentP)).outerHTML).toBe(expected);
-        expect((await create(RenderObject)).outerHTML).toBe(expected);
+        expect((await create(RenderObjectP).render()).outerHTML).toBe(expected);
         expect((await create(ArrowCompP)).outerHTML).toBe(expected);
         expect((await create(ClassCompP).render())().outerHTML).toBe(expected);
     });

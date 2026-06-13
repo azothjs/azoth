@@ -327,3 +327,105 @@ describe('rerenderer — nesting', () => {
     });
 
 });
+
+describe('rerenderer — UIComponent protocol (increment d)', () => {
+
+    const componentBind = targets => {
+        const t0 = targets[0];
+        return v0 => composeComponent(t0, v0);
+    };
+    const makeHost = id =>
+        renderer(id, slotTargets, componentBind, false, `<p data-bind><!--0--></p>`);
+
+    test('object literal: initialize intake once, update drives change (render not re-called)', ({ expect }) => {
+        const tCard = makeP('rr-d-lit');
+        let init = 0, render = 0, update = 0;
+        const card = {
+            initialize({ id }) { init++; this.id = id; },
+            render() { render++; return tCard(`cat #${this.id}`); },
+            update({ id }) { update++; this.id = id; return tCard(`cat #${this.id}`); },
+        };
+        const host = makeHost('rr-d-lithost');
+        const page = rerenderer(id => host([card, { id }]));
+
+        const dom = page(1);
+        const node = dom.firstChild;
+        expect(init).toBe(1);
+        expect(render).toBe(1);
+        expect(node.textContent).toBe('cat #1');
+
+        page(2);
+        expect(init).toBe(1);                    // intake once — not re-initialized
+        expect(render).toBe(1);                  // render NOT re-called
+        expect(update).toBe(1);                  // the update verb fired instead
+        expect(dom.firstChild).toBe(node);       // same node — === skip, no churn
+        expect(node.textContent).toBe('cat #2'); // new props flowed via update
+    });
+
+    test('class: constructed once, update verb replaces re-construction', ({ expect }) => {
+        const tCard = makeP('rr-d-cls');
+        let ctor = 0, update = 0;
+        class Cat {
+            constructor({ id }) { ctor++; this.id = id; }
+            render() { return tCard(`cat #${this.id}`); }
+            update({ id }) { update++; this.id = id; return tCard(`cat #${this.id}`); }
+        }
+        const host = makeHost('rr-d-clshost');
+        const page = rerenderer(id => host([Cat, { id }]));
+
+        const dom = page(1);
+        const node = dom.firstChild;
+        expect(ctor).toBe(1);
+        expect(node.textContent).toBe('cat #1');
+
+        page(2);
+        expect(ctor).toBe(1);                    // NOT re-constructed (the (c) stub is gone)
+        expect(update).toBe(1);
+        expect(dom.firstChild).toBe(node);
+        expect(node.textContent).toBe('cat #2');
+    });
+
+    test('update returning void: component handled its own DOM internally', ({ expect }) => {
+        let render = 0, update = 0;
+        const widget = {
+            initialize({ label }) { this.label = label; },
+            render() { render++; this.node = document.createTextNode(this.label); return this.node; },
+            update({ label }) { update++; this.node.data = label; }, // returns void
+        };
+        const host = makeHost('rr-d-void');
+        const page = rerenderer(label => host([widget, { label }]));
+
+        const dom = page('a');
+        const node = dom.firstChild;
+        expect(render).toBe(1);
+        expect(node.textContent).toBe('a');
+
+        page('b');
+        expect(render).toBe(1);             // not re-rendered
+        expect(update).toBe(1);
+        expect(dom.firstChild).toBe(node);  // same text node, mutated in place
+        expect(node.textContent).toBe('b');
+    });
+
+    test('childNodes is a distinct intake param, not folded into props', ({ expect }) => {
+        const tCard = makeP('rr-d-children');
+        let seenProps = null, seenChildren = null;
+        const card = {
+            initialize(props, childNodes) {
+                seenProps = props;
+                seenChildren = childNodes;
+                this.id = props.id;
+            },
+            render() { return tCard(`#${this.id}`); },
+            update(props) { this.id = props.id; return tCard(`#${this.id}`); },
+        };
+        const host = makeHost('rr-d-childhost');
+        const childNodes = ['child']; // stand-in for the tuple's third slot
+        const page = rerenderer(id => host([card, { id }, childNodes]));
+
+        page(1);
+        expect(seenProps).toEqual({ id: 1 });
+        expect(seenChildren).toBe(childNodes); // distinct param, passed straight through
+    });
+
+});
