@@ -15,8 +15,10 @@ describe('Channel — construction', () => {
         const promise = Promise.resolve('felix');
         const c = new Channel({ source: promise });
         expect(c.initial).toBeUndefined();
-        // Without a transform, source passes through unchanged
-        expect(c.source).toBe(promise);
+        // The source is wrapped with the abort guard (so a stale result is
+        // neutralized if the Channel switches sources mid-flight) — a derived
+        // promise, not the input, but it resolves to the same value.
+        expect(c.source).not.toBe(promise);
         await expect(c.source).resolves.toBe('felix');
     });
 
@@ -507,6 +509,25 @@ describe('Channel error transform', () => {
             error: err => err.message  // returns "boom", not "BOOM"
         });
         await expect(c.source).resolves.toBe('boom');
+    });
+
+});
+
+describe('Channel — update (the component-position rerender verb)', () => {
+
+    const sub = () => ({ subscribe() { return { unsubscribe() { } }; } });
+
+    test('same source ref → no-op (undefined): the live subscription is kept', ({ expect }) => {
+        const source = sub();
+        const c = new Channel({ source });
+        expect(c.update({ source })).toBeUndefined();
+    });
+
+    test('new source ref → a fresh Channel as the replacement', ({ expect }) => {
+        const c = new Channel({ source: sub() });
+        const next = c.update({ source: sub() });
+        expect(next).toBeInstanceOf(Channel);
+        expect(next).not.toBe(c);
     });
 
 });

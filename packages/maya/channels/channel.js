@@ -39,6 +39,15 @@ import { pushable } from './pushable.js';
  *
  * Children (JSX) or the second constructor argument (direct) become the
  * initial render value. The initial value does NOT go through `as`.
+ *
+ * Update (in component position, under a rerenderer): `update(props,
+ * childNodes)` is the change channel. Same `source` reference → no-op (the
+ * live subscription keeps flowing, no flash, no double-subscribe). New
+ * `source` reference → the prior subscription is torn down internally (an
+ * AbortController fires; generators unsubscribe / removeEventListener / stop)
+ * and a fresh Channel is returned to drive the new source. This is INTERNAL
+ * resource management — Channel owns its subscription. An external abort
+ * signal (a prop fired from outside) is separate, unbuilt work.
  */
 export class Channel {
 
@@ -50,6 +59,11 @@ export class Channel {
     #initial;
     #source;
     #append;
+    // The original source reference (pre-makeSource), kept for update()'s
+    // identity compare, and the internal teardown controller for this
+    // instance's subscription.
+    #sourceRef;
+    #controller;
 
     constructor(props, childNodes) {
         const {
@@ -70,17 +84,48 @@ export class Channel {
             transform = value => value?.map ? value.map(inner) : inner(value);
         }
 
+        this.#sourceRef = source;
+        this.#controller = new AbortController();
         this.#initial = childNodes;
-        this.#source = makeSource(source, transform, errorTransform, eventType);
+        this.#source = makeSource(
+            source, transform, errorTransform, eventType, this.#controller.signal,
+        );
         this.#append = !!append;
     }
 
     get initial() { return this.#initial; }
     get source() { return this.#source; }
     get append() { return this.#append; }
+
+    // The update verb (component position, rerenderer active). Identity on
+    // the source ref: unchanged → no-op (undefined; keep the running
+    // subscription). Changed → abort this instance's consumption (prompt
+    // internal teardown) and hand back a fresh Channel as the replacement;
+    // composeComponent caches and drives it (new initial + new source).
+    update(props, childNodes) {
+        if((props?.source) === this.#sourceRef) return;
+        this.#controller.abort();
+        return new Channel(props, childNodes);
+    }
 }
 
-function makeSource(source, transform, errorTransform, eventType) {
+// compose ignores this (no-op slot); a stale Promise resolves to it after
+// the Channel has switched sources. Matches compose.js's exported sentinel
+// by registry symbol — no import (avoids the compose↔channel cycle).
+const IGNORE = Symbol.for('azoth.compose.IGNORE');
+
+// Resolves to ABORTED when the signal fires — raced against each pending
+// pull so a switch interrupts a parked `await` promptly instead of waiting
+// for the abandoned source to produce its next value.
+const ABORTED = Symbol('Channel.aborted');
+function aborted(signal) {
+    return new Promise(resolve => {
+        if(signal.aborted) resolve(ABORTED);
+        else signal.addEventListener('abort', () => resolve(ABORTED), { once: true });
+    });
+}
+
+function makeSource(source, transform, errorTransform, eventType, signal) {
     if(source === undefined || source === null) {
         return source;
     }
@@ -94,7 +139,7 @@ function makeSource(source, transform, errorTransform, eventType) {
                 `WebSocket, BroadcastChannel, MediaQueryList).`
             );
         }
-        return fromEventTarget(source, eventType, transform, errorTransform);
+        return fromEventTarget(source, eventType, transform, errorTransform, signal);
     }
     if(source instanceof EventTarget) {
         throw new TypeError(
@@ -105,14 +150,14 @@ function makeSource(source, transform, errorTransform, eventType) {
     }
     switch(true) {
         case source instanceof Promise:
-            return fromPromise(source, transform, errorTransform);
+            return fromPromise(source, transform, errorTransform, signal);
         case !!source[Symbol.asyncIterator]:
             // Covers async generators, modern ReadableStreams, and any
             // other AsyncIterable. Stream errors land in the try/catch
             // and route through errorTransform like any other iter error.
-            return fromAsyncIterable(source, transform, errorTransform);
+            return fromAsyncIterable(source, transform, errorTransform, signal);
         case typeof source.subscribe === 'function':
-            return fromObservable(source, transform, errorTransform);
+            return fromObservable(source, transform, errorTransform, signal);
         default:
             throw new TypeError(
                 `Channel: unsupported source type "${typeof source}". ` +
@@ -121,15 +166,26 @@ function makeSource(source, transform, errorTransform, eventType) {
     }
 }
 
-function fromPromise(source, transform, errorTransform) {
+function fromPromise(source, transform, errorTransform, signal) {
     let p = transform ? source.then(transform) : source;
     if(errorTransform) p = p.catch(errorTransform);
-    return p;
+    // A promise can't be cancelled, only ignored: if the Channel switched
+    // sources before this resolved, neutralize the stale result so it can't
+    // clobber the current content. compose treats IGNORE as a no-op slot.
+    return p.then(value => signal.aborted ? IGNORE : value);
 }
 
-async function* fromAsyncIterable(iter, transform, errorTransform) {
+async function* fromAsyncIterable(iter, transform, errorTransform, signal) {
+    const it = iter[Symbol.asyncIterator]();
+    const stop = aborted(signal);
     try {
-        for await(const value of iter) {
+        while(!signal.aborted) {
+            // Race the pull against the abort so a switch interrupts a parked
+            // await; the abandoned next() is left to settle and be ignored.
+            const next = await Promise.race([it.next(), stop]);
+            if(next === ABORTED || signal.aborted) break;
+            const { value, done } = next;
+            if(done) break;
             yield transform ? transform(value) : value;
         }
     }
@@ -137,30 +193,38 @@ async function* fromAsyncIterable(iter, transform, errorTransform) {
         if(errorTransform) yield errorTransform(err);
         else throw err;
     }
+    finally {
+        // Best-effort upstream cleanup (a user generator's own finally).
+        it.return?.();
+    }
 }
 
-async function* fromEventTarget(target, eventType, transform, errorTransform) {
+async function* fromEventTarget(target, eventType, transform, errorTransform, signal) {
     // pushable bridges the EventTarget's push model into pull-based async
     // iteration. The listener pushes each event into the iterator; the
     // try/finally guarantees we removeEventListener whether the consumer
-    // exits normally, throws, or is aborted (slot removed from the DOM).
+    // exits normally, throws, or is aborted (source switched / slot removed).
     const [iter, push] = pushable();
+    const it = iter[Symbol.asyncIterator]();
+    const stop = aborted(signal);
     target.addEventListener(eventType, push);
     try {
-        try {
-            for await(const event of iter) {
-                yield transform ? transform(event) : event;
-            }
-        }
-        catch(err) {
-            // EventTarget itself has no error channel — this catches
-            // exceptions thrown by `transform` for parity with other source
-            // types' error handling.
-            if(errorTransform) yield errorTransform(err);
-            else throw err;
+        while(!signal.aborted) {
+            const next = await Promise.race([it.next(), stop]);
+            if(next === ABORTED || signal.aborted) break;
+            const { value, done } = next;
+            if(done) break;
+            yield transform ? transform(value) : value;
         }
     }
+    catch(err) {
+        // EventTarget itself has no error channel — this catches exceptions
+        // thrown by `transform` for parity with other source types.
+        if(errorTransform) yield errorTransform(err);
+        else throw err;
+    }
     finally {
+        it.return?.();
         target.removeEventListener(eventType, push);
     }
 }
@@ -168,7 +232,7 @@ async function* fromEventTarget(target, eventType, transform, errorTransform) {
 // Sentinel for observable completion — distinguishable from any user value.
 const COMPLETE = Symbol('Channel.observable.complete');
 
-async function* fromObservable(observable, transform, errorTransform) {
+async function* fromObservable(observable, transform, errorTransform, signal) {
     const queue = [];           // normal `next` values (go through transform)
     let pending = null;         // { resolve, reject } when consumer is awaiting
     let completed = false;
@@ -217,8 +281,28 @@ async function* fromObservable(observable, transform, errorTransform) {
         }
     });
 
+    // Unsubscribe exactly once — abort fires it promptly (synchronous with the
+    // source switch); the finally is the catch-all for normal/error exits.
+    let torn = false;
+    const teardown = () => {
+        if(torn) return;
+        torn = true;
+        if(typeof subscription?.unsubscribe === 'function') subscription.unsubscribe();
+    };
+    const onAbort = () => {
+        teardown();
+        completed = true;
+        if(pending) {
+            const { resolve } = pending;
+            pending = null;
+            resolve(COMPLETE);
+        }
+    };
+    signal.addEventListener('abort', onAbort, { once: true });
+
     try {
         while(true) {
+            if(signal.aborted) return;
             if(queue.length > 0) {
                 const value = queue.shift();
                 yield transform ? transform(value) : value;
@@ -241,9 +325,7 @@ async function* fromObservable(observable, transform, errorTransform) {
         }
     }
     finally {
-        // Unsubscribe whether we exited normally, threw, or were aborted.
-        if(typeof subscription?.unsubscribe === 'function') {
-            subscription.unsubscribe();
-        }
+        signal.removeEventListener('abort', onAbort);
+        teardown();
     }
 }

@@ -1,5 +1,6 @@
 import { describe, test, beforeAll } from 'vitest';
 import { compose, composeComponent, createComponent } from '../compose/compose.js';
+import { Channel } from '../channels/channel.js';
 import { renderer, RenderService } from './renderer.js';
 import { rerenderer } from './rerenderer.js';
 
@@ -448,6 +449,65 @@ describe('rerenderer — UIComponent protocol (increment d)', () => {
         page(1);
         expect(seenProps).toEqual({ id: 1 });
         expect(seenChildren).toBe(childNodes); // distinct param, passed straight through
+    });
+
+});
+
+describe('rerenderer — Channel update verb (increment e)', () => {
+
+    const channelBind = targets => {
+        const t0 = targets[0];
+        return v0 => composeComponent(t0, v0);
+    };
+    const makeHost = id =>
+        renderer(id, slotTargets, channelBind, false, `<p data-bind><!--0--></p>`);
+
+    // A minimal Observable whose subscribe/unsubscribe we can count.
+    const observable = () => {
+        const calls = { subscribe: 0, unsubscribe: 0 };
+        const obs = {
+            subscribe() {
+                calls.subscribe++;
+                return { unsubscribe() { calls.unsubscribe++; } };
+            },
+        };
+        return { obs, calls };
+    };
+    const tick = () => new Promise(r => setTimeout(r));
+
+    test('same source ref across rebinds: no re-subscribe, subscription kept', async ({ expect }) => {
+        const { obs, calls } = observable();
+        const host = makeHost('rr-e-same');
+        // source closed over (stable ref); label drives the rebind
+        const page = rerenderer(label =>
+            host([Channel, { source: obs, as: v => `${label}:${v}` }, document.createTextNode('…')]));
+
+        page('a');
+        await tick();
+        expect(calls.subscribe).toBe(1);
+
+        page('b');                            // same obs ref → update is a no-op
+        await tick();
+        expect(calls.subscribe).toBe(1);      // NOT re-subscribed
+        expect(calls.unsubscribe).toBe(0);    // the live subscription is kept
+    });
+
+    test('new source ref: prior subscription torn down, new one opened', async ({ expect }) => {
+        const a = observable();
+        const b = observable();
+        const host = makeHost('rr-e-switch');
+        const page = rerenderer(src =>
+            host([Channel, { source: src, as: v => `${v}` }, document.createTextNode('…')]));
+
+        page(a.obs);
+        await tick();
+        expect(a.calls.subscribe).toBe(1);
+
+        page(b.obs);                          // switch source
+        expect(a.calls.unsubscribe).toBe(1);  // old torn down synchronously via abort
+        await tick();
+        expect(b.calls.subscribe).toBe(1);    // new source subscribed
+        expect(a.calls.subscribe).toBe(1);    // old not re-touched
     });
 
 });

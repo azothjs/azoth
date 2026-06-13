@@ -120,13 +120,20 @@ export function composeComponent(anchor, [Constructor, props, childNodes]) {
         // downstream → ordinary replace).
         const memo = rr.getComponent(anchor);
         if(memo && memo.Constructor === Constructor) {
-            // UIComponent: the instance IS the update surface. render() ran
-            // once at construction; update() is the change channel — void
-            // means it drove its own DOM, a Composable return replaces (and
-            // the === skip makes "returned the same node" a no-op).
+            // Updatable instance: the instance IS the update surface.
+            // update() is the change channel — undefined means it kept its
+            // own DOM (a UIComponent drove in place, or a Channel left its
+            // live subscription running); a Composable return replaces. When
+            // that return is itself an updatable instance (a Channel handing
+            // back its post-switch replacement), it becomes the new cache.
             if(memo.instance) {
                 const out = memo.instance.update(props, childNodes);
-                if(out !== undefined) compose(anchor, out);
+                if(out !== undefined) {
+                    if(out !== memo.instance && isUpdatable(out)) {
+                        rr.setComponent(anchor, { Constructor, instance: out });
+                    }
+                    paint(anchor, out);
+                }
                 return;
             }
             // Function chain: re-invoke the cached last link.
@@ -140,13 +147,14 @@ export function composeComponent(anchor, [Constructor, props, childNodes]) {
 
         const created = create(Constructor, props, childNodes);
         const { out, last } = walkChain(created, props, childNodes);
-        // A UIComponent (has update()) caches its instance for the update
-        // verb. Everything else caches its chain end: plain functions
-        // re-call (setup re-fires — the documented cost); constructibles
-        // without update() re-construct.
-        if(isUIComponent(out)) {
+        // An updatable instance (has update()) caches for the update verb:
+        // UIComponents (render+update) and Channel (update, no render —
+        // recognized by compose). Everything else caches its chain end:
+        // plain functions re-call (setup re-fires — the documented cost),
+        // constructibles without update() re-construct.
+        if(isUpdatable(out)) {
             rr.setComponent(anchor, { Constructor, instance: out });
-            compose(anchor, out.render()); // first paint; node tracked for === skip
+            paint(anchor, out);
         }
         else {
             rr.setComponent(anchor, { Constructor, updater: last ?? callableFor(Constructor) });
@@ -158,13 +166,19 @@ export function composeComponent(anchor, [Constructor, props, childNodes]) {
     createCompose(Constructor, props, childNodes, anchor);
 }
 
-// The UIComponent shape: render() to paint, update() as the change channel.
-// Both required — the instance path calls each. render-only objects fall to
-// the chain path (re-render); a missing update() is not a UIComponent.
-function isUIComponent(value) {
+// First paint of a cached instance. A UIComponent renders (no args — intake
+// already happened; the node is tracked for the === skip). Anything else
+// updatable (a Channel) composes directly, so compose's own dispatch drives
+// it — for Channel that's the `instanceof Channel` branch (initial + source).
+function paint(anchor, instance) {
+    compose(anchor, typeof instance.render === 'function' ? instance.render() : instance);
+}
+
+// Has an update() change channel → cache the instance for the update verb.
+// Covers UIComponents (render+update) and Channel (update only).
+function isUpdatable(value) {
     return value !== null
         && typeof value === 'object'
-        && typeof value.render === 'function'
         && typeof value.update === 'function';
 }
 
