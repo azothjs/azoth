@@ -337,38 +337,27 @@ describe('rerenderer — UIComponent protocol (increment d)', () => {
     const makeHost = id =>
         renderer(id, slotTargets, componentBind, false, `<p data-bind><!--0--></p>`);
 
-    test('object literal: initialize intake once, update drives change (render not re-called)', ({ expect }) => {
-        const tCard = makeP('rr-d-lit');
-        let init = 0, render = 0, update = 0;
-        const card = {
-            initialize({ id }) { init++; this.id = id; },
-            render() { render++; return tCard(`cat #${this.id}`); },
-            update({ id }) { update++; this.id = id; return tCard(`cat #${this.id}`); },
-        };
-        const host = makeHost('rr-d-lithost');
-        const page = rerenderer(id => host([card, { id }]));
+    // Transpiled JSX emits one factory declaration per call site (increment
+    // b). Site identity is the factory's CLOSURE identity (fresh per
+    // renderer() call), so a render() and an update() that each contain <X/>
+    // are distinct sites even with identical HTML — they can't share a node
+    // the way two calls to one factory would. (That same-HTML-still-distinct
+    // path is proven by the "deduped templates cannot collide" test above;
+    // these tests don't re-exercise it.)
+    //
+    // NOTE: the separate-sites test below stands in for two call sites by
+    // giving them DIFFERENT template ids — a structural shortcut. At runtime
+    // the separation would come from the closure mechanism, not the id.
 
-        const dom = page(1);
-        const node = dom.firstChild;
-        expect(init).toBe(1);
-        expect(render).toBe(1);
-        expect(node.textContent).toBe('cat #1');
-
-        page(2);
-        expect(init).toBe(1);                    // intake once — not re-initialized
-        expect(render).toBe(1);                  // render NOT re-called
-        expect(update).toBe(1);                  // the update verb fired instead
-        expect(dom.firstChild).toBe(node);       // same node — === skip, no churn
-        expect(node.textContent).toBe('cat #2'); // new props flowed via update
-    });
-
-    test('class: constructed once, update verb replaces re-construction', ({ expect }) => {
+    // Pattern: update() re-renders through render()'s OWN site
+    // (this.render()) — one site, so the node is reused across updates.
+    test('class: constructed once, update re-renders through this.render() — node stable', ({ expect }) => {
         const tCard = makeP('rr-d-cls');
-        let ctor = 0, update = 0;
+        let ctor = 0, render = 0, update = 0;
         class Cat {
             constructor({ id }) { ctor++; this.id = id; }
-            render() { return tCard(`cat #${this.id}`); }
-            update({ id }) { update++; this.id = id; return tCard(`cat #${this.id}`); }
+            render() { render++; return tCard(`cat #${this.id}`); }
+            update({ id }) { update++; this.id = id; return this.render(); }
         }
         const host = makeHost('rr-d-clshost');
         const page = rerenderer(id => host([Cat, { id }]));
@@ -376,13 +365,46 @@ describe('rerenderer — UIComponent protocol (increment d)', () => {
         const dom = page(1);
         const node = dom.firstChild;
         expect(ctor).toBe(1);
+        expect(render).toBe(1);
         expect(node.textContent).toBe('cat #1');
 
         page(2);
-        expect(ctor).toBe(1);                    // NOT re-constructed (the (c) stub is gone)
-        expect(update).toBe(1);
-        expect(dom.firstChild).toBe(node);
+        expect(ctor).toBe(1);               // constructed ONCE — the point of (d)
+        expect(update).toBe(1);             // update verb fired
+        expect(render).toBe(2);             // re-rendered via render()'s site (cheap)
+        expect(dom.firstChild).toBe(node);  // same node — shared site + === skip
         expect(node.textContent).toBe('cat #2');
+    });
+
+    // Pattern: render() and update() carry SEPARATE JSX (distinct sites).
+    // The first update renders from its own site → a new node replaces
+    // render's; subsequent updates reuse the update site → then stable.
+    test('object literal: separate render/update sites — first update swaps node, then stable', ({ expect }) => {
+        const tRender = makeP('rr-d-lit-r');
+        const tUpdate = makeP('rr-d-lit-u');
+        let init = 0;
+        const card = {
+            initialize({ id }) { init++; this.id = id; },
+            render() { return tRender(`cat #${this.id}`); },          // site R
+            update({ id }) { this.id = id; return tUpdate(`cat #${this.id}`); }, // site U
+        };
+        const host = makeHost('rr-d-lithost');
+        const page = rerenderer(id => host([card, { id }]));
+
+        const dom = page(1);
+        const first = dom.firstChild;
+        expect(init).toBe(1);
+        expect(first.textContent).toBe('cat #1');
+
+        page(2);
+        expect(init).toBe(1);                       // intake once — not re-initialized
+        const second = dom.firstChild;
+        expect(second).not.toBe(first);             // update's site is a different node
+        expect(second.textContent).toBe('cat #2');
+
+        page(3);
+        expect(dom.firstChild).toBe(second);        // update site now hits — stable
+        expect(second.textContent).toBe('cat #3');
     });
 
     test('update returning void: component handled its own DOM internally', ({ expect }) => {
@@ -417,7 +439,7 @@ describe('rerenderer — UIComponent protocol (increment d)', () => {
                 this.id = props.id;
             },
             render() { return tCard(`#${this.id}`); },
-            update(props) { this.id = props.id; return tCard(`#${this.id}`); },
+            update(props) { this.id = props.id; return this.render(); },
         };
         const host = makeHost('rr-d-childhost');
         const childNodes = ['child']; // stand-in for the tuple's third slot
