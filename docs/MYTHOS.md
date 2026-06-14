@@ -62,6 +62,34 @@ in JSX beats maintaining a tagged-template-literal toolchain. Azoth
 keeps its compile-away thesis and switches its authoring surface to
 JSX. (The framework remains: JSX as DOM literals — not React semantics.)
 
+**2024-01-10 — core Azoth, and the lineage of the names.** The day Marty
+writes core Azoth, he forwards a piece of lore he'd gotten from the source
+years before: *why DOM events are lowercase.* Around 2015 (11 years on at
+this writing) he had asked Brendan Eich, on Quora, "What is the origin of
+lower casing DOM object events and event methods?" The creator of
+JavaScript answered:
+
+> "I imitated HyperCard event names, e.g. click (Used with the `on`
+> keyword: `on click …` in HyperTalk). … JS followed Java, which followed
+> Smalltalk, in using camelCaps for method names and StudlyCaps for
+> 'class names'." — /be
+
+HyperTalk wrote handlers as `on mouseUp / play "boing" / end mouseUp`
+(HyperTalk Beginner's Guide, p.96) — the word after `on` already lowercase.
+The leap to a fully-lowercase `onmouseup` is the aesthetic Marty traces on
+Stack Overflow (2021): `onmouseUp` "isn't so hot," so the all-lowercase
+start carried through the whole name.
+
+It is not incidental that this surfaces at Azoth's birth. Azoth treats the
+platform's own names as authoritative — events are `node.onclick`
+(lowercase, because Eich liked the look of HyperCard's `on mouseUp`), not
+React's invented `onClick`. The same instinct runs through the
+attribute/property split — `class` the markup attribute, `className` the
+DOM property — and through making azoth, not a React-shaped library, the
+authority on the DOM API (see `docs/design/attributes-and-properties.md`).
+Use the platform's names, sourced from the platform, traced to the people
+who chose them. The receipts go back to the creator.
+
 **2023-09 → 2024-10 — Svelte 5 adopts half (a).** Template strings +
 `cloneNode`, four to five years after the proposal. The floor rises;
 the innovation becomes commodity.
@@ -102,3 +130,8 @@ moat. Azoth maintains a deletion calendar.
 - 2017 platform research: `2017-work` branch, `research/javascript-dom/`
 - Half (b), shipped: `packages/vite-plugin` (template injection),
   `packages/maya/renderer/dom-renderer.js` (`getById`)
+- Naming lineage, from the source — Brendan Eich on the origin of lowercase
+  DOM events (answer requested by Marty Nelson):
+  https://www.quora.com/What-is-the-origin-of-lower-casing-DOM-object-events-and-event-methods
+- The HyperTalk → `onmouseup` trace, documented:
+  https://stackoverflow.com/questions/67506981/why-are-javascript-event-names-all-lowercase
