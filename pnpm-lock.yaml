@@ -81,6 +81,21 @@ importers:
         specifier: workspace:*
         version: link:../../test-utils
 
+  packages/dom-info:
+    dependencies:
+      aria-attributes:
+        specifier: ^2.0.1
+        version: 2.0.1
+      html-element-attributes:
+        specifier: ^3.3.0
+        version: 3.5.0
+      html-tag-names:
+        specifier: ^2.1.0
+        version: 2.1.0
+      property-information:
+        specifier: ^7.2.0
+        version: 7.2.0
+
   packages/jsonic:
     devDependencies:
       test-utils:
@@ -1402,6 +1417,9 @@ packages:
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
 
+  aria-attributes@2.0.1:
+    resolution: {integrity: sha512-cxeGg3YamjVap7OLwsl75FfowoKhRlUiXtbL5nKFqvDJ+B51ktWhCdMtMTyYMa+qIzHE5mznODCYDn64asnraQ==}
+
   aria-query@5.1.3:
     resolution: {integrity: sha512-R5iJ5lkuHybztUfuOAznmboyjWq8O6sqNqtK7CLOqdydi54VNbORp49mb14KbWgG1QD3JFO9hJdZ+y4KutfdOQ==}
 
@@ -2179,9 +2197,15 @@ packages:
   hookable@5.5.3:
     resolution: {integrity: sha512-Yc+BQe8SvoXH1643Qez1zqLRmbA5rCL+sSmk6TVos0LWVfNIB7PGncdlId77WzLGSIB5KaWgTaNTs2lNVEI6VQ==}
 
+  html-element-attributes@3.5.0:
+    resolution: {integrity: sha512-rU2BFhp0kQla9sqPBI46C+zbP6PFOtD7z6XNAJ6as+cGecCDXLx0W3aIs6XdPLmBBG/Fy1meRi/n65Exofz4Qw==}
+
   html-encoding-sniffer@6.0.0:
     resolution: {integrity: sha512-CV9TW3Y3f8/wT0BRFc1/KAVQ3TUHiXmaAb6VW9vtiMFf7SLoMd1PdAc4W3KFOFETBJUb90KatHqlsZMWV+R9Gg==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
+
+  html-tag-names@2.1.0:
+    resolution: {integrity: sha512-+NhBUNvS5Ig8g8LO1DBpyapuGsu+FLcpLwmMADCntvU9IUa30++WV3GmuBHZm8Y9cHdIson/uvbQ/6jVL63XZw==}
 
   html-void-elements@3.0.0:
     resolution: {integrity: sha512-bEqo66MRXsUGxWHV5IP0PUiAWwoEjba4VCzg0LjFJBpchPaTfyfCKTG6bc5F8ucKec3q5y6qOdGyYTSBEvhCrg==}
@@ -4828,6 +4852,8 @@ snapshots:
 
   argparse@2.0.1: {}
 
+  aria-attributes@2.0.1: {}
+
   aria-query@5.1.3:
     dependencies:
       deep-equal: 2.2.3
@@ -5800,11 +5826,15 @@ snapshots:
 
   hookable@5.5.3: {}
 
+  html-element-attributes@3.5.0: {}
+
   html-encoding-sniffer@6.0.0:
     dependencies:
       '@exodus/bytes': 1.15.1
     transitivePeerDependencies:
       - '@noble/hashes'
+
+  html-tag-names@2.1.0: {}
 
   html-void-elements@3.0.0: {}
 

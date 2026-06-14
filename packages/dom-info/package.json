@@ -1,0 +1,17 @@
+{
+    "name": "@azothjs/dom-info",
+    "version": "0.1.0",
+    "description": "Azoth's DOM-API authority: validated element/attribute/property facts, and the questions thoth asks about a prop.",
+    "type": "module",
+    "main": "./index.js",
+    "exports": {
+        ".": "./index.js",
+        "./data": "./data.js"
+    },
+    "dependencies": {
+        "aria-attributes": "^2.0.1",
+        "html-element-attributes": "^3.3.0",
+        "html-tag-names": "^2.1.0",
+        "property-information": "^7.2.0"
+    }
+}
