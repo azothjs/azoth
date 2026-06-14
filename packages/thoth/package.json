@@ -36,6 +36,7 @@
         "astring": "^1.8.6",
         "html-void-elements": "^3.0.0",
         "is-valid-es-identifier": "^2.0.0",
+        "property-information": "^7.2.0",
         "source-map": "^0.7.4"
     }
 }
