@@ -39,8 +39,11 @@ As architectual models, hypermedia and state-based rendering are mutually exclus
 
 ## Hypermedia > Azoth
 
-Not HDA
-Azoth as JS client example
+Hypermedia is not new, and not ours. Its ancestor is **HyperCard** — Bill Atkinson's stacks, where the medium _was_ the program: the content and the handlers that responded to it lived in one artifact (`on mouseUp …`). The web inherited that model, and JavaScript inherited the very names — `onclick` traces directly to HyperCard's `on mouseUp` (the receipt, from Brendan Eich himself, is in [`MYTHOS.md`](./MYTHOS.md)).
+
+In the modern era **htmx** re-articulated the hypermedia truth most clearly: HTML as the source of truth, hypermedia controls driving interaction, the delta model above rather than `ui = fn(state)`. We credit the _truth_, not the implementation. htmx is the modern face of **HDA** — hypermedia-driven applications, HTML over the wire from a server. Azoth is **not HDA**: it is a **JS-client example** of the same hypermedia model — the deltas produced in the browser by compiled-away code, the platform passively integrating the layout changes.
+
+So the "return to the web platform" runs deeper than DOM-API spellings (lowercase events, `class` vs `className`). Those are the surface; hypermedia — markup as the medium and the source of truth — is the current beneath.
 
 ## No State, No General Framework Reactivity
 

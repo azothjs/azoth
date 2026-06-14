@@ -64,10 +64,12 @@ JSX. (The framework remains: JSX as DOM literals — not React semantics.)
 
 **2024-01-10 — core Azoth, and the lineage of the names.** The day Marty
 writes core Azoth, he forwards a piece of lore he'd gotten from the source
-years before: *why DOM events are lowercase.* Around 2015 (11 years on at
-this writing) he had asked Brendan Eich, on Quora, "What is the origin of
-lower casing DOM object events and event methods?" The creator of
-JavaScript answered:
+years before: *why DOM events are lowercase.* Around 2015–16 — the same
+window as the `diamond-alpha` template work above — he had asked Brendan
+Eich, on Quora, "What is the origin of lower casing DOM object events and
+event methods?" The platform instinct was forming on two fronts at once:
+compiling *to* the platform, and asking *why the platform is the way it is.*
+The creator of JavaScript answered:
 
 > "I imitated HyperCard event names, e.g. click (Used with the `on`
 > keyword: `on click …` in HyperTalk). … JS followed Java, which followed
@@ -89,6 +91,15 @@ DOM property — and through making azoth, not a React-shaped library, the
 authority on the DOM API (see `docs/design/attributes-and-properties.md`).
 Use the platform's names, sourced from the platform, traced to the people
 who chose them. The receipts go back to the creator.
+
+And HyperCard is more than where the names came from — it is the
+**hypermedia ancestor.** The "return to the platform" runs deeper than
+DOM-API spellings: at bottom it is hypermedia — markup as the source of
+truth and the medium of interaction (the delta model of
+`docs/hypermedia.md`, not `ui = fn(state)`). It is the model htmx
+re-articulated for the modern web — the truth worth crediting, distinct
+from the implementation (azoth is a compile-to-platform JS client, not
+HTML-over-the-wire). The names are the surface; hypermedia is the current.
 
 **2023-09 → 2024-10 — Svelte 5 adopts half (a).** Template strings +
 `cloneNode`, four to five years after the proposal. The floor rises;
