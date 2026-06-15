@@ -166,8 +166,9 @@ export class Transpiler extends Generator {
         state.write(`, {`);
         for(let i = 0; i < props.length; i++) {
             const { node, expr, type } = props[i];
-            // TODO: Dom lookup, JS .prop v['prop'], etc. 
-            // refactor with code below
+            // Component props are author-named JS object keys — no DOM
+            // resolution (that's dom-info's job for intrinsics only).
+            // TODO: quote keys that aren't valid JS identifiers.
             state.write(` `);
             if(type === BIND.SPREAD) {
                 state.write(`...`);
