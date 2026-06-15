@@ -76,6 +76,7 @@ export class HtmlGenerator extends Generator {
     // attr="value"
     JSXAttribute(node, state) {
         if(node.value?.type === 'JSXExpressionContainer') return;
+        if(node.promoted) return; // NON_STATIC: emitted as a runtime property
         state.write(' ');
         this[node.name.type](node.name, state);
         if(node.value) {

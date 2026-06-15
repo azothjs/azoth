@@ -1,4 +1,4 @@
-import { resolveDynamic } from '@azothjs/dom-info';
+import { resolveDynamic, resolveStatic } from '@azothjs/dom-info';
 import { BIND, Template } from './Template.js';
 import { voidElements } from './html.js';
 
@@ -84,7 +84,7 @@ export class Analyzer {
         this.#elements.pop();
     }
 
-    #bind(type, node, expr, index) {
+    #bind(type, node, expr, index, dom) {
         const element = this.#elements.at(-1); // peek
         element.isRoot = element === this.#root;
 
@@ -110,12 +110,12 @@ export class Analyzer {
         }
 
         // intrinsic element prop: dom-info resolves to the DOM property or
-        // setAttribute(NS), and errors on channel/React mismatches.
+        // setAttribute(NS), and errors on channel/React mismatches. A static
+        // attribute promoted to a property (NON_STATIC) arrives pre-resolved.
         if(type === BIND.PROP) {
-            const tag = element.openingElement?.name?.name;
-            const dom = resolveDynamic(attrName(node.name), tag);
-            if(dom.kind === 'error') throw new TypeError(dom.message);
-            binding.dom = dom;
+            binding.dom = dom
+                ?? resolveDynamic(attrName(node.name), element.openingElement?.name?.name);
+            if(binding.dom.kind === 'error') throw new TypeError(binding.dom.message);
         }
 
         this.#bindings.push(binding);
@@ -222,7 +222,22 @@ export class Analyzer {
 
             let expr = attr.value;
             const isJSXExpr = expr?.type === 'JSXExpressionContainer';
-            if(jsxOnly && !isJSXExpr) continue;
+
+            // intrinsic static attribute: dom-info validates it as markup and
+            // errors on React-isms / wrong-element / static event handlers.
+            // NON_STATIC names can't survive template cloning, so they promote
+            // to a runtime property assignment and drop out of the HTML.
+            if(jsxOnly && !isJSXExpr) {
+                const element = this.#elements.at(-1);
+                const dom = resolveStatic(attrName(attr.name), element.openingElement?.name?.name);
+                if(dom.kind === 'error') throw new TypeError(dom.message);
+                if(dom.kind === 'promote') {
+                    attr.promoted = true;
+                    const value = attr.value ?? { type: 'Literal', value: true };
+                    this.#bind(BIND.PROP, attr, value, i, { kind: 'property', name: dom.property });
+                }
+                continue;
+            }
 
             // element attributes = static html
             // component props = code gen js obj literal prop

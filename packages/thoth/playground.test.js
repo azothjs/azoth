@@ -113,6 +113,41 @@ describe('decomposition playground', () => {
             .toThrowError(/use the DOM property name "className"/);
     });
 
+    test('static attributes — markup, errors, and NON_STATIC promotion', ({ expect }) => {
+        // A static attribute is markup and stays in the template HTML. But
+        // NON_STATIC names (autofocus, muted, …) can't survive being cloned
+        // from a <template>, so they promote to a runtime property assignment
+        // and drop out of the HTML — `required` stays, `autofocus` becomes a
+        // binding.
+        expect(decompose(`const t = <input autofocus required name={n} />;`)).toMatchInlineSnapshot(`
+          "
+          ==== code ====
+          import { t9ca71c1d } from 'virtual:azoth-templates?id=9ca71c1d';
+
+          const t = t9ca71c1d(true,n);
+          ==== template 9ca71c1d ====
+          html:     <input required>
+          targets:  r => [r,r]
+          bind:     (ts) => {
+            const t0 = ts[0], t1 = ts[1];
+            return (v0, v1) => {
+              t0.autofocus = v0;
+              t1.name = v1;
+            };    
+          }
+          renderer: __renderer("9ca71c1d", ga95fa6bb, b90264fbb, false)
+          "
+        `);
+
+        // Static channel mismatches are compile errors, not silent markup:
+        expect(() => compile(`const t = <p className="x">y</p>;`))
+            .toThrowError(/use the HTML attribute "class"/);
+        expect(() => compile(`const t = <button onclick="f()">b</button>;`))
+            .toThrowError(/Event handlers are dynamic/);
+        expect(() => compile(`const t = <div href="/x">d</div>;`))
+            .toThrowError(/"href" is not a valid attribute on <div>/);
+    });
+
     test('multi-fragment function — two templates, one function', ({ expect }) => {
         const input = `
             function Page({ title, content }) {

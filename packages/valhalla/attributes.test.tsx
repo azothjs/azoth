@@ -58,3 +58,15 @@ describe('dynamic bindings → DOM properties', () => {
     });
 
 });
+
+describe('NON_STATIC promotion → runtime property', () => {
+
+    // A static autofocus can't be cloned out of a <template> with effect, so
+    // the compiler promotes it to a property assignment that runs on render.
+    test('static autofocus is assigned as a property at runtime', ({ expect }) => {
+        const el = <input autofocus /> as HTMLInputElement;
+        document.body.append(el);
+        expect(el.autofocus).toBe(true);
+    });
+
+});
