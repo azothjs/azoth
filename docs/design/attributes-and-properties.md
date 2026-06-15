@@ -190,12 +190,27 @@ platform element — HTML, SVG, or MathML (`html-tag-names`, `svg-tag-names`,
 `mathml-tag-names`). `<foo>` is a compile error, matching the platform's stance
 (an unknown tag is an inert `HTMLUnknownElement`, not a thing you meant).
 
-Attribute resolution is HTML-only knowledge: SVG/MathML elements validate as
-*tags* but aren't attribute-constrained — we have no SVG/MathML attribute data,
-so their attributes route leniently (the same as custom elements). Correct SVG
-rendering also needs namespace handling (`createElementNS`); that lands with
-the SVG attribute data, later. Today `<svg>`/`<path>` compile but render in the
-HTML namespace.
+## SVG
+
+SVG is fully supported. Two facts make it work through the same compile-to-
+template-clone pipeline:
+
+- **Namespacing is free.** The browser's foreign-content parsing namespaces the
+  cloned template — `<svg>` and its children come out in the SVG namespace, and
+  `<div>` inside `<foreignObject>` flips back to HTML. No `createElementNS`.
+- **SVG bindings are `setAttribute`.** SVG DOM properties are read-only
+  `SVGAnimated*` wrappers (assigning a primitive throws or no-ops), so dynamic
+  SVG attributes resolve to `setAttribute` — never a property — case-preserved
+  (`viewBox`, not `viewbox`), with `xlink:`/`xml:` via `setAttributeNS`. The
+  author writes the markup name; a property spelling (`className`) errors toward
+  it (`class`).
+
+The Analyzer tracks namespace down the element stack (`<svg>`/`<math>` enter,
+`<foreignObject>` is an HTML island, else inherit) and passes it to dom-info.
+Attributes are validated per element via `svg-element-attributes` (`cx` on
+`<rect>` errors); events are the namespace-agnostic `on*` property in any
+namespace. MathML is recognized as tags but attribute-lenient (no MathML
+attribute data yet).
 
 ## Components and custom elements
 
