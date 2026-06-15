@@ -76,6 +76,7 @@ export class Analyzer {
     }
 
     #pushElement(node) {
+        node.namespace = elementNamespace(node, this.#elements.at(-1)?.namespace);
         this.#elements.push(node);
         node.order = ++this.#documentOrder;
     }
@@ -114,7 +115,7 @@ export class Analyzer {
         // attribute promoted to a property (NON_STATIC) arrives pre-resolved.
         if(type === BIND.PROP) {
             binding.dom = dom
-                ?? resolveDynamic(attrName(node.name), element.openingElement?.name?.name);
+                ?? resolveDynamic(attrName(node.name), element.openingElement?.name?.name, element.namespace);
             if(binding.dom.kind === 'error') throw new TypeError(binding.dom.message);
         }
 
@@ -229,7 +230,7 @@ export class Analyzer {
             // to a runtime property assignment and drop out of the HTML.
             if(jsxOnly && !isJSXExpr) {
                 const element = this.#elements.at(-1);
-                const dom = resolveStatic(attrName(attr.name), element.openingElement?.name?.name);
+                const dom = resolveStatic(attrName(attr.name), element.openingElement?.name?.name, element.namespace);
                 if(dom.kind === 'error') throw new TypeError(dom.message);
                 if(dom.kind === 'promote') {
                     attr.promoted = true;
@@ -257,6 +258,18 @@ export class Analyzer {
 
     JSXText() { /* no-op */ }
     JSXEmptyExpression() { /* no-op */ }
+}
+
+// Namespace an element resolves in, from its tag and parent's namespace.
+// <svg>/<math> enter their namespace; <foreignObject> is an HTML island back
+// inside SVG; everything else inherits. The browser's foreign-content parsing
+// already namespaces the cloned template — this is for attribute resolution.
+function elementNamespace(node, parentNamespace = 'html') {
+    const tag = node.openingElement?.name?.name;
+    if(tag === 'svg') return 'svg';
+    if(tag === 'math') return 'mathml';
+    if(parentNamespace === 'svg' && tag === 'foreignObject') return 'html';
+    return parentNamespace;
 }
 
 // JSXAttribute name → raw string ("class", "xlink:href")
