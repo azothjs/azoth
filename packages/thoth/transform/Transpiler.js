@@ -1,4 +1,5 @@
 import { generate } from 'astring';
+import { isValidESIdentifier } from 'is-valid-es-identifier';
 import { HtmlGenerator } from './HtmlGenerator.js';
 import { Generator } from './GeneratorBase.js';
 import { Analyzer } from './Analyzer.js';
@@ -167,14 +168,17 @@ export class Transpiler extends Generator {
         for(let i = 0; i < props.length; i++) {
             const { node, expr, type } = props[i];
             // Component props are author-named JS object keys — no DOM
-            // resolution (that's dom-info's job for intrinsics only).
-            // TODO: quote keys that aren't valid JS identifiers.
+            // resolution (that's dom-info's job for intrinsics only). Keys
+            // that aren't valid JS identifiers (data-x, aria-y, ns:z) are
+            // quoted so the emitted object literal parses.
             state.write(` `);
             if(type === BIND.SPREAD) {
                 state.write(`...`);
             }
             else {
-                state.write(node.name.name, node.name);
+                const key = propKey(node.name);
+                if(isValidESIdentifier(key)) state.write(key, node.name);
+                else state.write(`"${key}"`, node.name);
                 state.write(`: `);
             }
             this[expr.type](expr, state);
@@ -182,4 +186,11 @@ export class Transpiler extends Generator {
         }
         state.write(` }`);
     }
+}
+
+// JSXAttribute name → object-literal key ("data-x", "xlink:href", "name")
+function propKey(nameNode) {
+    return nameNode.type === 'JSXNamespacedName'
+        ? `${nameNode.namespace.name}:${nameNode.name.name}`
+        : nameNode.name;
 }

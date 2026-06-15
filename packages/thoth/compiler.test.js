@@ -840,6 +840,17 @@ describe('components and custom element', () => {
         `);
     });
 
+    test('component prop keys that are not valid identifiers are quoted', ({ expect }) => {
+        const input = `const c = <Component data-id={x} aria-label={y} name={z} />;`;
+        const { code } = compile(input);
+        expect(code).toMatchInlineSnapshot(`
+          "import { __rC } from 'azoth/runtime';
+
+          const c = __rC(Component, { "data-id": x, "aria-label": y, name: z, });
+          "
+        `);
+    });
+
     test('child level components: empty and with props', ({ expect }) => {
         const input = `
             const component = <div>
