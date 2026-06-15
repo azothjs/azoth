@@ -159,6 +159,19 @@ describe('SVG namespace — setAttribute, case-preserved', () => {
         expect(resolveStatic('viewBox', 'svg', 'svg')).toEqual({ kind: 'attribute', name: 'viewBox', boolean: false });
         expect(resolveStatic('className', 'svg', 'svg')).toMatchObject({ kind: 'error' });
     });
+    test('per-element SVG validation — wrong-element / unknown errors', () => {
+        // presentation + geometry attrs valid on their elements
+        expect(resolveDynamic('fill', 'circle', 'svg')).toEqual({ kind: 'attribute', name: 'fill' });
+        expect(resolveDynamic('d', 'path', 'svg')).toEqual({ kind: 'attribute', name: 'd' });
+        // wrong element: cx is circle/ellipse, not rect; d is path-only
+        expect(resolveDynamic('cx', 'rect', 'svg')).toMatchObject({ kind: 'error' });
+        expect(resolveDynamic('d', 'circle', 'svg')).toMatchObject({ kind: 'error' });
+        expect(resolveDynamic('d', 'circle', 'svg').message).toMatch(/not a valid SVG attribute on <circle>/);
+        // unknown name
+        expect(resolveDynamic('fooBar', 'circle', 'svg')).toMatchObject({ kind: 'error' });
+        // data-/aria- stay lenient
+        expect(resolveDynamic('data-id', 'circle', 'svg')).toEqual({ kind: 'attribute', name: 'data-id' });
+    });
 });
 
 describe('element questions', () => {

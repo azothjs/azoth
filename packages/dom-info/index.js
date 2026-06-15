@@ -3,6 +3,7 @@ import { htmlTagNames } from 'html-tag-names';
 import { svgTagNames } from 'svg-tag-names';
 import { mathmlTagNames } from 'mathml-tag-names';
 import { htmlElementAttributes } from 'html-element-attributes';
+import { svgElementAttributes } from 'svg-element-attributes';
 import {
     CORRECTIONS, ATTR_ONLY, ENUMERATED, NON_STATIC, FORCE_ATTRIBUTE, NAMESPACE,
     PROPERTY_ONLY, EVENTS,
@@ -24,6 +25,7 @@ import {
 const htmlElements = new Set(htmlTagNames);
 const knownTags = new Set([...htmlTagNames, ...svgTagNames, ...mathmlTagNames]);
 const globalAttributes = new Set(htmlElementAttributes['*']);
+const svgGlobalAttributes = new Set(svgElementAttributes['*']);
 
 const globalEvents = new Set(EVENTS.global);
 const tagEvents = new Map(Object.entries(EVENTS.perTag).map(([t, ns]) => [t, new Set(ns)]));
@@ -113,24 +115,49 @@ function resolveUnknown(rawName, info, tagName) {
 // The author writes the markup name; a divergent property spelling errors
 // toward it. Per-element attribute validation lands in Phase 3.
 
+// Is this attribute allowed on this SVG element? svg-element-attributes gives
+// per-element lists; presentation attributes (fill, stroke, …) are per-element,
+// and `'*'` is only the RDFa/core globals. Elements absent from the data
+// (custom elements in SVG context) aren't constrained.
+function isSvgAttributeForTag(attribute, tagName) {
+    const attrs = svgElementAttributes[tagName];
+    if(!attrs) return true;
+    return svgGlobalAttributes.has(attribute) || attrs.includes(attribute);
+}
+
+function svgChannelMismatch(rawName, info) {
+    // The author writes the markup name; a divergent property spelling
+    // (className for class) errors toward it. xlink/xml are handled before.
+    return info.defined && rawName !== info.attribute
+        ? error(`SVG uses the markup attribute name — write "${info.attribute}", not "${rawName}".`)
+        : null;
+}
+
+function svgNotForTag(rawName, info, tagName) {
+    return isSvgAttributeForTag(info.attribute, tagName)
+        ? null
+        : error(`"${rawName}" is not a valid SVG attribute on <${tagName}>.`);
+}
+
 function resolveSvgDynamic(rawName, tagName) {
     const info = find(svg, rawName);
     if(info.space === 'xlink' || info.space === 'xml') {
         return { kind: 'attributeNS', name: info.attribute, ns: NAMESPACE[info.space] };
     }
-    if(info.defined && rawName !== info.attribute) {
-        return error(`SVG uses the markup attribute name — write "${info.attribute}", not "${rawName}".`);
-    }
-    return { kind: 'attribute', name: info.attribute };
+    if(isPrefixedOrAttrOnly(rawName)) return { kind: 'attribute', name: info.attribute };
+    return svgChannelMismatch(rawName, info)
+        ?? svgNotForTag(rawName, info, tagName)
+        ?? { kind: 'attribute', name: info.attribute };
 }
 
 function resolveSvgStatic(rawName, tagName) {
     const info = find(svg, rawName);
-    if(info.defined && rawName !== info.attribute
-        && info.space !== 'xlink' && info.space !== 'xml') {
-        return error(`SVG uses the markup attribute name — write "${info.attribute}", not "${rawName}".`);
+    if(info.space === 'xlink' || info.space === 'xml' || isPrefixedOrAttrOnly(rawName)) {
+        return { kind: 'attribute', name: info.attribute, boolean: !!info.boolean };
     }
-    return { kind: 'attribute', name: info.attribute, boolean: !!info.boolean };
+    return svgChannelMismatch(rawName, info)
+        ?? svgNotForTag(rawName, info, tagName)
+        ?? { kind: 'attribute', name: info.attribute, boolean: !!info.boolean };
 }
 
 /**
