@@ -79,3 +79,57 @@ export const NAMESPACE = {
     xlink: 'http://www.w3.org/1999/xlink',
     xml: 'http://www.w3.org/XML/1998/namespace',
 };
+
+// Standard events a headless desktop browser doesn't expose: touch handlers
+// appear only with touch support ('ontouchstart' in window is the classic
+// feature-detect). Listed explicitly so they validate, and excluded from the
+// strict browser-match in events.test.js.
+export const CONDITIONAL_EVENTS = [
+    'ontouchcancel', 'ontouchend', 'ontouchmove', 'ontouchstart',
+];
+
+// Platform event surface, derived from the browser (property-information's
+// event data is incomplete — it misses pointer/touch/animation/etc.).
+// `global` = on* handlers present on every element (GlobalEventHandlers +
+// DocumentAndElementEventHandlers, plus CONDITIONAL_EVENTS); `perTag` =
+// element-specific extras (media EME/PiP, the window handlers reflected on
+// body/frameset). Browser-validated and regenerated in events.test.js.
+export const EVENTS = {
+    global: CONDITIONAL_EVENTS.concat(`
+        onabort onanimationcancel onanimationend onanimationiteration onanimationstart
+        onauxclick onbeforecopy onbeforecut onbeforeinput onbeforematch onbeforepaste
+        onbeforetoggle onbeforexrselect onblur oncancel oncanplay oncanplaythrough
+        onchange onclick onclose oncommand oncontentvisibilityautostatechange oncontextlost
+        oncontextmenu oncontextrestored oncopy oncuechange oncut ondblclick ondrag ondragend
+        ondragenter ondragleave ondragover ondragstart ondrop ondurationchange onemptied
+        onended onerror onfocus onformdata onfullscreenchange onfullscreenerror
+        ongotpointercapture oninput oninvalid onkeydown onkeypress onkeyup onload
+        onloadeddata onloadedmetadata onloadstart onlostpointercapture onmousedown
+        onmouseenter onmouseleave onmousemove onmouseout onmouseover onmouseup onmousewheel
+        onpaste onpause onplay onplaying onpointercancel onpointerdown onpointerenter
+        onpointerleave onpointermove onpointerout onpointerover onpointerrawupdate onpointerup
+        onprogress onratechange onreset onresize onscroll onscrollend onscrollsnapchange
+        onscrollsnapchanging onsearch onsecuritypolicyviolation onseeked onseeking onselect
+        onselectionchange onselectstart onslotchange onstalled onsubmit onsuspend ontimeupdate
+        ontoggle ontransitioncancel ontransitionend ontransitionrun ontransitionstart
+        onvolumechange onwaiting onwebkitanimationend onwebkitanimationiteration
+        onwebkitanimationstart onwebkitfullscreenchange onwebkitfullscreenerror
+        onwebkittransitionend onwheel
+    `.split(/\s+/).filter(Boolean)),
+    perTag: {
+        audio: ['onencrypted', 'onwaitingforkey'],
+        video: ['onencrypted', 'onenterpictureinpicture', 'onleavepictureinpicture', 'onwaitingforkey'],
+        body: WINDOW_EVENTS(),
+        frameset: WINDOW_EVENTS(),
+    },
+};
+
+// Window event handlers, reflected on body/frameset (WindowEventHandlers).
+function WINDOW_EVENTS() {
+    return [
+        'onafterprint', 'onbeforeprint', 'onbeforeunload', 'ongamepadconnected',
+        'ongamepaddisconnected', 'onhashchange', 'onlanguagechange', 'onmessage',
+        'onmessageerror', 'onoffline', 'ononline', 'onpagehide', 'onpageshow',
+        'onpopstate', 'onrejectionhandled', 'onstorage', 'onunhandledrejection', 'onunload',
+    ];
+}

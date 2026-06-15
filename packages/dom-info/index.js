@@ -5,7 +5,7 @@ import { mathmlTagNames } from 'mathml-tag-names';
 import { htmlElementAttributes } from 'html-element-attributes';
 import {
     CORRECTIONS, ATTR_ONLY, ENUMERATED, NON_STATIC, FORCE_ATTRIBUTE, NAMESPACE,
-    PROPERTY_ONLY,
+    PROPERTY_ONLY, EVENTS,
 } from './data.js';
 
 /**
@@ -24,6 +24,10 @@ import {
 const htmlElements = new Set(htmlTagNames);
 const knownTags = new Set([...htmlTagNames, ...svgTagNames, ...mathmlTagNames]);
 const globalAttributes = new Set(htmlElementAttributes['*']);
+
+const globalEvents = new Set(EVENTS.global);
+const tagEvents = new Map(Object.entries(EVENTS.perTag).map(([t, ns]) => [t, new Set(ns)]));
+const allEvents = new Set([...EVENTS.global, ...Object.values(EVENTS.perTag).flat()]);
 
 // Element questions ---------------------------------------------------------
 
@@ -137,12 +141,20 @@ export function resolveStatic(rawName, tagName) {
  *   | { kind: 'attributeNS', name, ns } | { kind: 'error', message }
  */
 export function resolveDynamic(rawName, tagName) {
-    // Events: the on* property channel; camelCase is React, not the platform.
+    // Events: the on* property channel. camelCase is React, the name must be a
+    // real DOM event, and per-tag events (media EME/PiP, window handlers) are
+    // scoped to their element.
     if(rawName.length > 2 && rawName[0] === 'o' && rawName[1] === 'n') {
         if(/[A-Z]/.test(rawName[2])) {
             return error(`"${rawName}" is not a platform event — the DOM event property is lowercase: "${rawName.toLowerCase()}".`);
         }
-        return { kind: 'property', name: rawName };
+        if(globalEvents.has(rawName) || tagEvents.get(tagName)?.has(rawName)) {
+            return { kind: 'property', name: rawName };
+        }
+        if(allEvents.has(rawName)) {
+            return error(`"${rawName}" is not an event on <${tagName}> — it belongs to another element.`);
+        }
+        return error(`"${rawName}" is not a recognized DOM event.`);
     }
 
     const info = find(html, rawName);

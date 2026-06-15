@@ -62,6 +62,19 @@ describe('resolveDynamic — the DOM API', () => {
         expect(resolveDynamic('onclick', 'button')).toEqual({ kind: 'property', name: 'onclick' });
         expect(resolveDynamic('onClick', 'button')).toMatchObject({ kind: 'error' });
     });
+    test('events must be real (onfoo is a typo, not a handler)', () => {
+        expect(resolveDynamic('onpointerdown', 'div')).toEqual({ kind: 'property', name: 'onpointerdown' });
+        expect(resolveDynamic('ontouchstart', 'div')).toEqual({ kind: 'property', name: 'ontouchstart' }); // capability-gated
+        expect(resolveDynamic('onfoo', 'div')).toMatchObject({ kind: 'error' });
+        expect(resolveDynamic('onfoo', 'div').message).toMatch(/not a recognized DOM event/);
+    });
+    test('events are per-tag — window/media handlers are element-scoped', () => {
+        expect(resolveDynamic('onhashchange', 'body')).toEqual({ kind: 'property', name: 'onhashchange' });
+        expect(resolveDynamic('onhashchange', 'div')).toMatchObject({ kind: 'error' });
+        expect(resolveDynamic('onhashchange', 'div').message).toMatch(/belongs to another element/);
+        expect(resolveDynamic('onencrypted', 'video')).toEqual({ kind: 'property', name: 'onencrypted' });
+        expect(resolveDynamic('onencrypted', 'div')).toMatchObject({ kind: 'error' });
+    });
     test('enumerated → setAttribute', () => {
         expect(resolveDynamic('spellcheck', 'div')).toEqual({ kind: 'attribute', name: 'spellcheck' });
         expect(resolveDynamic('draggable', 'div')).toEqual({ kind: 'attribute', name: 'draggable' });
