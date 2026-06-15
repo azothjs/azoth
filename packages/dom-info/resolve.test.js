@@ -72,6 +72,34 @@ describe('resolveDynamic — the DOM API', () => {
     });
 });
 
+describe('per-tag validity', () => {
+    test('a recognized attribute on the wrong element → error', () => {
+        expect(resolveDynamic('href', 'div')).toMatchObject({ kind: 'error' });
+        expect(resolveDynamic('href', 'div').message).toMatch(/not a valid attribute on <div>/);
+        expect(resolveDynamic('value', 'div')).toMatchObject({ kind: 'error' });
+        expect(resolveStatic('href', 'div')).toMatchObject({ kind: 'error' });
+        expect(resolveStatic('value', 'p')).toMatchObject({ kind: 'error' });
+    });
+    test('the same attribute on its element resolves', () => {
+        expect(resolveDynamic('href', 'a')).toEqual({ kind: 'property', name: 'href' });
+        expect(resolveDynamic('value', 'input')).toEqual({ kind: 'property', name: 'value' });
+        expect(resolveStatic('href', 'a')).toEqual({ kind: 'attribute', name: 'href', boolean: false });
+    });
+    test('global attributes are valid on any element', () => {
+        expect(resolveDynamic('id', 'span')).toEqual({ kind: 'property', name: 'id' });
+        expect(resolveDynamic('className', 'section')).toEqual({ kind: 'property', name: 'className' });
+        expect(resolveStatic('class', 'section')).toEqual({ kind: 'attribute', name: 'class', boolean: false });
+    });
+    test('custom/unknown elements are not constrained', () => {
+        expect(resolveDynamic('href', 'my-widget')).toEqual({ kind: 'property', name: 'href' });
+        expect(resolveStatic('href', 'my-widget')).toEqual({ kind: 'attribute', name: 'href', boolean: false });
+    });
+    test('unknown names stay lenient (not a per-tag error)', () => {
+        expect(resolveDynamic('fooBar', 'div')).toEqual({ kind: 'attribute', name: 'fooBar' });
+        expect(resolveStatic('foo-bar', 'div')).toEqual({ kind: 'attribute', name: 'foo-bar', boolean: false });
+    });
+});
+
 describe('element questions', () => {
     test('custom element = tag with a hyphen', () => {
         expect(isCustomElement('my-element')).toBe(true);

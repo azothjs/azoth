@@ -1,5 +1,6 @@
 import { find, html } from 'property-information';
 import { htmlTagNames } from 'html-tag-names';
+import { htmlElementAttributes } from 'html-element-attributes';
 import {
     CORRECTIONS, ATTR_ONLY, ENUMERATED, NON_STATIC, FORCE_ATTRIBUTE, NAMESPACE,
 } from './data.js';
@@ -18,6 +19,7 @@ import {
  */
 
 const knownTags = new Set(htmlTagNames);
+const globalAttributes = new Set(htmlElementAttributes['*']);
 
 // Element questions ---------------------------------------------------------
 
@@ -48,6 +50,16 @@ function isPropertyLess(rawName, info) {
     return /^(?:data|aria)-/.test(rawName) || ATTR_ONLY.has(rawName) || !info.defined;
 }
 
+// Is this markup attribute allowed on this element? Validates a recognized
+// platform attribute against the element's attribute set (globals + the
+// per-tag list). Unknown/custom elements aren't constrained; data-*/aria-*,
+// events, and unknown names are filtered out before this is reached.
+function isAttributeForTag(attribute, tagName) {
+    if(!isKnownElement(tagName)) return true;
+    return globalAttributes.has(attribute)
+        || (htmlElementAttributes[tagName]?.includes(attribute) ?? false);
+}
+
 /**
  * Static binding (`attr="value"`) → HTML markup.
  *   { kind: 'attribute', name, boolean } | { kind: 'promote', property }
@@ -64,6 +76,11 @@ export function resolveStatic(rawName, tagName) {
     const info = find(html, rawName);
     if(info.space === 'xlink' || info.space === 'xml' || isPropertyLess(rawName, info)) {
         return { kind: 'attribute', name: info.attribute, boolean: !!info.boolean };
+    }
+
+    // Recognized platform attribute, but not allowed on this element.
+    if(!isAttributeForTag(info.attribute, tagName)) {
+        return error(`"${rawName}" is not a valid attribute on <${tagName}>.`);
     }
 
     // A property-spelled name with a static value is a channel mismatch.
@@ -102,6 +119,11 @@ export function resolveDynamic(rawName, tagName) {
     // No property to align to, so no divergent/Reactism check applies.
     if(isPropertyLess(rawName, info)) {
         return { kind: 'attribute', name: info.attribute };
+    }
+
+    // Recognized platform attribute, but not allowed on this element.
+    if(!isAttributeForTag(info.attribute, tagName)) {
+        return error(`"${rawName}" is not a valid attribute on <${tagName}>.`);
     }
 
     // Quirks that force the attribute despite a property existing, and
