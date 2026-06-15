@@ -148,6 +148,15 @@ describe('decomposition playground', () => {
             .toThrowError(/"href" is not a valid attribute on <div>/);
     });
 
+    test('unknown tags error; HTML/SVG/MathML and custom elements compile', ({ expect }) => {
+        // A lowercase, non-hyphen tag must be a known platform element.
+        expect(() => compile(`const t = <foo>x</foo>;`))
+            .toThrowError(/<foo> is not a known HTML, SVG, or MathML element/);
+        // Known platform elements (incl. SVG) and custom elements are fine.
+        expect(() => compile(`const t = <svg><circle/></svg>;`)).not.toThrow();
+        expect(() => compile(`const t = <my-widget>x</my-widget>;`)).not.toThrow();
+    });
+
     test('multi-fragment function — two templates, one function', ({ expect }) => {
         const input = `
             function Page({ title, content }) {

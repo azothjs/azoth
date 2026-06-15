@@ -1,5 +1,7 @@
 import { find, html } from 'property-information';
 import { htmlTagNames } from 'html-tag-names';
+import { svgTagNames } from 'svg-tag-names';
+import { mathmlTagNames } from 'mathml-tag-names';
 import { htmlElementAttributes } from 'html-element-attributes';
 import {
     CORRECTIONS, ATTR_ONLY, ENUMERATED, NON_STATIC, FORCE_ATTRIBUTE, NAMESPACE,
@@ -18,7 +20,8 @@ import {
  * when the author writes a React-only name, we error toward the platform name.
  */
 
-const knownTags = new Set(htmlTagNames);
+const htmlElements = new Set(htmlTagNames);
+const knownTags = new Set([...htmlTagNames, ...svgTagNames, ...mathmlTagNames]);
 const globalAttributes = new Set(htmlElementAttributes['*']);
 
 // Element questions ---------------------------------------------------------
@@ -27,8 +30,16 @@ export function isCustomElement(tag) {
     return tag.includes('-');
 }
 
+// A known platform element: HTML, SVG, or MathML.
 export function isKnownElement(tag) {
     return knownTags.has(tag);
+}
+
+// HTML-namespace element. Attribute resolution is HTML-only knowledge — we
+// have no SVG/MathML attribute data yet — so SVG/MathML elements are not
+// attribute-constrained, the same as custom elements.
+function isHtmlElement(tag) {
+    return htmlElements.has(tag);
 }
 
 // Prop questions ------------------------------------------------------------
@@ -55,18 +66,19 @@ function isPrefixedOrAttrOnly(rawName) {
 
 // Is this markup attribute allowed on this element? Validates a recognized
 // platform attribute against the element's attribute set (globals + the
-// per-tag list). Custom/unknown elements aren't constrained.
+// per-tag list). Non-HTML (SVG/MathML/custom) elements aren't constrained.
 function isAttributeForTag(attribute, tagName) {
-    if(!isKnownElement(tagName)) return true;
+    if(!isHtmlElement(tagName)) return true;
     return globalAttributes.has(attribute)
         || (htmlElementAttributes[tagName]?.includes(attribute) ?? false);
 }
 
-// Unknown name (not a recognized platform attribute). Custom elements and
-// unknown tags define their own attributes, so they stay lenient; a known
-// intrinsic rejects it (strict by default — a future config flag may relax).
+// Unknown name (not a recognized platform attribute). Non-HTML elements
+// (SVG/MathML/custom) define their own attributes, so they stay lenient; a
+// known HTML element rejects it (strict by default — a future config flag
+// may relax).
 function resolveUnknown(rawName, info, tagName) {
-    if(!isKnownElement(tagName)) return { kind: 'attribute', name: info.attribute };
+    if(!isHtmlElement(tagName)) return { kind: 'attribute', name: info.attribute };
     return error(`"${rawName}" is not a recognized attribute or property on <${tagName}>.`);
 }
 

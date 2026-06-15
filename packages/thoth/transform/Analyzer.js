@@ -1,4 +1,4 @@
-import { resolveDynamic, resolveStatic } from '@azothjs/dom-info';
+import { resolveDynamic, resolveStatic, isKnownElement } from '@azothjs/dom-info';
 import { BIND, Template } from './Template.js';
 import { voidElements } from './html.js';
 
@@ -277,6 +277,13 @@ function assessElement(node) {
     if(isComponent) {
         node.props = [];
         node.componentExpr = identifier;
+    }
+    // A lowercase, non-hyphen tag must be a known platform element.
+    else if(!isCustom && !isKnownElement(identifier.name)) {
+        throw new TypeError(
+            `<${identifier.name}> is not a known HTML, SVG, or MathML element. `
+            + `Custom elements need a hyphen (<my-${identifier.name}>); components are Capitalized.`
+        );
     }
 }
 

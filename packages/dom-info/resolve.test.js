@@ -117,9 +117,18 @@ describe('element questions', () => {
         expect(isCustomElement('my-element')).toBe(true);
         expect(isCustomElement('div')).toBe(false);
     });
-    test('known intrinsic elements', () => {
+    test('known elements span HTML, SVG, and MathML', () => {
         expect(isKnownElement('div')).toBe(true);
         expect(isKnownElement('input')).toBe(true);
+        expect(isKnownElement('path')).toBe(true);   // svg
+        expect(isKnownElement('circle')).toBe(true); // svg
+        expect(isKnownElement('math')).toBe(true);   // mathml
         expect(isKnownElement('notarealtag')).toBe(false);
+    });
+    test('SVG/MathML attributes are not constrained (no HTML data)', () => {
+        // We validate the tag, but have no SVG/MathML attribute data, so
+        // attributes route leniently rather than erroring.
+        expect(resolveDynamic('cx', 'circle')).toEqual({ kind: 'attribute', name: 'cx' });
+        expect(resolveStatic('d', 'path')).toEqual({ kind: 'attribute', name: 'd', boolean: false });
     });
 });

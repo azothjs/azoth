@@ -12,6 +12,8 @@
         "aria-attributes": "^2.0.1",
         "html-element-attributes": "^3.3.0",
         "html-tag-names": "^2.1.0",
-        "property-information": "^7.2.0"
+        "mathml-tag-names": "^4.0.0",
+        "property-information": "^7.2.0",
+        "svg-tag-names": "^3.0.1"
     }
 }
