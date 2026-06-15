@@ -1,7 +1,10 @@
 # Attributes and Properties — the platform-teaching model
 
-Status: design settled (2026-06-13). Implementation pending: a compile-time
-resolution table consumed by thoth's Analyzer + generators.
+Status: implemented (2026-06-15) in `@azothjs/dom-info`, consumed by thoth's
+Analyzer + generators. dom-info is the DOM-API authority — element, attribute,
+property, and event questions all resolve there, browser-validated against the
+pinned Chromium. Scope grew past attributes to **tags and events** (see those
+sections). One config flag (relax unknown-name strictness) is parked.
 
 ## Thesis: the split is the pedagogy
 
@@ -47,7 +50,11 @@ reverse (a `{…}` value never lands in the HTML markup):
 - **`NON_STATIC`** — `autofocus`, `muted`, `defaultValue`, `defaultChecked`:
   even a *static* value must be applied as a JS property (a cloned-template
   attribute won't take). A static value on these is promoted to a dynamic
-  property assignment.
+  property assignment. (`defaultValue`/`defaultChecked` are real IDL
+  properties that reflect the `value`/`checked` *attributes* — the initial
+  value — not React vocab. There's no `defaultvalue` markup attribute, so the
+  idiomatic static initial value is `value="…"`; `defaultValue={…}` is for the
+  rare *dynamic* initial value that must differ from the live value.)
 - **Property-less names** — `data-*`, `aria-*`, author-custom: a *dynamic*
   value has no property to set, so JS uses `setAttribute`. This is the only
   place a dynamic binding touches an attribute — via JS, never baked into
@@ -79,18 +86,29 @@ name. Exceptions:
 home base — the first stop for an attribute binding; `setAttribute` /
 `setAttributeNS` / `toggleAttribute` are the platform-required *adjustments*
 layered on where a property won't do. Resolving the name:
-1. `on*` event → property assignment (`node.onclick = fn`). See Events.
+1. `on*` event → property assignment (`node.onclick = fn`). Must be a real,
+   element-scoped event. See Events.
 2. SVG namespaced (`xlink:`, `xml:`) → `setAttributeNS`.
-3. enumerated — `spellcheck`, `draggable`, `translate`, `autocorrect` →
+3. `data-*`, `aria-*`, attribute-only names → `setAttribute` (no property).
+4. property-only IDL names (`defaultValue`, `defaultChecked`) → `node[prop] = x`.
+   Real properties with no attribute twin, so property-information can't see
+   them; element-scoped (input/textarea).
+5. an unknown name (not a recognized platform attribute/property) → **error**
+   on a known HTML element; lenient `setAttribute` on a custom/SVG/MathML
+   element (they define their own attributes). See rejects.
+6. a recognized attribute **not valid on this element** (`href` on `<div>`) →
+   **error**. See rejects.
+7. enumerated — `spellcheck`, `draggable`, `translate`, `autocorrect` →
    `setAttribute` with the string (NOT boolean: their value is the literal
    `"true"`/`"false"`, which a boolean property/presence would mis-coerce).
-4. boolean attribute (the curated list) → boolean property / `toggleAttribute`.
-5. a DOM **property** name → `node[prop] = x`. The author writes the property
-   spelling: `className`, `htmlFor`, `tabIndex`, `readOnly`, the camelCase
-   reflectors, plus live-state `value`/`checked`/`selected`/media. A *divergent
-   attribute* spelling used dynamically (`class={x}`, `readonly={x}`) is an
-   error (below) — it is **not** silently mapped to the property.
-6. property-less (`data-*`, `aria-*`, custom, attribute-only) → `setAttribute`.
+8. force-attribute quirks (`form`, `list`@input, media `width`/`height`,
+   `sandbox`@iframe) → `setAttribute` despite a property existing.
+9. boolean attribute (the curated list) → boolean property / `toggleAttribute`.
+10. a DOM **property** name → `node[prop] = x`. The author writes the property
+    spelling: `className`, `htmlFor`, `tabIndex`, `readOnly`, the camelCase
+    reflectors, plus live-state `value`/`checked`/`selected`/media. A *divergent
+    attribute* spelling used dynamically (`class={x}`, `readonly={x}`) is an
+    error (below) — it is **not** silently mapped to the property.
 
 ## What azoth rejects (educational errors)
 
@@ -107,6 +125,16 @@ DOM property?", not "does React use it?". Errors teach in platform terms.
   `readonly={x}` → error: a dynamic binding is a DOM property; use the property
   name (`className`, `htmlFor`, `readOnly`). Not silently mapped — the mismatch
   is taught, not hidden.
+- **unknown name on a known element** — `fooBar={x}` on `<div>` → error: not a
+  recognized attribute or property. (Custom/SVG/MathML elements stay lenient —
+  they define their own attributes. The parked config flag would relax this for
+  HTML too.)
+- **recognized attribute on the wrong element** — `href` on `<div>`, `value` on
+  `<p>` → error: real attribute, not valid here.
+- **unknown tag** — `<foo>` → error: not a known HTML/SVG/MathML element.
+  Custom elements need a hyphen (`<my-foo>`); components are Capitalized.
+- **non-event / mis-scoped event** — `onfoo={fn}` → not a real DOM event;
+  `onhashchange={fn}` on `<div>` → a window handler, belongs on `<body>`.
 
 `className` / `htmlFor` / `tabIndex` (used dynamically) and `class` / `for`
 (used statically) are **never** errors — they're the aligned forms.
@@ -144,6 +172,31 @@ Standard events have `on*` properties. Custom events and advanced needs
 `const el = <div/>; el.addEventListener('my-event', …)`. **No event
 delegation** — that's a parallel system away from the platform.
 
+The `on*` name is validated against the browser's event surface, not just
+the `on…` shape: `onfoo={fn}` errors (a typo, not a handler). property-
+information's event data is incomplete (misses pointer/touch/animation/etc.),
+so the set is **browser-derived** and pinned in dom-info, regenerated on a
+Chromium bump. Events are element-scoped like attributes: global handlers
+(`onclick`, `onpointerdown`) anywhere; window handlers (`onhashchange`,
+`onbeforeunload`) on `body`/`frameset`; media EME/PiP (`onencrypted`,
+`onenterpictureinpicture`) on `audio`/`video`. Touch handlers are capability-
+gated (absent on headless desktop Chromium), so they're listed explicitly and
+exempted from the strict browser-match.
+
+## Tags
+
+The element name is validated too. A lowercase, non-hyphen tag must be a known
+platform element — HTML, SVG, or MathML (`html-tag-names`, `svg-tag-names`,
+`mathml-tag-names`). `<foo>` is a compile error, matching the platform's stance
+(an unknown tag is an inert `HTMLUnknownElement`, not a thing you meant).
+
+Attribute resolution is HTML-only knowledge: SVG/MathML elements validate as
+*tags* but aren't attribute-constrained — we have no SVG/MathML attribute data,
+so their attributes route leniently (the same as custom elements). Correct SVG
+rendering also needs namespace handling (`createElementNS`); that lands with
+the SVG attribute data, later. Today `<svg>`/`<path>` compile but render in the
+HTML namespace.
+
 ## Components and custom elements
 
 - **Components** (capitalized): props are author-named object keys with no DOM
@@ -155,11 +208,25 @@ delegation** — that's a parallel system away from the platform.
 
 ## Data source
 
-Azoth owns the table (compile-time, no runtime dependency). The core is the
-**attribute↔property reflection map** — `property-information` carries exactly
-this (attribute name, property name, boolean/enumerated flags) — supplemented
-by the framework constants (Solid `dom-expressions/constants.js`: booleans,
-SVG elements/namespaces; Vue `shouldSetAsProp`: enumerated, force-attribute
-quirks; Svelte `NON_STATIC_PROPERTIES`), validated against the `dom-info`
-browser audit. Reflection rules live in spec prose, not IDL; the relevant
-tables are ~40–80 names, so curated + audited beats generated.
+`@azothjs/dom-info` owns the facts (compile-time, no runtime dependency).
+Layers:
+
+- **`property-information`** — the attribute↔property reflection map (attribute
+  name, React/hast property name, boolean/enumerated flags). Its `.property` is
+  the *React* name, not always the real DOM property, so it's the backbone for
+  reflection + Reactism detection, not the final word.
+- **`html-element-attributes`** — per-element attribute sets (globals + per-tag)
+  for the wrong-element check.
+- **`html-tag-names` / `svg-tag-names` / `mathml-tag-names`** — known tags.
+- **Browser-validated data** (`data.js`, gated by `dom-props.test.js` /
+  `events.test.js` against the pinned Chromium): `CORRECTIONS` (the real DOM
+  property where property-information's React name diverges — `srcset` not
+  `srcSet`), `PROPERTY_ONLY` (`defaultValue`/`defaultChecked`), and the
+  `EVENTS` surface (property-information's event data is too incomplete to
+  trust). The browser is the authority; the test regenerates on a bump.
+- **Stated quirks** — enumerated, `NON_STATIC`, `FORCE_ATTRIBUTE`, namespaces
+  (synthesized from Solid `dom-expressions/constants.js`, Vue `shouldSetAsProp`,
+  Svelte `NON_STATIC_PROPERTIES`).
+
+Reflection rules live in spec prose, not IDL; the relevant tables are ~40–80
+names, so curated + browser-audited beats generated.
