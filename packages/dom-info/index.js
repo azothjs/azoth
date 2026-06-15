@@ -46,18 +46,28 @@ function isForceAttribute(attribute, tagName) {
     return scope === true || (scope !== undefined && scope.has(tagName));
 }
 
-function isPropertyLess(rawName, info) {
-    return /^(?:data|aria)-/.test(rawName) || ATTR_ONLY.has(rawName) || !info.defined;
+// Universally-valid attribute spellings with no property to align to →
+// setAttribute on any element. data-*/aria-* by prefix, plus the browser-
+// verified attr-only names (microdata, element identity, …).
+function isPrefixedOrAttrOnly(rawName) {
+    return /^(?:data|aria)-/.test(rawName) || ATTR_ONLY.has(rawName);
 }
 
 // Is this markup attribute allowed on this element? Validates a recognized
 // platform attribute against the element's attribute set (globals + the
-// per-tag list). Unknown/custom elements aren't constrained; data-*/aria-*,
-// events, and unknown names are filtered out before this is reached.
+// per-tag list). Custom/unknown elements aren't constrained.
 function isAttributeForTag(attribute, tagName) {
     if(!isKnownElement(tagName)) return true;
     return globalAttributes.has(attribute)
         || (htmlElementAttributes[tagName]?.includes(attribute) ?? false);
+}
+
+// Unknown name (not a recognized platform attribute). Custom elements and
+// unknown tags define their own attributes, so they stay lenient; a known
+// intrinsic rejects it (strict by default — a future config flag may relax).
+function resolveUnknown(rawName, info, tagName) {
+    if(!isKnownElement(tagName)) return { kind: 'attribute', name: info.attribute };
+    return error(`"${rawName}" is not a recognized attribute or property on <${tagName}>.`);
 }
 
 /**
@@ -70,12 +80,25 @@ export function resolveStatic(rawName, tagName) {
         return error(`Event handlers are dynamic — write ${rawName}={handler}, not a static string.`);
     }
     if(NON_STATIC.has(rawName.toLowerCase())) {
-        return { kind: 'promote', property: realProperty(find(html, rawName)) };
+        const info = find(html, rawName);
+        // Recognized NON_STATIC names are still element-scoped (muted is
+        // media-only). Names property-information doesn't define (defaultValue,
+        // defaultChecked — IDL props, not markup) skip the per-tag check.
+        if(info.defined && !isAttributeForTag(info.attribute, tagName)) {
+            return error(`"${rawName}" is not a valid attribute on <${tagName}>.`);
+        }
+        return { kind: 'promote', property: realProperty(info) };
     }
 
     const info = find(html, rawName);
-    if(info.space === 'xlink' || info.space === 'xml' || isPropertyLess(rawName, info)) {
+    if(info.space === 'xlink' || info.space === 'xml' || isPrefixedOrAttrOnly(rawName)) {
         return { kind: 'attribute', name: info.attribute, boolean: !!info.boolean };
+    }
+    if(!info.defined) {
+        const unknown = resolveUnknown(rawName, info, tagName);
+        return unknown.kind === 'error'
+            ? unknown
+            : { kind: 'attribute', name: info.attribute, boolean: false };
     }
 
     // Recognized platform attribute, but not allowed on this element.
@@ -115,10 +138,13 @@ export function resolveDynamic(rawName, tagName) {
         return { kind: 'attributeNS', name: info.attribute, ns: NAMESPACE[info.space] };
     }
 
-    // Property-less (data-*/aria-*, custom/unknown, attr-only) → setAttribute.
-    // No property to align to, so no divergent/Reactism check applies.
-    if(isPropertyLess(rawName, info)) {
+    // data-*/aria-* and attr-only names → setAttribute on any element.
+    if(isPrefixedOrAttrOnly(rawName)) {
         return { kind: 'attribute', name: info.attribute };
+    }
+    // Unknown name → strict on known intrinsics, lenient on custom elements.
+    if(!info.defined) {
+        return resolveUnknown(rawName, info, tagName);
     }
 
     // Recognized platform attribute, but not allowed on this element.

@@ -28,6 +28,11 @@ describe('resolveStatic — markup attributes', () => {
         expect(resolveStatic('autofocus', 'input')).toMatchObject({ kind: 'promote' });
         expect(resolveStatic('muted', 'video')).toMatchObject({ kind: 'promote' });
     });
+    test('NON_STATIC promotion is per-tag — muted is media-only', () => {
+        expect(resolveStatic('muted', 'div')).toMatchObject({ kind: 'error' });
+        expect(resolveStatic('muted', 'div').message).toMatch(/not a valid attribute on <div>/);
+        expect(resolveStatic('autofocus', 'div')).toMatchObject({ kind: 'promote' }); // global
+    });
     test('static event handler → error', () => {
         expect(resolveStatic('onclick', 'button')).toMatchObject({ kind: 'error' });
     });
@@ -61,10 +66,9 @@ describe('resolveDynamic — the DOM API', () => {
         expect(resolveDynamic('spellcheck', 'div')).toEqual({ kind: 'attribute', name: 'spellcheck' });
         expect(resolveDynamic('draggable', 'div')).toEqual({ kind: 'attribute', name: 'draggable' });
     });
-    test('property-less / unknown → setAttribute', () => {
+    test('data-*/aria-* → setAttribute', () => {
         expect(resolveDynamic('data-id', 'div')).toEqual({ kind: 'attribute', name: 'data-id' });
         expect(resolveDynamic('aria-label', 'div')).toEqual({ kind: 'attribute', name: 'aria-label' });
-        expect(resolveDynamic('fooBar', 'div')).toEqual({ kind: 'attribute', name: 'fooBar' });
     });
     test('force-attribute quirk → setAttribute despite a property', () => {
         expect(resolveDynamic('list', 'input')).toEqual({ kind: 'attribute', name: 'list' });
@@ -94,9 +98,17 @@ describe('per-tag validity', () => {
         expect(resolveDynamic('href', 'my-widget')).toEqual({ kind: 'property', name: 'href' });
         expect(resolveStatic('href', 'my-widget')).toEqual({ kind: 'attribute', name: 'href', boolean: false });
     });
-    test('unknown names stay lenient (not a per-tag error)', () => {
-        expect(resolveDynamic('fooBar', 'div')).toEqual({ kind: 'attribute', name: 'fooBar' });
-        expect(resolveStatic('foo-bar', 'div')).toEqual({ kind: 'attribute', name: 'foo-bar', boolean: false });
+});
+
+describe('unrecognized names — strict on intrinsics, lenient on custom', () => {
+    test('unknown name on a known intrinsic → error', () => {
+        expect(resolveDynamic('fooBar', 'div')).toMatchObject({ kind: 'error' });
+        expect(resolveDynamic('fooBar', 'div').message).toMatch(/not a recognized attribute or property on <div>/);
+        expect(resolveStatic('foo-bar', 'div')).toMatchObject({ kind: 'error' });
+    });
+    test('unknown name on a custom element → setAttribute (author-defined)', () => {
+        expect(resolveDynamic('fooBar', 'my-widget')).toEqual({ kind: 'attribute', name: 'fooBar' });
+        expect(resolveStatic('foo-bar', 'my-widget')).toEqual({ kind: 'attribute', name: 'foo-bar', boolean: false });
     });
 });
 
