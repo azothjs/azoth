@@ -54,6 +54,16 @@ export const ENUMERATED = new Set(['spellcheck', 'draggable', 'translate', 'auto
 // value is promoted to a dynamic property assignment.
 export const NON_STATIC = new Set(['autofocus', 'muted', 'defaultvalue', 'defaultchecked']);
 
+// Real IDL properties with no content-attribute twin, so property-information
+// (attribute-keyed) can't see them: defaultValue/defaultChecked reflect the
+// `value`/`checked` *attributes* (the initial value), distinct from the live
+// `value`/`checked` properties. Scoped to the elements that own them;
+// browser-validated in dom-props.test.js.
+export const PROPERTY_ONLY = {
+    defaultValue: new Set(['input', 'textarea']),
+    defaultChecked: new Set(['input']),
+};
+
 // The property exists but is read-only / side-effecting, so a dynamic binding
 // must use setAttribute. Tag-scoped; `true` = any element.
 export const FORCE_ATTRIBUTE = {

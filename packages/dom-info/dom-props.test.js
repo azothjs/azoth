@@ -3,7 +3,7 @@ import { htmlTagNames } from 'html-tag-names';
 import { htmlElementAttributes } from 'html-element-attributes';
 import { html, find } from 'property-information';
 import { ariaAttributes } from 'aria-attributes';
-import { ATTR_ONLY, CORRECTIONS, ENUMERATED } from './data.js';
+import { ATTR_ONLY, CORRECTIONS, ENUMERATED, PROPERTY_ONLY } from './data.js';
 import { isCustomElement, isKnownElement } from './index.js';
 
 /**
@@ -120,5 +120,15 @@ describe('custom elements', () => {
     test('a hyphenated tag is a custom element, not a known intrinsic', ({ expect }) => {
         expect(isCustomElement('my-element')).toBe(true);
         expect(isKnownElement('my-element')).toBe(false);
+    });
+});
+
+// PROPERTY_ONLY names have no attribute twin, so they can't be probed through
+// the attribute loops above. Confirm each is a real property on its element(s).
+describe.each(Object.entries(PROPERTY_ONLY))('property-only %s', (prop, tags) => {
+    describe.each([...tags])('%s', tag => {
+        test(`is a real property of <${tag}>`, ({ expect }) => {
+            expect(prop in document.createElement(tag)).toBe(true);
+        });
     });
 });

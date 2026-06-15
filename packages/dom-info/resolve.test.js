@@ -74,6 +74,15 @@ describe('resolveDynamic — the DOM API', () => {
         expect(resolveDynamic('list', 'input')).toEqual({ kind: 'attribute', name: 'list' });
         expect(resolveDynamic('width', 'img')).toEqual({ kind: 'attribute', name: 'width' });
     });
+    test('property-only IDL names (defaultValue) → property, element-scoped', () => {
+        // Real properties property-information can't see (no attribute twin).
+        expect(resolveDynamic('defaultValue', 'input')).toEqual({ kind: 'property', name: 'defaultValue' });
+        expect(resolveDynamic('defaultValue', 'textarea')).toEqual({ kind: 'property', name: 'defaultValue' });
+        expect(resolveDynamic('defaultChecked', 'input')).toEqual({ kind: 'property', name: 'defaultChecked' });
+        // Not valid off their elements.
+        expect(resolveDynamic('defaultValue', 'div')).toMatchObject({ kind: 'error' });
+        expect(resolveStatic('defaultValue', 'div')).toMatchObject({ kind: 'error' });
+    });
 });
 
 describe('per-tag validity', () => {

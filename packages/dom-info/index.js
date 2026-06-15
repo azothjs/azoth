@@ -5,6 +5,7 @@ import { mathmlTagNames } from 'mathml-tag-names';
 import { htmlElementAttributes } from 'html-element-attributes';
 import {
     CORRECTIONS, ATTR_ONLY, ENUMERATED, NON_STATIC, FORCE_ATTRIBUTE, NAMESPACE,
+    PROPERTY_ONLY,
 } from './data.js';
 
 /**
@@ -93,12 +94,13 @@ export function resolveStatic(rawName, tagName) {
     }
     if(NON_STATIC.has(rawName.toLowerCase())) {
         const info = find(html, rawName);
-        // Recognized NON_STATIC names are still element-scoped (muted is
-        // media-only). Names property-information doesn't define (defaultValue,
-        // defaultChecked — IDL props, not markup) skip the per-tag check.
-        if(info.defined && !isAttributeForTag(info.attribute, tagName)) {
-            return error(`"${rawName}" is not a valid attribute on <${tagName}>.`);
-        }
+        // NON_STATIC names are element-scoped: attribute-backed ones (muted)
+        // via the per-tag attribute set, property-only ones (defaultValue)
+        // via PROPERTY_ONLY. Non-HTML elements aren't constrained.
+        const valid = info.defined
+            ? isAttributeForTag(info.attribute, tagName)
+            : (PROPERTY_ONLY[rawName]?.has(tagName) ?? !isHtmlElement(tagName));
+        if(!valid) return error(`"${rawName}" is not a valid attribute on <${tagName}>.`);
         return { kind: 'promote', property: realProperty(info) };
     }
 
@@ -153,6 +155,11 @@ export function resolveDynamic(rawName, tagName) {
     // data-*/aria-* and attr-only names → setAttribute on any element.
     if(isPrefixedOrAttrOnly(rawName)) {
         return { kind: 'attribute', name: info.attribute };
+    }
+    // Real IDL property property-information can't see (no attribute twin),
+    // scoped to its element(s): defaultValue/defaultChecked.
+    if(PROPERTY_ONLY[rawName]?.has(tagName)) {
+        return { kind: 'property', name: rawName };
     }
     // Unknown name → strict on known intrinsics, lenient on custom elements.
     if(!info.defined) {
