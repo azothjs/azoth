@@ -134,6 +134,33 @@ describe('unrecognized names — strict on intrinsics, lenient on custom', () =>
     });
 });
 
+describe('SVG namespace — setAttribute, case-preserved', () => {
+    // SVG DOM props are read-only SVGAnimated*, so dynamic bindings are always
+    // setAttribute. Names are case-sensitive; xlink:/xml: → setAttributeNS.
+    test('dynamic SVG attributes → setAttribute, case preserved', () => {
+        expect(resolveDynamic('viewBox', 'svg', 'svg')).toEqual({ kind: 'attribute', name: 'viewBox' });
+        expect(resolveDynamic('cx', 'circle', 'svg')).toEqual({ kind: 'attribute', name: 'cx' });
+        expect(resolveDynamic('stroke-width', 'path', 'svg')).toEqual({ kind: 'attribute', name: 'stroke-width' });
+        expect(resolveDynamic('fill', 'rect', 'svg')).toEqual({ kind: 'attribute', name: 'fill' });
+    });
+    test('xlink:/xml: → setAttributeNS', () => {
+        expect(resolveDynamic('xlink:href', 'use', 'svg'))
+            .toEqual({ kind: 'attributeNS', name: 'xlink:href', ns: 'http://www.w3.org/1999/xlink' });
+    });
+    test('SVG uses the markup name — a property spelling errors toward it', () => {
+        expect(resolveDynamic('className', 'svg', 'svg')).toMatchObject({ kind: 'error' });
+        expect(resolveDynamic('className', 'svg', 'svg').message).toMatch(/write "class", not "className"/);
+        expect(resolveDynamic('class', 'svg', 'svg')).toEqual({ kind: 'attribute', name: 'class' });
+    });
+    test('events work on SVG (global handlers)', () => {
+        expect(resolveDynamic('onclick', 'circle', 'svg')).toEqual({ kind: 'property', name: 'onclick' });
+    });
+    test('static SVG attributes stay markup', () => {
+        expect(resolveStatic('viewBox', 'svg', 'svg')).toEqual({ kind: 'attribute', name: 'viewBox', boolean: false });
+        expect(resolveStatic('className', 'svg', 'svg')).toMatchObject({ kind: 'error' });
+    });
+});
+
 describe('element questions', () => {
     test('custom element = tag with a hyphen', () => {
         expect(isCustomElement('my-element')).toBe(true);

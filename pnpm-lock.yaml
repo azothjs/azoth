@@ -98,6 +98,9 @@ importers:
       property-information:
         specifier: ^7.2.0
         version: 7.2.0
+      svg-element-attributes:
+        specifier: ^2.1.0
+        version: 2.1.0
       svg-tag-names:
         specifier: ^3.0.1
         version: 3.0.1
@@ -3159,6 +3162,9 @@ packages:
   supports-color@7.2.0:
     resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
     engines: {node: '>=8'}
+
+  svg-element-attributes@2.1.0:
+    resolution: {integrity: sha512-Tq0WY3uGw/rltlSlAsro/WWqbg5oNiaRwzq13I9H1m/dYjMjesuxKV76dGSlpacjslGyAis8VIwqPXaUUXw26w==}
 
   svg-tag-names@3.0.1:
     resolution: {integrity: sha512-R5EDS44RQSOwwKIOOUZLKZggMeFL8fDSSZr1hVK5Z0KkyuGVOZfyepBZDkPu/aoL+hSOysxxvAk8uN4yN2LOMQ==}
@@ -6882,6 +6888,8 @@ snapshots:
   supports-color@7.2.0:
     dependencies:
       has-flag: 4.0.0
+
+  svg-element-attributes@2.1.0: {}
 
   svg-tag-names@3.0.1: {}
 

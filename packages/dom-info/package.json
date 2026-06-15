@@ -14,6 +14,7 @@
         "html-tag-names": "^2.1.0",
         "mathml-tag-names": "^4.0.0",
         "property-information": "^7.2.0",
+        "svg-element-attributes": "^2.1.0",
         "svg-tag-names": "^3.0.1"
     }
 }

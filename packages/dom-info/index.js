@@ -1,4 +1,4 @@
-import { find, html } from 'property-information';
+import { find, html, svg } from 'property-information';
 import { htmlTagNames } from 'html-tag-names';
 import { svgTagNames } from 'svg-tag-names';
 import { mathmlTagNames } from 'mathml-tag-names';
@@ -51,6 +51,24 @@ function isHtmlElement(tag) {
 
 const error = message => ({ kind: 'error', message });
 
+const isEventName = rawName => rawName.length > 2 && rawName[0] === 'o' && rawName[1] === 'n';
+
+// Events are namespace-agnostic (GlobalEventHandlers live on every element).
+// camelCase is React; the name must be a real DOM event; per-tag events
+// (window handlers, media EME/PiP) are element-scoped.
+function resolveEvent(rawName, tagName) {
+    if(/[A-Z]/.test(rawName[2])) {
+        return error(`"${rawName}" is not a platform event — the DOM event property is lowercase: "${rawName.toLowerCase()}".`);
+    }
+    if(globalEvents.has(rawName) || tagEvents.get(tagName)?.has(rawName)) {
+        return { kind: 'property', name: rawName };
+    }
+    if(allEvents.has(rawName)) {
+        return error(`"${rawName}" is not an event on <${tagName}> — it belongs to another element.`);
+    }
+    return error(`"${rawName}" is not a recognized DOM event.`);
+}
+
 // The real DOM property name — the correction wins over property-information's
 // React `.property`.
 function realProperty(info) {
@@ -87,15 +105,47 @@ function resolveUnknown(rawName, info, tagName) {
     return error(`"${rawName}" is not a recognized attribute or property on <${tagName}>.`);
 }
 
+// SVG resolution -------------------------------------------------------------
+// SVG DOM properties are read-only SVGAnimated* wrappers (assigning a primitive
+// throws or no-ops), so dynamic SVG bindings are ALWAYS setAttribute — never a
+// property. Names are case-sensitive (viewBox, not viewbox) and property-
+// information's `svg` schema preserves casing + carries xlink/xml namespaces.
+// The author writes the markup name; a divergent property spelling errors
+// toward it. Per-element attribute validation lands in Phase 3.
+
+function resolveSvgDynamic(rawName, tagName) {
+    const info = find(svg, rawName);
+    if(info.space === 'xlink' || info.space === 'xml') {
+        return { kind: 'attributeNS', name: info.attribute, ns: NAMESPACE[info.space] };
+    }
+    if(info.defined && rawName !== info.attribute) {
+        return error(`SVG uses the markup attribute name — write "${info.attribute}", not "${rawName}".`);
+    }
+    return { kind: 'attribute', name: info.attribute };
+}
+
+function resolveSvgStatic(rawName, tagName) {
+    const info = find(svg, rawName);
+    if(info.defined && rawName !== info.attribute
+        && info.space !== 'xlink' && info.space !== 'xml') {
+        return error(`SVG uses the markup attribute name — write "${info.attribute}", not "${rawName}".`);
+    }
+    return { kind: 'attribute', name: info.attribute, boolean: !!info.boolean };
+}
+
 /**
- * Static binding (`attr="value"`) → HTML markup.
+ * Static binding (`attr="value"`) → markup.
  *   { kind: 'attribute', name, boolean } | { kind: 'promote', property }
  *   | { kind: 'error', message }
  */
-export function resolveStatic(rawName, tagName) {
-    if(rawName.length > 2 && rawName[0] === 'o' && rawName[1] === 'n') {
+export function resolveStatic(rawName, tagName, namespace = 'html') {
+    if(isEventName(rawName)) {
         return error(`Event handlers are dynamic — write ${rawName}={handler}, not a static string.`);
     }
+    if(namespace === 'svg') return resolveSvgStatic(rawName, tagName);
+    // foreign (MathML / non-HTML islands): no attribute data — emit verbatim.
+    if(namespace !== 'html') return { kind: 'attribute', name: rawName, boolean: false };
+
     if(NON_STATIC.has(rawName.toLowerCase())) {
         const info = find(html, rawName);
         // NON_STATIC names are element-scoped: attribute-backed ones (muted)
@@ -140,21 +190,16 @@ export function resolveStatic(rawName, tagName) {
  *   { kind: 'property', name } | { kind: 'attribute', name }
  *   | { kind: 'attributeNS', name, ns } | { kind: 'error', message }
  */
-export function resolveDynamic(rawName, tagName) {
-    // Events: the on* property channel. camelCase is React, the name must be a
-    // real DOM event, and per-tag events (media EME/PiP, window handlers) are
-    // scoped to their element.
-    if(rawName.length > 2 && rawName[0] === 'o' && rawName[1] === 'n') {
-        if(/[A-Z]/.test(rawName[2])) {
-            return error(`"${rawName}" is not a platform event — the DOM event property is lowercase: "${rawName.toLowerCase()}".`);
-        }
-        if(globalEvents.has(rawName) || tagEvents.get(tagName)?.has(rawName)) {
-            return { kind: 'property', name: rawName };
-        }
-        if(allEvents.has(rawName)) {
-            return error(`"${rawName}" is not an event on <${tagName}> — it belongs to another element.`);
-        }
-        return error(`"${rawName}" is not a recognized DOM event.`);
+export function resolveDynamic(rawName, tagName, namespace = 'html') {
+    if(isEventName(rawName)) return resolveEvent(rawName, tagName);
+    if(namespace === 'svg') return resolveSvgDynamic(rawName, tagName);
+    // foreign (MathML / non-HTML islands): no attribute data — setAttribute,
+    // honoring xlink/xml namespaces.
+    if(namespace !== 'html') {
+        const info = find(html, rawName);
+        return (info.space === 'xlink' || info.space === 'xml')
+            ? { kind: 'attributeNS', name: info.attribute, ns: NAMESPACE[info.space] }
+            : { kind: 'attribute', name: rawName };
     }
 
     const info = find(html, rawName);
