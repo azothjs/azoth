@@ -137,20 +137,20 @@ describe('JSX dom literals', () => {
     });
 
     test('property names', ({ expect }) => {
-        const input = `const t = <input 
+        const input = `const t = <input
             required
             className={"className"}
             name={"name"}
-            class={"class"}
-            class-name={"class-name"}
+            value={"value"}
+            data-name={"data-name"}
         />;`;
 
         const { code, templates } = compile(input);
 
         expect(code).toMatchInlineSnapshot(`
-          "import { td1b379f7 } from 'virtual:azoth-templates?id=d1b379f7';
+          "import { t4154283f } from 'virtual:azoth-templates?id=4154283f';
 
-          const t = td1b379f7("className","name","class","class-name");
+          const t = t4154283f("className","name","value","data-name");
           "
         `);
 
@@ -158,16 +158,16 @@ describe('JSX dom literals', () => {
           [
             {
               "bMap": "[0,-1,-2,-3]",
-              "bindKey": "59709254",
+              "bindKey": "d94bd6e8",
               "html": "<input required>",
-              "id": "d1b379f7",
+              "id": "4154283f",
               "isDomFragment": false,
               "isEmpty": false,
               "propertyNames": [
                 "className",
                 "name",
-                "class",
-                "class-name",
+                "value",
+                "data-name",
               ],
               "tMap": "[-1,-1,-1,-1]",
               "targetKey": "b6fc661c",

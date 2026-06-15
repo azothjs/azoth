@@ -84,18 +84,15 @@ describe('decomposition playground', () => {
         `);
     });
 
-    test('property binding — className vs class (the foot-gun, visible)', ({ expect }) => {
-        const input = `
-            const a = <p className={status}>ok</p>;
-            const b = <p class={status}>broken</p>;
-        `;
-        expect(decompose(input)).toMatchInlineSnapshot(`
+    test('property binding — className compiles; class={…} is a compile error', ({ expect }) => {
+        // The dynamic channel (`={…}`) writes the DOM property. `className` is
+        // the real property name, so it compiles straight through.
+        expect(decompose(`const a = <p className={status}>ok</p>;`)).toMatchInlineSnapshot(`
           "
           ==== code ====
-          import { t0095e1b8, t2512f52f } from 'virtual:azoth-templates?id=0095e1b8&id=2512f52f';
+          import { t0095e1b8 } from 'virtual:azoth-templates?id=0095e1b8';
 
           const a = t0095e1b8(status);
-          const b = t2512f52f(status);
           ==== template 0095e1b8 ====
           html:     <p>ok</p>
           targets:  r => [r]
@@ -106,18 +103,14 @@ describe('decomposition playground', () => {
             };    
           }
           renderer: __renderer("0095e1b8", gd124b23c, bc38a3225, false)
-          ==== template 2512f52f ====
-          html:     <p>broken</p>
-          targets:  r => [r]
-          bind:     (ts) => {
-            const t0 = ts[0];
-            return (v0) => {
-              t0["class"] = v0;
-            };    
-          }
-          renderer: __renderer("2512f52f", gd124b23c, bd78da520, false)
           "
         `);
+
+        // `class={…}` used to silently write a non-existent `class` JS property
+        // — the invisible foot-gun. dom-info now rejects it at compile time and
+        // points at the property name.
+        expect(() => compile(`const b = <p class={status}>broken</p>;`))
+            .toThrowError(/use the DOM property name "className"/);
     });
 
     test('multi-fragment function — two templates, one function', ({ expect }) => {

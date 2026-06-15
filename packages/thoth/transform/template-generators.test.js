@@ -145,14 +145,14 @@ describe('bind generator', () => {
         );
     });
 
-    test('data-/dataset props', ({ compile, expect }) => {
+    test('data-* props → setAttribute', ({ compile, expect }) => {
         const code = compile(`const t = <p data-id={id}></p>;`);
         expect(code).toMatchInlineSnapshot(
             `
           "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              t0.dataset.id = v0;
+              t0.setAttribute("data-id", v0);
             };    
           }"
         `

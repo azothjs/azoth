@@ -3,17 +3,21 @@
 /**
  * ATTRIBUTE TESTS
  *
- * Verifies the static-attribute vs dynamic-property split.
+ * Verifies the static-attribute vs dynamic-property split end-to-end in a
+ * real browser.
  *
- * - Static attributes compile to HTML in the extracted template
- * - Dynamic interpolation assigns DOM properties at runtime
- * - This means dynamic bindings need PROPERTY names, not attribute names:
- *     class= → className=  (for dynamic; class= is fine for static)
- *     for=   → htmlFor=
+ * - Static `attr="value"` compiles to HTML in the extracted template.
+ * - Dynamic `attr={value}` writes through the DOM API at runtime, so the name
+ *   must be the DOM property:
+ *     class=    → className=   (dynamic; static class= is fine)
+ *     for=      → htmlFor=
  *     readonly= → readOnly=
  *     tabindex= → tabIndex=
  *
- * See docs/topics/attributes-and-properties.md for the full discussion.
+ * Using the attribute spelling dynamically (`class={…}`) is a compile error,
+ * not a silent no-op — dom-info rejects it and points at the property name
+ * (see thoth's compiler/playground tests). The resolution model lives in
+ * docs/design/attributes-and-properties.md.
  */
 
 import { describe, test } from 'vitest';
@@ -24,27 +28,33 @@ function fixture(node: Node): string {
     return document.body.innerHTML;
 }
 
-describe('dynamic class attributes', () => {
+describe('static attributes → template HTML', () => {
 
-    test('class={var} does NOT work — uses attribute name not property name', ({ expect }) => {
-        const Box = ({ class: className }) => (
-            <div class={className}>content</div>
-        );
-
-        const el = <Box class="highlighted" />;
-
-        // class attribute missing because element["class"] doesn't work
-        expect(fixture(el)).toMatchInlineSnapshot(`"<div>content</div>"`);
+    test('static class stays a markup attribute', ({ expect }) => {
+        const el = <div class="highlighted">content</div>;
+        expect(fixture(el)).toMatchInlineSnapshot(`"<div class="highlighted">content</div>"`);
     });
 
-    test('className={var} DOES work — uses DOM property name', ({ expect }) => {
-        const Box = ({ className }) => (
-            <div className={className}>content</div>
-        );
+});
 
-        const el = <Box className="highlighted" />;
+describe('dynamic bindings → DOM properties', () => {
 
+    test('className={var} sets the class property', ({ expect }) => {
+        const className = 'highlighted';
+        const el = <div className={className}>content</div>;
         expect(fixture(el)).toMatchInlineSnapshot(`"<div class="highlighted">content</div>"`);
+    });
+
+    test('htmlFor={var} sets the for property', ({ expect }) => {
+        const htmlFor = 'name-input';
+        const el = <label htmlFor={htmlFor}>Name</label>;
+        expect(fixture(el)).toMatchInlineSnapshot(`"<label for="name-input">Name</label>"`);
+    });
+
+    test('data-* dynamic binding → setAttribute', ({ expect }) => {
+        const id = '42';
+        const el = <div data-id={id}>content</div>;
+        expect(fixture(el)).toMatchInlineSnapshot(`"<div data-id="42">content</div>"`);
     });
 
 });

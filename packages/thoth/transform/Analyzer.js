@@ -1,3 +1,4 @@
+import { resolveDynamic } from '@azothjs/dom-info';
 import { BIND, Template } from './Template.js';
 import { voidElements } from './html.js';
 
@@ -106,6 +107,15 @@ export class Analyzer {
             // early exit! components get bindings as obj literal props
             element.props.push(binding);
             return;
+        }
+
+        // intrinsic element prop: dom-info resolves to the DOM property or
+        // setAttribute(NS), and errors on channel/React mismatches.
+        if(type === BIND.PROP) {
+            const tag = element.openingElement?.name?.name;
+            const dom = resolveDynamic(attrName(node.name), tag);
+            if(dom.kind === 'error') throw new TypeError(dom.message);
+            binding.dom = dom;
         }
 
         this.#bindings.push(binding);
@@ -232,6 +242,13 @@ export class Analyzer {
 
     JSXText() { /* no-op */ }
     JSXEmptyExpression() { /* no-op */ }
+}
+
+// JSXAttribute name → raw string ("class", "xlink:href")
+function attrName(nameNode) {
+    return nameNode.type === 'JSXNamespacedName'
+        ? `${nameNode.namespace.name}:${nameNode.name.name}`
+        : nameNode.name;
 }
 
 function assessElement(node) {

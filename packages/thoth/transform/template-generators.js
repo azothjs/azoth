@@ -47,24 +47,26 @@ export function makeBind({ isStatic, bindings }) {
         params.push(`${VALUE}${i}`);
     }
 
-    const bound = bindings.map(({ type, node }, index) => {
+    const bound = bindings.map(({ type, dom }, index) => {
         if(type !== BIND.PROP) {
             return `${METHOD[type]}(${TARGET}${index}, ${VALUE}${index});`;
         }
 
+        // dom-info resolved the channel (Analyzer.#bind).
         // TODO: consider source maps for prop on element
-        // TODO: DOMProp/attr lookup, camel vs '-', etc., exceptions
-        const identity = node.name;
-        let propName = identity.name;
-        let target = `${TARGET}${index}`;
-        if(propName.startsWith('data-')) {
-            target += `.dataset`;
-            propName = propName.slice(5);
+        const target = `${TARGET}${index}`;
+        const value = `${VALUE}${index}`;
+        switch(dom.kind) {
+            case 'property': {
+                const refinement = isValidESIdentifier(dom.name)
+                    ? `.${dom.name}` : `["${dom.name}"]`;
+                return `${target}${refinement} = ${value};`;
+            }
+            case 'attribute':
+                return `${target}.setAttribute("${dom.name}", ${value});`;
+            case 'attributeNS':
+                return `${target}.setAttributeNS("${dom.ns}", "${dom.name}", ${value});`;
         }
-        const isValidId = isValidESIdentifier(propName);
-        const refinement = isValidId ? `.${propName}` : `["${propName}"]`;
-
-        return `${target}${refinement} = ${VALUE}${index};`;
     });
 
     return `(${TARGETS}) => {

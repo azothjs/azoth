@@ -110,6 +110,9 @@ importers:
 
   packages/thoth:
     dependencies:
+      '@azothjs/dom-info':
+        specifier: workspace:*
+        version: link:../dom-info
       acorn:
         specifier: ^8.11.3
         version: 8.16.0
@@ -125,9 +128,6 @@ importers:
       is-valid-es-identifier:
         specifier: ^2.0.0
         version: 2.0.0
-      property-information:
-        specifier: ^7.2.0
-        version: 7.2.0
       source-map:
         specifier: ^0.7.4
         version: 0.7.6
