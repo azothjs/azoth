@@ -18,6 +18,7 @@ export const CORRECTIONS = {
     allowfullscreen: 'allowFullscreen',
     autocapitalize: 'autocapitalize',
     autocomplete: 'autocomplete',
+    autofocus: 'autofocus',
     autoplay: 'autoplay',
     charset: 'charset',
     enctype: 'enctype',
@@ -34,7 +35,7 @@ export const CORRECTIONS = {
 // names). `data-*` and `aria-*` are handled by prefix in resolve; the explicit
 // `aria-*` entries below are the ones that lack a reflected property.
 export const ATTR_ONLY = new Set([
-    'is', 'itemid', 'itemprop', 'itemref', 'itemscope', 'itemtype',
+    'is', 'itemid', 'itemprop', 'itemref', 'itemscope', 'itemtype', 'exportparts',
     'language',                                   // script
     'srclang',                                    // track
     'shadowrootmode', 'shadowrootdelegatesfocus', // template
