@@ -126,6 +126,39 @@ describe('rerenderer — JSX-driven', () => {
         expect(card.textContent).toBe('cat #2');   // new prop flowed
     });
 
+    test('module factory: the returned closure IS the rerenderable (no inner rerenderer)', ({ expect }) => {
+        // Two related-but-separate things meet here:
+        //   1. The rerenderer changes the FLOW — DOM made on the first call is
+        //      reused (rebound with new props) on later calls, not recreated.
+        //   2. Initial-render-then-update is a plain JS pattern the author
+        //      already knows. Here it's a module factory: setup closes over
+        //      state and returns a render fn. (Classes do it with
+        //      constructor/render, objects with initialize/render — standard
+        //      CS, all in the corpus.)
+        // The rerenderer just LINKS that pattern to JSX-as-DOM: a component's
+        // returned function is the rerenderable, re-invoked with new props
+        // while the setup zone runs once. The inner rerenderer() in the test
+        // above is safe but redundant — a rerenderer is a cache over template
+        // calls, and one suffices here. Nothing azoth-specific to learn;
+        // subtract to unlock.
+        let setupCount = 0;
+        function CatCard({ count = 0 }: { count?: number }) {
+            setupCount++; // setup zone — runs ONCE
+            return ({ id }: { id: number }) => <p>cat #{id} rendered {++count} times</p>;
+        }
+        const page = rerenderer((id: number) => <main><CatCard count={5} id={id} /></main>);
+
+        const main = page(1) as HTMLElement;
+        const card = main.firstElementChild as HTMLElement;
+        expect(setupCount).toBe(1);
+        expect(card.textContent).toBe('cat #1 rendered 6 times'); // count: 5 → 6
+
+        page(2);
+        expect(setupCount).toBe(1);                  // setup ran once
+        expect(main.firstElementChild).toBe(card);   // same DOM node, rebound
+        expect(card.textContent).toBe('cat #2 rendered 7 times'); // same closure: 6 → 7
+    });
+
     test('Channel in the wrap: switching source shows the new value; a late stale resolve is ignored', async ({ expect }) => {
         const a = Promise.withResolvers<string>();
         const b = Promise.withResolvers<string>();
