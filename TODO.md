@@ -249,6 +249,16 @@ write-up once 2.0 ships.
 - Valhalla API-level rerenderer tests (JSX-driven, crazy scenarios)
   once increments (b)+(c) land — that's where confidence accrues;
   refine code after.
+- `stopRerenderer` (name TBD): a way, within a rerenderer path, to toggle
+  the flow back to create-new-DOM mode for a subtree — opt out of reuse
+  where each call should mint fresh nodes. Future feature; design open.
+- Teaching: the rerenderer *mechanism* doesn't need corpus budget — it's
+  init-then-update, a plain JS/CS pattern (module factory, class
+  constructor/render, object initialize/render) LLMs already know; the
+  rerenderer just links it to JSX-as-DOM. What needs examples is tying
+  those patterns to real-world UI layout management. Write those for the
+  docs (component-as-module-factory, class/object UIComponent, plain
+  render fn — each shown in a realistic layout), not mechanism explainers.
 
 ### WICG Observable + `EventTarget.prototype.when()`
 
