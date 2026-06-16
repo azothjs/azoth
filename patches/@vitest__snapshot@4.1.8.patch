@@ -1,0 +1,22 @@
+diff --git a/dist/index.js b/dist/index.js
+index 1a61477796163a7a7f8ce9d44a7828b3debf13a8..83377c7961eb11da25974961aec02bf9a086931b 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -316,7 +316,7 @@ async function saveInlineSnapshots(environment, snapshots) {
+ 		}
+ 	}));
+ }
+-const defaultStartObjectRegex = /(?:toMatchInlineSnapshot|toThrowErrorMatchingInlineSnapshot)\s*\(\s*(?:\/\*[\s\S]*\*\/\s*|\/\/.*(?:[\n\r\u2028\u2029]\s*|[\t\v\f \xA0\u1680\u2000-\u200A\u202F\u205F\u3000\uFEFF]))*\{/;
++const defaultStartObjectRegex = /(?:toMatchInlineSnapshot|toThrowErrorMatchingInlineSnapshot)\s*\(\s*(?:\/\*[\s\S]*?\*\/\s*|\/\/.*(?:[\n\r\u2028\u2029]\s*|[\t\v\f \xA0\u1680\u2000-\u200A\u202F\u205F\u3000\uFEFF]))*\{/;
+ function escapeRegExp(s) {
+ 	return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+ }
+@@ -392,7 +392,7 @@ function getCodeStartingAtIndex(code, index, methodNames) {
+ 		index
+ 	};
+ }
+-const defaultStartRegex = /(?:toMatchInlineSnapshot|toThrowErrorMatchingInlineSnapshot)\s*\(\s*(?:\/\*[\s\S]*\*\/\s*|\/\/.*(?:[\n\r\u2028\u2029]\s*|[\t\v\f \xA0\u1680\u2000-\u200A\u202F\u205F\u3000\uFEFF]))*[\w$]*(['"`)])/;
++const defaultStartRegex = /(?:toMatchInlineSnapshot|toThrowErrorMatchingInlineSnapshot)\s*\(\s*(?:\/\*[\s\S]*?\*\/\s*|\/\/.*(?:[\n\r\u2028\u2029]\s*|[\t\v\f \xA0\u1680\u2000-\u200A\u202F\u205F\u3000\uFEFF]))*[\w$]*(['"`)])/;
+ const buildStartRegex = memo((assertionName) => {
+ 	const replaced = defaultStartRegex.source.replace("toMatchInlineSnapshot|toThrowErrorMatchingInlineSnapshot", escapeRegExp(assertionName));
+ 	return new RegExp(replaced);

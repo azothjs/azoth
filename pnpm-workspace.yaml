@@ -11,3 +11,5 @@ allowBuilds:
   geckodriver: false
   # Transitive dep of vite-plugin-inspect; postinstall is Vue version detection.
   vue-demi: false
+patchedDependencies:
+  '@vitest/snapshot@4.1.8': patches/@vitest__snapshot@4.1.8.patch

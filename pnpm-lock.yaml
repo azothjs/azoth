@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@vitest/snapshot@4.1.8': 7784d6c884392218f5a70ff518bc75d8fa83e4981fd1036c25c34cc8a154de47
+
 importers:
 
   .:
@@ -4604,7 +4607,7 @@ snapshots:
       '@vitest/utils': 4.1.8
       pathe: 2.0.3
 
-  '@vitest/snapshot@4.1.8':
+  '@vitest/snapshot@4.1.8(patch_hash=7784d6c884392218f5a70ff518bc75d8fa83e4981fd1036c25c34cc8a154de47)':
     dependencies:
       '@vitest/pretty-format': 4.1.8
       '@vitest/utils': 4.1.8
@@ -7184,7 +7187,7 @@ snapshots:
       '@vitest/mocker': 4.1.8(vite@6.4.3(@types/node@22.19.20))
       '@vitest/pretty-format': 4.1.8
       '@vitest/runner': 4.1.8
-      '@vitest/snapshot': 4.1.8
+      '@vitest/snapshot': 4.1.8(patch_hash=7784d6c884392218f5a70ff518bc75d8fa83e4981fd1036c25c34cc8a154de47)
       '@vitest/spy': 4.1.8
       '@vitest/utils': 4.1.8
       es-module-lexer: 2.1.0
