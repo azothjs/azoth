@@ -336,3 +336,14 @@ this repo via `pnpm patch` (`patches/@vitest__snapshot@4.1.8.patch`) since
 the martypdx fork is vitest 5.0-beta (a major ahead of our 4.1.8). The
 upstream PR (martypdx fork) is still to be opened; drop the patch once it
 lands and we bump. See `OVERNIGHT-NOTES.md` for the original discovery.
+
+### Vitest -u second bug — adjacent same-test snapshots mis-assign (LOW PRIORITY, spike)
+
+Separate from the comment-greedy bug above. With two `toMatchInlineSnapshot()`
+calls in the SAME test, `-u` mis-assigns: one value lands on the wrong call,
+the other is lost. Repro'd minimally (2026-06-15) — NOT triggered by comments
+or identical expressions; the trigger is subtle position-tracking in
+saveInlineSnapshots. The comment patch does not cover it. Workaround in use:
+`toBe()` with known values, or fill snapshots one at a time. Spike to isolate
+the exact trigger and fold into the upstream fix. Low priority — single-
+snapshot-per-test (the common case) is unaffected.
