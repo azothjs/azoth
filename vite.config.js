@@ -8,6 +8,27 @@ import { playwright } from '@vitest/browser-playwright';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// dom-info's browser-validation suites probe the pinned Chromium to confirm
+// the lifted platform data (props / events / SVG element names) still matches.
+// They change only on a dependency or Chromium bump — not on app code — so
+// they stay OUT of the default run and CI signal. Run on demand with
+// `pnpm test:validate` (e.g. on a dep bump or PR to main).
+const validationTests = [
+    'packages/dom-info/dom-props.test.js',
+    'packages/dom-info/events.test.js',
+    'packages/dom-info/svg.test.js',
+];
+const VALIDATE = process.env.VALIDATE === 'true';
+
+const baseExclude = [
+    '**/node_modules/**',
+    '**/dist/**',
+    // Node-specific tests that can't run in browser
+    'packages/jsonic/json-stream.test.js',
+    'packages/vite-plugin/index.test.js',
+    'vite-test/plugin.test.js',
+];
+
 export default defineConfig({
     test: {
         browser: {
@@ -19,14 +40,11 @@ export default defineConfig({
             instances: [{ browser: 'chromium' }],
             provider: playwright(),
         },
-        // Node-specific tests that can't run in browser
-        exclude: [
-            '**/node_modules/**',
-            '**/dist/**',
-            'packages/jsonic/json-stream.test.js',
-            'packages/vite-plugin/index.test.js',
-            'vite-test/plugin.test.js',
-        ],
+        // VALIDATE: run ONLY the browser-validation suites; otherwise run
+        // everything except them.
+        ...(VALIDATE
+            ? { include: validationTests, exclude: baseExclude }
+            : { exclude: [...baseExclude, ...validationTests] }),
     },
     resolve: {
         alias: {

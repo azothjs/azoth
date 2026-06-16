@@ -16,6 +16,7 @@
         "start:docs": "pnpm -F docs start",
         "test": "vitest",
         "test:CI": "CI=true vitest && pnpm lint",
+        "test:validate": "VALIDATE=true vitest run",
         "lint": "eslint packages"
     },
     "devDependencies": {

@@ -297,10 +297,32 @@ What migrates when it does:
 This migration doubles as the validation pass for the 2.0 migration
 story — first real consumer upgrade.
 
+## dom-info
+
+### Browser-validation suites — on-demand, not in CI
+
+dom-info's `dom-props` / `events` / `svg` suites probe the pinned Chromium
+to confirm the lifted platform data still matches. They're excluded from
+the default run (`pnpm test`) and run on demand via `pnpm test:validate`
+(`VALIDATE=true`). They change only on a dependency or Chromium bump.
+
+Open follow-ons:
+- Wire `test:validate` into a CI job gated to PRs/merges that touch
+  `packages/dom-info/**` or bump the relevant deps (property-information,
+  html/svg-element-attributes, html/svg/mathml-tag-names, playwright) —
+  rather than every push.
+- A "deps current?" check (renovate, or a scheduled `pnpm outdated` on
+  those packages) to signal when re-validation + data regeneration is due.
+- dom-info has no README yet; document the data sources + validation
+  workflow when the package is readied for standalone publish.
+
 ## External (not Azoth code)
 
-### Vitest snapshot bug — PR ready at `/tmp/vitest-fork`
+### Vitest snapshot bug — fix applied locally; upstream PR still open
 
-A 4-character regex fix to a vitest snapshot-serialization bug
-discovered during this work. See `OVERNIGHT-NOTES.md` at repo root for
-details. Sitting unmerged; needs to be turned into an upstream PR.
+A 4-character non-greedy regex fix to vitest's inline-snapshot updater
+(`@vitest/snapshot`, coalesces snapshots after a comment). Now applied to
+this repo via `pnpm patch` (`patches/@vitest__snapshot@4.1.8.patch`) since
+the martypdx fork is vitest 5.0-beta (a major ahead of our 4.1.8). The
+upstream PR (martypdx fork) is still to be opened; drop the patch once it
+lands and we bump. See `OVERNIGHT-NOTES.md` for the original discovery.
