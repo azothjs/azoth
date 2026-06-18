@@ -13,6 +13,31 @@ Related blocks decision: KeyedBlock renames to **ListBlock**
 (js-framework-benchmark holdover name). AnchorBlock remains a cut
 candidate; Toggle TBD.
 
+### ListBlock design — settled 2026-06-17
+
+Two list strategies, distinguished by *node lifecycle* (not by "store
+per-item state or not" — the per-row bound closure is unavoidable; what's
+shared is the one `makeBind` factory = the single render path):
+
+1. **Node-per-item, keyed (THE primary, ~95% of lists).** A rerenderer per
+   row, keyed by id — "swap a rerenderer in per row." Reuses the existing
+   rerenderer wholesale; no new core mechanism. Update/remove/swap/select
+   by key. Most lists are 20–few-hundred rows. Migrating here is what lets
+   the legacy Controller/Updater + injectable/getBound relocate-path in
+   renderer.js be deleted.
+   - Optional cap: recycle a bounded pool of on-hand nodes (paging /
+     keep-N-around) — still interp 1, just with a ceiling. Not virtualization.
+2. **Recycled pool / virtualization (large lists, FUTURE, separate block).**
+   K nodes ≪ N items; rebind the pool to a data window on scroll. Different
+   node lifecycle, so a distinct block — not a mode toggle on ListBlock.
+   Paint-dodge for offscreen rows: `content-visibility` (modern form of the
+   old `display`-hidden trick).
+
+Implementation increment when picked up: rewrite KeyedBlock → ListBlock as a
+`Map<key, rerenderer(rowFn)>` over the shared row template; then remove the
+now-unused Controller/Updater/getBound legacy path; then block tests
+(js-framework-benchmark-style add/update/swap/remove/select).
+
 ## Attribute vs property table (2.0 release-gating)
 
 Azoth currently does nothing here — WYSIWYG. Static JSX values compile
