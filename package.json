@@ -12,7 +12,6 @@
     },
     "type": "module",
     "scripts": {
-        "start": "pnpm -F sandbox start",
         "start:docs": "pnpm -F docs start",
         "test": "vitest",
         "test:CI": "CI=true vitest && pnpm lint",

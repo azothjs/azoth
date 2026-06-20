@@ -16,7 +16,6 @@
         "espree",
         "IIFE",
         "inlines",
-        "jsonic",
         "martypdx",
         "nsbsp",
         "onattribute",
@@ -45,8 +44,7 @@
     "eslint.workingDirectories": [
         {
             "pattern": "./packages/*/"
-        },
-        "./sandbox"
+        }
     ],
     "typescript.format.indentSwitchCase": false,
     "vitest.showFailMessages": true,
