@@ -111,13 +111,23 @@ describe('KeyedUList — ops', () => {
         expect(order(list)).toEqual([]);
     });
 
-    test('keyAt — event target → its row key, walking up to the row root', ({ expect }) => {
+    test('insert — place one row before another (positional add); null → append', ({ expect }) => {
+        const list = make();
+        list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }]);
+        list.insert({ id: 3, name: 'Tom' }, 2);       // before Mittens
+        expect(order(list)).toEqual(['Felix', 'Tom', 'Mittens']);
+        list.insert({ id: 4, name: 'Ada' }, null);    // no beforeKey → append
+        expect(order(list)).toEqual(['Felix', 'Tom', 'Mittens', 'Ada']);
+        expect(list.size).toBe(4);
+    });
+
+    test('keyFor — event target → its row key (inverse of get), walking to the row root', ({ expect }) => {
         const list = make();
         list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }]);
         const li = list.get(1)!;
-        expect(list.keyAt(li)).toBe(1);               // the row root itself
-        expect(list.keyAt(li.firstChild!)).toBe(1);   // a descendant (the text node)
-        expect(list.keyAt(list)).toBe(undefined);     // outside any row
+        expect(list.keyFor(li)).toBe(1);              // the row root itself
+        expect(list.keyFor(li.firstChild!)).toBe(1);  // a descendant (the text node)
+        expect(list.keyFor(list)).toBe(undefined);    // outside any row
     });
 
 });

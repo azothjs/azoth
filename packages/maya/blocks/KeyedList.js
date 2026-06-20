@@ -52,14 +52,19 @@ export class KeyedList extends HTMLElement {
         if(root !== this && root.parentNode !== this) this.append(root);
     }
 
-    add(...items) { for(const item of items) this.#insert(item); }
-    addAll(items) { for(const item of items) this.#insert(item); }
+    add(...items) { for(const item of items) this.#place(item, null); }
+    addAll(items) { for(const item of items) this.#place(item, null); }
 
-    #insert(data) {
+    // Insert one row before `beforeKey`'s row; omit/null → append. For sources
+    // that carry placement with the item (e.g. Firebase's prev-key add events).
+    insert(data, beforeKey) { return this.#place(data, beforeKey); }
+
+    #place(data, beforeKey) {
         const key = this.key(data);
         const render = rerenderer(this.view); // one rerenderer instance per row
         const node = render(data);            // first call: builds + caches the node
-        this.rowContainer.append(node);
+        const ref = beforeKey == null ? null : (this.#rows.get(beforeKey)?.node ?? null);
+        this.rowContainer.insertBefore(node, ref); // null ref → append
         this.#rows.set(key, { node, render });
         this.#keys.set(node, key);
         return node;
@@ -83,7 +88,7 @@ export class KeyedList extends HTMLElement {
 
     // Move the row to before `beforeKey`'s row; omit/null → to the end.
     // Key-relative (the author works in keys, not indices), mirrors DOM
-    // insertBefore. Positional insert = add then move.
+    // insertBefore. (Positional add is insert().)
     move(key, beforeKey) {
         const row = this.#rows.get(key);
         if(!row) return;
@@ -103,8 +108,9 @@ export class KeyedList extends HTMLElement {
     get(key) { return this.#rows.get(key)?.node ?? null; }
     get size() { return this.#rows.size; }
 
-    // Delegation: given an event target, the key of the row it's inside.
-    keyAt(target) {
+    // The key for an event target's row (walks up to the row root). Inverse of
+    // get(key): get is key→node, keyFor is node→key. The delegation path.
+    keyFor(target) {
         for(let n = target; n && n !== this; n = n.parentNode) {
             if(this.#keys.has(n)) return this.#keys.get(n);
         }

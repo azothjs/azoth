@@ -37,9 +37,21 @@ The author reads the render flow from the spelling. That's the payoff of Q1.
 (JS-flow, runs-once-returns-rerenderable) covers two jobs — **tactical DOM-
 manipulation encapsulation** and **compositional work** — and *neither needs a
 new frame*; both live inside the page's forward-only render. Reach for a custom
-element only when the work is **dynamic and self-managing** (add/remove/move/
-update over time) — the case that falls outside forward-only and earns its own
-cycle. KeyedList is that case; most encapsulation/composition is not.
+element only when the work is **dynamic and self-managing in a way not addressed
+by replaying the same data structure over the same templates** via the
+rerenderer (which already does array-replay / ordinal reuse — the loops case).
+KeyedList qualifies: keyed deltas (add/remove/move of individual rows over time,
+sources that emit deltas not snapshots) don't reduce to "render the new array."
+Most encapsulation/composition does, and stays a UIComponent. (More art than
+science — this is the recognition test.)
+
+**The frame is a REPLICABLE author pattern, not privileged.** KeyedList imports
+only the public `rerenderer` + platform (`HTMLElement`, `document`, `Map`) — no
+compose internals, no `activeRerenderer`/stack, no `siteKey`. So any author can
+build a self-managing frame the same way: `extends HTMLElement` + `Map<key,
+rerenderer(view)>` + imperative DOM ops + idempotent `define`. KeyedList is a
+worked *example* of the pattern, not a maya-internal capability — which
+validates that the public rerenderer is a sufficient primitive for frames.
 
 **Referential transparency confirmed.** Holding the element as a JS ref and
 composing it via `{list}` is referentially transparent — the same element flows
@@ -166,15 +178,24 @@ this.addEventListener('pet:adopted', e => this.update(e.detail.id, {status:'adop
 
 ### Ops (verbs)
 
-`add(...items)` (variadic, append-like, for inline/few) **and** `addAll(items)`
-(an array, the bulk path) · `update(key, data)` · `move(key, beforeKey?)` ·
-`remove(key)` · `clear()` · `has(key)` · `get(key)` · `size` · `keyAt(target)`.
+`add(...items)` (variadic append) · `addAll(items)` (array, bulk) ·
+`insert(data, beforeKey?)` (one row, positional) · `update(key, data)` ·
+`move(key, beforeKey?)` · `remove(key)` · `clear()` · `has(key)` · `get(key)` ·
+`keyFor(node)` · `size` · `[Symbol.iterator]` → `[key, node]`.
 
-**`move` is key-relative** — `move(key, beforeKey)` puts the row before
-`beforeKey`'s row; omit `beforeKey` → to the end (mirrors DOM `insertBefore`).
-The author works in keys, not indices, so there is no `move(key, index)`.
-**Positional insert = `add` then `move`** — so no `{before}` option (fragile
-against variadic `add`) and no `addBefore`. Subtracted.
+**Placement is key-relative, via a positional `beforeKey` arg** (omit/null → to
+the end; mirrors DOM `insertBefore`):
+- `insert(data, beforeKey)` — add one row at a position. Earns its keep over
+  `add`+`move` because ordered realtime sources deliver placement *with* the
+  add (e.g. Firebase's prev-key events), and it's one DOM op, not two.
+- `move(key, beforeKey)` — reposition an existing row.
+
+The author works in **keys, not indices** — no `move(key, index)`. And
+`beforeKey` is a plain positional arg, **not** a `{before}` options object
+(which is fragile against variadic `add`) — so no `addBefore` either.
+
+`keyFor(node)` (was `keyAt`) is the delegation path and the inverse of `get`:
+`get(key)→node`, `keyFor(node)→key`.
 
 Why both `add` and `addAll`, not variadic-only (`add(...all)` mirroring
 `element.append`): a list is the **big-N** case — `add(...10_000)` risks
