@@ -8,12 +8,17 @@
  * to provide accurate intellisense for Azoth JSX.
  */
 
-// Children can be strings, numbers, nodes, or arrays of these
+import type { Channel } from '@azothjs/maya/channels';
+
+// Children: strings, numbers, nodes, channels (async/composable sources), or
+// arrays of these. (Ideally maya's full Composable type — Channel is the case
+// surfaced so far; broaden as others appear.)
 type DOMChild =
     | string
     | number
     | boolean
     | Node
+    | Channel
     | null
     | undefined
     | DOMChild[];
