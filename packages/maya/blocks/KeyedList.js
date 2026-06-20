@@ -63,7 +63,7 @@ export class KeyedList extends HTMLElement {
         const key = this.key(data);
         const render = rerenderer(this.view); // one rerenderer instance per row
         const node = render(data);            // first call: builds + caches the node
-        const ref = beforeKey == null ? null : (this.#rows.get(beforeKey)?.node ?? null);
+        const ref = this.#rows.get(beforeKey)?.node ?? null; // null/undefined/missing → null = append
         this.rowContainer.insertBefore(node, ref); // null ref → append
         this.#rows.set(key, { node, render });
         this.#keys.set(node, key);
@@ -92,7 +92,7 @@ export class KeyedList extends HTMLElement {
     move(key, beforeKey) {
         const row = this.#rows.get(key);
         if(!row) return;
-        const ref = beforeKey == null ? null : (this.#rows.get(beforeKey)?.node ?? null);
+        const ref = this.#rows.get(beforeKey)?.node ?? null; // null/undefined/missing → null = append
         this.rowContainer.insertBefore(row.node, ref);
     }
 

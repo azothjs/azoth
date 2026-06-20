@@ -372,3 +372,9 @@ saveInlineSnapshots. The comment patch does not cover it. Workaround in use:
 `toBe()` with known values, or fill snapshots one at a time. Spike to isolate
 the exact trigger and fold into the upstream fix. Low priority — single-
 snapshot-per-test (the common case) is unaffected.
+
+## ESLint usage review (lower priority)
+
+Revisit how azoth configures ESLint — e.g. `eqeqeq` flagged `== null` (the
+idiomatic null/undefined check); consider the `{ null: "ignore" }` option, and
+audit the ruleset generally. (Surfaced by a CI failure on KeyedList.js, 2026-06.)
