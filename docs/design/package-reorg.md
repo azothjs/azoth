@@ -40,3 +40,16 @@ your go; the publishing/versioning/repo decisions are yours.
 3. **vite-plugin → thoth** (with the bump).
 4. **dom-info** fold-or-keep.
 5. **jsonic** extraction (you create the repo; I prep the workspace removal).
+
+## Parked: vite-plugin testing (`vite-test`) — rethink
+
+The `vite-test` project (fixture-diff: `out/` vs `expected-out/`) exists to test
+the vite-plugin, but it's brittle. When vite-plugin folds into thoth, rethink how
+the plugin is tested — likely a focused integration test (compile a known input,
+assert the emitted modules) rather than a committed output-diff fixture.
+
+## Env note: pnpm is pinned
+
+The repo pins **pnpm@11.5.2** (lockfile 9.0). A different local pnpm (e.g. 8.x)
+can't read the lock and will drift versions on install — use `corepack pnpm`
+(honors the pin). Worth a one-line contributor note in the README.
