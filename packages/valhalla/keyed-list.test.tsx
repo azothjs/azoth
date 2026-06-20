@@ -191,3 +191,57 @@ describe('KeyedUList — nested inside a rerenderer (the frame boundary)', () =>
     });
 
 });
+
+describe('Controller — the source axis (author-defined bridge)', () => {
+
+    // A controller bridges a data SOURCE to LIST OPS. azoth ships none — this is
+    // the contract/recipe an author (or a per-source library) implements. The
+    // source's delta maps straight to an op; no reconcile-by-diff.
+    //
+    // Stub source: an EventTarget standing in for supabase realtime / a
+    // websocket feed (mocks are fine for controllers).
+    class FeedStub extends EventTarget {
+        insert(pet: { id: number; name: string }) { this.dispatchEvent(new CustomEvent('insert', { detail: pet })); }
+        update(pet: { id: number; name: string }) { this.dispatchEvent(new CustomEvent('update', { detail: pet })); }
+        remove(id: number) { this.dispatchEvent(new CustomEvent('remove', { detail: id })); }
+    }
+
+    class FeedController {
+        constructor(public source: FeedStub, list: PetList) {
+            this.#on('insert', e => list.add(e.detail));
+            this.#on('update', e => list.update(e.detail.id, e.detail));
+            this.#on('remove', e => list.remove(e.detail));
+        }
+        #offs: Array<() => void> = [];
+        #on(type: string, fn: (e: any) => void) {
+            this.source.addEventListener(type, fn);
+            this.#offs.push(() => this.source.removeEventListener(type, fn));
+        }
+        dispose() { this.#offs.forEach(off => off()); }   // pairs to disconnectedCallback
+    }
+
+    test('source events drive add / update (in place) / remove; dispose tears down', ({ expect }) => {
+        const feed = new FeedStub();
+        const list = document.createElement('pet-list') as PetList;
+        document.body.append(list);
+        const ctl = new FeedController(feed, list);
+
+        feed.insert({ id: 1, name: 'Felix' });
+        feed.insert({ id: 2, name: 'Mittens' });
+        expect([...list.root.children].map(n => n.textContent)).toEqual(['Felix', 'Mittens']);
+
+        const li1 = list.get(1);
+        feed.update({ id: 1, name: 'Felicia' });
+        expect(list.get(1)).toBe(li1);                    // delta → update(key): same node, in place
+        expect(li1!.textContent).toBe('Felicia');
+
+        feed.remove(2);
+        expect(list.has(2)).toBe(false);
+        expect([...list.root.children].map(n => n.textContent)).toEqual(['Felicia']);
+
+        ctl.dispose();
+        feed.insert({ id: 3, name: 'Tom' });              // after teardown: no effect
+        expect(list.has(3)).toBe(false);
+    });
+
+});
