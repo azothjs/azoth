@@ -29,6 +29,7 @@
  */
 import { describe, test } from 'vitest';
 import { KeyedUList } from '@azothjs/maya/blocks';
+import { rerenderer } from '@azothjs/maya/renderer';
 
 type Pet = { id: number; name: string };
 
@@ -117,6 +118,32 @@ describe('KeyedUList — ops', () => {
         expect(list.keyAt(li)).toBe(1);               // the row root itself
         expect(list.keyAt(li.firstChild!)).toBe(1);   // a descendant (the text node)
         expect(list.keyAt(list)).toBe(undefined);     // outside any row
+    });
+
+});
+
+describe('KeyedUList — nested inside a rerenderer (the frame boundary)', () => {
+
+    // A keyed list lives inside a re-rendering region. The custom element is a
+    // separate render frame: the outer rerenderer reuses the element by site
+    // and never reaches into its internals, so its imperatively-managed rows
+    // survive an outer re-render. (If this holds, the fresh-Renderer-frame
+    // reset is moot — see docs/design/keyed-list.md.)
+    test('outer re-render reuses the element; its rows survive', ({ expect }) => {
+        const render = rerenderer((label: string) =>
+            <section><h2>{label}</h2><pet-list></pet-list></section>);
+
+        const section = render('Pets') as HTMLElement;
+        document.body.append(section);                // connect → pet-list builds its <ul>
+        const list = section.querySelector('pet-list') as PetList;
+        list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }]);
+        expect([...list.root.children].map(n => n.textContent)).toEqual(['Felix', 'Mittens']);
+
+        const again = render('Animals');              // outer rerenderer re-runs
+        expect(again).toBe(section);                  // same section (site cache)
+        expect(section.querySelector('pet-list')).toBe(list);            // element reused, not rebuilt
+        expect(section.querySelector('h2')!.textContent).toBe('Animals'); // outer binding rebound
+        expect([...list.root.children].map(n => n.textContent)).toEqual(['Felix', 'Mittens']); // rows intact
     });
 
 });

@@ -247,13 +247,16 @@ terser alternative; the full `…Element` mirror is overkill.
 - **Q3 empirically confirmed:** `expect(after).toBe(before)` passed — `update`
   rebinds the row IN PLACE (same node) via its per-row rerenderer. Not just
   reasoned now; observed.
-- **Fresh-Renderer frame: deferred, possibly moot.** Green with NO `renderer.js`
-  change: the container is built with `document.createElement` (no rerenderer
-  involvement) and each row's rerenderer self-pushes/pops, so the element's
-  internals never consult an outer rerenderer. The frame reset / `activeRenderer`
-  rename is robustness for the *nested-inside-a-rerenderer* case — a nested-usage
-  test would settle whether it's ever needed. Subtract candidate. **TODO: write
-  that nested-usage test.**
+- **Fresh-Renderer frame: CONFIRMED MOOT — subtracted.** The nested-usage test
+  (KeyedUList inside a rerenderer pass) is green: an outer re-render reuses the
+  `<pet-list>` node by site, rebinds its own bindings, and the element's
+  imperatively-managed rows survive untouched. The outer rerenderer never
+  reaches into the element's internals — the container is built with
+  `document.createElement` (no rerenderer) and each row's rerenderer
+  self-pushes/pops. So the custom-element boundary *is* the frame boundary,
+  structurally; the `activeRenderer` rename / explicit fresh-frame push is NOT
+  needed. (The design anticipated needing it — turns out the structure provides
+  it for free.)
 - **Separate concern — the outer rerenderer updating the element's PROPS** (not
   reaching into its internals). If the author binds a dynamic prop on the
   element, the outer rerenderer re-assigns it on re-render:
