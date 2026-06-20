@@ -14,9 +14,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // they stay OUT of the default run and CI signal. Run on demand with
 // `pnpm test:validate` (e.g. on a dep bump or PR to main).
 const validationTests = [
-    'packages/dom-info/dom-props.test.js',
-    'packages/dom-info/events.test.js',
-    'packages/dom-info/svg.test.js',
+    'packages/thoth/dom-info/dom-props.test.js',
+    'packages/thoth/dom-info/events.test.js',
+    'packages/thoth/dom-info/svg.test.js',
 ];
 const VALIDATE = process.env.VALIDATE === 'true';
 
@@ -24,7 +24,6 @@ const baseExclude = [
     '**/node_modules/**',
     '**/dist/**',
     // Node-specific tests that can't run in browser
-    'packages/jsonic/json-stream.test.js',
     'packages/vite-plugin/index.test.js',
     'vite-test/plugin.test.js',
 ];
