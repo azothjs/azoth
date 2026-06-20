@@ -28,7 +28,7 @@
  * (unfixed in vitest 4.x; see CLAUDE.md).
  */
 import { describe, test } from 'vitest';
-import { KeyedUList } from '@azothjs/maya/blocks';
+import { KeyedUList, KeyedOList, KeyedTable } from '@azothjs/maya/blocks';
 import { rerenderer } from '@azothjs/maya/renderer';
 
 type Pet = { id: number; name: string };
@@ -118,6 +118,50 @@ describe('KeyedUList — ops', () => {
         expect(list.keyAt(li)).toBe(1);               // the row root itself
         expect(list.keyAt(li.firstChild!)).toBe(1);   // a descendant (the text node)
         expect(list.keyAt(list)).toBe(undefined);     // outside any row
+    });
+
+});
+
+describe('KeyedOList / KeyedTable — semantic leaves', () => {
+
+    test('KeyedOList owns an <ol> and manages <li> rows', ({ expect }) => {
+        class NumList extends KeyedOList {
+            constructor() {
+                super();
+                this.key = (n: { id: number; label: string }) => n.id;
+                this.view = (n: { id: number; label: string }) => <li>{n.label}</li>;
+            }
+        }
+        if(!customElements.get('num-list')) customElements.define('num-list', NumList);
+
+        const list = document.createElement('num-list') as KeyedOList;
+        document.body.append(list);
+        list.addAll([{ id: 1, label: 'one' }, { id: 2, label: 'two' }]);
+
+        const ol = list.querySelector('ol')!;
+        expect([...ol.children].map(li => li.tagName)).toEqual(['LI', 'LI']);
+        expect([...ol.children].map(li => li.textContent)).toEqual(['one', 'two']);
+    });
+
+    test('KeyedTable owns <table><tbody> and manages <tr> rows in the tbody', ({ expect }) => {
+        class RowList extends KeyedTable {
+            constructor() {
+                super();
+                this.key = (r: { id: number; name: string }) => r.id;
+                this.view = (r: { id: number; name: string }) => <tr><td>{r.name}</td></tr>;
+            }
+        }
+        if(!customElements.get('row-list')) customElements.define('row-list', RowList);
+
+        const list = document.createElement('row-list') as KeyedTable;
+        document.body.append(list);
+        list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }]);
+
+        const tbody = list.querySelector('table > tbody')!;
+        expect([...tbody.children].map(tr => tr.tagName)).toEqual(['TR', 'TR']);
+        expect([...tbody.querySelectorAll('td')].map(td => td.textContent)).toEqual(['Felix', 'Mittens']);
+        expect(list.update(1, { id: 1, name: 'Felicia' })).toBe(tbody.children[0]); // in-place, same <tr>
+        expect(tbody.querySelector('td')!.textContent).toBe('Felicia');
     });
 
 });
