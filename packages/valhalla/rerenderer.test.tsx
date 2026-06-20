@@ -142,9 +142,14 @@ describe('rerenderer — JSX-driven', () => {
         // calls, and one suffices here. Nothing azoth-specific to learn;
         // subtract to unlock.
         let setupCount = 0;
-        function CatCard({ count = 0 }: { count?: number }) {
+        // The cast is the known typing gap: a component returning its
+        // rerenderable (a function) isn't yet modeled by JSX.Element — the
+        // same `as unknown as JSX.Element` workaround as channels.test.tsx.
+        // The TypeScript review (TODO §Components) is where this gets typed.
+        function CatCard({ count = 0 }: { count?: number; id: number }) {
             setupCount++; // setup zone — runs ONCE
-            return ({ id }: { id: number }) => <p>cat #{id} rendered {++count} times</p>;
+            return (({ id }: { id: number }) =>
+                <p>cat #{id} rendered {++count} times</p>) as unknown as JSX.Element;
         }
         const page = rerenderer((id: number) => <main><CatCard count={5} id={id} /></main>);
 

@@ -5,19 +5,20 @@
 Valhalla tests double as **dev examples for LLMs** — the audience is the
 model, so optimize for corpus clarity over human editor ergonomics.
 
-- **Let vitest generate snapshot values.** Write
-  `expect(html).toMatchInlineSnapshot()` and run `vitest -u`; never
-  hand-type the HTML. The snapshot is generated truth from real output.
-- **No `/* HTML */` directive.** It only buys editor syntax-highlighting
-  for humans — nothing for an LLM, where the value is self-evidently HTML.
-  It also triggers a vitest inline-snapshot updater bug (a greedy
-  comment-skip coalesces multiple snapshots in one file onto the last on
-  `-u`) and churns the call onto two lines. Use plain single-line
-  `toMatchInlineSnapshot(`"…"`)`.
+- **Generate the value, never hand-type it.** Write
+  `expect(html).toMatchInlineSnapshot()` and run `vitest -u` — the value is
+  generated truth from real output.
+- **Then freeze it to `.toBe('…')` for the committed form.** The vitest `-u`
+  updater coalesces multiple snapshots in one file (writes several onto one
+  call, leaves the others empty) — **NOT fixed in the installed vitest (4.x)**,
+  despite the upstream PR; any adjacent `//` comment or a second snapshot can
+  trigger it. So generate with `toMatchInlineSnapshot`, then convert each to
+  `expect(html).toBe('…')` using the generated string. `.toBe` is immune to the
+  `-u` mangling, reads just as clearly, and is exact string equality for an
+  `outerHTML` string. (Tradeoff: you lose one-step regeneration — to re-gen,
+  temporarily switch back to `toMatchInlineSnapshot`. The real vitest fix is
+  deferred.)
+- **No `/* HTML */` directive** — nothing for an LLM (the value is self-
+  evidently HTML), and it's another `-u` trigger.
 - **Keep JSX inline (single-line)** in tests so HTML snapshots don't pick
   up whitespace text nodes between sibling elements.
-
-Background: the greedy-comment-skip bug is fixed upstream by the vitest PR
-that came out of this repo's work (`fix(snapshot): make inline comment-skip
-regex non-greedy`). Dropping the marker makes our snapshots
-regeneration-safe regardless of which vitest version is installed.
