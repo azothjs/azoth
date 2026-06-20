@@ -75,6 +75,17 @@ declare global {
         // Future: TypeScript contribution for per-tag return types
         type Element = Node;
 
+        // What can appear as a JSX tag. An azoth component runs once and returns
+        // either DOM or a *rerenderable* (the closure `rerenderer()` returns) —
+        // broader than the `Node` that `Element` stays at for intrinsic tags.
+        // Defining ElementType lets a component returning a rerenderable be a
+        // valid tag WITHOUT widening `Element` (which would wreck per-tag
+        // intrinsic return types).
+        type ElementType =
+            | string                                               // intrinsic tag
+            | ((...args: any[]) => Node | ((...args: any[]) => Node)) // function component (props, childNodes) → DOM or a rerenderable
+            | (new (...args: any[]) => any);                       // class component (Channel, UIComponent)
+
         // Children attribute
         interface ElementChildrenAttribute {
             children: {};
