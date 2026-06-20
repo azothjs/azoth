@@ -81,14 +81,14 @@ export class KeyedList extends HTMLElement {
         this.#rows.delete(key);
     }
 
-    // Reorder so the row ends up at `index` in the final order. Index-based
-    // (vs add's {before:key} — the index-vs-key consistency call is still open).
-    move(key, index) {
+    // Move the row to before `beforeKey`'s row; omit/null → to the end.
+    // Key-relative (the author works in keys, not indices), mirrors DOM
+    // insertBefore. Positional insert = add then move.
+    move(key, beforeKey) {
         const row = this.#rows.get(key);
         if(!row) return;
-        const container = this.rowContainer;
-        const others = [...container.children].filter(n => n !== row.node);
-        container.insertBefore(row.node, others[index] ?? null);
+        const ref = beforeKey == null ? null : (this.#rows.get(beforeKey)?.node ?? null);
+        this.rowContainer.insertBefore(row.node, ref);
     }
 
     clear() {

@@ -33,6 +33,19 @@ Two sides of one pattern, distinguished at the composition seam **by casing**
 
 The author reads the render flow from the spelling. That's the payoff of Q1.
 
+**When you need the frame (custom element) vs not (UIComponent).** A UIComponent
+(JS-flow, runs-once-returns-rerenderable) covers two jobs — **tactical DOM-
+manipulation encapsulation** and **compositional work** — and *neither needs a
+new frame*; both live inside the page's forward-only render. Reach for a custom
+element only when the work is **dynamic and self-managing** (add/remove/move/
+update over time) — the case that falls outside forward-only and earns its own
+cycle. KeyedList is that case; most encapsulation/composition is not.
+
+**Referential transparency confirmed.** Holding the element as a JS ref and
+composing it via `{list}` is referentially transparent — the same element flows
+through, re-renders don't replace it (compose's `===` anchor memo no-ops), rows
+survive. azoth owns the JSX call-site, so this is tested, not assumed.
+
 ## Renderer reset (the frame boundary, expressed in code)
 
 The conceptual frame boundary has a 1:1 expression in `renderer.js`. Today the
@@ -154,8 +167,14 @@ this.addEventListener('pet:adopted', e => this.update(e.detail.id, {status:'adop
 ### Ops (verbs)
 
 `add(...items)` (variadic, append-like, for inline/few) **and** `addAll(items)`
-(an array, the bulk path) · `update(key, data)` · `move(key, index)` ·
+(an array, the bulk path) · `update(key, data)` · `move(key, beforeKey?)` ·
 `remove(key)` · `clear()` · `has(key)` · `get(key)` · `size` · `keyAt(target)`.
+
+**`move` is key-relative** — `move(key, beforeKey)` puts the row before
+`beforeKey`'s row; omit `beforeKey` → to the end (mirrors DOM `insertBefore`).
+The author works in keys, not indices, so there is no `move(key, index)`.
+**Positional insert = `add` then `move`** — so no `{before}` option (fragile
+against variadic `add`) and no `addBefore`. Subtracted.
 
 Why both `add` and `addAll`, not variadic-only (`add(...all)` mirroring
 `element.append`): a list is the **big-N** case — `add(...10_000)` risks

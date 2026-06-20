@@ -94,13 +94,13 @@ describe('KeyedUList — ops', () => {
         expect(order(list)).toEqual(['Felix', 'Tom']);
     });
 
-    test('move — the row ends up at the given index (forward and back)', ({ expect }) => {
+    test('move — key-relative: before another row, or to the end', ({ expect }) => {
         const list = make();
         list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }, { id: 3, name: 'Tom' }]);
-        list.move(3, 0);                              // to front
+        list.move(3, 1);                              // Tom before Felix
         expect(order(list)).toEqual(['Tom', 'Felix', 'Mittens']);
-        list.move(3, 2);                              // forward, to end
-        expect(order(list)).toEqual(['Felix', 'Mittens', 'Tom']);
+        list.move(1, null);                           // Felix to the end (no beforeKey)
+        expect(order(list)).toEqual(['Tom', 'Mittens', 'Felix']);
     });
 
     test('clear — empties the DOM and the key map', ({ expect }) => {
@@ -187,6 +187,26 @@ describe('KeyedUList — nested inside a rerenderer (the frame boundary)', () =>
         expect(again).toBe(section);                  // same section (site cache)
         expect(section.querySelector('pet-list')).toBe(list);            // element reused, not rebuilt
         expect(section.querySelector('h2')!.textContent).toBe('Animals'); // outer binding rebound
+        expect([...list.root.children].map(n => n.textContent)).toEqual(['Felix', 'Mittens']); // rows intact
+    });
+
+    // Stronger: hold the element as a JS ref and compose it via {list}. azoth
+    // owns the JSX call-site, so confirm it's referentially transparent — the
+    // same element flows through, re-renders don't replace it, rows survive.
+    test('an externally-held element ref composed via {list} stays the same element', ({ expect }) => {
+        const list = <pet-list></pet-list> as PetList;     // created once, held
+        const render = rerenderer((label: string) =>
+            <section><h2>{label}</h2>{list}</section>);
+
+        const section = render('Pets') as HTMLElement;
+        document.body.append(section);                     // connect → builds the <ul>
+        expect(section.querySelector('pet-list')).toBe(list);   // the very ref, composed in
+        list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }]);
+
+        const again = render('Animals');                   // {list} is the same ref → no-op at the anchor
+        expect(again).toBe(section);
+        expect(section.querySelector('pet-list')).toBe(list);              // still the same element
+        expect(section.querySelector('h2')!.textContent).toBe('Animals');  // sibling binding rebound
         expect([...list.root.children].map(n => n.textContent)).toEqual(['Felix', 'Mittens']); // rows intact
     });
 
