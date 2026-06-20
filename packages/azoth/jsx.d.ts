@@ -45,6 +45,24 @@ type IntrinsicElementProps<T> =
         children?: DOMChild;
     };
 
+// Custom elements (hyphenated tags) are author-defined, so props are open.
+// Matched via a template-literal index key (below) so ONLY hyphenated tags
+// resolve to this — an unknown NON-hyphenated tag (e.g. an HTML typo) still
+// errors. Authors can augment a specific tag with precise props if they want.
+type CustomElementProps = {
+    children?: DOMChild;
+    [prop: string]: any;
+};
+
+// SVG attributes are authored as strings/numbers, but the DOM reflects them as
+// SVGAnimated* objects — so reusing the element interfaces here would reject
+// `viewBox="0 0 10 10"` or `r={5}`. Open for now; precise SVG attribute typing
+// is a deferred refinement (a hand-rolled attribute map, React-style).
+type SVGElementProps = {
+    children?: DOMChild;
+    [attr: string]: any;
+};
+
 declare global {
     namespace JSX {
         // JSX expressions evaluate to DOM Nodes
@@ -171,6 +189,41 @@ declare global {
             var: IntrinsicElementProps<HTMLElement>;
             video: IntrinsicElementProps<HTMLVideoElement>;
             wbr: IntrinsicElementProps<HTMLElement>;
+
+            // SVG Elements (svg-only tag names; shared names like title/a/script
+            // stay HTML above). Open props — see SVGElementProps.
+            svg: SVGElementProps;
+            g: SVGElementProps;
+            path: SVGElementProps;
+            circle: SVGElementProps;
+            ellipse: SVGElementProps;
+            rect: SVGElementProps;
+            line: SVGElementProps;
+            polyline: SVGElementProps;
+            polygon: SVGElementProps;
+            text: SVGElementProps;
+            tspan: SVGElementProps;
+            defs: SVGElementProps;
+            use: SVGElementProps;
+            symbol: SVGElementProps;
+            clipPath: SVGElementProps;
+            mask: SVGElementProps;
+            pattern: SVGElementProps;
+            image: SVGElementProps;
+            linearGradient: SVGElementProps;
+            radialGradient: SVGElementProps;
+            stop: SVGElementProps;
+            filter: SVGElementProps;
+            foreignObject: SVGElementProps;
+            marker: SVGElementProps;
+            view: SVGElementProps;
+            desc: SVGElementProps;
+            metadata: SVGElementProps;
+
+            // Custom elements: the template-literal key matches ONLY hyphenated
+            // tags, so `<pet-list>` resolves here while a non-hyphenated typo
+            // still errors. Author-defined → open props.
+            [customTag: `${string}-${string}`]: CustomElementProps;
         }
     }
 
