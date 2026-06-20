@@ -30,11 +30,9 @@
         "./runtime": "./runtime.js",
         "./maya": "./maya.js",
         "./maya/channels": "./maya/channels.js",
-        "./chronos/generators": "./chronos/generators.js",
         "./vite-plugin": "./vite-plugin.js"
     },
     "dependencies": {
-        "@azothjs/chronos": "workspace:*",
         "@azothjs/maya": "workspace:*",
         "@azothjs/vite-plugin": "workspace:*"
     }
