@@ -41,6 +41,10 @@ export class KeyedList extends HTMLElement {
 
     get root() { return this.#root ??= this.createRoot(); }
 
+    // Where rows are appended. Default: the root itself. Leaves whose semantic
+    // root nests the rows override it (KeyedTable → the <tbody>).
+    get rowContainer() { return this.root; }
+
     connectedCallback() {
         const root = this.root; // builds it on first connect
         // Attach the created root once (idempotent — connectedCallback can
@@ -55,7 +59,7 @@ export class KeyedList extends HTMLElement {
         const key = this.key(data);
         const render = rerenderer(this.view); // one rerenderer instance per row
         const node = render(data);            // first call: builds + caches the node
-        this.root.append(node);
+        this.rowContainer.append(node);
         this.#rows.set(key, { node, render });
         this.#keys.set(node, key);
         return node;
@@ -77,10 +81,14 @@ export class KeyedList extends HTMLElement {
         this.#rows.delete(key);
     }
 
+    // Reorder so the row ends up at `index` in the final order. Index-based
+    // (vs add's {before:key} — the index-vs-key consistency call is still open).
     move(key, index) {
         const row = this.#rows.get(key);
         if(!row) return;
-        this.root.insertBefore(row.node, this.root.children[index] ?? null);
+        const container = this.rowContainer;
+        const others = [...container.children].filter(n => n !== row.node);
+        container.insertBefore(row.node, others[index] ?? null);
     }
 
     clear() {

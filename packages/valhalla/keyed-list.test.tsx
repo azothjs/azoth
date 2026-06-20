@@ -64,3 +64,59 @@ describe('KeyedUList — authoring', () => {
     });
 
 });
+
+describe('KeyedUList — ops', () => {
+
+    const make = () => {
+        const list = document.createElement('pet-list') as PetList;
+        document.body.append(list);
+        return list;
+    };
+    const order = (list: PetList) => [...list.root.children].map(n => n.textContent);
+
+    test('add — variadic: one, several, or spread (each arg is a row)', ({ expect }) => {
+        const list = make();
+        list.add({ id: 1, name: 'Felix' });
+        list.add({ id: 2, name: 'Mittens' }, { id: 3, name: 'Tom' });
+        list.add(...[{ id: 4, name: 'Ada' }]);
+        expect(list.size).toBe(4);
+        expect(order(list)).toEqual(['Felix', 'Mittens', 'Tom', 'Ada']);
+    });
+
+    test('remove — drops the row, its node, and its key', ({ expect }) => {
+        const list = make();
+        list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }, { id: 3, name: 'Tom' }]);
+        list.remove(2);
+        expect(list.size).toBe(2);
+        expect(list.has(2)).toBe(false);
+        expect(list.get(2)).toBe(null);
+        expect(order(list)).toEqual(['Felix', 'Tom']);
+    });
+
+    test('move — the row ends up at the given index (forward and back)', ({ expect }) => {
+        const list = make();
+        list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }, { id: 3, name: 'Tom' }]);
+        list.move(3, 0);                              // to front
+        expect(order(list)).toEqual(['Tom', 'Felix', 'Mittens']);
+        list.move(3, 2);                              // forward, to end
+        expect(order(list)).toEqual(['Felix', 'Mittens', 'Tom']);
+    });
+
+    test('clear — empties the DOM and the key map', ({ expect }) => {
+        const list = make();
+        list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }]);
+        list.clear();
+        expect(list.size).toBe(0);
+        expect(order(list)).toEqual([]);
+    });
+
+    test('keyAt — event target → its row key, walking up to the row root', ({ expect }) => {
+        const list = make();
+        list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }]);
+        const li = list.get(1)!;
+        expect(list.keyAt(li)).toBe(1);               // the row root itself
+        expect(list.keyAt(li.firstChild!)).toBe(1);   // a descendant (the text node)
+        expect(list.keyAt(list)).toBe(undefined);     // outside any row
+    });
+
+});
