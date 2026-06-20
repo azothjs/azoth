@@ -9,9 +9,15 @@ pattern. **Not a limit — an invitation.**
 
 ## Two questions, kept separate
 
-1. **Is it a frame?** — dynamic + self-managing, *and* **not** reducible to
-   "replay the same data structure over the same templates" (the rerenderer
-   already does array-replay / ordinal reuse — the loops case). Architecture test.
+1. **Is it a frame?** "Dynamic" is too vague — pin it by what is *not* one.
+   **Tactical DOM work** — render initial DOM from a template, then imperatively
+   set a prop or two on those existing nodes — is *not* a frame; it's a
+   UIComponent (template render + a simple imperative update). Nor is anything
+   reducible to **replaying the same data structure over the same templates**
+   (the rerenderer already does that — array-replay / ordinal reuse, the loops
+   case). A frame is for **self-managing structural change over time** that none
+   of those expresses — rows/views appearing, disappearing, reordering on their
+   own clock. Architecture test.
 2. **Should it ship out-of-the-box?** — **ubiquitous + low opinion-cost**
    (settled semantics, few defensible designs). Inclusion test. Most frames pass
    (1) and fail (2) → they're recipes, not core.
@@ -28,7 +34,7 @@ state the frame needs) + imperative DOM ops + idempotent `define`. Public
 |---|---|---|
 | **Keyed list** (KeyedList) | yes | **YES** — universal; list semantics are settled |
 | **Virtualized list** (VirtualList) | yes (different node lifecycle) | likely — big-data is common; planned leaf |
-| **Route outlet** (URL → view swap) | yes | **strongest next case — but evaluate, don't auto-ship.** Ubiquitous, but routing is high-opinion (nested routes, guards, data-loading). If anything, ship the *outlet* frame, leave the routing strategy to the author |
+| **Route outlet** (navigation → view swap) | yes | **strongest next case — but a `subtract` story, not a router (see note).** |
 | Enter/leave **transitions** (coordinate removal with animation) | yes | recipe — common but opinionated; pairs with lists |
 | **Portal / teleport** (managed placement elsewhere) | yes | recipe |
 | Drag-**sortable** | yes | recipe — specialized; pairs with lists |
@@ -36,6 +42,19 @@ state the frame needs) + imperative DOM ops + idempotent `define`. Public
 | Tabs / accordion / **selection** | **no** — forward-only + CSS + a tiny imperative swap (see keyed-list's select discussion) | n/a |
 | **Forms** | **no** — native + forward-only | n/a |
 | Single **async value** | **no** — that's `Channel`'s job | n/a |
+
+## On routing — no general problems, just app-layout decisions
+
+A state-managed / render-tree router treats every navigation the same — or makes
+you opt out with hacks. But the real question is an **app decision, per route**:
+is the rendered view *preserved and reused*, or *recreated*? The frame model
+makes that an explicit author choice — a kept element ref → reused; a fresh
+element → recreated — not a framework default. So azoth ships (at most) the
+**outlet frame** (the seam where a view swaps) and leaves the *routing strategy*
+to the app. There are no general routing problems, just app-layout decisions —
+*subtract to unlock*. (Proving ground: the first real app — a wre-dashboards →
+works-os-frontend shell — features "router as LLM tool use," which exercises
+exactly this.)
 
 ## The stance
 
