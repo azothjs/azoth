@@ -51,7 +51,10 @@ compose internals, no `activeRerenderer`/stack, no `siteKey`. So any author can
 build a self-managing frame the same way: `extends HTMLElement` + `Map<key,
 rerenderer(view)>` + imperative DOM ops + idempotent `define`. KeyedList is a
 worked *example* of the pattern, not a maya-internal capability — which
-validates that the public rerenderer is a sufficient primitive for frames.
+validates that the public rerenderer is a sufficient primitive for frames. So
+the OOTB primitive set becomes a deferred, conservative choice (not a limit, an
+invitation): see [frame-primitives](./frame-primitives.md) for the recognition
+test and the candidate landscape.
 
 **Referential transparency confirmed.** Holding the element as a JS ref and
 composing it via `{list}` is referentially transparent — the same element flows
