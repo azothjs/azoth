@@ -1,4 +1,4 @@
-import { resolveDynamic, resolveStatic, isKnownElement } from '@azothjs/dom-info';
+import { resolveDynamic, resolveStatic, isKnownElement } from '../dom-info/index.js';
 import { BIND, Template } from './Template.js';
 import { voidElements } from './html.js';
 
