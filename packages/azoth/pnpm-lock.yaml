@@ -5,9 +5,6 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@azothjs/chronos':
-    specifier: workspace:*
-    version: link:../chronos
   '@azothjs/maya':
     specifier: workspace:*
     version: link:../maya
