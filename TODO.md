@@ -1,42 +1,25 @@
 # Azoth TODO
 
-## Rerenderer (2.0 centerpiece — design captured, pre-spike)
+## Blocks / rerenderer follow-ons
 
-Design: `docs/design/rerenderer.md`. Re-execution + identity-keyed
-cache; per-call-site factories (closure identity as key); ordinal reuse
-for loops; lists-shrink-branches-sleep prune rule; narrowest-scope
-convention (components run once and RETURN their rerenderable);
-per-type update dispatch in compose. Spike order in the doc's open
-questions. Naming bikeshed (Rerender vs Rerenderer) deferred.
+Landed: **KeyedList** shipped (abstract base + `KeyedUList`/`KeyedOList`/
+`KeyedTable` leaves; add/addAll/insert/update/move/remove/clear/has/get/keyFor;
+controller pattern; `Map<key, rerenderer(view)>` per-row model). Legacy
+`Controller`/`Updater` + injectable/`getBound` path removed. Design:
+`docs/design/keyed-list.md`, `frame-primitives.md`.
 
-Related blocks decision: KeyedBlock renames to **ListBlock**
-(js-framework-benchmark holdover name). AnchorBlock remains a cut
-candidate; Toggle TBD.
-
-### ListBlock design — settled 2026-06-17
-
-Two list strategies, distinguished by *node lifecycle* (not by "store
-per-item state or not" — the per-row bound closure is unavoidable; what's
-shared is the one `makeBind` factory = the single render path):
-
-1. **Node-per-item, keyed (THE primary, ~95% of lists).** A rerenderer per
-   row, keyed by id — "swap a rerenderer in per row." Reuses the existing
-   rerenderer wholesale; no new core mechanism. Update/remove/swap/select
-   by key. Most lists are 20–few-hundred rows. Migrating here is what lets
-   the legacy Controller/Updater + injectable/getBound relocate-path in
-   renderer.js be deleted.
-   - Optional cap: recycle a bounded pool of on-hand nodes (paging /
-     keep-N-around) — still interp 1, just with a ceiling. Not virtualization.
-2. **Recycled pool / virtualization (large lists, FUTURE, separate block).**
-   K nodes ≪ N items; rebind the pool to a data window on scroll. Different
-   node lifecycle, so a distinct block — not a mode toggle on ListBlock.
-   Paint-dodge for offscreen rows: `content-visibility` (modern form of the
-   old `display`-hidden trick).
-
-Implementation increment when picked up: rewrite KeyedBlock → ListBlock as a
-`Map<key, rerenderer(rowFn)>` over the shared row template; then remove the
-now-unused Controller/Updater/getBound legacy path; then block tests
-(js-framework-benchmark-style add/update/swap/remove/select).
+Open:
+- **Rerenderer naming bikeshed** (Rerender vs Rerenderer) — deferred.
+- **AnchorBlock** cut candidate; **Toggle** disposition — decide.
+- **VirtualList** (recycled-pool / virtualization, FUTURE, separate block) —
+  `docs/design/VirtualList.md` + `frame-primitives.md`.
+- **`stopRerenderer`** (name TBD): opt a subtree out of reuse (mint fresh nodes)
+  within a rerenderer path. The custom-element frame turned out NOT to need an
+  explicit reset (see keyed-list.md), but a general subtree opt-out may still
+  want it. Future; design open.
+- **Teaching docs**: tie the init→update patterns (module-factory / class /
+  object UIComponent / plain render fn) to realistic UI-layout management —
+  worked examples, not mechanism explainers.
 
 ## Attribute vs property table (2.0 release-gating)
 
@@ -81,37 +64,6 @@ Related: reply to wooorm's open question on property-information #21
 (he asked whether dom-info's browser-audit should be pulled into his
 project, Feb 2025, awaiting Marty's answer). Comment first; PR if
 receptive; Azoth doesn't wait on the outcome.
-
-## Chronos
-
-### Consolidate `generator` into maya `pushable`
-
-The maya package now exports `pushable()` (in `@azothjs/maya/channels`)
-which is the same push-to-pull bridge `chronos.generator()` provides —
-minus the transform parameter (moved to call site / Channel.as /
-iterator helpers). pushable is canonical going forward.
-
-To finish the consolidation:
-- Migrate `wre-dashboards` (and any other downstream) off
-  `azoth/chronos/generators` to `azoth/maya/channels`. The transform
-  argument used in `AgentSearch.jsx` line 14 becomes either an explicit
-  `await` at the call site or a `Channel.as` transform.
-- Remove `chronos/generators/generator.js` once no consumers remain.
-- The chronos package's role narrows further (or dissolves) — open
-  design question, not a blocker.
-
-### Multicast disposition
-
-`Multicast` is still in chronos but has no production callers (the old
-chronos `channels/branch.js` that used it is gone). Either:
-
-- Keep as scaffolding for a future iterators-with-many-consumers
-  primitive, OR
-- Defer entirely to RxJS / TC39 Observable for fan-out and remove.
-
-The EventTarget-based broadcast helper sketched as a future utility
-(see Channel section) may obviate Multicast entirely — EventTarget is
-naturally multi-listener, which is the actual ask.
 
 ## Channel
 
@@ -170,42 +122,26 @@ any DOM" separation-of-concerns pattern deserves a documented example
 (search box + paging + results in one module, Channel out — no
 component-tree demands). Connects to the hypermedia thesis.
 
-## Components
+## Components / typing — precision pass (follow-on)
 
-### Typing review — d.ts + JSDoc for consumer type info
+valhalla now typechecks fully (`.tsx`, 0 errors) — the forcing function is done:
+`jsx.d.ts` has HTML + SVG + custom-element tags (hyphen-indexed) and
+`JSX.ElementType` (function + class components returning DOM or a rerenderable);
+`DOMChild` includes `Channel`; maya's types reach valhalla via `allowJs`
+inference. Remaining is *depth* (optional, on-demand):
 
-Doing valhalla in `.tsx` was the forcing function that uncovered gaps
-between runtime behavior and the type definitions. The runtime accepts
-considerably more than the types currently model. The review:
+**`DOMChild` still incomplete** — compose also accepts at runtime: `Promise`,
+`AsyncIterable`, `ReadableStream`, Observable-shaped, render objects, function
+refs, `IGNORE` sentinel, `bigint`. (Channel added.) The `as unknown as
+JSX.Element` cast in `channels.test.tsx` surfaces it.
 
-**`DOMChild` (in `packages/azoth/jsx.d.ts`) is incomplete.** Today it's
-`string | number | boolean | Node | null | undefined | DOMChild[]`. compose
-also accepts at runtime — and should be reflected in the type:
-- `Promise<DOMChild>`
-- `AsyncIterable<DOMChild>`
-- `ReadableStream<DOMChild>`
-- Observable-shaped (`{ subscribe(...) }`)
-- Render objects (`{ render(props?, childNodes?) }`)
-- Function references (invoked with no args by compose)
-- `Channel` instances
-- `IGNORE` sentinel
-- `bigint`
+**`<Channel>` props are `any`** — its constructor param is untyped, so neither
+`new Channel({…})` nor `<Channel …>` deep-checks props. Typing the constructor
+(JSDoc **on Channel** — types-closer-to-the-object) unlocks both: `eventType` ⟺
+EventTarget source, `map` ⟺ array source, `error`/`as` return match, `append`.
 
-The mismatch surfaces concretely at `packages/valhalla/channels.test.tsx:317`
-where an observable-in-slot needs an `as unknown as JSX.Element` cast.
-
-**`<Channel>` props need typed signatures with constraint relationships:**
-- `eventType` required ⟺ `source` is an `EventTarget`
-- `map` meaningful only when source produces arrays
-- `error` transform returns must match what `as` returns
-- `append` boolean-presence semantics (JSX attribute style)
-
-JSDoc with `@template` + conditional types is one path; per-component
-`.d.ts` overloads another. Open question.
-
-**`pushable`, render-object form, class-component form, function-component
-form** also need typed surfaces. The public API is stable enough now that
-this work pays off; it's a real next step.
+**Per-form prop typing** — `pushable`, render-object, class-/function-component
+surfaces. `@template`/conditional types vs per-component `.d.ts` — open.
 
 ## Compose
 
@@ -265,26 +201,6 @@ part-groups + the Rerenderer's apply-values mechanism) to offer the
 direction conversation. Watch the repo; consider a position
 write-up once 2.0 ships.
 
-### Rerenderer follow-ons
-
-- Controller/Updater likely removable once blocks migrate onto
-  Rerenderer (legacy injectable path in renderer.js goes with them).
-- ListBlock may need variant behavior — or simply swaps a rerenderer
-  in per row. Decide during the blocks increment.
-- Valhalla API-level rerenderer tests (JSX-driven, crazy scenarios)
-  once increments (b)+(c) land — that's where confidence accrues;
-  refine code after.
-- `stopRerenderer` (name TBD): a way, within a rerenderer path, to toggle
-  the flow back to create-new-DOM mode for a subtree — opt out of reuse
-  where each call should mint fresh nodes. Future feature; design open.
-- Teaching: the rerenderer *mechanism* doesn't need corpus budget — it's
-  init-then-update, a plain JS/CS pattern (module factory, class
-  constructor/render, object initialize/render) LLMs already know; the
-  rerenderer just links it to JSX-as-DOM. What needs examples is tying
-  those patterns to real-world UI layout management. Write those for the
-  docs (component-as-module-factory, class/object UIComponent, plain
-  render fn — each shown in a realistic layout), not mechanism explainers.
-
 ### WICG Observable + `EventTarget.prototype.when()`
 
 Chrome 135+ has shipped Observable; Firefox is implementing. When
@@ -332,24 +248,24 @@ What migrates when it does:
 This migration doubles as the validation pass for the 2.0 migration
 story — first real consumer upgrade.
 
-## dom-info
+## dom-info (folded into thoth — `packages/thoth/dom-info/`)
 
 ### Browser-validation suites — on-demand, not in CI
 
-dom-info's `dom-props` / `events` / `svg` suites probe the pinned Chromium
-to confirm the lifted platform data still matches. They're excluded from
-the default run (`pnpm test`) and run on demand via `pnpm test:validate`
-(`VALIDATE=true`). They change only on a dependency or Chromium bump.
+The `dom-props` / `events` / `svg` suites probe the pinned Chromium to confirm
+the lifted platform data still matches. Excluded from the default run; run on
+demand via `pnpm test:validate` (`VALIDATE=true`). They change only on a
+dependency or Chromium bump.
 
 Open follow-ons:
 - Wire `test:validate` into a CI job gated to PRs/merges that touch
-  `packages/dom-info/**` or bump the relevant deps (property-information,
-  html/svg-element-attributes, html/svg/mathml-tag-names, playwright) —
-  rather than every push.
-- A "deps current?" check (renovate, or a scheduled `pnpm outdated` on
-  those packages) to signal when re-validation + data regeneration is due.
-- dom-info has no README yet; document the data sources + validation
-  workflow when the package is readied for standalone publish.
+  `packages/thoth/dom-info/**` or bump the relevant deps (property-information,
+  html/svg-element-attributes, html/svg/mathml-tag-names, playwright) — rather
+  than every push.
+- A "deps current?" check (renovate, or scheduled `pnpm outdated` on those
+  packages) to signal when re-validation + data regeneration is due.
+- No README for the dom-info module yet; document the data sources + validation
+  workflow (now under thoth).
 
 ## External (not Azoth code)
 
