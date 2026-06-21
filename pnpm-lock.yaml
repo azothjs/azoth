@@ -71,9 +71,9 @@ importers:
       '@azothjs/maya':
         specifier: workspace:*
         version: link:../maya
-      '@azothjs/vite-plugin':
+      '@azothjs/thoth':
         specifier: workspace:*
-        version: link:../vite-plugin
+        version: link:../thoth
 
   packages/maya:
     devDependencies:
@@ -83,6 +83,9 @@ importers:
 
   packages/thoth:
     dependencies:
+      '@rollup/pluginutils':
+        specifier: ^5.1.0
+        version: 5.4.0(rollup@4.61.1)
       acorn:
         specifier: ^8.11.3
         version: 8.16.0
@@ -122,27 +125,15 @@ importers:
       svg-tag-names:
         specifier: ^3.0.1
         version: 3.0.1
+      vite:
+        specifier: ^5.0.12
+        version: 5.4.21(@types/node@22.19.20)
 
   packages/valhalla:
     devDependencies:
       '@azothjs/maya':
         specifier: workspace:*
         version: link:../maya
-
-  packages/vite-plugin:
-    dependencies:
-      '@azothjs/thoth':
-        specifier: workspace:*
-        version: link:../thoth
-      '@rollup/pluginutils':
-        specifier: ^5.1.0
-        version: 5.4.0(rollup@4.61.1)
-      source-map:
-        specifier: ^0.7.4
-        version: 0.7.6
-      vite:
-        specifier: ^5.0.12
-        version: 5.4.21(@types/node@22.19.20)
 
   test-utils: {}
 

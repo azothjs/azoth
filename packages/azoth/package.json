@@ -34,6 +34,6 @@
     },
     "dependencies": {
         "@azothjs/maya": "workspace:*",
-        "@azothjs/vite-plugin": "workspace:*"
+        "@azothjs/thoth": "workspace:*"
     }
 }

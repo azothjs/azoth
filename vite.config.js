@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import inspect from 'vite-plugin-inspect';
-import azothPlugin from './packages/vite-plugin/index.js'
+import azothPlugin from './packages/thoth/vite/index.js'
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { playwright } from '@vitest/browser-playwright';
@@ -24,7 +24,7 @@ const baseExclude = [
     '**/node_modules/**',
     '**/dist/**',
     // Node-specific tests that can't run in browser
-    'packages/vite-plugin/index.test.js',
+    '**/vite/index.test.js',
     'vite-test/plugin.test.js',
 ];
 

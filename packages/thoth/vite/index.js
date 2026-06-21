@@ -1,4 +1,4 @@
-import { compile, templateModule, makeTargets, makeRenderer, makeBind } from '@azothjs/thoth';
+import { compile, templateModule, makeTargets, makeRenderer, makeBind } from '../compiler.js';
 import { createFilter } from '@rollup/pluginutils';
 import { transform as esbuildTransform } from 'esbuild';
 import path from 'node:path';
