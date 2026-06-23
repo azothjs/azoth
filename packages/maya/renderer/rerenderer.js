@@ -41,6 +41,43 @@ export function activeRenderer() {
 // Distinguishes "no value stored yet" from a stored undefined.
 const NONE = Symbol('rerenderer.none');
 
+// The stack holds two kinds, both answering getBound / skipIfSame /
+// getComponent / setComponent (polymorphism — render() and compose() just
+// call the active one). This is the fresh kind, the RESET: it reuses
+// nothing — ignores siteKey, never skips an identical value, never
+// memoizes a component. Pushed to SHADOW an outer Rerenderer (e.g. a
+// custom element in connectedCallback), so a nested scope mints new DOM
+// instead of being reused. It renders fresh and, by topping the stack,
+// rerenders nothing. See docs/design/keyed-list.md.
+class Renderer {
+    run(renderFn, args) {
+        stack.push(this);
+        try {
+            return renderFn(...args);
+        }
+        finally {
+            const popped = stack.pop();
+            // eslint-disable-next-line no-unsafe-finally
+            if(popped !== this) throw new Error('Renderer stack error');
+        }
+    }
+    getBound(siteKey, make) { return make(); } // fresh: ignore the site
+    skipIfSame() { return false; }             // never skip — always compose
+    getComponent() { return null; }            // no memo — always create
+    setComponent() { }                         // fresh: nothing to remember
+}
+
+export function renderer(renderFn) {
+    if(typeof renderFn !== 'function') {
+        throw new TypeError(
+            `renderer requires a function. Received "${typeof renderFn}". ` +
+            `Wrap the work in a thunk: renderer(() => buildSubtree()).`
+        );
+    }
+    const r = new Renderer();
+    return (...args) => r.run(renderFn, args);
+}
+
 class Rerenderer {
     #sites = new Map();
     #anchors = new WeakMap();

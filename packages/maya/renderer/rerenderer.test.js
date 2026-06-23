@@ -2,7 +2,7 @@ import { describe, test, beforeAll } from 'vitest';
 import { compose, composeComponent, createComponent } from '../compose/compose.js';
 import { Channel } from '../channels/channel.js';
 import { render, RenderService } from './render.js';
-import { rerenderer } from './rerenderer.js';
+import { renderer, rerenderer } from './rerenderer.js';
 
 /**
  * Increment (a) of the Rerenderer spike — runtime only, intrinsic only.
@@ -27,6 +27,42 @@ describe('rerenderer — the gate', () => {
         expect(() => rerenderer(document.createElement('div')))
             .toThrow(/requires a function/);
         expect(() => rerenderer(undefined)).toThrow(/requires a function/);
+    });
+
+});
+
+describe('renderer — the reset (fresh shadow)', () => {
+
+    // renderer() pushes a fresh Renderer: it ignores siteKey and builds anew.
+    // Topping the stack, it SHADOWS an outer rerenderer, so a nested render
+    // site mints new DOM instead of being reused. (A custom-element frame
+    // pushes one in connectedCallback — see docs/design/keyed-list.md.)
+
+    test('non-function throws, like rerenderer', ({ expect }) => {
+        expect(() => renderer('nope')).toThrow(/requires a function/);
+    });
+
+    test('a wrapped site builds fresh inside an outer rerenderer — not reused', ({ expect }) => {
+        const t = makeP('reset-fresh');
+        const fn = rerenderer(v => renderer(() => t(v))());
+
+        const a = fn('x');
+        const b = fn('y');              // outer re-runs; renderer() shadows it
+
+        expect(b).not.toBe(a);          // fresh node, not the cached one
+        expect(a.textContent).toBe('x');
+        expect(b.textContent).toBe('y');
+    });
+
+    test('without the reset, the same site is reused by the outer rerenderer', ({ expect }) => {
+        const t = makeP('reset-contrast');
+        const fn = rerenderer(v => t(v));
+
+        const a = fn('x');
+        const b = fn('y');              // same site, cached → same node, rebound
+
+        expect(b).toBe(a);              // reused — the behavior the reset overrides
+        expect(b.textContent).toBe('y');
     });
 
 });

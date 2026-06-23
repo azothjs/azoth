@@ -12,10 +12,6 @@ Open:
 - **Rerenderer naming bikeshed** (Rerender vs Rerenderer) — deferred.
 - **VirtualList** (recycled-pool / virtualization, FUTURE, separate block) —
   `docs/design/VirtualList.md` + `frame-primitives.md`.
-- **`stopRerenderer`** (name TBD): opt a subtree out of reuse (mint fresh nodes)
-  within a rerenderer path. The custom-element frame turned out NOT to need an
-  explicit reset (see keyed-list.md), but a general subtree opt-out may still
-  want it. Future; design open.
 - **Teaching docs**: tie the init→update patterns (module-factory / class /
   object UIComponent / plain render fn) to realistic UI-layout management —
   worked examples, not mechanism explainers.

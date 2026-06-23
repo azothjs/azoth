@@ -2,7 +2,7 @@ import { DOMRenderer } from './dom-renderer.js';
 import { HTMLRenderer } from './html-renderer.js';
 import { activeRenderer } from './rerenderer.js';
 
-export { rerenderer, activeRenderer } from './rerenderer.js';
+export { renderer, rerenderer, activeRenderer } from './rerenderer.js';
 
 const templates = new Map(); // cache
 let renderEngine = DOMRenderer; // DOM or HTML engine
@@ -43,11 +43,12 @@ export function render(id, targets, makeBind, isFragment, content) {
 
     return (...args) => {
         if(!create) return null;
-        const rr = activeRenderer();
-        // Under a rerenderer: reuse this site's cached node, rebound. Otherwise
-        // (plain forward render): a fresh build.
-        const { node: root, bind } = rr
-            ? rr.getBound(siteKey, buildFresh)
+        const r = activeRenderer();
+        // The active renderer decides: a rerenderer reuses this site's cached
+        // node (rebound); a fresh renderer ignores the site and builds anew;
+        // no active renderer (plain forward render) also builds fresh.
+        const { node: root, bind } = r
+            ? r.getBound(siteKey, buildFresh)
             : buildFresh();
         if(bind) bind(...args);
         return root;
