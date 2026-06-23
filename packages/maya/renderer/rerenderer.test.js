@@ -1,12 +1,12 @@
 import { describe, test, beforeAll } from 'vitest';
 import { compose, composeComponent, createComponent } from '../compose/compose.js';
 import { Channel } from '../channels/channel.js';
-import { renderer, RenderService } from './renderer.js';
+import { render, RenderService } from './render.js';
 import { rerenderer } from './rerenderer.js';
 
 /**
  * Increment (a) of the Rerenderer spike — runtime only, intrinsic only.
- * Templates are hand-built renderer(...) calls (what thoth emits), per
+ * Templates are hand-built render(...) calls (what thoth emits), per
  * the pattern in controller.test.js. See docs/design/rerenderer.md.
  */
 
@@ -18,7 +18,7 @@ const slotBind = targets => {
     const t0 = targets[0];
     return v0 => compose(t0, v0);
 };
-const makeP = id => renderer(id, slotTargets, slotBind, false, `<p data-bind><!--0--></p>`);
+const makeP = id => render(id, slotTargets, slotBind, false, `<p data-bind><!--0--></p>`);
 
 describe('rerenderer — the gate', () => {
 
@@ -65,8 +65,8 @@ describe('rerenderer — control flow (the hooks coin, flipped)', () => {
     test('conditional branches: each cached by its own site; sleeping, not dead', ({ expect }) => {
         // anchor comment is childNodes[1] here — text "A:" is [0]
         const prefixTargets = r => [r.childNodes[1]];
-        const tA = renderer('rr-br-a', prefixTargets, slotBind, false, `<p data-bind>A:<!--0--></p>`);
-        const tB = renderer('rr-br-b', prefixTargets, slotBind, false, `<p data-bind>B:<!--0--></p>`);
+        const tA = render('rr-br-a', prefixTargets, slotBind, false, `<p data-bind>A:<!--0--></p>`);
+        const tB = render('rr-br-b', prefixTargets, slotBind, false, `<p data-bind>B:<!--0--></p>`);
         const fn = rerenderer((flag, v) => flag ? tA(v) : tB(v));
 
         const a1 = fn(true, 'x');
@@ -107,8 +107,8 @@ describe('rerenderer — control flow (the hooks coin, flipped)', () => {
         // Two declarations, SAME template id — the compiled shape after
         // per-site factory emission. Closure identity keys the cache.
         const html = `<p data-bind><!--0--></p>`;
-        const tX = renderer('rr-dup', slotTargets, slotBind, false, html);
-        const tY = renderer('rr-dup', slotTargets, slotBind, false, html);
+        const tX = render('rr-dup', slotTargets, slotBind, false, html);
+        const tY = render('rr-dup', slotTargets, slotBind, false, html);
         const fn = rerenderer((a, b) => [tX(a), tY(b)]);
 
         const [x1, y1] = fn('left', 'right');
@@ -168,13 +168,13 @@ describe('rerenderer — anchor memory (=== skip)', () => {
 describe('rerenderer — components inside the wrap (increment c)', () => {
 
     // Simulates the compiled component slot: bind receives the tuple
-    // [Constructor, props] and calls composeComponent (what __cC does).
+    // [Constructor, props] and calls composeComponent (what __composeComponent does).
     const componentBind = targets => {
         const t0 = targets[0];
         return v0 => composeComponent(t0, v0);
     };
     const makeHost = id =>
-        renderer(id, slotTargets, componentBind, false, `<p data-bind><!--0--></p>`);
+        render(id, slotTargets, componentBind, false, `<p data-bind><!--0--></p>`);
 
     test('chain rule: setup runs once, the returned rerenderable is re-invoked', ({ expect }) => {
         const tCard = makeP('rr-c-card');
@@ -336,11 +336,11 @@ describe('rerenderer — UIComponent protocol (increment d)', () => {
         return v0 => composeComponent(t0, v0);
     };
     const makeHost = id =>
-        renderer(id, slotTargets, componentBind, false, `<p data-bind><!--0--></p>`);
+        render(id, slotTargets, componentBind, false, `<p data-bind><!--0--></p>`);
 
     // Transpiled JSX emits one factory declaration per call site (increment
     // b). Site identity is the factory's CLOSURE identity (fresh per
-    // renderer() call), so a render() and an update() that each contain <X/>
+    // render() call), so a render() and an update() that each contain <X/>
     // are distinct sites even with identical HTML — they can't share a node
     // the way two calls to one factory would. (That same-HTML-still-distinct
     // path is proven by the "deduped templates cannot collide" test above;
@@ -460,7 +460,7 @@ describe('rerenderer — Channel update verb (increment e)', () => {
         return v0 => composeComponent(t0, v0);
     };
     const makeHost = id =>
-        renderer(id, slotTargets, channelBind, false, `<p data-bind><!--0--></p>`);
+        render(id, slotTargets, channelBind, false, `<p data-bind><!--0--></p>`);
 
     // A minimal Observable whose subscribe/unsubscribe we can count.
     const observable = () => {

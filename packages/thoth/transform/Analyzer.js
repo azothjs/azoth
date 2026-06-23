@@ -70,7 +70,7 @@ export class Analyzer {
         }
         else {
             assessElement(node);
-            if(node.isComponent) this.#imports.add('rC');
+            if(node.isComponent) this.#imports.add('createComponent');
             this.JSXElement(node);
         }
     }

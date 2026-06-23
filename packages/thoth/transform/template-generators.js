@@ -24,7 +24,7 @@ export function makeRenderer({ isEmpty, id, targetKey, tMap, bindKey, bMap, isDo
     const content = !options?.noContent;
     const target = targetKey ? `g${targetKey}` : `null`;
     const bind = bindKey ? `b${bindKey}` : `null`;
-    let renderer = `__renderer(`;
+    let renderer = `__render(`;
     renderer += `"${id}", ${target}, ${bind}, ${isDomFragment}`;
     if(content) renderer += ', `' + `${html}` + '`';
     renderer += `)`;
@@ -36,7 +36,7 @@ const TARGETS = 'ts';
 const TARGET = 't';
 const VALUE = 'v';
 // reserved, child, component, prop, spread
-const METHOD = ['', '__c', '__cC', '', 'Object.assign'];
+const METHOD = ['', '__compose', '__composeComponent', '', 'Object.assign'];
 
 export function makeBind({ isStatic, bindings }) {
     if(isStatic) return 'null';

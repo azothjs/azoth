@@ -29,7 +29,7 @@
         "./channels": "./channels/index.js",
         "./compose": "./compose/compose.js",
         "./lists": "./lists/index.js",
-        "./renderer": "./renderer/renderer.js"
+        "./renderer": "./renderer/render.js"
     },
     "devDependencies": {
         "test-utils": "workspace:^"
