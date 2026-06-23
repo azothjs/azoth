@@ -159,8 +159,8 @@ The function receives the root element (`r`) and optionally the array of `data-b
   const t0 = ts[0], t1 = ts[1], t2 = ts[2];
   return (v0, v1, v2) => {
     t0.className = v0;    // Property assignment
-    __c(t1, v1);          // Compose into child position
-    __c(t2, v2);          // Compose into child position
+    __compose(t1, v1);          // Compose into child position
+    __compose(t2, v2);          // Compose into child position
   };    
 }
 ```
@@ -169,16 +169,16 @@ The function receives the root element (`r`) and optionally the array of `data-b
 - Property assignment: `t0.className = v0`
 - Dataset assignment: `t0.dataset.id = v0`
 - Spread props: `Object.assign(t0, v0)`
-- Child compose: `__c(t0, v0)` (calls Maya's compose)
-- Component compose: `__cC(t0, v0)` (calls Maya's composeComponent)
+- Child compose: `__compose(t0, v0)` (calls Maya's compose)
+- Component compose: `__composeComponent(t0, v0)` (calls Maya's composeComponent)
 
 ### 3. Render Generator (`makeRenderer`)
 
-**Purpose:** Generate the call to Maya's `__renderer` function.
+**Purpose:** Generate the call to Maya's `__render` function.
 
 ```javascript
 // Output
-__renderer("77e67b80", g5feceb66, b6b86b273, false, `<p><!--0--></p>`)
+__render("77e67b80", g5feceb66, b6b86b273, false, `<p><!--0--></p>`)
 ```
 
 Arguments:
@@ -263,7 +263,7 @@ const b = <p>{name2}</p>;
 const a = <p>{x}</p>;
 const b = <div>{y}</div>;
 // Different elements, but same binding pattern (one child compose)
-// Can share the same bind function: (ts) => { return (v0) => { __c(ts[0], v0); }; }
+// Can share the same bind function: (ts) => { return (v0) => { __compose(ts[0], v0); }; }
 ```
 
 This emerges naturally from decomposing the compilation into these pieces.

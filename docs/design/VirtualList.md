@@ -1,7 +1,7 @@
 # VirtualList (name TBD) — recycled-pool / virtualized list
 
 > Status: FUTURE, separate block. Notes parked while designing
-> [KeyedList](../../packages/maya/blocks/KeyedList.js). Not started.
+> [KeyedList](../../packages/maya/lists/KeyedList.js). Not started.
 
 The second list strategy from the 2026-06-17 TODO decision. Distinguished
 from `KeyedList` by **node lifecycle**, not by a config flag — so it's a

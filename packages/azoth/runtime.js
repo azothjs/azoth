@@ -1,9 +1,9 @@
 export {
-    compose as __c,
-    createComponent as __rC,
-    composeComponent as __cC,
+    compose as __compose,
+    createComponent as __createComponent,
+    composeComponent as __composeComponent,
 } from '@azothjs/maya/compose';
 
 export {
-    renderer as __renderer,
+    render as __render,
 } from '@azothjs/maya/renderer';

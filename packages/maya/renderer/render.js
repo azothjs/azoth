@@ -1,8 +1,8 @@
 import { DOMRenderer } from './dom-renderer.js';
 import { HTMLRenderer } from './html-renderer.js';
-import { activeRerenderer } from './rerenderer.js';
+import { activeRenderer } from './rerenderer.js';
 
-export { rerenderer, activeRerenderer } from './rerenderer.js';
+export { rerenderer, activeRenderer } from './rerenderer.js';
 
 const templates = new Map(); // cache
 let renderEngine = DOMRenderer; // DOM or HTML engine
@@ -25,10 +25,10 @@ function get(id, isFragment = false, content) {
     return template;
 }
 
-export function renderer(id, targets, makeBind, isFragment, content) {
+export function render(id, targets, makeBind, isFragment, content) {
     const create = get(id, isFragment, content);
 
-    // Per-declaration identity: the rerenderer's cache key. Each renderer()
+    // Per-declaration identity: the rerenderer's cache key. Each render()
     // call is one compiled call site (per-site factory) — closure identity IS
     // the key, so deduped templates (same id, multiple sites) cannot collide
     // across sites.
@@ -43,7 +43,7 @@ export function renderer(id, targets, makeBind, isFragment, content) {
 
     return (...args) => {
         if(!create) return null;
-        const rr = activeRerenderer();
+        const rr = activeRenderer();
         // Under a rerenderer: reuse this site's cached node, rebound. Otherwise
         // (plain forward render): a fresh build.
         const { node: root, bind } = rr

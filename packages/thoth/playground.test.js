@@ -17,7 +17,7 @@ import {
  *   html:     the template HTML (delivered in the .html page, by id)
  *   targets:  the generated target-selector function (g…)
  *   bind:     the generated binder (b…) — values in, DOM writes out
- *   renderer: the template factory wiring (t… = __renderer(…))
+ *   renderer: the template factory wiring (t… = __render(…))
  *
  * To reason about a new scenario: add a test with empty snapshots and run
  *
@@ -57,24 +57,24 @@ describe('decomposition playground', () => {
         expect(decompose(input)).toMatchInlineSnapshot(`
           "
           ==== code ====
-          import { __rC } from 'azoth/runtime';
+          import { __createComponent } from 'azoth/runtime';
           import { t4a104a2a } from 'virtual:azoth-templates?id=4a104a2a';
           const Greeting = ({name}) => {
               const salutation = name === 'CascadiaJS' ? "Whazzup" : "Hello";
               return t4a104a2a(salutation,name.toUpperCase());
           };
-          document.body.append(__rC(Greeting, { name: "CascadiaJS", }));
+          document.body.append(__createComponent(Greeting, { name: "CascadiaJS", }));
           ==== template 4a104a2a ====
           html:     <p><!--0-->, <!--0-->!</p>
           targets:  r => [r.childNodes[0],r.childNodes[2]]
           bind:     (ts) => {
             const t0 = ts[0], t1 = ts[1];
             return (v0, v1) => {
-              __c(t0, v0);
-              __c(t1, v1);
+              __compose(t0, v0);
+              __compose(t1, v1);
             };    
           }
-          renderer: __renderer("4a104a2a", g356056d3, bac4750db, false)
+          renderer: __render("4a104a2a", g356056d3, bac4750db, false)
           ==== template e3b0c442 ====
           html:     
           targets:  null
@@ -102,7 +102,7 @@ describe('decomposition playground', () => {
               t0.className = v0;
             };    
           }
-          renderer: __renderer("0095e1b8", gd124b23c, bc38a3225, false)
+          renderer: __render("0095e1b8", gd124b23c, bc38a3225, false)
           "
         `);
 
@@ -135,7 +135,7 @@ describe('decomposition playground', () => {
               t1.name = v1;
             };    
           }
-          renderer: __renderer("9ca71c1d", ga95fa6bb, b90264fbb, false)
+          renderer: __render("9ca71c1d", ga95fa6bb, b90264fbb, false)
           "
         `);
 
@@ -181,20 +181,20 @@ describe('decomposition playground', () => {
           bind:     (ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }
-          renderer: __renderer("9a2e4cdb", gdb407f11, b6b86b273, false)
+          renderer: __render("9a2e4cdb", gdb407f11, b6b86b273, false)
           ==== template 732d1cd1 ====
           html:     <main><!--0--></main>
           targets:  r => [r.childNodes[0]]
           bind:     (ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }
-          renderer: __renderer("732d1cd1", gdb407f11, b6b86b273, false)
+          renderer: __render("732d1cd1", gdb407f11, b6b86b273, false)
           "
         `);
     });
@@ -217,20 +217,20 @@ describe('decomposition playground', () => {
           bind:     (ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }
-          renderer: __renderer("f4127425", gdb407f11, b6b86b273, false)
+          renderer: __render("f4127425", gdb407f11, b6b86b273, false)
           ==== template 79ccc8b8 ====
           html:     <p>loading <!--0-->%</p>
           targets:  r => [r.childNodes[1]]
           bind:     (ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }
-          renderer: __renderer("79ccc8b8", g043f347c, b6b86b273, false)
+          renderer: __render("79ccc8b8", g043f347c, b6b86b273, false)
           "
         `);
     });
@@ -255,10 +255,10 @@ describe('decomposition playground', () => {
           bind:     (ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __cC(t0, v0);
+              __composeComponent(t0, v0);
             };    
           }
-          renderer: __renderer("3d3e41e0", g043f347c, bd4735e3a, false)
+          renderer: __render("3d3e41e0", g043f347c, bd4735e3a, false)
           "
         `);
     });
@@ -281,20 +281,20 @@ describe('decomposition playground', () => {
           bind:     (ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }
-          renderer: __renderer("15aa2705", gdb407f11, b6b86b273, false)
+          renderer: __render("15aa2705", gdb407f11, b6b86b273, false)
           ==== template 15aa2705 ====
           html:     <p><!--0--></p>
           targets:  r => [r.childNodes[0]]
           bind:     (ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }
-          renderer: __renderer("15aa2705", gdb407f11, b6b86b273, false)
+          renderer: __render("15aa2705", gdb407f11, b6b86b273, false)
           "
         `);
     });
@@ -319,20 +319,20 @@ describe('decomposition playground', () => {
           bind:     (ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }
-          renderer: __renderer("057b50eb", g043f347c, b6b86b273, false)
+          renderer: __render("057b50eb", g043f347c, b6b86b273, false)
           ==== template fbb7e8b4 ====
           html:     <li><!--0--></li>
           targets:  r => [r.childNodes[0]]
           bind:     (ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }
-          renderer: __renderer("fbb7e8b4", gdb407f11, b6b86b273, false)
+          renderer: __render("fbb7e8b4", gdb407f11, b6b86b273, false)
           "
         `);
     });
@@ -359,11 +359,11 @@ describe('decomposition playground', () => {
           bind:     (ts) => {
             const t0 = ts[0], t1 = ts[1];
             return (v0, v1) => {
-              __c(t0, v0);
-              __c(t1, v1);
+              __compose(t0, v0);
+              __compose(t1, v1);
             };    
           }
-          renderer: __renderer("47556cd8", g356056d3, bac4750db, false)
+          renderer: __render("47556cd8", g356056d3, bac4750db, false)
           "
         `);
     });

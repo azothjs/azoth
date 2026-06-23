@@ -1,5 +1,5 @@
 import { Channel } from '../channels/channel.js';
-import { activeRerenderer } from '../renderer/rerenderer.js';
+import { activeRenderer } from '../renderer/rerenderer.js';
 
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
@@ -12,7 +12,7 @@ export function compose(anchor, input, keepLast, props, childNodes) {
     // only on the replace path: keepLast=true means accumulate, where
     // a repeated value is a legitimate "add another."
     if(!keepLast) {
-        const rr = activeRerenderer();
+        const rr = activeRenderer();
         if(rr && rr.skipIfSame(anchor, input)) return;
     }
 
@@ -113,7 +113,7 @@ export function compose(anchor, input, keepLast, props, childNodes) {
 }
 
 export function composeComponent(anchor, [Constructor, props, childNodes]) {
-    const rr = activeRerenderer();
+    const rr = activeRenderer();
     if(rr) {
         // The update verb. Same Constructor at this anchor → update in
         // place. Different Constructor → fall through to create (=== fails
