@@ -10,7 +10,6 @@ controller pattern; `Map<key, rerenderer(view)>` per-row model). Legacy
 
 Open:
 - **Rerenderer naming bikeshed** (Rerender vs Rerenderer) — deferred.
-- **AnchorBlock** cut candidate; **Toggle** disposition — decide.
 - **VirtualList** (recycled-pool / virtualization, FUTURE, separate block) —
   `docs/design/VirtualList.md` + `frame-primitives.md`.
 - **`stopRerenderer`** (name TBD): opt a subtree out of reuse (mint fresh nodes)

@@ -97,11 +97,11 @@ export default function azothPlugin(options) {
 
     function loadBindModule([id]) {
         // TODO: conditionally import based on what was used in templates
-        return `import { __c, __cC } from 'azoth/runtime';\nexport const b${id} = ${makeBind(byBind.get(id))};`;
+        return `import { __compose, __composeComponent } from 'azoth/runtime';\nexport const b${id} = ${makeBind(byBind.get(id))};`;
     }
 
     function loadTemplateModule(ids, isBuild) {
-        const moduleImports = [`import { __renderer } from 'azoth/runtime';\n`];
+        const moduleImports = [`import { __render } from 'azoth/runtime';\n`];
 
         const targetGenerators = new Set();
         const bindGenerators = new Set();

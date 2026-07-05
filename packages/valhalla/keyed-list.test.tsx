@@ -17,7 +17,7 @@
  *    reconcile-by-diff. `update(key, data)` rebinds that row's node IN PLACE
  *    (its own per-row rerenderer — the Q3 contract this file also covers).
  *
- * Provisional: module home (`@azothjs/maya/blocks`) and the JSX form
+ * Provisional: module home (`@azothjs/maya/lists`) and the JSX form
  * `<pet-list/>` (needs an IntrinsicElements declaration — the next
  * author-first constraint) are TBD. This file creates via
  * document.createElement to isolate the authoring stance from JSX typing.
@@ -28,7 +28,7 @@
  * (unfixed in vitest 4.x; see CLAUDE.md).
  */
 import { describe, test } from 'vitest';
-import { KeyedUList, KeyedOList, KeyedTable } from '@azothjs/maya/blocks';
+import { KeyedUList, KeyedOList, KeyedTable } from '@azothjs/maya/lists';
 import { rerenderer } from '@azothjs/maya/renderer';
 
 type Pet = { id: number; name: string };

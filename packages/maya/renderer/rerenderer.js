@@ -34,7 +34,7 @@
 
 const stack = [];
 
-export function activeRerenderer() {
+export function activeRenderer() {
     return stack.length ? stack[stack.length - 1] : null;
 }
 

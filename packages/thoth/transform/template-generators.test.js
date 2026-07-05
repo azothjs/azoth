@@ -93,7 +93,7 @@ describe('bind generator', () => {
           "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }"
         `);
@@ -105,7 +105,7 @@ describe('bind generator', () => {
           "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }"
         `);
@@ -121,8 +121,8 @@ describe('bind generator', () => {
             const t0 = ts[0], t1 = ts[1], t2 = ts[2];
             return (v0, v1, v2) => {
               t0.className = v0;
-              __c(t1, v1);
-              __c(t2, v2);
+              __compose(t1, v1);
+              __compose(t2, v2);
             };    
           }"
         `
@@ -138,7 +138,7 @@ describe('bind generator', () => {
           "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __cC(t0, v0);
+              __composeComponent(t0, v0);
             };    
           }"
         `
@@ -192,31 +192,31 @@ describe('bind generator', () => {
             "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }",
             "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }",
             "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }",
             "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }",
             "(ts) => {
             const t0 = ts[0];
             return (v0) => {
-              __c(t0, v0);
+              __compose(t0, v0);
             };    
           }",
             "null",
@@ -237,13 +237,13 @@ describe('render generator', () => {
     test('simple', ({ compile, expect }) => {
         const code = compile(`name => <p>{name}</p>`);
 
-        expect(code).toMatchInlineSnapshot(`"__renderer("15aa2705", gdb407f11, b6b86b273, false, \`<p><!--0--></p>\`)"`);
+        expect(code).toMatchInlineSnapshot(`"__render("15aa2705", gdb407f11, b6b86b273, false, \`<p><!--0--></p>\`)"`);
     });
 
     test('static', ({ compile, expect }) => {
         const code = compile(`() => <p>static</p>`);
 
-        expect(code).toMatchInlineSnapshot(`"__renderer("a84dfd44", null, null, false, \`<p>static</p>\`)"`);
+        expect(code).toMatchInlineSnapshot(`"__render("a84dfd44", null, null, false, \`<p>static</p>\`)"`);
     });
 
     test('jsx comments are ignored', ({ compile, expect }) => {
@@ -254,7 +254,7 @@ describe('render generator', () => {
         </div>`);
 
         // Only one <!--0--> for the conditional, none for the comment
-        expect(code).toMatchInlineSnapshot(`"__renderer("77ff2813", g24227028, b6b86b273, false, \`<div>
+        expect(code).toMatchInlineSnapshot(`"__render("77ff2813", g24227028, b6b86b273, false, \`<div>
             
             <!--0-->
         </div>\`)"`);
@@ -268,7 +268,7 @@ describe('render generator', () => {
 
         expect(code).toMatchInlineSnapshot(
             `
-          "__renderer("2ce4ea27", gedc11336, b8477292e, false, \`<p>
+          "__render("2ce4ea27", gedc11336, b8477292e, false, \`<p>
                       <!--0--> <span data-bind>hey <!--0-->!</span>
                   </p>\`)"
         `
@@ -279,7 +279,7 @@ describe('render generator', () => {
         const template = preParse(`name => <p>{name}</p>`, expect);
         const code = makeRenderer(template, { noContent: true });
 
-        expect(code).toMatchInlineSnapshot(`"__renderer("15aa2705", gdb407f11, b6b86b273, false)"`);
+        expect(code).toMatchInlineSnapshot(`"__render("15aa2705", gdb407f11, b6b86b273, false)"`);
     });
 
 
@@ -298,12 +298,12 @@ describe('render generator', () => {
         const mapped = initial.templates.map(makeRenderer);
         expect(mapped).toMatchInlineSnapshot(`
           [
-            "__renderer("191b5e03", null, null, false, \`<p>loading...</p>\`)",
-            "__renderer("15aa2705", gdb407f11, b6b86b273, false, \`<p><!--0--></p>\`)",
-            "__renderer("3fcf8b87", gdb407f11, b6b86b273, false, \`<ul><!--0--></ul>\`)",
-            "__renderer("2c4a6c0f", gdb407f11, b6b86b273, false, \`<p><!--0--> cats</p>\`)",
-            "__renderer("fbb7e8b4", gdb407f11, b6b86b273, false, \`<li><!--0--></li>\`)",
-            "__renderer("3fcf8b87", gdb407f11, b6b86b273, false, \`<ul><!--0--></ul>\`)",
+            "__render("191b5e03", null, null, false, \`<p>loading...</p>\`)",
+            "__render("15aa2705", gdb407f11, b6b86b273, false, \`<p><!--0--></p>\`)",
+            "__render("3fcf8b87", gdb407f11, b6b86b273, false, \`<ul><!--0--></ul>\`)",
+            "__render("2c4a6c0f", gdb407f11, b6b86b273, false, \`<p><!--0--> cats</p>\`)",
+            "__render("fbb7e8b4", gdb407f11, b6b86b273, false, \`<li><!--0--></li>\`)",
+            "__render("3fcf8b87", gdb407f11, b6b86b273, false, \`<ul><!--0--></ul>\`)",
           ]
         `);
     });

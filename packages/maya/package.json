@@ -26,10 +26,10 @@
         "**/!(*test|*config).js"
     ],
     "exports": {
-        "./blocks": "./blocks/blocks.js",
         "./channels": "./channels/index.js",
         "./compose": "./compose/compose.js",
-        "./renderer": "./renderer/renderer.js"
+        "./lists": "./lists/index.js",
+        "./renderer": "./renderer/render.js"
     },
     "devDependencies": {
         "test-utils": "workspace:^"

@@ -141,7 +141,7 @@ export class Transpiler extends Generator {
     }
 
     CreateElement(node, state) {
-        state.write(`__rC(`, node);
+        state.write(`__createComponent(`, node);
         this.CompleteElement(node, node.componentExpr, state);
         state.write(`)`);
     }
@@ -153,7 +153,7 @@ export class Transpiler extends Generator {
         }
         else {
             // Always emit empty object so components can safely destructure props
-            // <Component /> -> __rC(Component, {}) not __rC(Component)
+            // <Component /> -> __createComponent(Component, {}) not __createComponent(Component)
             state.write(`, {}`);
         }
 
