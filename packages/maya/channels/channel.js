@@ -1,8 +1,10 @@
 import { pushable } from './pushable.js';
+import { IGNORE } from '../compose/compose.js';
 
 /**
- * Channel — recognized by compose via `instanceof Channel`. The class IS
- * the JSX component: one class, two roles, one definition.
+ * Channel — recognized by compose via the Input shape (a `.from` getter),
+ * not by class. The class IS the JSX component: one class, two roles, one
+ * definition.
  *
  *   JSX form:
  *     <Channel source={x} as={Y}>loading</Channel>
@@ -10,8 +12,9 @@ import { pushable } from './pushable.js';
  *   Direct (equivalent):
  *     new Channel({ source: x, as: Y }, loadingDom)
  *
- * Both produce an instance with `.initial` and `.source`. compose.js
- * checks `instanceof Channel` to recognize either.
+ * Both produce an instance implementing the Input shape — `.initial` +
+ * `.from` (+ `.append`) — which compose recognizes structurally. `source`
+ * is what flows IN (upstream); `.from` is where compose draws the input FROM.
  *
  * Props:
  *   - `source`    — Promise, async iterable, Observable (anything with
@@ -51,13 +54,13 @@ import { pushable } from './pushable.js';
  */
 export class Channel {
 
-    // Private fields make .initial, .source, and .append read-only after
+    // Private fields make .initial, .from, and .append read-only after
     // construction. The class is exported (it has to be — JSX needs the
     // identifier), but instances are immutable to outside code. The
     // conventional surface is <Channel> JSX or `new Channel(props, childNodes)`;
     // direct mutation isn't part of the contract.
     #initial;
-    #source;
+    #from;
     #append;
     // The original source reference (pre-makeSource), kept for update()'s
     // identity compare, and the internal teardown controller for this
@@ -87,14 +90,14 @@ export class Channel {
         this.#sourceRef = source;
         this.#controller = new AbortController();
         this.#initial = childNodes;
-        this.#source = makeSource(
+        this.#from = makeSource(
             source, transform, errorTransform, eventType, this.#controller.signal,
         );
         this.#append = !!append;
     }
 
     get initial() { return this.#initial; }
-    get source() { return this.#source; }
+    get from() { return this.#from; }
     get append() { return this.#append; }
 
     // The update verb (component position, rerenderer active). Identity on
@@ -116,10 +119,10 @@ export class Channel {
     }
 }
 
-// compose ignores this (no-op slot); a stale Promise resolves to it after
-// the Channel has switched sources. Matches compose.js's exported sentinel
-// by registry symbol — no import (avoids the compose↔channel cycle).
-const IGNORE = Symbol.for('azoth.compose.IGNORE');
+// IGNORE (imported from compose) marks a no-op slot: a stale Promise resolves
+// to it after the Channel switched sources. One definition now — compose no
+// longer imports Channel, so the compose↔channel cycle that forced a local
+// copy is gone.
 
 // Resolves to ABORTED when the signal fires — raced against each pending
 // pull so a switch interrupts a parked `await` promptly instead of waiting

@@ -1,4 +1,3 @@
-import { Channel } from '../channels/channel.js';
 import { activeRenderer } from '../renderer/rerenderer.js';
 
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
@@ -38,25 +37,6 @@ export function compose(anchor, input, keepLast, props, childNodes) {
         case input instanceof Node:
             replace(anchor, input, keepLast);
             break;
-        case input instanceof Channel: {
-            compose(anchor, input.initial, keepLast);
-            const { source, append } = input;
-            // No source — initial-only Channel; leave the initial in place.
-            if(source === undefined || source === null) break;
-            if(source instanceof Promise) {
-                // Single value always replaces the initial. `append` has
-                // no effect on Promise sources (only one value to emit).
-                source.then(value => compose(anchor, value, false, props, childNodes));
-                break;
-            }
-            // Async iterable. Channel's makeSource normalizes async
-            // generators, Observables, and ReadableStreams into this shape.
-            // When `append` is true, composeAsyncIterator's firstReplaces
-            // flag makes the first value clear the initial and subsequent
-            // values accumulate.
-            composeAsyncIterator(anchor, source, append, props, childNodes, append);
-            break;
-        }
         case type === 'function': {
             // will throw if function is class,
             // unlike create or compose element
@@ -106,6 +86,25 @@ export function compose(anchor, input, keepLast, props, childNodes) {
                 complete() { }
             });
             break;
+        // Input — { initial?, from, append? }: the explicit "seed this slot,
+        // then drive it from a source" shape. `from` is where the input comes
+        // from (a Channel, a bare literal, …). compose recognizes the SHAPE,
+        // not any class — it no longer imports Channel. Placed after
+        // render/subscribe so those more specific shapes win.
+        case 'from' in input: {
+            compose(anchor, input.initial, keepLast);
+            const { from, append } = input;
+            if(from === undefined || from === null) break;   // seed only
+            if(from instanceof Promise) {
+                // Single value replaces the seed; `append` is moot (one value).
+                from.then(value => compose(anchor, value, false, props, childNodes));
+                break;
+            }
+            // Async iterable — with `append`, firstReplaces clears the seed on
+            // the first value, then subsequent values accumulate.
+            composeAsyncIterator(anchor, from, append, props, childNodes, append);
+            break;
+        }
         default: {
             throwTypeErrorForObject(input);
         }

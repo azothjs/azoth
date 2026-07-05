@@ -18,8 +18,8 @@ describe('Channel — construction', () => {
         // The source is wrapped with the abort guard (so a stale result is
         // neutralized if the Channel switches sources mid-flight) — a derived
         // promise, not the input, but it resolves to the same value.
-        expect(c.source).not.toBe(promise);
-        await expect(c.source).resolves.toBe('felix');
+        expect(c.from).not.toBe(promise);
+        await expect(c.from).resolves.toBe('felix');
     });
 
     test('promise source with transform', async ({ expect }) => {
@@ -29,7 +29,7 @@ describe('Channel — construction', () => {
             as: name => `Mr. ${name}`
         });
         expect(c.initial).toBeUndefined();
-        await expect(c.source).resolves.toBe('Mr. felix');
+        await expect(c.from).resolves.toBe('Mr. felix');
     });
 
     test('initial via childNodes (no transform applied)', ({ expect }) => {
@@ -50,14 +50,14 @@ describe('Channel — construction', () => {
             as: item => item.n,
             map: true
         });
-        await expect(c.source).resolves.toEqual([1, 2, 3]);
+        await expect(c.from).resolves.toEqual([1, 2, 3]);
     });
 
     test('map without transform is a no-op (no wrapping)', async ({ expect }) => {
         const arr = [1, 2, 3];
         const promise = Promise.resolve(arr);
         const c = new Channel({ source: promise, map: true });
-        await expect(c.source).resolves.toBe(arr);
+        await expect(c.from).resolves.toBe(arr);
     });
 
     test('async iterator source', async ({ expect }) => {
@@ -67,7 +67,7 @@ describe('Channel — construction', () => {
         }
         const c = new Channel({ source: gen() });
         const collected = [];
-        for await(const v of c.source) collected.push(v);
+        for await(const v of c.from) collected.push(v);
         expect(collected).toEqual(['felix', 'duchess']);
     });
 
@@ -81,7 +81,7 @@ describe('Channel — construction', () => {
             as: name => name.toUpperCase()
         });
         const collected = [];
-        for await(const v of c.source) collected.push(v);
+        for await(const v of c.from) collected.push(v);
         expect(collected).toEqual(['FELIX', 'DUCHESS']);
     });
 
@@ -91,10 +91,10 @@ describe('Channel — construction', () => {
         }).toThrow(/unsupported source type/);
     });
 
-    test('undefined source produces undefined .source (initial-only Channel via childNodes)', ({ expect }) => {
+    test('undefined source produces undefined .from (initial-only Channel via childNodes)', ({ expect }) => {
         const c = new Channel({}, 'hi');
         expect(c.initial).toBe('hi');
-        expect(c.source).toBeUndefined();
+        expect(c.from).toBeUndefined();
     });
 
 });
@@ -116,7 +116,7 @@ describe('Channel with ReadableStream source', () => {
         });
         const c = new Channel({ source: stream });
         const collected = [];
-        for await(const v of c.source) collected.push(v);
+        for await(const v of c.from) collected.push(v);
         expect(collected).toEqual(['a', 'b']);
     });
 
@@ -133,7 +133,7 @@ describe('Channel with ReadableStream source', () => {
             as: s => s.toUpperCase()
         });
         const collected = [];
-        for await(const v of c.source) collected.push(v);
+        for await(const v of c.from) collected.push(v);
         expect(collected).toEqual(['A', 'B']);
     });
 
@@ -153,7 +153,7 @@ describe('Channel with ReadableStream source', () => {
             error: err => `[err: ${err.message}]`
         });
         const collected = [];
-        for await(const v of c.source) collected.push(v);
+        for await(const v of c.from) collected.push(v);
         expect(collected).toEqual(['[err: stream broke]']);
     });
 
@@ -165,7 +165,7 @@ describe('Channel with ReadableStream source', () => {
         });
         const c = new Channel({ source: stream });
         await expect(async () => {
-            for await(const _ of c.source) { /* drain */ }
+            for await(const _ of c.from) { /* drain */ }
         }).rejects.toThrow(/stream broke/);
     });
 
@@ -200,7 +200,7 @@ describe('Channel with EventTarget source', () => {
         // Start iterating, then dispatch a few events.
         const collected = [];
         const consumer = (async () => {
-            for await(const event of c.source) {
+            for await(const event of c.from) {
                 collected.push(event.detail);
                 if(collected.length === 3) return;
             }
@@ -222,7 +222,7 @@ describe('Channel with EventTarget source', () => {
 
         const collected = [];
         const consumer = (async () => {
-            for await(const event of c.source) {
+            for await(const event of c.from) {
                 collected.push(event.detail);
                 if(collected.length === 2) return;
             }
@@ -248,7 +248,7 @@ describe('Channel with EventTarget source', () => {
 
         const collected = [];
         const consumer = (async () => {
-            for await(const v of c.source) {
+            for await(const v of c.from) {
                 collected.push(v);
                 if(collected.length === 2) return;
             }
@@ -273,7 +273,7 @@ describe('Channel with EventTarget source', () => {
 
         const collected = [];
         const consumer = (async () => {
-            for await(const v of c.source) collected.push(v);
+            for await(const v of c.from) collected.push(v);
         })();
 
         await Promise.resolve();
@@ -302,7 +302,7 @@ describe('Channel with EventTarget source', () => {
         };
 
         const c = new Channel({ source: target, eventType: 'ping' });
-        const iter = c.source;
+        const iter = c.from;
 
         // Start iteration
         const consumer = (async () => {
@@ -362,7 +362,7 @@ describe('Channel with Observable source', () => {
         const obs = makeObservable(['felix', 'duchess', 'garfield']);
         const c = new Channel({ source: obs });
         const collected = [];
-        for await(const v of c.source) collected.push(v);
+        for await(const v of c.from) collected.push(v);
         expect(collected).toEqual(['felix', 'duchess', 'garfield']);
     });
 
@@ -373,7 +373,7 @@ describe('Channel with Observable source', () => {
             as: n => n.toUpperCase()
         });
         const collected = [];
-        for await(const v of c.source) collected.push(v);
+        for await(const v of c.from) collected.push(v);
         expect(collected).toEqual(['FELIX', 'DUCHESS']);
     });
 
@@ -390,7 +390,7 @@ describe('Channel with Observable source', () => {
         const c = new Channel({ source: obs });
         const collected = [];
         await expect(async () => {
-            for await(const v of c.source) collected.push(v);
+            for await(const v of c.from) collected.push(v);
         }).rejects.toThrow(/source broke/);
         expect(collected).toEqual(['felix']);
     });
@@ -435,13 +435,13 @@ describe('Channel error transform', () => {
             source: promise,
             error: err => `oops: ${err.message}`
         });
-        await expect(c.source).resolves.toBe('oops: boom');
+        await expect(c.from).resolves.toBe('oops: boom');
     });
 
     test('Promise rejection without `error` prop propagates', async ({ expect }) => {
         const promise = Promise.reject(new Error('boom'));
         const c = new Channel({ source: promise });
-        await expect(c.source).rejects.toThrow(/boom/);
+        await expect(c.from).rejects.toThrow(/boom/);
     });
 
     test('async iterator throwing with `error` yields error transform then ends', async ({ expect }) => {
@@ -454,7 +454,7 @@ describe('Channel error transform', () => {
             error: err => `[error: ${err.message}]`
         });
         const collected = [];
-        for await(const v of c.source) collected.push(v);
+        for await(const v of c.from) collected.push(v);
         expect(collected).toEqual(['felix', '[error: source broke]']);
     });
 
@@ -466,7 +466,7 @@ describe('Channel error transform', () => {
         const c = new Channel({ source: gen() });
         const collected = [];
         await expect(async () => {
-            for await(const v of c.source) collected.push(v);
+            for await(const v of c.from) collected.push(v);
         }).rejects.toThrow(/source broke/);
         expect(collected).toEqual(['felix']);
     });
@@ -486,7 +486,7 @@ describe('Channel error transform', () => {
             error: err => `[error: ${err.message}]`
         });
         const collected = [];
-        for await(const v of c.source) collected.push(v);
+        for await(const v of c.from) collected.push(v);
         expect(collected).toEqual(['felix', '[error: source broke]']);
     });
 
@@ -495,7 +495,7 @@ describe('Channel error transform', () => {
         // Attempting to write throws in strict mode (test files run as
         // modules → strict). The getters expose the private fields read-only.
         expect(() => { c.initial = 'something else'; }).toThrow(TypeError);
-        expect(() => { c.source = 'something else'; }).toThrow(TypeError);
+        expect(() => { c.from = 'something else'; }).toThrow(TypeError);
     });
 
     test('error transform output bypasses the `as` value transform', async ({ expect }) => {
@@ -508,7 +508,7 @@ describe('Channel error transform', () => {
             as: v => v.toUpperCase(),
             error: err => err.message  // returns "boom", not "BOOM"
         });
-        await expect(c.source).resolves.toBe('boom');
+        await expect(c.from).resolves.toBe('boom');
     });
 
 });
