@@ -2,6 +2,19 @@ import { activeRenderer } from '../renderer/rerenderer.js';
 
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
+/**
+ * @typedef {Object} Input
+ * The explicit form of a compose input — "seed this slot, then drive it from a
+ * source." Recognized structurally by `from`, so a bare object literal is
+ * first-class and Channel is just one implementer. (`source` is what flows into
+ * a Channel upstream; `from` is where compose draws the input from.)
+ * @property {*} [initial] Seed composed immediately — a loading view, etc.
+ * @property {Promise<*> | AsyncIterable<*>} from The source whose value(s)
+ *   replace the seed: a Promise (resolves once) or an async iterable (each value
+ *   replaces, or accumulates with `append`).
+ * @property {boolean} [append] When true, the first source value replaces the
+ *   seed and subsequent values accumulate; otherwise each replaces the prior.
+ */
 export function compose(anchor, input, keep, props, childNodes) {
     if(keep !== true) keep = false;
 
@@ -111,6 +124,17 @@ export function compose(anchor, input, keep, props, childNodes) {
     }
 }
 
+/**
+ * @typedef {Object} UIComponent
+ * The imperative-update protocol compose drives in component position — any
+ * object, class, or function of this shape, no base class to extend.
+ * @property {(props: object, childNodes?: *) => void} [initialize] Optional
+ *   one-time setup (intake), before the first render.
+ * @property {() => *} render First paint — no args; intake already happened.
+ * @property {(props: object, childNodes?: *) => (*|void)} update A prop changed:
+ *   return new DOM to replace, or void to adapt in place. (Channel implements
+ *   update-only — no render.)
+ */
 export function composeComponent(anchor, [Constructor, props, childNodes]) {
     const rr = activeRenderer();
     if(rr) {
