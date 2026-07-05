@@ -75,6 +75,19 @@ declare global {
         // Future: TypeScript contribution for per-tag return types
         type Element = Node;
 
+        // A component's return: a Node, or a "rerenderable" — the re-render
+        // closure a rerenderer() / module-factory hands back (takes new props,
+        // returns DOM).
+        type Rerenderable = (...args: any[]) => any;
+
+        // What may be used as a JSX tag. Without this, TS requires a component's
+        // return to be assignable to `Element` (a Node) and rejects the
+        // rerenderable-returning form — e.g. `() => rerenderer(...)`.
+        type ElementType =
+            | string
+            | ((...args: any[]) => Element | Rerenderable)
+            | (new (...args: any[]) => any);
+
         // Children attribute
         interface ElementChildrenAttribute {
             children: {};
