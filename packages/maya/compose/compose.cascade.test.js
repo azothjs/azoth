@@ -1,7 +1,7 @@
 /**
- * keepLast / append cascade — EMPIRICAL PROBES.
+ * keep / append cascade — EMPIRICAL PROBES.
  *
- * Pinning what compose actually does with `keepLast` at a shared anchor, so
+ * Pinning what compose actually does with `keep` at a shared anchor, so
  * the `Input` generalization ({ initial?, from, append? }) inherits verified
  * behavior rather than a guess. The clear/accumulate mechanics here are the
  * heart of the cascade; async sources (Channel / Input) ride on top of them.
@@ -17,10 +17,10 @@ import { Channel } from '../channels/channel.js';
 
 beforeEach(fixtureSetup);
 
-// keepLast=false is REPLACE: does it clear the WHOLE anchor (both siblings),
+// keep=false is REPLACE: does it clear the WHOLE anchor (both siblings),
 // or just its own prior value? This is the mechanism behind "a live source
 // clobbers its siblings" — any replacing value at a shared anchor.
-test('keepLast=false after accumulating two siblings', ({ expect }) => {
+test('keep=false after accumulating two siblings', ({ expect }) => {
     const seq = [];
     const { dom, anchor } = elementWithAnchor();
     compose(anchor, ['A', 'B'], true);   // two accumulated siblings
@@ -35,8 +35,8 @@ test('keepLast=false after accumulating two siblings', ({ expect }) => {
     `);
 });
 
-// keepLast=true is APPEND: adds onto whatever is already there.
-test('keepLast=true appends onto existing siblings', ({ expect }) => {
+// keep=true is APPEND: adds onto whatever is already there.
+test('keep=true appends onto existing siblings', ({ expect }) => {
     const seq = [];
     const { dom, anchor } = elementWithAnchor();
     compose(anchor, ['A', 'B'], true);
@@ -51,14 +51,14 @@ test('keepLast=true appends onto existing siblings', ({ expect }) => {
     `);
 });
 
-// An array: composeArray does `if(!keepLast) clear`, then composes each member
-// with keepLast=true. So a default array should clear prior, then accumulate.
+// An array: composeArray does `if(!keep) clear`, then composes each member
+// with keep=true. So a default array should clear prior, then accumulate.
 test('array clears prior content, then accumulates its members', ({ expect }) => {
     const seq = [];
     const { dom, anchor } = elementWithAnchor();
     compose(anchor, 'X', false);
     seq.push(dom.outerHTML);
-    compose(anchor, ['A', 'B', 'C']);     // default keepLast → clears X first?
+    compose(anchor, ['A', 'B', 'C']);     // default keep → clears X first?
     seq.push(dom.outerHTML);
     expect(seq).toMatchInlineSnapshot(`
       [

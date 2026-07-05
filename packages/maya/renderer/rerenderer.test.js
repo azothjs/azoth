@@ -154,10 +154,10 @@ describe('rerenderer — anchor memory (=== skip)', () => {
         expect(calls).toBe(11);
     });
 
-    test('accumulate path (keepLast) is exempt: repeated values are legitimate', ({ expect }) => {
+    test('accumulate path (keep) is exempt: repeated values are legitimate', ({ expect }) => {
         const t = makeP('rr-arr');
         const fn = rerenderer(pair => t(pair));
-        // An array composes per-item with keepLast=true — two identical
+        // An array composes per-item with keep=true — two identical
         // strings must BOTH render (no false skip on the append path).
         const node = fn(['a', 'a']);
         expect(node.textContent).toBe('aa');

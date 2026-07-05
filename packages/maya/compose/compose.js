@@ -2,15 +2,15 @@ import { activeRenderer } from '../renderer/rerenderer.js';
 
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
-export function compose(anchor, input, keepLast, props, childNodes) {
-    if(keepLast !== true) keepLast = false;
+export function compose(anchor, input, keep, props, childNodes) {
+    if(keep !== true) keep = false;
 
     // The identical value at an anchor is one instruction, not two.
     // Only consulted during a synchronous rerender pass (async
     // continuations run after the pass — stack empty, no skip), and
-    // only on the replace path: keepLast=true means accumulate, where
+    // only on the replace path: keep=true means accumulate, where
     // a repeated value is a legitimate "add another."
-    if(!keepLast) {
+    if(!keep) {
         const rr = activeRenderer();
         if(rr && rr.skipIfSame(anchor, input)) return;
     }
@@ -25,23 +25,23 @@ export function compose(anchor, input, keepLast, props, childNodes) {
         case input === true:
         case input === false:
         case input === '':
-            if(!keepLast) clear(anchor);
+            if(!keep) clear(anchor);
             break;
         case type === 'number':
         case type === 'bigint':
             input = `${input}`;
         // eslint-disable-next-line no-fallthrough
         case type === 'string':
-            replace(anchor, input, keepLast);
+            replace(anchor, input, keep);
             break;
         case input instanceof Node:
-            replace(anchor, input, keepLast);
+            replace(anchor, input, keep);
             break;
         case type === 'function': {
             // will throw if function is class,
             // unlike create or compose element
             let out = input(props, childNodes);
-            compose(anchor, out, keepLast);
+            compose(anchor, out, keep);
             break;
         }
         case type !== 'object': {
@@ -50,10 +50,10 @@ export function compose(anchor, input, keepLast, props, childNodes) {
             break;
         }
         case input instanceof Promise:
-            input.then(value => compose(anchor, value, keepLast, props, childNodes));
+            input.then(value => compose(anchor, value, keep, props, childNodes));
             break;
         case Array.isArray(input):
-            composeArray(anchor, input, keepLast);
+            composeArray(anchor, input, keep);
             break;
         // ReadableStream must come before the asyncIterator check — modern
         // ReadableStream implements [Symbol.asyncIterator], so without this
@@ -65,13 +65,13 @@ export function compose(anchor, input, keepLast, props, childNodes) {
             break;
         // w/o the !! this causes intermittent failures :p maybe vitest/node thing?
         case !!input[Symbol.asyncIterator]:
-            composeAsyncIterator(anchor, input, keepLast, props, childNodes);
+            composeAsyncIterator(anchor, input, keep, props, childNodes);
             break;
         case typeof input?.render === 'function':
             // Drive a UIComponent to DOM. Intake (props/childNodes) happened
             // at construction; render() takes no args. The change channel is
             // update(), not re-render — see composeComponent.
-            compose(anchor, input.render(), keepLast);
+            compose(anchor, input.render(), keep);
             break;
         case typeof input.subscribe === 'function':
             // Observable shape per the TC39 proposal (RxJS-compatible).
@@ -81,7 +81,7 @@ export function compose(anchor, input, keepLast, props, childNodes) {
             // no-op; the slot keeps its last value. Use <Channel error={...}>
             // for handled errors.
             input.subscribe({
-                next(value) { compose(anchor, value, keepLast, props, childNodes); },
+                next(value) { compose(anchor, value, keep, props, childNodes); },
                 error(err) { throw err; },
                 complete() { }
             });
@@ -92,7 +92,7 @@ export function compose(anchor, input, keepLast, props, childNodes) {
         // not any class — it no longer imports Channel. Placed after
         // render/subscribe so those more specific shapes win.
         case 'from' in input: {
-            compose(anchor, input.initial, keepLast);
+            compose(anchor, input.initial, keep);
             const { from, append } = input;
             if(from === undefined || from === null) break;   // seed only
             if(from instanceof Promise) {
@@ -294,8 +294,8 @@ function create(input, props, childNodes) {
 
 /* replace and clear */
 
-function replace(anchor, input, keepLast) {
-    if(!keepLast) clear(anchor);
+function replace(anchor, input, keep) {
+    if(!keep) clear(anchor);
     anchor.before(input);
     anchor.data = ++anchor.data;
 }
@@ -323,8 +323,8 @@ function clear(anchor) {
 
 /* complex types */
 
-function composeArray(anchor, array, keepLast) {
-    if(!keepLast) clear(anchor);
+function composeArray(anchor, array, keep) {
+    if(!keep) clear(anchor);
     // TODO: optimize arrays here if Node[] research shows gain.
     // vanillajs-1 in jsperf benchmarks has specific numbers
     for(let i = 0; i < array.length; i++) {
@@ -332,29 +332,29 @@ function composeArray(anchor, array, keepLast) {
     }
 }
 
-async function composeStream(anchor, stream, keepLast) {
+async function composeStream(anchor, stream, keep) {
     stream.pipeTo(new WritableStream({
         write(chunk) {
-            compose(anchor, chunk, keepLast);
+            compose(anchor, chunk, keep);
         }
     }));
 }
 
 async function composeAsyncIterator(
-    anchor, iterator, keepLast, props, childNodes, firstReplaces = false,
+    anchor, iterator, keep, props, childNodes, firstReplaces = false,
 ) {
     // TODO: use iterator directly and
     // - control return when removed, and maybe throws on error
     // - possible yield/return semantics for third communication channel
     //
     // `firstReplaces` is set by the Channel branch when `append` is true:
-    // the first iteration overrides keepLast to false so it clears the
-    // initial render; subsequent iterations honor keepLast (true →
+    // the first iteration overrides keep to false so it clears the
+    // initial render; subsequent iterations honor keep (true →
     // accumulate). For non-Channel callers, `firstReplaces` defaults to
     // false so behavior is unchanged.
     let first = true;
     for await(const value of iterator) {
-        const effective = (first && firstReplaces) ? false : keepLast;
+        const effective = (first && firstReplaces) ? false : keep;
         compose(anchor, value, effective, props, childNodes);
         first = false;
     }
