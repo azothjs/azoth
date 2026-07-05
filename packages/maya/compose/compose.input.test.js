@@ -22,20 +22,20 @@ function driven() {
     const queue = [];
     let waiting = null;
     const gen = (async function* () {
-        for (;;) {
+        for(;;) {
             let v;
-            if (queue.length) v = queue.shift();
+            if(queue.length) v = queue.shift();
             else {
                 const { promise, resolve } = Promise.withResolvers();
                 waiting = resolve;
                 v = await promise;
             }
-            if (v === DONE) return;
+            if(v === DONE) return;
             yield v;
         }
     })();
     const push = v => {
-        if (waiting) { const w = waiting; waiting = null; w(v); }
+        if(waiting) { const w = waiting; waiting = null; w(v); }
         else queue.push(v);
     };
     return { gen, push };
