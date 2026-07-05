@@ -106,3 +106,40 @@ test('nested Input — search with loading (streamed items accumulate; resets on
       ]
     `);
 });
+
+// The no-teardown edge, made visible. After the swap to search B, search A's
+// stream was never torn down — it's still live and bound to this anchor, so a
+// late push on it intrudes on search B's result. This is why a *switching*
+// slot wants a Channel (it aborts the stale source), not a bare Input.
+test('nested Input — a stale stream intrudes after the swap (no teardown)', async ({ expect, fixture, find }) => {
+    const seq = [];
+    const outer = driven();
+    const streamA = driven();
+    const streamB = driven();
+
+    const { dom, anchor } = elementWithAnchor();
+    fixture.append(dom);
+    compose(anchor, outer.gen);
+
+    outer.push({ initial: 'loading-a', from: streamA.gen, append: true });
+    await find('loading-a'); seq.push(fixture.innerHTML);
+    streamA.push('a1'); await find('a1'); seq.push(fixture.innerHTML);
+
+    outer.push({ initial: 'loading-b', from: streamB.gen, append: true });
+    await find('loading-b'); seq.push(fixture.innerHTML);
+    streamB.push('b1'); await find('b1'); seq.push(fixture.innerHTML);
+
+    // search A is over — but its stream is still live and bound to this anchor:
+    streamA.push('a-late');
+    await find('b1a-late'); seq.push(fixture.innerHTML);
+
+    expect(seq).toMatchInlineSnapshot(`
+      [
+        "<div>loading-a<!--1--></div>",
+        "<div>a1<!--1--></div>",
+        "<div>loading-b<!--1--></div>",
+        "<div>b1<!--1--></div>",
+        "<div>b1a-late<!--2--></div>",
+      ]
+    `);
+});
