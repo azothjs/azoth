@@ -33,19 +33,19 @@ origin.
 
 | Package | Role | Status |
 |---|---|---|
-| [`azoth`](packages/azoth) | Umbrella package; re-exports chronos, maya, vite-plugin | published |
-| [`@azothjs/thoth`](packages/thoth) | JSX compiler — extracts HTML, generates targets + bind + renderer | DOM target complete; HTML/SSR target in progress |
-| [`@azothjs/maya`](packages/maya) | Runtime — compose, blocks, renderer, replay bindings | DOM complete; HTML target in progress |
-| [`@azothjs/chronos`](packages/chronos) | Lightweight async-generator factories — `generator()`, `reduce()`. No rendering coupling. | beta |
-| [`@azothjs/vite-plugin`](packages/vite-plugin) | Vite integration with `.tsx` support via esbuild pre-pass | published |
-| [`jsonic`](packages/jsonic) | Streaming JSON parser (used by chronos) | alpha |
-| [`valhalla`](packages/valhalla) | API-level integration tests; also serves as worked-example reference for LLMs | active, private |
+| [`azoth`](packages/azoth) | Umbrella package; re-exports maya (runtime) + the Vite plugin | published |
+| [`@azothjs/maya`](packages/maya) | Runtime — compose, the rerenderer, keyed lists, replay bindings | DOM complete; HTML target in progress |
+| [`@azothjs/thoth`](packages/thoth) | JSX compiler (extracts HTML, generates targets + bind + renderer) + the Vite plugin (`@azothjs/thoth/vite`) + dom-info (internal DOM-API authority) | DOM target complete; HTML/SSR target in progress |
+| [`valhalla`](packages/valhalla) | Conformance suite (author-JSX → thoth → maya); doubles as worked-example reference for LLMs | active, private |
+
+Two halves under one umbrella: **maya** is what runs in the browser, **thoth**
+is what runs at build time (compiler + its Vite plugin + the internal dom-info
+data). The `azoth` package is the single install that re-exports both.
 
 ## Projects
 
 | Project | Purpose |
 |---|---|
-| [`sandbox`](sandbox) | Developer scratchpad |
 | [`test-utils`](test-utils) | Common test helpers |
 | [`vite-test`](vite-test) | End-to-end Vite pipeline smoke test |
 | [`docs`](docs) | Vitepress documentation site |
@@ -62,7 +62,7 @@ Then configure Vite (`vite.config.js`):
 
 ```js
 import { defineConfig } from 'vite';
-import azoth from '@azothjs/vite-plugin';
+import azoth from 'azoth/vite-plugin';
 
 export default defineConfig({
     plugins: [azoth()]
