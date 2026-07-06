@@ -274,6 +274,10 @@ render(): DOM                             // first paint
 update(props, childNodes): DOM | void     // a prop changed: return new DOM, or void to adapt in place
 ```
 
+(In the types this is two shapes: `render` + `update` is the base **`UIComponent`**
+that `compose` drives in a slot; add the optional `initialize` and it's the
+fuller **`Component`** that `create` — `<C/>` — runs end to end.)
+
 These are two different axes, and they compose: **UIComponent is how a thing
 updates; a frame is where its render cycle is isolated.** A component driven by
 an async source, fenced by `renderer`, owning a cycle on the source's clock — is
@@ -311,6 +315,11 @@ The strongest evidence that frames are platform-native, not framework magic:
 public `rerenderer` and the platform (`HTMLElement`, `document`, `Map`); Channel
 is an ordinary object implementing the update shape over an `AbortController`.
 Neither touches a compose internal, the renderer stack, or a `siteKey`.
+
+The reverse holds too: `compose` has no privileged branch for `Channel` — it
+recognizes the **Input shape** (`{ from, … }`) structurally, exactly as it would
+a bare object literal. Channel is one implementer of a shape any author can
+write, not a class the core special-cases.
 
 So a frame is a **replicable author pattern**, not a maya capability. Any author
 can build a self-managing frame the same way KeyedList does — `extends
