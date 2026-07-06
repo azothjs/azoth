@@ -25,7 +25,7 @@ is being organized for open-source release.
 
 For the longer reasoning trace (an LLM working through Azoth for the first
 time and corrected over many sessions), see
-[`docs/MENTAL-MODEL.md`](docs/MENTAL-MODEL.md). The topic files in
+[`docs/history/MENTAL-MODEL.md`](docs/history/MENTAL-MODEL.md). The topic files in
 `docs/topics/` are the curated surface; the mental-model document is the
 origin.
 

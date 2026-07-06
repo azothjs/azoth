@@ -157,6 +157,6 @@ yet. Surface that confusion. It's valuable.
 7. [Hypermedia](hypermedia.md) — events-as-deltas model
 8. The rest as needed
 
-For deeper context, see [`MENTAL-MODEL.md`](../MENTAL-MODEL.md) — the origin
+For deeper context, see [`MENTAL-MODEL.md`](../history/MENTAL-MODEL.md) — the origin
 document this site grew out of, written by an LLM working through Azoth for
 the first time. The reframes here came from there.

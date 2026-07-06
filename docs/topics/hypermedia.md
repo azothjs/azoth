@@ -259,8 +259,8 @@ problem genuinely calls for it.
 
 ## Further reading
 
-- [`docs/hypermedia.md`](../hypermedia.md) — the longer essay this topic
+- [`docs/history/hypermedia.md`](../history/hypermedia.md) — the longer essay this topic
   page distills, with the React-vs-Azoth comparison in full
-- [`docs/MENTAL-MODEL.md`](../MENTAL-MODEL.md) — sections "The
+- [`docs/history/MENTAL-MODEL.md`](../history/MENTAL-MODEL.md) — sections "The
   Fundamental Model: Events = Deltas," "Alignment with the Original Web
   Platform," and "Layout Management, Not State Management"

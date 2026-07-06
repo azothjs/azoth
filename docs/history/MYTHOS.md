@@ -96,7 +96,7 @@ And HyperCard is more than where the names came from — it is the
 **hypermedia ancestor.** The "return to the platform" runs deeper than
 DOM-API spellings: at bottom it is hypermedia — markup as the source of
 truth and the medium of interaction (the delta model of
-`docs/hypermedia.md`, not `ui = fn(state)`). It is the model htmx
+`docs/history/hypermedia.md`, not `ui = fn(state)`). It is the model htmx
 re-articulated for the modern web — the truth worth crediting, distinct
 from the implementation (azoth is a compile-to-platform JS client, not
 HTML-over-the-wire). The names are the surface; hypermedia is the current.

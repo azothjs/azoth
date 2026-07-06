@@ -63,5 +63,5 @@ If you're new to Azoth, this order works well:
 5. [Workflow](./workflow.md) (when ready to build)
 6. The rest as questions arise
 
-For deeper origin context, see [`MENTAL-MODEL.md`](../MENTAL-MODEL.md) — the
+For deeper origin context, see [`MENTAL-MODEL.md`](../history/MENTAL-MODEL.md) — the
 longer reasoning trace this site was extracted from.

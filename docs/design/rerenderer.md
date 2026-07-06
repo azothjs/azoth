@@ -12,7 +12,7 @@ hand-rolls this gap. The Rerenderer is Azoth's answer: **specify a
 template, apply new values, no imperative updates** — the talk slide
 already names it: "Selective re-render: new props, same DOM."
 
-It is missing browser functionality, built deletable (see MYTHOS.md —
+It is missing browser functionality, built deletable (see docs/history/MYTHOS.md —
 the deletion calendar).
 
 ## The mechanism: re-execution + identity-keyed cache

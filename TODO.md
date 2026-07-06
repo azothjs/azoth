@@ -246,10 +246,7 @@ current API (including EventTarget + pushable as of this batch). Still
 referencing the old `channel()` function form and/or `@azothjs/chronos/channels`
 imports:
 
-- `docs/ASYNC-PATTERNS.md`
-- `docs/async-rendering-patterns.md`
-- `docs/MENTAL-MODEL.md` (origin artifact — may be intentional history)
-- `docs/index.md` (line 110)
+- `docs/index.md` (line 110 — the `channel()` code example)
 - `docs/topics/maya-runtime.md` (line 205 — passing reference in a list)
 - `docs/topics/hypermedia.md` (lines 135, 156, 252)
 - `docs/topics/coming-from-react.md` (line 70)
@@ -257,7 +254,20 @@ imports:
 - `packages/valhalla/index.md` (line 31 — describes old test surface)
 
 Pass through and update to `<Channel>` JSX + `@azothjs/maya/channels`.
-MENTAL-MODEL.md may be left as-is since it's the historical artifact.
+
+Done 2026-07: the loose `docs/*.md` layer resolved — `maya.md` +
+`ASYNC-PATTERNS.md` deleted (stale; guide bits already folded); `hypermedia.md`,
+`async-rendering-patterns.md`, `MENTAL-MODEL.md`, `MYTHOS.md` archived to
+`docs/history/` (+ README; inbound links repointed). `docs/` now holds only
+`index.md`; the archived samples' stale APIs stay as-is (artifacts, not guides).
+
+### Docs site (vitepress) nav is dangling
+
+`docs/.vitepress/config.mjs` `nav` → `/about` and `sidebar` → `/intro` reference
+files that don't exist (pre-existing); a commented-out block lists `/about`,
+`/compose`, `/component`, `/async`. `docs/index.md` is the real home
+(`layout: home`). Rebuild the nav/sidebar around `docs/topics/`, or fold into
+the open "ditch vitepress" decision.
 
 ### Downstream: wre-dashboards migration to 2.0
 

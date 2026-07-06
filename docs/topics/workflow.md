@@ -974,5 +974,5 @@ External CSS files load correctly via relative paths:
 - [Authoring style](authoring-style.md) — file naming, component
   organization
 - [For LLMs](for-llms.md) — terminology discipline
-- [`../MENTAL-MODEL.md`](../MENTAL-MODEL.md) — the origin document this
+- [`../history/MENTAL-MODEL.md`](../history/MENTAL-MODEL.md) — the origin document this
   site grew out of

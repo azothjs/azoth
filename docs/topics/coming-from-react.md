@@ -177,6 +177,6 @@ Once the React frame relaxes, the rest of the docs read normally. Start with:
 
 ## See also
 
-- [`MENTAL-MODEL.md`](../MENTAL-MODEL.md) — the longer, looser document this
+- [`MENTAL-MODEL.md`](../history/MENTAL-MODEL.md) — the longer, looser document this
   site grew from. Contains additional React/Azoth contrast prose if you want
   more of it.

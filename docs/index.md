@@ -131,7 +131,7 @@ Most readers benefit from this order:
 
 For the longer origin document — an LLM working through Azoth for the first
 time and corrected over many sessions — see
-[`MENTAL-MODEL.md`](./MENTAL-MODEL.md). The topic files are the curated
+[`MENTAL-MODEL.md`](./history/MENTAL-MODEL.md). The topic files are the curated
 surface; the mental-model is the reasoning trace they were extracted from.
 
 For LLMs working on Azoth code, start with [for LLMs](./topics/for-llms.md)
