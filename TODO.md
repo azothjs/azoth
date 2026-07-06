@@ -142,6 +142,17 @@ EventTarget source, `map` ⟺ array source, `error`/`as` return match, `append`.
 **Per-form prop typing** — `pushable`, render-object, class-/function-component
 surfaces. `@template`/conditional types vs per-component `.d.ts` — open.
 
+**`childNodes` type on component signatures** — jsx.d.ts types the second
+component arg as `any` (matches the JSDoc `*`). Tighten to `Node`, `Composable`,
+or a specific child-nodes shape? Pin the compiler's actual childNodes shape
+first.
+
+**`Component.initialize?` — optional vs required** — the Component typedef
+(create's full lifecycle) has `initialize?` optional, matching create's
+`initialize?.()`. Should create REQUIRE initialize (drop the runtime `?.`, make
+the type `initialize`)? A stricter contract vs the current lenient runtime —
+decide together.
+
 ## Compose
 
 ### Accept null/undefined return from components
@@ -153,6 +164,18 @@ constructor returns (typically the new instance even when the body
 `return null`s, unless an object is explicitly returned). Worth verifying
 the full surface and aligning so authors can write `return null` to mean
 "render nothing" regardless of component form.
+
+### Async source teardown — follow-ons
+
+compose now cancels a live source on clear (a `WeakMap<anchor, cancel>` plus a
+`currentSource` reentrancy guard so a source's own value doesn't self-cancel;
+covers async-iter / promise / stream / observable).
+
+- **withAbort ↔ pushable**: should `pushable` (packages/maya/channels/
+  pushable.js) return `[results$, push, cancel]` — a cancel alongside push — so
+  the abort machinery is shared/exposed there too? Or overreaching (keep
+  pushable minimal; let compose/Channel own cancellation)? Revisit once the
+  `withAbort` shape settles; may collapse compose's `aborted()` into channel's.
 
 ### Performance research (parked)
 
