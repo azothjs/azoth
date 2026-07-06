@@ -63,7 +63,7 @@ export function compose(anchor, input, keep, props, childNodes) {
             break;
         }
         case input instanceof Promise:
-            input.then(value => compose(anchor, value, keep, props, childNodes));
+            composePromise(anchor, input, keep, props, childNodes);
             break;
         case Array.isArray(input):
             composeArray(anchor, input, keep);
@@ -87,17 +87,7 @@ export function compose(anchor, input, keep, props, childNodes) {
             compose(anchor, input.render(), keep);
             break;
         case typeof input.subscribe === 'function':
-            // Observable shape per the TC39 proposal (RxJS-compatible).
-            // Subscribe directly: each `next` value flows through compose.
-            // Errors re-throw — surfaces as unhandled, matching how a raw
-            // async iterator throwing in this slot behaves. Complete is a
-            // no-op; the slot keeps its last value. Use <Channel error={...}>
-            // for handled errors.
-            input.subscribe({
-                next(value) { compose(anchor, value, keep, props, childNodes); },
-                error(err) { throw err; },
-                complete() { }
-            });
+            composeObservable(anchor, input, keep, props, childNodes);
             break;
         // Input — { initial?, from, append? }: the explicit "seed this slot,
         // then drive it from a source" shape. `from` is where the input comes
@@ -110,7 +100,7 @@ export function compose(anchor, input, keep, props, childNodes) {
             if(from === undefined || from === null) break;   // seed only
             if(from instanceof Promise) {
                 // Single value replaces the seed; `append` is moot (one value).
-                from.then(value => compose(anchor, value, false, props, childNodes));
+                composePromise(anchor, from, false, props, childNodes);
                 break;
             }
             // Async iterable — with `append`, firstReplaces clears the seed on
@@ -326,6 +316,46 @@ function create(input, props, childNodes) {
     }
 }
 
+/* async source teardown
+
+   A live source (async-iterator, stream, observable, promise) registers a
+   cancel keyed by its anchor comment; clear(anchor) invokes it. So replacing an
+   anchor's content — case 2, a content swap — tears the previous source down. A
+   higher "block swap" never calls this clear, so a source in a swapped-away
+   block stays live (author's choice / MutationObserver). One source per anchor:
+   a new subscribe supersedes the prior. Bare sources are otherwise fire-and-
+   forget; Channel layers its own switch-abort on top (see channel.js). */
+
+const subscriptions = new WeakMap();   // anchor comment → cancel()
+
+// The source whose value is currently being composed. A clear() fired DURING a
+// source composing its OWN value must NOT cancel that source — only a clear
+// from OUTSIDE it (a different source, or a plain value taking over) tears it
+// down. This reentrancy guard lets a driving source (an outer async iterator)
+// and the content source it yields (an inner one) share an anchor.
+let currentSource = null;
+
+function subscribe(anchor, cancel) {
+    subscriptions.set(anchor, cancel);
+}
+
+// A source that ends on its own clears only ITS registration — a newer source
+// may have superseded it (=== guard).
+function settled(anchor, cancel) {
+    if(subscriptions.get(anchor) === cancel) subscriptions.delete(anchor);
+}
+
+// Resolves to ABORTED when the signal fires, raced against a pull so clear()
+// interrupts a parked await. (Duplicates channel's aborted() for now —
+// working code both places; collapse in refinement if the shape holds.)
+const ABORTED = Symbol('compose.aborted');
+function aborted(signal) {
+    return new Promise(resolve => {
+        if(signal.aborted) resolve(ABORTED);
+        else signal.addEventListener('abort', () => resolve(ABORTED), { once: true });
+    });
+}
+
 /* replace and clear */
 
 function replace(anchor, input, keep) {
@@ -335,6 +365,13 @@ function replace(anchor, input, keep) {
 }
 
 function clear(anchor) {
+    // Cancel a live source feeding this anchor before removing its nodes — a
+    // content swap, or a plain value replacing an async source, tears it down.
+    // But NOT when the source is composing its OWN value (currentSource): that
+    // clear is self-triggered (updating in place), not a takeover.
+    const cancel = subscriptions.get(anchor);
+    if(cancel && cancel !== currentSource) { subscriptions.delete(anchor); cancel(); }
+
     let node = anchor;
     let count = +anchor.data;
 
@@ -367,31 +404,107 @@ function composeArray(anchor, array, keep) {
 }
 
 async function composeStream(anchor, stream, keep) {
-    stream.pipeTo(new WritableStream({
-        write(chunk) {
-            compose(anchor, chunk, keep);
-        }
-    }));
+    const controller = new AbortController();
+    const cancel = () => controller.abort();
+    subscribe(anchor, cancel);
+    try {
+        await stream.pipeTo(new WritableStream({
+            write(chunk) {
+                const prev = currentSource;
+                currentSource = cancel;
+                try { compose(anchor, chunk, keep); }
+                finally { currentSource = prev; }
+            }
+        }), { signal: controller.signal });
+    }
+    catch(err) {
+        // abort (via clear) is expected; only a real stream error propagates.
+        if(!controller.signal.aborted) throw err;
+    }
+    finally {
+        settled(anchor, cancel);
+    }
 }
 
 async function composeAsyncIterator(
     anchor, iterator, keep, props, childNodes, firstReplaces = false,
 ) {
-    // TODO: use iterator directly and
-    // - control return when removed, and maybe throws on error
-    // - possible yield/return semantics for third communication channel
+    // `firstReplaces` is set by the Input/Channel branch when `append` is true:
+    // the first iteration overrides keep to false so it clears the initial
+    // render; subsequent iterations honor keep (true → accumulate). Non-Input
+    // callers default it to false (behavior unchanged).
     //
-    // `firstReplaces` is set by the Channel branch when `append` is true:
-    // the first iteration overrides keep to false so it clears the
-    // initial render; subsequent iterations honor keep (true →
-    // accumulate). For non-Channel callers, `firstReplaces` defaults to
-    // false so behavior is unchanged.
+    // Cancellable: register an abort keyed by the anchor. clear(anchor) fires
+    // it, so a content swap tears this pull down (and the source's own
+    // it.return() cleanup runs). The abort is RACED against each pull so a
+    // clear interrupts a parked await; the abandoned next() is left to settle.
+    const controller = new AbortController();
+    const { signal } = controller;
+    const cancel = () => controller.abort();
+    subscribe(anchor, cancel);
+
+    const it = iterator[Symbol.asyncIterator]();
+    const stop = aborted(signal);
     let first = true;
-    for await(const value of iterator) {
-        const effective = (first && firstReplaces) ? false : keep;
-        compose(anchor, value, effective, props, childNodes);
-        first = false;
+    try {
+        while(!signal.aborted) {
+            const next = await Promise.race([it.next(), stop]);
+            if(next === ABORTED || signal.aborted) break;
+            const { value, done } = next;
+            if(done) break;
+            const effective = (first && firstReplaces) ? false : keep;
+            const prev = currentSource;
+            currentSource = cancel;
+            try { compose(anchor, value, effective, props, childNodes); }
+            finally { currentSource = prev; }
+            first = false;
+        }
     }
+    finally {
+        it.return?.();
+        settled(anchor, cancel);
+    }
+}
+
+// A promise can't be aborted, only ignored: register a live-flag so a swap
+// (clear) neutralizes a still-pending result before it can compose. The
+// currentSource guard keeps the resolve's own clear from cancelling it.
+function composePromise(anchor, promise, keep, props, childNodes) {
+    let live = true;
+    const cancel = () => { live = false; };
+    subscribe(anchor, cancel);
+    promise.then(value => {
+        if(live) {
+            const prev = currentSource;
+            currentSource = cancel;
+            try { compose(anchor, value, keep, props, childNodes); }
+            finally { currentSource = prev; }
+        }
+        settled(anchor, cancel);
+    });
+}
+
+// Observable (TC39 / RxJS-compatible). Each `next` flows through compose; errors
+// re-throw (unhandled, like a raw async iterator throwing here); complete is a
+// no-op — the slot keeps its last value (use <Channel error={...}> for handled
+// errors). Teardown: unsubscribe on clear.
+function composeObservable(anchor, observable, keep, props, childNodes) {
+    let subscription;
+    const cancel = () => {
+        if(typeof subscription === 'function') subscription();
+        else subscription?.unsubscribe?.();
+    };
+    subscribe(anchor, cancel);
+    subscription = observable.subscribe({
+        next(value) {
+            const prev = currentSource;
+            currentSource = cancel;
+            try { compose(anchor, value, keep, props, childNodes); }
+            finally { currentSource = prev; }
+        },
+        error(err) { throw err; },
+        complete() { settled(anchor, cancel); }
+    });
 }
 
 /* thrown errors */

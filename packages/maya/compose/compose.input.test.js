@@ -107,11 +107,12 @@ test('nested Input — search with loading (streamed items accumulate; resets on
     `);
 });
 
-// The no-teardown edge, made visible. After the swap to search B, search A's
-// stream was never torn down — it's still live and bound to this anchor, so a
-// late push on it intrudes on search B's result. This is why a *switching*
-// slot wants a Channel (it aborts the stale source), not a bare Input.
-test('nested Input — a stale stream intrudes after the swap (no teardown)', async ({ expect, fixture, find }) => {
+// Teardown on swap. When search B replaces search A, clear(anchor) cancels
+// search A's stream — so a late push on it is IGNORED (the pull was torn down)
+// and can't intrude on search B, which keeps flowing. compose owns this case-2
+// cleanup; a Channel isn't required for it. (A higher block swap that never
+// clears this anchor would instead leave the source live — the author's choice.)
+test('nested Input — the stale stream is torn down on swap (no intrusion)', async ({ expect, fixture, find }) => {
     const seq = [];
     const outer = driven();
     const streamA = driven();
@@ -129,9 +130,10 @@ test('nested Input — a stale stream intrudes after the swap (no teardown)', as
     await find('loading-b'); seq.push(fixture.innerHTML);
     streamB.push('b1'); await find('b1'); seq.push(fixture.innerHTML);
 
-    // search A is over — but its stream is still live and bound to this anchor:
+    // search A is over — its stream was torn down at the swap. The late push is
+    // ignored; search B keeps flowing (b2 appends), with no a-late intrusion.
     streamA.push('a-late');
-    await find('b1a-late'); seq.push(fixture.innerHTML);
+    streamB.push('b2'); await find('b1b2'); seq.push(fixture.innerHTML);
 
     expect(seq).toMatchInlineSnapshot(`
       [
@@ -139,7 +141,7 @@ test('nested Input — a stale stream intrudes after the swap (no teardown)', as
         "<div>a1<!--1--></div>",
         "<div>loading-b<!--1--></div>",
         "<div>b1<!--1--></div>",
-        "<div>b1a-late<!--2--></div>",
+        "<div>b1b2<!--2--></div>",
       ]
     `);
 });
