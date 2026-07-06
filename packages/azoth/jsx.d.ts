@@ -9,19 +9,29 @@
  */
 
 import type { Channel } from '@azothjs/maya/channels';
+import type { Input, UIComponent } from '@azothjs/maya/compose';
 
-// Children: strings, numbers, nodes, channels (async/composable sources), or
-// arrays of these. (Ideally maya's full Composable type — Channel is the case
-// surfaced so far; broaden as others appear.)
-type DOMChild =
+// maya's Composable — everything compose() accepts: a {…} slot value, or a
+// component's return. (DOMChild was the child subset; this is the full set,
+// mirroring compose's own dispatch.)
+type Composable =
     | string
     | number
+    | bigint
     | boolean
-    | Node
-    | Channel
     | null
     | undefined
-    | DOMChild[];
+    | Node
+    | Channel
+    | Input                              // { initial?, from, append? }
+    | UIComponent                        // { render, update, initialize? }
+    | Promise<Composable>
+    | AsyncIterable<Composable>
+    | ReadableStream
+    | ((...args: any[]) => Composable)   // function / rerenderable
+    | Composable[];
+
+type DOMChild = Composable;
 
 // Properties to exclude from element attributes
 type ExcludedProps = "children";
@@ -75,18 +85,14 @@ declare global {
         // Future: TypeScript contribution for per-tag return types
         type Element = Node;
 
-        // A component's return: a Node, or a "rerenderable" — the re-render
-        // closure a rerenderer() / module-factory hands back (takes new props,
-        // returns DOM).
-        type Rerenderable = (...args: any[]) => any;
-
-        // What may be used as a JSX tag. Without this, TS requires a component's
-        // return to be assignable to `Element` (a Node) and rejects the
-        // rerenderable-returning form — e.g. `() => rerenderer(...)`.
+        // What may be used as a JSX tag: an intrinsic/custom-element string tag,
+        // a function component, or a class component. A component returns a
+        // Composable (what compose accepts) — including a rerenderable (the
+        // re-render closure), which is why `() => rerenderer(...)` typechecks.
         type ElementType =
-            | string
-            | ((...args: any[]) => Element | Rerenderable)
-            | (new (...args: any[]) => any);
+            | string                                  // intrinsic + custom-element tags
+            | ((...args: any[]) => Composable)        // function component
+            | (new (...args: any[]) => Composable);   // class component
 
         // Children attribute
         interface ElementChildrenAttribute {
