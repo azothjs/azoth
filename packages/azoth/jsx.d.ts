@@ -9,7 +9,7 @@
  */
 
 import type { Channel } from '@azothjs/maya/channels';
-import type { Input, UIComponent } from '@azothjs/maya/compose';
+import type { Input, UIComponent, Component } from '@azothjs/maya/compose';
 
 // maya's Composable — everything compose() accepts: a {…} slot value, or a
 // component's return. (DOMChild was the child subset; this is the full set,
@@ -24,11 +24,11 @@ type Composable =
     | Node
     | Channel
     | Input                              // { initial?, from, append? }
-    | UIComponent                        // { render, update, initialize? }
+    | UIComponent                        // base: { render, update }
     | Promise<Composable>
     | AsyncIterable<Composable>
     | ReadableStream
-    | ((...args: any[]) => Composable)   // function / rerenderable
+    | ((props?: any, childNodes?: any) => Composable)   // function / rerenderable
     | Composable[];
 
 type DOMChild = Composable;
@@ -85,14 +85,18 @@ declare global {
         // Future: TypeScript contribution for per-tag return types
         type Element = Node;
 
-        // What may be used as a JSX tag: an intrinsic/custom-element string tag,
-        // a function component, or a class component. A component returns a
-        // Composable (what compose accepts) — including a rerenderable (the
-        // re-render closure), which is why `() => rerenderer(...)` typechecks.
+        // What may be used as a JSX tag: an intrinsic/custom-element string tag;
+        // null/undefined (a conditional no-op — `<C/>` where C is null); a
+        // function or class component (returns a Composable, including a
+        // rerenderable, which is why `() => rerenderer(...)` typechecks); or a
+        // Component object (create()'s full { initialize?, render, update }).
+        // Components are invoked `(props, childNodes)` — hence the second arg.
         type ElementType =
-            | string                                  // intrinsic + custom-element tags
-            | ((...args: any[]) => Composable)        // function component
-            | (new (...args: any[]) => Composable);   // class component
+            | string                                              // intrinsic + custom-element tags
+            | null | undefined                                    // conditional no-op: <C/> where C is null
+            | ((props?: any, childNodes?: any) => Composable)     // function component
+            | (new (props?: any, childNodes?: any) => Composable) // class component
+            | Component;                                          // object component (full lifecycle)
 
         // Children attribute
         interface ElementChildrenAttribute {

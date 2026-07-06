@@ -126,14 +126,24 @@ export function compose(anchor, input, keep, props, childNodes) {
 
 /**
  * @typedef {Object} UIComponent
- * The imperative-update protocol compose drives in component position — any
- * object, class, or function of this shape, no base class to extend.
- * @property {(props: object, childNodes?: *) => void} [initialize] Optional
- *   one-time setup (intake), before the first render.
+ * The base imperative-update protocol compose() drives in component position —
+ * any object, class, or function of this shape, no base class to extend.
+ * compose()/Composable cares ONLY about this base (render + update); the
+ * create()/`<C/>` intake hook lives on the fuller {@link Component}.
  * @property {() => *} render First paint — no args; intake already happened.
  * @property {(props: object, childNodes?: *) => (*|void)} update A prop changed:
  *   return new DOM to replace, or void to adapt in place. (Channel implements
  *   update-only — no render.)
+ */
+
+/**
+ * @typedef {UIComponent & { initialize?: (props: object, childNodes?: *) => void }} Component
+ * A create()/`<C/>` component — a {@link UIComponent} plus the optional one-time
+ * `initialize` intake (props/childNodes), run once before the first render.
+ * create() drives the full lifecycle (initialize → render → update); compose()
+ * in a slot drives only the UIComponent base. (initialize is optional because
+ * create calls it as `initialize?.()` — a base UIComponent is a valid create
+ * input too.)
  */
 export function composeComponent(anchor, [Constructor, props, childNodes]) {
     const rr = activeRenderer();
