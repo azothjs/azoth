@@ -86,10 +86,12 @@ benefit from real usage informing them.
 
 ### Cancel semantics / AbortController
 
-Channel currently has no way to signal "I'm done with this source" back
-upstream. Sources that hold resources (open WebSockets, ongoing fetches)
-keep going. Natural shape: an `AbortController` prop, hooked into compose's
-slot lifecycle. Defer until a real-world need surfaces; design is open.
+The slot-lifecycle half landed (2026-07): compose tears down a live source when
+its anchor is cleared (WeakMap<anchor, cancel> + reentrancy guard — see Compose
+→ Async source teardown). What remains is the AUTHOR-initiated half — a Channel
+`AbortController`/`cancel` prop so code can say "I'm done with this source" and
+release upstream resources (open WebSockets, ongoing fetches), not just react to
+a swap. Defer until a real-world need surfaces; design is open.
 
 ### Channel role evolution
 
@@ -123,16 +125,19 @@ component-tree demands). Connects to the hypermedia thesis.
 
 ## Components / typing — precision pass (follow-on)
 
-valhalla now typechecks fully (`.tsx`, 0 errors) — the forcing function is done:
-`jsx.d.ts` has HTML + SVG + custom-element tags (hyphen-indexed) and
-`JSX.ElementType` (function + class components returning DOM or a rerenderable);
-`DOMChild` includes `Channel`; maya's types reach valhalla via `allowJs`
-inference. Remaining is *depth* (optional, on-demand):
+valhalla typechecks fully (`.tsx`, 0 errors). Landed 2026-07: a full
+`Composable` union in jsx.d.ts — everything compose accepts — with `DOMChild =
+Composable`; `JSX.ElementType` = string tag | null/undefined (conditional
+no-op) | function | class | `Component` object, all returning `Composable`, with
+the `(props, childNodes)` arity; and the `UIComponent` (base: render/update) vs
+`Component` (create's full: + `initialize`) split. maya's types reach valhalla
+via `allowJs`. Remaining is *depth* (optional, on-demand):
 
-**`DOMChild` still incomplete** — compose also accepts at runtime: `Promise`,
-`AsyncIterable`, `ReadableStream`, Observable-shaped, render objects, function
-refs, `IGNORE` sentinel, `bigint`. (Channel added.) The `as unknown as
-JSX.Element` cast in `channels.test.tsx` surfaces it.
+**`Composable` — last gaps** — it now covers primitives, Node, Channel, Input,
+UIComponent, Promise, AsyncIterable, ReadableStream, function/rerenderable,
+arrays. Still missing: **Observable-shaped** (`.subscribe`) and the **`IGNORE`**
+sentinel — the `as unknown as JSX.Element` casts in `channels.test.tsx:285`
+(Observable) and `rerenderer.test.tsx` persist for these.
 
 **`<Channel>` props are `any`** — its constructor param is untyped, so neither
 `new Channel({…})` nor `<Channel …>` deep-checks props. Typing the constructor
@@ -176,6 +181,11 @@ covers async-iter / promise / stream / observable).
   the abort machinery is shared/exposed there too? Or overreaching (keep
   pushable minimal; let compose/Channel own cancellation)? Revisit once the
   `withAbort` shape settles; may collapse compose's `aborted()` into channel's.
+- **composeStream's hardcoded `keep`** — a direct `{aStream}` value composes via
+  `composeStream(anchor, stream, true)` — always accumulate. Sensible default for
+  a chunk stream, but now that Input carries `append`, reconsider: should a
+  direct stream honor compose's `keep`, and should Input-`from`-a-stream route
+  through pipeTo (composeStream) instead of for-await (composeAsyncIterator)?
 
 ### Performance research (parked)
 
@@ -316,3 +326,7 @@ snapshot-per-test (the common case) is unaffected.
 Revisit how azoth configures ESLint — e.g. `eqeqeq` flagged `== null` (the
 idiomatic null/undefined check); consider the `{ null: "ignore" }` option, and
 audit the ruleset generally. (Surfaced by a CI failure on KeyedList.js, 2026-06.)
+Landed 2026-07: a husky + lint-staged pre-commit hook runs `eslint --fix` on
+staged `packages/**/*.{js,jsx,ts,tsx}` (via npx — no pnpm). Still open: the
+ruleset audit itself, and an ESLint v9 modernization (flat config already in
+use; deps are on v8.57).
