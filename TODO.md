@@ -257,6 +257,16 @@ saveInlineSnapshots. The comment patch does not cover it. Workaround in use:
 the exact trigger and fold into the upstream fix. Low priority — single-
 snapshot-per-test (the common case) is unaffected.
 
+BROWSER MODE is worse (2026-07, building valhalla compose.test.tsx): filling
+many empty snapshots in one browser-mode run coalesces several values onto
+one call and leaves others empty; filling ONE AT A TIME via `-t` still lands
+values on the WRONG calls (offset by skipped tests — the write-back resolves
+call sites against executed-test ordinals, not file positions). Node-env
+files fill fine (compose.clear.test.js, 4-in-one-run, correct). Workaround
+that held: capture real output via a probe assertion (`expect('SNAP>>>' +
+JSON.stringify(v)).toBe('')`, harvest Received from the failure), freeze to
+`toBe`/`toEqual` directly. Fold this evidence into the spike.
+
 ## ESLint usage review (lower priority)
 
 Revisit how azoth configures ESLint — e.g. `eqeqeq` flagged `== null` (the
