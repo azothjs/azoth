@@ -362,8 +362,13 @@ function aborted(signal) {
 
 function replace(anchor, input, keep) {
     if(!keep) clear(anchor);
+    // A DocumentFragment inserts childNodes.length nodes (and empties
+    // itself); everything else inserts one. The anchor's count must match
+    // what the slot actually owns, or a later clear() strands the
+    // difference. (Probe-confirmed: compose.clear.test.js.)
+    const count = input instanceof DocumentFragment ? input.childNodes.length : 1;
     anchor.before(input);
-    anchor.data = ++anchor.data;
+    anchor.data = +anchor.data + count;
 }
 
 function clear(anchor) {

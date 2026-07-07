@@ -82,7 +82,7 @@ describe('element binding positions: root vs child', () => {
         );
 
         expect(fixture(el)).toMatchInlineSnapshot(`"<div class="featured"><h2>Featured Content<!--1--></h2><!--1-->
-                <p>Some description here</p><!--1--></div>"`);
+                <p>Some description here</p><!--4--></div>"`);
     });
 
     test('multiple bindings at different depths', ({ expect }) => {
