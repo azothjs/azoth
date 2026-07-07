@@ -48,7 +48,7 @@ data). The `azoth` package is the single install that re-exports both.
 |---|---|
 | [`test-utils`](test-utils) | Common test helpers |
 | [`vite-test`](vite-test) | End-to-end Vite pipeline smoke test |
-| [`docs`](docs) | Vitepress documentation site |
+| [`docs`](docs) | Markdown docs: `topics/` (author-facing) · `design/` (maintainer decision records) · `history/` (archived artifacts) |
 
 ## Install
 

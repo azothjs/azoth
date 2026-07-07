@@ -1,6 +1,5 @@
 packages:
   - "./packages/*"
-  - "./docs"
   - "./test-utils"
 allowBuilds:
   # esbuild's postinstall sets up the binary — required for vite/transform.
