@@ -218,10 +218,12 @@ Resolved 2026-07 (the tests-as-docs prune):
   and the JSX-comment crash entry flipped to Resolved (pinned in
   `smoke.test.tsx` + `compiler.test.js`).
 
-Still open: `components.md` stays prose until component-forms tests land in
-valhalla (class / object+initialize / chain rule / null no-op / thrown
-messages) — write those, then fold-or-archive it. Earlier loose-docs
-resolution (maya.md etc.) noted in git history.
+Resolved 2026-07 (follow-through): component-forms tests landed
+(`valhalla/component-forms.test.tsx`) and `components.md` folded to its
+concept kernel (the reframe, which-form-when, created-vs-composed) with
+pointers to the tests. The prune is complete — every mechanics rule now
+lives as a test. Earlier loose-docs resolution (maya.md etc.) noted in git
+history.
 
 ## dom-info (folded into thoth — `packages/thoth/dom-info/`)
 
