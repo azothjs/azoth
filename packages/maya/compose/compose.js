@@ -15,7 +15,7 @@ export const IGNORE = Symbol.for('azoth.compose.IGNORE');
  * @property {boolean} [append] When true, the first source value replaces the
  *   seed and subsequent values accumulate; otherwise each replaces the prior.
  */
-export function compose(anchor, input, keep, props, childNodes) {
+export function compose(anchor, input, keep) {
     if(keep !== true) keep = false;
 
     // The identical value at an anchor is one instruction, not two.
@@ -52,8 +52,11 @@ export function compose(anchor, input, keep, props, childNodes) {
             break;
         case type === 'function': {
             // will throw if function is class,
-            // unlike create or compose element
-            let out = input(props, childNodes);
+            // unlike create or compose element.
+            // Called with no args: props/childNodes intake is component
+            // territory (create/composeComponent) — a slot function is a
+            // deferred value, not a component.
+            let out = input();
             compose(anchor, out, keep);
             break;
         }
@@ -63,7 +66,7 @@ export function compose(anchor, input, keep, props, childNodes) {
             break;
         }
         case input instanceof Promise:
-            composePromise(anchor, input, keep, props, childNodes);
+            composePromise(anchor, input, keep);
             break;
         case Array.isArray(input):
             composeArray(anchor, input, keep);
@@ -78,7 +81,7 @@ export function compose(anchor, input, keep, props, childNodes) {
             break;
         // w/o the !! this causes intermittent failures :p maybe vitest/node thing?
         case !!input[Symbol.asyncIterator]:
-            composeAsyncIterator(anchor, input, keep, props, childNodes);
+            composeAsyncIterator(anchor, input, keep);
             break;
         case typeof input?.render === 'function':
             // Drive a UIComponent to DOM. Intake (props/childNodes) happened
@@ -87,7 +90,7 @@ export function compose(anchor, input, keep, props, childNodes) {
             compose(anchor, input.render(), keep);
             break;
         case typeof input.subscribe === 'function':
-            composeObservable(anchor, input, keep, props, childNodes);
+            composeObservable(anchor, input, keep);
             break;
         // Input — { initial?, from, append? }: the explicit "seed this slot,
         // then drive it from a source" shape. `from` is where the input comes
@@ -100,12 +103,12 @@ export function compose(anchor, input, keep, props, childNodes) {
             if(from === undefined || from === null) break;   // seed only
             if(from instanceof Promise) {
                 // Single value replaces the seed; `append` is moot (one value).
-                composePromise(anchor, from, false, props, childNodes);
+                composePromise(anchor, from, false);
                 break;
             }
             // Async iterable — with `append`, firstReplaces clears the seed on
             // the first value, then subsequent values accumulate.
-            composeAsyncIterator(anchor, from, append, props, childNodes, append);
+            composeAsyncIterator(anchor, from, append, append);
             break;
         }
         default: {
@@ -426,9 +429,7 @@ async function composeStream(anchor, stream, keep) {
     }
 }
 
-async function composeAsyncIterator(
-    anchor, iterator, keep, props, childNodes, firstReplaces = false,
-) {
+async function composeAsyncIterator(anchor, iterator, keep, firstReplaces = false) {
     // `firstReplaces` is set by the Input/Channel branch when `append` is true:
     // the first iteration overrides keep to false so it clears the initial
     // render; subsequent iterations honor keep (true → accumulate). Non-Input
@@ -455,7 +456,7 @@ async function composeAsyncIterator(
             const effective = (first && firstReplaces) ? false : keep;
             const prev = currentSource;
             currentSource = cancel;
-            try { compose(anchor, value, effective, props, childNodes); }
+            try { compose(anchor, value, effective); }
             finally { currentSource = prev; }
             first = false;
         }
@@ -469,7 +470,7 @@ async function composeAsyncIterator(
 // A promise can't be aborted, only ignored: register a live-flag so a swap
 // (clear) neutralizes a still-pending result before it can compose. The
 // currentSource guard keeps the resolve's own clear from cancelling it.
-function composePromise(anchor, promise, keep, props, childNodes) {
+function composePromise(anchor, promise, keep) {
     let live = true;
     const cancel = () => { live = false; };
     subscribe(anchor, cancel);
@@ -477,7 +478,7 @@ function composePromise(anchor, promise, keep, props, childNodes) {
         if(live) {
             const prev = currentSource;
             currentSource = cancel;
-            try { compose(anchor, value, keep, props, childNodes); }
+            try { compose(anchor, value, keep); }
             finally { currentSource = prev; }
         }
         settled(anchor, cancel);
@@ -488,7 +489,7 @@ function composePromise(anchor, promise, keep, props, childNodes) {
 // re-throw (unhandled, like a raw async iterator throwing here); complete is a
 // no-op — the slot keeps its last value (use <Channel error={...}> for handled
 // errors). Teardown: unsubscribe on clear.
-function composeObservable(anchor, observable, keep, props, childNodes) {
+function composeObservable(anchor, observable, keep) {
     let subscription;
     const cancel = () => {
         if(typeof subscription === 'function') subscription();
@@ -499,7 +500,7 @@ function composeObservable(anchor, observable, keep, props, childNodes) {
         next(value) {
             const prev = currentSource;
             currentSource = cancel;
-            try { compose(anchor, value, keep, props, childNodes); }
+            try { compose(anchor, value, keep); }
             finally { currentSource = prev; }
         },
         error(err) { throw err; },
