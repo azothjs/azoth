@@ -91,10 +91,10 @@ const t = te6c2b6be(status, name);
 
 ```javascript
 // Extracted HTML template (ships in the document)
-<p>Hello <!--0--></p>
+<p>Hello <!--az:0--></p>
 ```
 
-The `<!--0-->` comment is the trick that preserves child-node structure
+The `<!--az:0-->` comment is the trick that preserves child-node structure
 across a dynamic text slot — without it, "Hello " and the surrounding
 static text would merge into one text node. The comment is a tangible
 child the runtime can locate and replace.

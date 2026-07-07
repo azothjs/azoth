@@ -12,13 +12,13 @@ import { renderer, rerenderer } from './rerenderer.js';
 
 beforeAll(() => RenderService.useDOMEngine());
 
-// <p data-bind><!--0--></p> with one child slot — the standard test shape.
+// <p data-bind><!--az:0--></p> with one child slot — the standard test shape.
 const slotTargets = r => [r.childNodes[0]];
 const slotBind = targets => {
     const t0 = targets[0];
     return v0 => compose(t0, v0);
 };
-const makeP = id => render(id, slotTargets, slotBind, false, `<p data-bind><!--0--></p>`);
+const makeP = id => render(id, slotTargets, slotBind, false, `<p data-bind><!--az:0--></p>`);
 
 describe('rerenderer — the gate', () => {
 
@@ -74,11 +74,11 @@ describe('rerenderer — same nodes, new values', () => {
         const fn = rerenderer(name => t(name));
 
         const n1 = fn('felix');
-        expect(n1.outerHTML).toMatchInlineSnapshot(`"<p data-bind="">felix<!--1--></p>"`);
+        expect(n1.outerHTML).toMatchInlineSnapshot(`"<p data-bind="">felix<!--az:1--></p>"`);
 
         const n2 = fn('duchess');
         expect(n2).toBe(n1); // same node — new props, same DOM
-        expect(n1.outerHTML).toMatchInlineSnapshot(`"<p data-bind="">duchess<!--1--></p>"`);
+        expect(n1.outerHTML).toMatchInlineSnapshot(`"<p data-bind="">duchess<!--az:1--></p>"`);
     });
 
     test('the thunk parameters are the update surface', ({ expect }) => {
@@ -101,8 +101,8 @@ describe('rerenderer — control flow (the hooks coin, flipped)', () => {
     test('conditional branches: each cached by its own site; sleeping, not dead', ({ expect }) => {
         // anchor comment is childNodes[1] here — text "A:" is [0]
         const prefixTargets = r => [r.childNodes[1]];
-        const tA = render('rr-br-a', prefixTargets, slotBind, false, `<p data-bind>A:<!--0--></p>`);
-        const tB = render('rr-br-b', prefixTargets, slotBind, false, `<p data-bind>B:<!--0--></p>`);
+        const tA = render('rr-br-a', prefixTargets, slotBind, false, `<p data-bind>A:<!--az:0--></p>`);
+        const tB = render('rr-br-b', prefixTargets, slotBind, false, `<p data-bind>B:<!--az:0--></p>`);
         const fn = rerenderer((flag, v) => flag ? tA(v) : tB(v));
 
         const a1 = fn(true, 'x');
@@ -142,7 +142,7 @@ describe('rerenderer — control flow (the hooks coin, flipped)', () => {
     test('deduped templates cannot collide: per-declaration site identity', ({ expect }) => {
         // Two declarations, SAME template id — the compiled shape after
         // per-site factory emission. Closure identity keys the cache.
-        const html = `<p data-bind><!--0--></p>`;
+        const html = `<p data-bind><!--az:0--></p>`;
         const tX = render('rr-dup', slotTargets, slotBind, false, html);
         const tY = render('rr-dup', slotTargets, slotBind, false, html);
         const fn = rerenderer((a, b) => [tX(a), tY(b)]);
@@ -210,7 +210,7 @@ describe('rerenderer — components inside the wrap (increment c)', () => {
         return v0 => composeComponent(t0, v0);
     };
     const makeHost = id =>
-        render(id, slotTargets, componentBind, false, `<p data-bind><!--0--></p>`);
+        render(id, slotTargets, componentBind, false, `<p data-bind><!--az:0--></p>`);
 
     test('chain rule: setup runs once, the returned rerenderable is re-invoked', ({ expect }) => {
         const tCard = makeP('rr-c-card');
@@ -372,7 +372,7 @@ describe('rerenderer — UIComponent protocol (increment d)', () => {
         return v0 => composeComponent(t0, v0);
     };
     const makeHost = id =>
-        render(id, slotTargets, componentBind, false, `<p data-bind><!--0--></p>`);
+        render(id, slotTargets, componentBind, false, `<p data-bind><!--az:0--></p>`);
 
     // Transpiled JSX emits one factory declaration per call site (increment
     // b). Site identity is the factory's CLOSURE identity (fresh per
@@ -496,7 +496,7 @@ describe('rerenderer — Channel update verb (increment e)', () => {
         return v0 => composeComponent(t0, v0);
     };
     const makeHost = id =>
-        render(id, slotTargets, channelBind, false, `<p data-bind><!--0--></p>`);
+        render(id, slotTargets, channelBind, false, `<p data-bind><!--az:0--></p>`);
 
     // A minimal Observable whose subscribe/unsubscribe we can count.
     const observable = () => {

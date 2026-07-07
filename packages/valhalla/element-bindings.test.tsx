@@ -46,7 +46,7 @@ describe('element binding positions: root vs child', () => {
 
         const el = <CardTitle title="Dashboard" />;
 
-        expect(fixture(el)).toMatchInlineSnapshot(`"<h2 class="card-title">Dashboard<!--1--></h2>"`);
+        expect(fixture(el)).toMatchInlineSnapshot(`"<h2 class="card-title">Dashboard<!--az:1--></h2>"`);
 
         expect(el.textContent).toBe('Dashboard');
     });
@@ -63,7 +63,7 @@ describe('element binding positions: root vs child', () => {
 
         expect(fixture(el)).toMatchInlineSnapshot(`"<div class="profile">
                 <img data-bind="" src="avatar.jpg" alt="Agent Smith">
-                <span data-bind="">Agent Smith<!--1--></span>
+                <span data-bind="">Agent Smith<!--az:1--></span>
             </div>"`);
     });
 
@@ -81,8 +81,8 @@ describe('element binding positions: root vs child', () => {
             </Card>
         );
 
-        expect(fixture(el)).toMatchInlineSnapshot(`"<div class="featured"><h2>Featured Content<!--1--></h2><!--1-->
-                <p>Some description here</p><!--4--></div>"`);
+        expect(fixture(el)).toMatchInlineSnapshot(`"<div class="featured"><h2>Featured Content<!--az:1--></h2><!--az:1-->
+                <p>Some description here</p><!--az:4--></div>"`);
     });
 
     test('multiple bindings at different depths', ({ expect }) => {
@@ -100,9 +100,9 @@ describe('element binding positions: root vs child', () => {
 
         expect(fixture(el)).toMatchInlineSnapshot(`"<div class="level-1">
                 <div class="level-2">
-                    <span data-bind="">deep<!--1--></span>
+                    <span data-bind="">deep<!--az:1--></span>
                 </div>
-                <p data-bind="">medium<!--1--></p>
+                <p data-bind="">medium<!--az:1--></p>
                 <footer data-bind="" data-value="attr">Footer</footer>
             </div>"`);
 

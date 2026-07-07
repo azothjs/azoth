@@ -237,7 +237,7 @@ describe('render generator', () => {
     test('simple', ({ compile, expect }) => {
         const code = compile(`name => <p>{name}</p>`);
 
-        expect(code).toMatchInlineSnapshot(`"__render("15aa2705", gdb407f11, b6b86b273, false, \`<p><!--0--></p>\`)"`);
+        expect(code).toMatchInlineSnapshot(`"__render("2daa7bd4", gdb407f11, b6b86b273, false, \`<p><!--az:0--></p>\`)"`);
     });
 
     test('static', ({ compile, expect }) => {
@@ -254,10 +254,12 @@ describe('render generator', () => {
         </div>`);
 
         // Only one <!--0--> for the conditional, none for the comment
-        expect(code).toMatchInlineSnapshot(`"__render("77ff2813", g24227028, b6b86b273, false, \`<div>
-            
-            <!--0-->
-        </div>\`)"`);
+        expect(code).toMatchInlineSnapshot(`
+          "__render("51cf172f", g24227028, b6b86b273, false, \`<div>
+                      
+                      <!--az:0-->
+                  </div>\`)"
+        `);
     });
 
 
@@ -268,8 +270,8 @@ describe('render generator', () => {
 
         expect(code).toMatchInlineSnapshot(
             `
-          "__render("2ce4ea27", gedc11336, b8477292e, false, \`<p>
-                      <!--0--> <span data-bind>hey <!--0-->!</span>
+          "__render("0599d196", gedc11336, b8477292e, false, \`<p>
+                      <!--az:0--> <span data-bind>hey <!--az:0-->!</span>
                   </p>\`)"
         `
         );
@@ -279,7 +281,7 @@ describe('render generator', () => {
         const template = preParse(`name => <p>{name}</p>`, expect);
         const code = makeRenderer(template, { noContent: true });
 
-        expect(code).toMatchInlineSnapshot(`"__render("15aa2705", gdb407f11, b6b86b273, false)"`);
+        expect(code).toMatchInlineSnapshot(`"__render("2daa7bd4", gdb407f11, b6b86b273, false)"`);
     });
 
 
@@ -299,11 +301,11 @@ describe('render generator', () => {
         expect(mapped).toMatchInlineSnapshot(`
           [
             "__render("191b5e03", null, null, false, \`<p>loading...</p>\`)",
-            "__render("15aa2705", gdb407f11, b6b86b273, false, \`<p><!--0--></p>\`)",
-            "__render("3fcf8b87", gdb407f11, b6b86b273, false, \`<ul><!--0--></ul>\`)",
-            "__render("2c4a6c0f", gdb407f11, b6b86b273, false, \`<p><!--0--> cats</p>\`)",
-            "__render("fbb7e8b4", gdb407f11, b6b86b273, false, \`<li><!--0--></li>\`)",
-            "__render("3fcf8b87", gdb407f11, b6b86b273, false, \`<ul><!--0--></ul>\`)",
+            "__render("2daa7bd4", gdb407f11, b6b86b273, false, \`<p><!--az:0--></p>\`)",
+            "__render("5028a4a6", gdb407f11, b6b86b273, false, \`<ul><!--az:0--></ul>\`)",
+            "__render("faceb5b0", gdb407f11, b6b86b273, false, \`<p><!--az:0--> cats</p>\`)",
+            "__render("d5d01530", gdb407f11, b6b86b273, false, \`<li><!--az:0--></li>\`)",
+            "__render("5028a4a6", gdb407f11, b6b86b273, false, \`<ul><!--az:0--></ul>\`)",
           ]
         `);
     });

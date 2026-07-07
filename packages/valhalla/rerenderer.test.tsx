@@ -28,11 +28,11 @@ describe('rerenderer — JSX-driven', () => {
         const render = rerenderer((name: string) => <p>{name}</p>);
 
         const first = render('felix') as HTMLParagraphElement;
-        expect(first.outerHTML).toMatchInlineSnapshot(`"<p>felix<!--1--></p>"`);
+        expect(first.outerHTML).toMatchInlineSnapshot(`"<p>felix<!--az:1--></p>"`);
 
         const second = render('duchess');
         expect(second).toBe(first);              // same node, rebound
-        expect(first.outerHTML).toMatchInlineSnapshot(`"<p>duchess<!--1--></p>"`);
+        expect(first.outerHTML).toMatchInlineSnapshot(`"<p>duchess<!--az:1--></p>"`);
     });
 
     test('conditional branches: each cached by its own site; sleeping, not dead', ({ expect }) => {

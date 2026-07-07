@@ -58,7 +58,7 @@ describe('create element', () => {
         expect(RenderObject.prototype?.constructor).not.toBeDefined();
     });
 
-    const expected = `<div>felix<!--1--></div>`;
+    const expected = `<div>felix<!--az:1--></div>`;
     const create = Constructor => createComponent(Constructor, { name: 'felix' });
     test('constructed values', async ({ expect }) => {
         expect(create(Component).outerHTML).toBe(expected);
@@ -99,7 +99,7 @@ describe('prop-agation', () => {
         fixture.append(dom);
         await find('lazy-cat');
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div><div>lazy-cat</div><!--1--></div>"`
+            `"<div><div>lazy-cat</div><!--az:1--></div>"`
         );
     });
 
@@ -125,7 +125,7 @@ describe('prop-agation', () => {
 describe('compose element', () => {
 
     describe.each(CONSTRUCTORS.concat(ASYNC_CONSTRUCTORS))('%o', Constructor => {
-        const expected = `<div><div>felix<!--1--></div><!--1--></div>`;
+        const expected = `<div><div>felix<!--az:1--></div><!--az:1--></div>`;
         test('prop-agation', async ({ expect, fixture, find }) => {
             const { dom, anchor } = elementWithAnchor();
             composeComponent(anchor, [Component, { name: 'felix' }]);
@@ -157,7 +157,7 @@ describe('compose element', () => {
         fixture.append(dom);
         await find('one', { exact: false });
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div><div>one</div><div>two</div><div>three</div><!--3--></div>"`
+            `"<div><div>one</div><div>two</div><div>three</div><!--az:3--></div>"`
         );
     });
 

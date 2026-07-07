@@ -37,8 +37,8 @@ describe('childNodes with nested components', () => {
 
         const el = <StatsCard title="Dashboard Stats" />;
 
-        expect(fixture(el)).toMatchInlineSnapshot(`"<div class="card"><h2 class="card-title">Dashboard Stats<!--1--></h2><!--1-->
-                <div class="stats-content">Content here</div><!--4--></div>"`);
+        expect(fixture(el)).toMatchInlineSnapshot(`"<div class="card"><h2 class="card-title">Dashboard Stats<!--az:1--></h2><!--az:1-->
+                <div class="stats-content">Content here</div><!--az:4--></div>"`);
     });
 
 });

@@ -86,7 +86,7 @@ describe('component invocation: <Component/> vs Component()', () => {
 
         const el = <Greeting />;
 
-        expect(fixture(el)).toMatchInlineSnapshot(`"<p>Hello, World<!--1--></p>"`);
+        expect(fixture(el)).toMatchInlineSnapshot(`"<p>Hello, World<!--az:1--></p>"`);
     });
 
     test('destructuring WORKS when props are always provided', ({ expect }) => {
@@ -96,7 +96,7 @@ describe('component invocation: <Component/> vs Component()', () => {
 
         const el = <Greeting name="Azoth" />;
 
-        expect(fixture(el)).toMatchInlineSnapshot(`"<p>Hello, Azoth<!--1--></p>"`);
+        expect(fixture(el)).toMatchInlineSnapshot(`"<p>Hello, Azoth<!--az:1--></p>"`);
     });
 
     test('destructuring WORKS with spread of object data', ({ expect }) => {
@@ -108,7 +108,7 @@ describe('component invocation: <Component/> vs Component()', () => {
 
         const el = <Profile {...data} />;
 
-        expect(fixture(el)).toMatchInlineSnapshot(`"<div class="profile">Agent Smith<!--1--> - Portland<!--1--></div>"`);
+        expect(fixture(el)).toMatchInlineSnapshot(`"<div class="profile">Agent Smith<!--az:1--> - Portland<!--az:1--></div>"`);
     });
 
     test('direct call still needs defensive coding', ({ expect }) => {
@@ -118,14 +118,14 @@ describe('component invocation: <Component/> vs Component()', () => {
         };
 
         // JSX invocation — works (props is {})
-        expect(fixture(<Greeting />)).toMatchInlineSnapshot(`"<p>Hello, World<!--1--></p>"`);
+        expect(fixture(<Greeting />)).toMatchInlineSnapshot(`"<p>Hello, World<!--az:1--></p>"`);
 
         // Direct call — also works due to defensive coding (props is undefined)
         // @ts-expect-error Testing runtime behavior — TypeScript correctly flags missing arg
-        expect(fixture(Greeting())).toMatchInlineSnapshot(`"<p>Hello, World<!--1--></p>"`);
+        expect(fixture(Greeting())).toMatchInlineSnapshot(`"<p>Hello, World<!--az:1--></p>"`);
 
         // With explicit props
-        expect(fixture(<Greeting name="Azoth" />)).toMatchInlineSnapshot(`"<p>Hello, Azoth<!--1--></p>"`);
+        expect(fixture(<Greeting name="Azoth" />)).toMatchInlineSnapshot(`"<p>Hello, Azoth<!--az:1--></p>"`);
     });
 
     test('destructuring FAILS with direct call (not JSX)', ({ expect }) => {

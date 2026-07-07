@@ -1,23 +1,21 @@
 /**
  * clear() / anchor bookkeeping — EMPIRICAL PROBES.
  *
- * The anchor comment's data is the count of live nodes the slot owns;
- * clear() walks that many previousSiblings, recursing into comment nodes
- * (nested slots tear down their own region first). Two probed holes:
+ * The anchor comment's data is `az:<count>` — the number of live nodes the
+ * slot owns. clear() walks that many previousSiblings, recursing into
+ * az:-prefixed comments only (nested slots tear down their own region
+ * first). Both holes these probes originally confirmed are now closed:
  *
- *   1. FRAGMENT COUNT — FIXED (probe-driven). A DocumentFragment inserts
- *      childNodes.length nodes, so replace() counts them into anchor.data
- *      (everything else counts 1). Before the fix, a compiled JSX fragment
- *      {<><p/><s/></>} in a slot — or createContextualFragment from fetched
- *      HTML — under-counted and a later clear stranded the difference.
+ *   1. FRAGMENT COUNT — a DocumentFragment inserts childNodes.length nodes,
+ *      so replace() counts them into anchor.data (everything else counts 1).
+ *      Before the fix, a compiled JSX fragment {<><p/><s/></>} in a slot —
+ *      or createContextualFragment from fetched HTML — under-counted and a
+ *      later clear stranded the difference.
  *
- *   2. FOREIGN NUMERIC COMMENT — OPEN HOLE, pinned below as current
- *      behavior. clear()'s recursion treats ANY comment as a nested anchor;
- *      a user comment with numeric data (<!--9-->) composed as slot content
- *      claims 9 preceding nodes it doesn't own and eats content outside the
- *      slot region. Text comments (<!-- note -->) are safe: +data is NaN,
- *      the recursion no-ops. Guard design TBD (mint-time anchor registry vs
- *      data prefix vs documented limitation).
+ *   2. FOREIGN COMMENT — the az: prefix is the trust boundary. An authored
+ *      comment in composed content — even a numeric one like <!--9-->, which
+ *      previously read as a nested-anchor count and ate content OUTSIDE the
+ *      slot region — is a plain node: counted, removed, never recursed into.
  *
  * Snapshots are generated from real output (empty → the run fills them).
  */
@@ -43,8 +41,8 @@ test('fragment children vs anchor count: replace after multi-child fragment', ({
     seq.push(dom.outerHTML);
     expect(seq).toMatchInlineSnapshot(`
       [
-        "<div><p>a</p><span>b</span><!--2--></div>",
-        "<div>X<!--1--></div>",
+        "<div><p>a</p><span>b</span><!--az:2--></div>",
+        "<div>X<!--az:1--></div>",
       ]
     `);
 });
@@ -53,7 +51,7 @@ test('fragment children vs anchor count: replace after multi-child fragment', ({
 // to the slot: all three fragment children clear, "Hello" is untouched.
 test('fragment children vs anchor count: with static sibling content', ({ expect }) => {
     const seq = [];
-    const { dom, anchor } = elementWithTextAnchor();   // <div>Hello<!--0--></div>
+    const { dom, anchor } = elementWithTextAnchor();   // <div>Hello<!--az:0--></div>
     const frag = document.createDocumentFragment();
     frag.append(document.createTextNode('1'), document.createTextNode('2'), document.createTextNode('3'));
 
@@ -63,34 +61,33 @@ test('fragment children vs anchor count: with static sibling content', ({ expect
     seq.push(dom.outerHTML);
     expect(seq).toMatchInlineSnapshot(`
       [
-        "<div>Hello123<!--3--></div>",
-        "<div>HelloX<!--1--></div>",
+        "<div>Hello123<!--az:3--></div>",
+        "<div>HelloX<!--az:1--></div>",
       ]
     `);
 });
 
-// 2a. THE OPEN HOLE, pinned as current behavior — this snapshot is WRONG on
-// purpose and should break when a guard lands. A user comment with NUMERIC
-// data composed as slot content: clear's recursion claims 9 preceding nodes
-// and eats "Hello", the static template content OUTSIDE the slot. Correct
-// output would keep "Hello": `<div>HelloX<!--1--></div>`.
-test('foreign numeric comment in slot content: clear over-reaches (pinned hole)', ({ expect }) => {
+// 2a. An authored comment with NUMERIC data composed as slot content — the
+// az: guard makes it a plain node. clear removes exactly a, <!--9-->, b;
+// "Hello" (static template content outside the slot) survives. Pre-guard,
+// the recursion trusted the 9 as a count and ate "Hello".
+test('foreign numeric comment in slot content: plain node, exact clear reach', ({ expect }) => {
     const seq = [];
-    const { dom, anchor } = elementWithTextAnchor();   // <div>Hello<!--0--></div>
+    const { dom, anchor } = elementWithTextAnchor();   // <div>Hello<!--az:0--></div>
     compose(anchor, ['a', document.createComment('9'), 'b']);
     seq.push(dom.outerHTML);
-    compose(anchor, 'X');           // should remove exactly a, <!--9-->, b
+    compose(anchor, 'X');
     seq.push(dom.outerHTML);
     expect(seq).toMatchInlineSnapshot(`
       [
-        "<div>Helloa<!--9-->b<!--3--></div>",
-        "<div>X<!--1--></div>",
+        "<div>Helloa<!--9-->b<!--az:3--></div>",
+        "<div>HelloX<!--az:1--></div>",
       ]
     `);
 });
 
-// 2b. Control: a non-numeric user comment (the common case — <!-- note -->).
-test('foreign text comment in slot content: clear reach', ({ expect }) => {
+// 2b. Control: a non-numeric authored comment (the common case) — same rule.
+test('foreign text comment in slot content: plain node, exact clear reach', ({ expect }) => {
     const seq = [];
     const { dom, anchor } = elementWithTextAnchor();
     compose(anchor, ['a', document.createComment(' note '), 'b']);
@@ -99,8 +96,8 @@ test('foreign text comment in slot content: clear reach', ({ expect }) => {
     seq.push(dom.outerHTML);
     expect(seq).toMatchInlineSnapshot(`
       [
-        "<div>Helloa<!-- note -->b<!--3--></div>",
-        "<div>HelloX<!--1--></div>",
+        "<div>Helloa<!-- note -->b<!--az:3--></div>",
+        "<div>HelloX<!--az:1--></div>",
       ]
     `);
 });

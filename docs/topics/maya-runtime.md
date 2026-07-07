@@ -45,7 +45,7 @@ What's worth holding in mind here:
 - `compose` is recursive. When a Promise resolves to a Node, the Node
   branch handles it. When a function returns a function, it's called
   again. The chain runs until something matches a terminal branch.
-- `compose` works against an **anchor** — a comment node (`<!--0-->`) that
+- `compose` works against an **anchor** — a comment node (`<!--az:0-->`) that
   marks the slot's position. New content goes before the anchor; the
   anchor stays put for the next composition.
 - A sibling function, `create`, is the same chain but aware of `props` and

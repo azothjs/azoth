@@ -1,4 +1,4 @@
-export const $anchor = (text = '0') => document.createComment(text);
+export const $anchor = (count = 0) => document.createComment(`az:${count}`);
 export const $text = (text) => document.createTextNode(text);
 export const $element = (text) => {
     const div = document.createElement('div');

@@ -350,15 +350,22 @@ function settled(anchor, cancel) {
 
 /* replace and clear */
 
+/* The anchor's data is `az:<count>` — the number of live nodes the slot
+   owns. The az: prefix is the trust boundary: only azoth-minted anchors
+   carry it (thoth materializes `<!--az:0-->` into template HTML), so
+   clear() can recurse into nested slots without ever mistaking an authored
+   comment — even a numeric one — for bookkeeping it should believe.
+   (Probe-confirmed both ways: compose.clear.test.js.) */
+
 function replace(anchor, input, keep) {
     if(!keep) clear(anchor);
     // A DocumentFragment inserts childNodes.length nodes (and empties
     // itself); everything else inserts one. The anchor's count must match
     // what the slot actually owns, or a later clear() strands the
-    // difference. (Probe-confirmed: compose.clear.test.js.)
+    // difference.
     const count = input instanceof DocumentFragment ? input.childNodes.length : 1;
+    anchor.data = `az:${+anchor.data.slice(3) + count}`;
     anchor.before(input);
-    anchor.data = +anchor.data + count;
 }
 
 function clear(anchor) {
@@ -370,23 +377,25 @@ function clear(anchor) {
     if(cancel && cancel !== currentSource) { subscriptions.delete(anchor); cancel(); }
 
     let node = anchor;
-    let count = +anchor.data;
-
-    // TODO: validate count received
+    let count = +anchor.data.slice(3);
 
     while(count--) {
         const { previousSibling } = node;
         if(!previousSibling) break;
 
-        // TODO: how to guard for azoth comments only?
-        if(previousSibling.nodeType === Node.COMMENT_NODE) {
+        // Only azoth anchors recurse — they own their region and tear it
+        // down (and cancel their sources) before removal. Authored comments
+        // in composed content are plain nodes.
+        if(previousSibling.nodeType === Node.COMMENT_NODE
+            && previousSibling.data.startsWith('az:')
+        ) {
             clear(previousSibling);
         }
 
         previousSibling.remove();
     }
 
-    anchor.data = 0;
+    anchor.data = 'az:0';
 }
 
 /* complex types */

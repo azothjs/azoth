@@ -131,10 +131,10 @@ Now `<pet-list>` is yours. Create it, connect it, fill it:
 const list = document.createElement('pet-list');
 document.body.append(list);                      // connect → builds the <ul>
 list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }]);
-// <pet-list><ul><li>Felix<!--1--></li><li>Mittens<!--1--></li></ul></pet-list>
+// <pet-list><ul><li>Felix<!--az:1--></li><li>Mittens<!--az:1--></li></ul></pet-list>
 ```
 
-(The `<!--1-->` is the interpolation anchor for `{p.name}` — see
+(The `<!--az:1-->` is the interpolation anchor for `{p.name}` — see
 [composition](composition.md).)
 
 One platform note: a custom element is summoned by a string tag (`<pet-list>`),

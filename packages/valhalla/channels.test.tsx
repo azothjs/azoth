@@ -56,12 +56,12 @@ describe('Channel with Promise source', () => {
         root.append(<main><Channel source={promise} /></main>);
 
         // Before resolve — just the anchor
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><!--0--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><!--az:0--></main>"`);
 
         resolve(<p>felix</p>);
         await microtasks();
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>felix</p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>felix</p><!--az:1--></main>"`);
     });
 
     test('promise with transform via `as`', async ({ expect }) => {
@@ -72,7 +72,7 @@ describe('Channel with Promise source', () => {
         resolve({ name: 'felix' });
         await microtasks();
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>felix<!--1--></p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>felix<!--az:1--></p><!--az:1--></main>"`);
     });
 
     test('children as initial loading state', async ({ expect }) => {
@@ -81,12 +81,12 @@ describe('Channel with Promise source', () => {
         root.append(<main><Channel source={promise}><p>loading…</p></Channel></main>);
 
         // Before resolve — children render
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>loading…</p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>loading…</p><!--az:1--></main>"`);
 
         resolve(<p>felix</p>);
         await microtasks();
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>felix</p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>felix</p><!--az:1--></main>"`);
     });
 
 });
@@ -101,13 +101,13 @@ describe('Channel with async iterator source', () => {
         const root = fixture();
         root.append(<main><Channel source={gen()} /></main>);
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><!--0--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><!--az:0--></main>"`);
 
         // Async iteration: multiple yields propagate over several microtask
         // hops. A macrotask boundary drains the whole pipeline cleanly.
         await macrotask();
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>duchess</p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>duchess</p><!--az:1--></main>"`);
     });
 
     test('async iterator with transform', async ({ expect }) => {
@@ -120,7 +120,7 @@ describe('Channel with async iterator source', () => {
 
         await macrotask();
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>duchess<!--1--></p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>duchess<!--az:1--></p><!--az:1--></main>"`);
     });
 
     describe('with timed delays', () => {
@@ -136,11 +136,11 @@ describe('Channel with async iterator source', () => {
             root.append(<main><Channel source={gen()}><p>loading…</p></Channel></main>);
 
             // Before time advances — children show
-            expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>loading…</p><!--1--></main>"`);
+            expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>loading…</p><!--az:1--></main>"`);
 
             await vi.runAllTimersAsync();
 
-            expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>felix</p><!--1--></main>"`);
+            expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>felix</p><!--az:1--></main>"`);
         });
     });
 
@@ -156,7 +156,7 @@ describe('Channel with map prop (array iteration)', () => {
         resolve([{ name: 'felix' }, { name: 'duchess' }]);
         await microtasks();
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>felix<!--1--></p><p>duchess<!--1--></p><!--2--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>felix<!--az:1--></p><p>duchess<!--az:1--></p><!--az:2--></main>"`);
     });
 
     test('async iterator of arrays with map', async ({ expect }) => {
@@ -170,7 +170,7 @@ describe('Channel with map prop (array iteration)', () => {
         await macrotask();
 
         // Last yield replaces previous
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>duchess<!--1--></p><p>garfield<!--1--></p><!--2--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>duchess<!--az:1--></p><p>garfield<!--az:1--></p><!--az:2--></main>"`);
     });
 
 });
@@ -196,7 +196,7 @@ describe('Channel with ReadableStream source', () => {
 
         await macrotask();
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main>duchess<!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main>duchess<!--az:1--></main>"`);
     });
 
     test('append: chunks accumulate after the first replaces any initial', async ({ expect }) => {
@@ -213,7 +213,7 @@ describe('Channel with ReadableStream source', () => {
 
         await macrotask();
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main>felix and duchess<!--3--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main>felix and duchess<!--az:3--></main>"`);
     });
 
     test('append with transform: per-chunk transform applied, chunks accumulate', async ({ expect }) => {
@@ -229,7 +229,7 @@ describe('Channel with ReadableStream source', () => {
 
         await macrotask();
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main>FELIX DUCHESS <!--2--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main>FELIX DUCHESS <!--az:2--></main>"`);
     });
 
 });
@@ -263,7 +263,7 @@ describe('Channel with Observable source', () => {
         await macrotask();
 
         // Like async iterator: last value replaces
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>duchess</p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>duchess</p><!--az:1--></main>"`);
     });
 
     test('observable with transform', async ({ expect }) => {
@@ -273,7 +273,7 @@ describe('Channel with Observable source', () => {
 
         await macrotask();
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>duchess<!--1--></p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>duchess<!--az:1--></p><!--az:1--></main>"`);
     });
 
     test('observable in a child slot (no Channel wrap) — compose handles directly', async ({ expect }) => {
@@ -285,7 +285,7 @@ describe('Channel with Observable source', () => {
 
         await macrotask();
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>direct</p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>direct</p><!--az:1--></main>"`);
     });
 
 });
@@ -300,7 +300,7 @@ describe('Channel with error prop', () => {
         reject(new Error('fetch failed'));
         await microtasks();
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p class="err">fetch failed<!--1--></p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p class="err">fetch failed<!--az:1--></p><!--az:1--></main>"`);
     });
 
     test('async iterator error replaces with error transform output', async ({ expect }) => {
@@ -314,7 +314,7 @@ describe('Channel with error prop', () => {
         await macrotask();
 
         // After the error, the error transform's output is the final value
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p class="err">source broke<!--1--></p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p class="err">source broke<!--az:1--></p><!--az:1--></main>"`);
     });
 
 });
@@ -328,15 +328,15 @@ describe('Channel with EventTarget source', () => {
 
         // Initial render: childNodes are shown before any event
         await macrotask();
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>waiting</p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>waiting</p><!--az:1--></main>"`);
 
         target.dispatchEvent(new CustomEvent('ping', { detail: 'a' }));
         await macrotask();
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>a<!--1--></p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>a<!--az:1--></p><!--az:1--></main>"`);
 
         target.dispatchEvent(new CustomEvent('ping', { detail: 'b' }));
         await macrotask();
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>b<!--1--></p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>b<!--az:1--></p><!--az:1--></main>"`);
     });
 
     test('append: events accumulate after replacing initial', async ({ expect }) => {
@@ -345,21 +345,21 @@ describe('Channel with EventTarget source', () => {
         root.append(<main><Channel source={target} eventType="msg" as={(e: CustomEvent) => <p>{String(e.detail)}</p>} append><p>connecting</p></Channel></main>);
 
         await macrotask();
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>connecting</p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>connecting</p><!--az:1--></main>"`);
 
         target.dispatchEvent(new CustomEvent('msg', { detail: 'one' }));
         await macrotask();
         // First event replaces the initial.
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>one<!--1--></p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>one<!--az:1--></p><!--az:1--></main>"`);
 
         target.dispatchEvent(new CustomEvent('msg', { detail: 'two' }));
         await macrotask();
         // Subsequent events accumulate.
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>one<!--1--></p><p>two<!--1--></p><!--2--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>one<!--az:1--></p><p>two<!--az:1--></p><!--az:2--></main>"`);
 
         target.dispatchEvent(new CustomEvent('msg', { detail: 'three' }));
         await macrotask();
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>one<!--1--></p><p>two<!--1--></p><p>three<!--1--></p><!--3--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>one<!--az:1--></p><p>two<!--az:1--></p><p>three<!--az:1--></p><!--az:3--></main>"`);
     });
 
     test('DOM element as EventTarget — click counter', async ({ expect }) => {
@@ -371,16 +371,16 @@ describe('Channel with EventTarget source', () => {
         root.append(<main>{button}<Channel source={button} eventType="click" as={() => <span>clicks: {++count}</span>}><span>clicks: 0</span></Channel></main>);
 
         await macrotask();
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><button>click me</button><!--1--><span>clicks: 0</span><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><button>click me</button><!--az:1--><span>clicks: 0</span><!--az:1--></main>"`);
 
         button.click();
         await macrotask();
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><button>click me</button><!--1--><span>clicks: 1<!--1--></span><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><button>click me</button><!--az:1--><span>clicks: 1<!--az:1--></span><!--az:1--></main>"`);
 
         button.click();
         button.click();
         await macrotask();
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><button>click me</button><!--1--><span>clicks: 3<!--1--></span><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><button>click me</button><!--az:1--><span>clicks: 3<!--az:1--></span><!--az:1--></main>"`);
     });
 
 });
@@ -395,7 +395,7 @@ describe('Channel — equivalent class and instance forms', () => {
         resolve(<p>same</p>);
         await microtasks();
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>same</p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>same</p><!--az:1--></main>"`);
     });
 
     test('pre-constructed Channel instance interpolated as child', async ({ expect }) => {
@@ -407,7 +407,7 @@ describe('Channel — equivalent class and instance forms', () => {
         resolve(<p>same</p>);
         await microtasks();
 
-        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>same</p><!--1--></main>"`);
+        expect(root.innerHTML).toMatchInlineSnapshot(`"<main><p>same</p><!--az:1--></main>"`);
     });
 
 });

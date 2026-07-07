@@ -29,8 +29,8 @@ test('keep=false after accumulating two siblings', ({ expect }) => {
     seq.push(dom.outerHTML);
     expect(seq).toMatchInlineSnapshot(`
       [
-        "<div>AB<!--2--></div>",
-        "<div>C<!--1--></div>",
+        "<div>AB<!--az:2--></div>",
+        "<div>C<!--az:1--></div>",
       ]
     `);
 });
@@ -45,8 +45,8 @@ test('keep=true appends onto existing siblings', ({ expect }) => {
     seq.push(dom.outerHTML);
     expect(seq).toMatchInlineSnapshot(`
       [
-        "<div>AB<!--2--></div>",
-        "<div>ABC<!--3--></div>",
+        "<div>AB<!--az:2--></div>",
+        "<div>ABC<!--az:3--></div>",
       ]
     `);
 });
@@ -62,8 +62,8 @@ test('array clears prior content, then accumulates its members', ({ expect }) =>
     seq.push(dom.outerHTML);
     expect(seq).toMatchInlineSnapshot(`
       [
-        "<div>X<!--1--></div>",
-        "<div>ABC<!--3--></div>",
+        "<div>X<!--az:1--></div>",
+        "<div>ABC<!--az:3--></div>",
       ]
     `);
 });
@@ -72,7 +72,7 @@ test('array clears prior content, then accumulates its members', ({ expect }) =>
 test('nested arrays flatten onto the one anchor', ({ expect }) => {
     const { dom, anchor } = elementWithAnchor();
     compose(anchor, [['A', 'B'], ['C']]);
-    expect(dom.outerHTML).toMatchInlineSnapshot(`"<div>ABC<!--3--></div>"`);
+    expect(dom.outerHTML).toMatchInlineSnapshot(`"<div>ABC<!--az:3--></div>"`);
 });
 
 // A Channel = initial seed + an appending async source. `firstReplaces`: the
@@ -98,9 +98,9 @@ test('Channel append: seed, first value replaces it, then appends', async ({ exp
     seq.push(fixture.innerHTML);            // did 'two' accumulate (→ onetwo)?
     expect(seq).toMatchInlineSnapshot(`
       [
-        "<div>seed<!--1--></div>",
-        "<div>one<!--1--></div>",
-        "<div>onetwo<!--2--></div>",
+        "<div>seed<!--az:1--></div>",
+        "<div>one<!--az:1--></div>",
+        "<div>onetwo<!--az:2--></div>",
       ]
     `);
 });
@@ -127,8 +127,8 @@ test('live source in an array clobbers a static sibling', async ({ expect, fixtu
     seq.push(fixture.innerHTML);            // did 'static' survive?
     expect(seq).toMatchInlineSnapshot(`
       [
-        "<div>staticseed<!--2--></div>",
-        "<div>live<!--1--></div>",
+        "<div>staticseed<!--az:2--></div>",
+        "<div>live<!--az:1--></div>",
       ]
     `);
 });

@@ -87,7 +87,7 @@ accumulate.
 ## The anchor mechanism
 
 At compile time, every child interpolation site becomes a comment node
-(`<!--0-->`). At runtime, that comment is the **anchor**: a stable position
+(`<!--az:0-->`). At runtime, that comment is the **anchor**: a stable position
 in the DOM that survives content changes.
 
 When a new value composes at the slot:

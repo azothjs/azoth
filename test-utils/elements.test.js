@@ -11,10 +11,10 @@ describe('test util elements', () => {
     test('text-anchor', ({ expect }) => {
         expect(elementWithTextAnchor()).toMatchInlineSnapshot(`
       {
-        "anchor": <!--0-->,
+        "anchor": <!--az:0-->,
         "dom": <div>
           Hello
-          <!--0-->
+          <!--az:0-->
         </div>,
       }
     `);
@@ -23,10 +23,10 @@ describe('test util elements', () => {
     test('text-anchor-text', ({ expect }) => {
         expect(elementWithTextAnchorText()).toMatchInlineSnapshot(`
       {
-        "anchor": <!--0-->,
+        "anchor": <!--az:0-->,
         "dom": <div>
           Hello
-          <!--0-->
+          <!--az:0-->
           Hello
         </div>,
       }
@@ -36,9 +36,9 @@ describe('test util elements', () => {
     test('anchor', ({ expect }) => {
         expect(elementWithAnchor()).toMatchInlineSnapshot(`
       {
-        "anchor": <!--0-->,
+        "anchor": <!--az:0-->,
         "dom": <div>
-          <!--0-->
+          <!--az:0-->
         </div>,
       }
     `);
@@ -47,9 +47,9 @@ describe('test util elements', () => {
     test('anchor-text', ({ expect }) => {
         expect(elementWithAnchorText()).toMatchInlineSnapshot(`
       {
-        "anchor": <!--0-->,
+        "anchor": <!--az:0-->,
         "dom": <div>
-          <!--0-->
+          <!--az:0-->
           Hello
         </div>,
       }

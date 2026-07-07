@@ -58,14 +58,14 @@ describe('decomposition playground', () => {
           "
           ==== code ====
           import { __createComponent } from 'azoth/runtime';
-          import { t4a104a2a } from 'virtual:azoth-templates?id=4a104a2a';
+          import { t0c2ba934 } from 'virtual:azoth-templates?id=0c2ba934';
           const Greeting = ({name}) => {
               const salutation = name === 'CascadiaJS' ? "Whazzup" : "Hello";
-              return t4a104a2a(salutation,name.toUpperCase());
+              return t0c2ba934(salutation,name.toUpperCase());
           };
           document.body.append(__createComponent(Greeting, { name: "CascadiaJS", }));
-          ==== template 4a104a2a ====
-          html:     <p><!--0-->, <!--0-->!</p>
+          ==== template 0c2ba934 ====
+          html:     <p><!--az:0-->, <!--az:0-->!</p>
           targets:  r => [r.childNodes[0],r.childNodes[2]]
           bind:     (ts) => {
             const t0 = ts[0], t1 = ts[1];
@@ -74,7 +74,7 @@ describe('decomposition playground', () => {
               __compose(t1, v1);
             };    
           }
-          renderer: __render("4a104a2a", g356056d3, bac4750db, false)
+          renderer: __render("0c2ba934", g356056d3, bac4750db, false)
           ==== template e3b0c442 ====
           html:     
           targets:  null
@@ -168,15 +168,15 @@ describe('decomposition playground', () => {
         expect(decompose(input)).toMatchInlineSnapshot(`
           "
           ==== code ====
-          import { t9a2e4cdb, t732d1cd1 } from 'virtual:azoth-templates?id=9a2e4cdb&id=732d1cd1';
+          import { t2ac603a4, te308ce22 } from 'virtual:azoth-templates?id=2ac603a4&id=e308ce22';
 
           function Page({title, content}) {
-              const head = t9a2e4cdb(title);
-              const body = t732d1cd1(content);
+              const head = t2ac603a4(title);
+              const body = te308ce22(content);
               return [head, body];
           }
-          ==== template 9a2e4cdb ====
-          html:     <header><!--0--></header>
+          ==== template 2ac603a4 ====
+          html:     <header><!--az:0--></header>
           targets:  r => [r.childNodes[0]]
           bind:     (ts) => {
             const t0 = ts[0];
@@ -184,9 +184,9 @@ describe('decomposition playground', () => {
               __compose(t0, v0);
             };    
           }
-          renderer: __render("9a2e4cdb", gdb407f11, b6b86b273, false)
-          ==== template 732d1cd1 ====
-          html:     <main><!--0--></main>
+          renderer: __render("2ac603a4", gdb407f11, b6b86b273, false)
+          ==== template e308ce22 ====
+          html:     <main><!--az:0--></main>
           targets:  r => [r.childNodes[0]]
           bind:     (ts) => {
             const t0 = ts[0];
@@ -194,7 +194,7 @@ describe('decomposition playground', () => {
               __compose(t0, v0);
             };    
           }
-          renderer: __render("732d1cd1", gdb407f11, b6b86b273, false)
+          renderer: __render("e308ce22", gdb407f11, b6b86b273, false)
           "
         `);
     });
@@ -208,11 +208,11 @@ describe('decomposition playground', () => {
         expect(decompose(input)).toMatchInlineSnapshot(`
           "
           ==== code ====
-          import { tf4127425, t79ccc8b8 } from 'virtual:azoth-templates?id=f4127425&id=79ccc8b8';
+          import { t5a773e88, tf8d26ba0 } from 'virtual:azoth-templates?id=5a773e88&id=f8d26ba0';
 
-          const view = ready ? tf4127425(content) : t79ccc8b8(pct);
-          ==== template f4127425 ====
-          html:     <section><!--0--></section>
+          const view = ready ? t5a773e88(content) : tf8d26ba0(pct);
+          ==== template 5a773e88 ====
+          html:     <section><!--az:0--></section>
           targets:  r => [r.childNodes[0]]
           bind:     (ts) => {
             const t0 = ts[0];
@@ -220,9 +220,9 @@ describe('decomposition playground', () => {
               __compose(t0, v0);
             };    
           }
-          renderer: __render("f4127425", gdb407f11, b6b86b273, false)
-          ==== template 79ccc8b8 ====
-          html:     <p>loading <!--0-->%</p>
+          renderer: __render("5a773e88", gdb407f11, b6b86b273, false)
+          ==== template f8d26ba0 ====
+          html:     <p>loading <!--az:0-->%</p>
           targets:  r => [r.childNodes[1]]
           bind:     (ts) => {
             const t0 = ts[0];
@@ -230,7 +230,7 @@ describe('decomposition playground', () => {
               __compose(t0, v0);
             };    
           }
-          renderer: __render("79ccc8b8", g043f347c, b6b86b273, false)
+          renderer: __render("f8d26ba0", g043f347c, b6b86b273, false)
           "
         `);
     });
@@ -244,12 +244,12 @@ describe('decomposition playground', () => {
         expect(decompose(input)).toMatchInlineSnapshot(`
           "
           ==== code ====
-          import { t3d3e41e0 } from 'virtual:azoth-templates?id=3d3e41e0';
+          import { tafa7221d } from 'virtual:azoth-templates?id=afa7221d';
 
-          const dom = t3d3e41e0([Cat, { name: name, }]);
-          ==== template 3d3e41e0 ====
+          const dom = tafa7221d([Cat, { name: name, }]);
+          ==== template afa7221d ====
           html:     <div>
-                          <!--0-->
+                          <!--az:0-->
                       </div>
           targets:  r => [r.childNodes[1]]
           bind:     (ts) => {
@@ -258,7 +258,7 @@ describe('decomposition playground', () => {
               __composeComponent(t0, v0);
             };    
           }
-          renderer: __render("3d3e41e0", g043f347c, bd4735e3a, false)
+          renderer: __render("afa7221d", g043f347c, bd4735e3a, false)
           "
         `);
     });
@@ -271,12 +271,12 @@ describe('decomposition playground', () => {
         expect(decompose(input)).toMatchInlineSnapshot(`
           "
           ==== code ====
-          import { t15aa2705, t15aa2705_1 } from 'virtual:azoth-templates?id=15aa2705&id=15aa2705';
+          import { t2daa7bd4, t2daa7bd4_1 } from 'virtual:azoth-templates?id=2daa7bd4&id=2daa7bd4';
 
-          const a = t15aa2705(x);
-          const b = t15aa2705_1(y);
-          ==== template 15aa2705 ====
-          html:     <p><!--0--></p>
+          const a = t2daa7bd4(x);
+          const b = t2daa7bd4_1(y);
+          ==== template 2daa7bd4 ====
+          html:     <p><!--az:0--></p>
           targets:  r => [r.childNodes[0]]
           bind:     (ts) => {
             const t0 = ts[0];
@@ -284,9 +284,9 @@ describe('decomposition playground', () => {
               __compose(t0, v0);
             };    
           }
-          renderer: __render("15aa2705", gdb407f11, b6b86b273, false)
-          ==== template 15aa2705 ====
-          html:     <p><!--0--></p>
+          renderer: __render("2daa7bd4", gdb407f11, b6b86b273, false)
+          ==== template 2daa7bd4 ====
+          html:     <p><!--az:0--></p>
           targets:  r => [r.childNodes[0]]
           bind:     (ts) => {
             const t0 = ts[0];
@@ -294,7 +294,7 @@ describe('decomposition playground', () => {
               __compose(t0, v0);
             };    
           }
-          renderer: __render("15aa2705", gdb407f11, b6b86b273, false)
+          renderer: __render("2daa7bd4", gdb407f11, b6b86b273, false)
           "
         `);
     });
@@ -308,12 +308,12 @@ describe('decomposition playground', () => {
         expect(decompose(input)).toMatchInlineSnapshot(`
           "
           ==== code ====
-          import { t057b50eb, tfbb7e8b4 } from 'virtual:azoth-templates?id=057b50eb&id=fbb7e8b4';
+          import { t3d6e97cb, td5d01530 } from 'virtual:azoth-templates?id=3d6e97cb&id=d5d01530';
 
-          const list = t057b50eb(items.map(item => tfbb7e8b4(item.label)));
-          ==== template 057b50eb ====
+          const list = t3d6e97cb(items.map(item => td5d01530(item.label)));
+          ==== template 3d6e97cb ====
           html:     <ul>
-                          <!--0-->
+                          <!--az:0-->
                       </ul>
           targets:  r => [r.childNodes[1]]
           bind:     (ts) => {
@@ -322,9 +322,9 @@ describe('decomposition playground', () => {
               __compose(t0, v0);
             };    
           }
-          renderer: __render("057b50eb", g043f347c, b6b86b273, false)
-          ==== template fbb7e8b4 ====
-          html:     <li><!--0--></li>
+          renderer: __render("3d6e97cb", g043f347c, b6b86b273, false)
+          ==== template d5d01530 ====
+          html:     <li><!--az:0--></li>
           targets:  r => [r.childNodes[0]]
           bind:     (ts) => {
             const t0 = ts[0];
@@ -332,7 +332,7 @@ describe('decomposition playground', () => {
               __compose(t0, v0);
             };    
           }
-          renderer: __render("fbb7e8b4", gdb407f11, b6b86b273, false)
+          renderer: __render("d5d01530", gdb407f11, b6b86b273, false)
           "
         `);
     });
@@ -347,14 +347,14 @@ describe('decomposition playground', () => {
         expect(decompose(input)).toMatchInlineSnapshot(`
           "
           ==== code ====
-          import { t47556cd8 } from 'virtual:azoth-templates?id=47556cd8';
+          import { td6d4856a } from 'virtual:azoth-templates?id=d6d4856a';
 
           function Component() {
               const name = asyncValueStream();
-              return rerenderer(() => t47556cd8(name,salutation));
+              return rerenderer(() => td6d4856a(name,salutation));
           }
-          ==== template 47556cd8 ====
-          html:     <p><!--0--> <!--0-->!</p>
+          ==== template d6d4856a ====
+          html:     <p><!--az:0--> <!--az:0-->!</p>
           targets:  r => [r.childNodes[0],r.childNodes[2]]
           bind:     (ts) => {
             const t0 = ts[0], t1 = ts[1];
@@ -363,7 +363,7 @@ describe('decomposition playground', () => {
               __compose(t1, v1);
             };    
           }
-          renderer: __render("47556cd8", g356056d3, bac4750db, false)
+          renderer: __render("d6d4856a", g356056d3, bac4750db, false)
           "
         `);
     });

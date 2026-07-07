@@ -61,9 +61,9 @@ test('a source replacing its own value is not self-cancelled', async ({ expect, 
 
     expect(seq).toMatchInlineSnapshot(`
       [
-        "<div>v1<!--1--></div>",
-        "<div>v2<!--1--></div>",
-        "<div>v3<!--1--></div>",
+        "<div>v1<!--az:1--></div>",
+        "<div>v2<!--az:1--></div>",
+        "<div>v3<!--az:1--></div>",
       ]
     `);
 });
@@ -87,9 +87,9 @@ test('a plain value replacing a live source tears the source down', async ({ exp
 
     expect(seq).toMatchInlineSnapshot(`
       [
-        "<div>v1<!--1--></div>",
-        "<div>static<!--1--></div>",
-        "<div>static<!--1--></div>",
+        "<div>v1<!--az:1--></div>",
+        "<div>static<!--az:1--></div>",
+        "<div>static<!--az:1--></div>",
       ]
     `);
 });

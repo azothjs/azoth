@@ -28,10 +28,10 @@ describe('append and remove', () => {
 
         expect(results).toMatchInlineSnapshot(`
           [
-            "elementWithTextAnchor       <div>HelloWorld<!--1--></div>",
-            "elementWithTextAnchorText   <div>HelloWorld<!--1-->Hello</div>",
-            "elementWithAnchor           <div>World<!--1--></div>",
-            "elementWithAnchorText       <div>World<!--1-->Hello</div>",
+            "elementWithTextAnchor       <div>HelloWorld<!--az:1--></div>",
+            "elementWithTextAnchorText   <div>HelloWorld<!--az:1-->Hello</div>",
+            "elementWithAnchor           <div>World<!--az:1--></div>",
+            "elementWithAnchorText       <div>World<!--az:1-->Hello</div>",
           ]
         `);
     });
@@ -43,7 +43,7 @@ describe('append and remove', () => {
         expect(dom).toMatchInlineSnapshot(`
           <div>
             first
-            <!--1-->
+            <!--az:1-->
           </div>
         `);
 
@@ -51,7 +51,7 @@ describe('append and remove', () => {
         expect(dom).toMatchInlineSnapshot(`
           <div>
             second
-            <!--1-->
+            <!--az:1-->
           </div>
         `);
 
@@ -61,7 +61,7 @@ describe('append and remove', () => {
             third
             fourth
             fifth
-            <!--3-->
+            <!--az:3-->
           </div>
         `);
 
@@ -69,7 +69,7 @@ describe('append and remove', () => {
         expect(dom).toMatchInlineSnapshot(`
           <div>
             sixth
-            <!--1-->
+            <!--az:1-->
           </div>
         `);
 
@@ -83,7 +83,7 @@ describe('append and remove', () => {
           <div>
             Hello
             1
-            <!--1-->
+            <!--az:1-->
           </div>
         `);
 
@@ -92,7 +92,7 @@ describe('append and remove', () => {
           <div>
             Hello
             2
-            <!--1-->
+            <!--az:1-->
           </div>
         `);
     });
@@ -104,8 +104,8 @@ describe('append and remove', () => {
 
         expect(dom).toMatchInlineSnapshot(`
           <div>
-            <!--0-->
-            <!--1-->
+            <!--az:0-->
+            <!--az:1-->
           </div>
         `);
 
@@ -115,8 +115,8 @@ describe('append and remove', () => {
             <div>
               hello
             </div>
-            <!--1-->
-            <!--1-->
+            <!--az:1-->
+            <!--az:1-->
           </div>
         `);
 
@@ -124,8 +124,8 @@ describe('append and remove', () => {
         compose(parent, anchor2);
         expect(dom).toMatchInlineSnapshot(`
           <div>
-            <!--0-->
-            <!--1-->
+            <!--az:0-->
+            <!--az:1-->
           </div>
         `);
 
@@ -135,8 +135,8 @@ describe('append and remove', () => {
             <div>
               goodbye
             </div>
-            <!--1-->
-            <!--1-->
+            <!--az:1-->
+            <!--az:1-->
           </div>
         `);
 
@@ -148,7 +148,7 @@ describe('append and remove', () => {
         expect(dom).toMatchInlineSnapshot(`
           <div>
             first
-            <!--1-->
+            <!--az:1-->
           </div>
         `);
 
@@ -156,7 +156,7 @@ describe('append and remove', () => {
         expect(dom).toMatchInlineSnapshot(`
           <div>
             first
-            <!--1-->
+            <!--az:1-->
           </div>
         `);
 
@@ -164,14 +164,14 @@ describe('append and remove', () => {
         expect(dom).toMatchInlineSnapshot(`
           <div>
             third
-            <!--1-->
+            <!--az:1-->
           </div>
         `);
 
         compose(anchor);
         expect(dom).toMatchInlineSnapshot(`
           <div>
-            <!--0-->
+            <!--az:0-->
           </div>
         `);
     });

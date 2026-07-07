@@ -66,10 +66,10 @@ test('nested Input — search with loading (Promise results; resets on new searc
 
     expect(seq).toMatchInlineSnapshot(`
       [
-        "<div>loading-a<!--1--></div>",
-        "<div>results-a<!--1--></div>",
-        "<div>loading-b<!--1--></div>",
-        "<div>results-b<!--1--></div>",
+        "<div>loading-a<!--az:1--></div>",
+        "<div>results-a<!--az:1--></div>",
+        "<div>loading-b<!--az:1--></div>",
+        "<div>results-b<!--az:1--></div>",
       ]
     `);
 });
@@ -98,11 +98,11 @@ test('nested Input — search with loading (streamed items accumulate; resets on
 
     expect(seq).toMatchInlineSnapshot(`
       [
-        "<div>loading-a<!--1--></div>",
-        "<div>a1<!--1--></div>",
-        "<div>a1a2<!--2--></div>",
-        "<div>loading-b<!--1--></div>",
-        "<div>b1<!--1--></div>",
+        "<div>loading-a<!--az:1--></div>",
+        "<div>a1<!--az:1--></div>",
+        "<div>a1a2<!--az:2--></div>",
+        "<div>loading-b<!--az:1--></div>",
+        "<div>b1<!--az:1--></div>",
       ]
     `);
 });
@@ -137,11 +137,11 @@ test('nested Input — the stale stream is torn down on swap (no intrusion)', as
 
     expect(seq).toMatchInlineSnapshot(`
       [
-        "<div>loading-a<!--1--></div>",
-        "<div>a1<!--1--></div>",
-        "<div>loading-b<!--1--></div>",
-        "<div>b1<!--1--></div>",
-        "<div>b1b2<!--2--></div>",
+        "<div>loading-a<!--az:1--></div>",
+        "<div>a1<!--az:1--></div>",
+        "<div>loading-b<!--az:1--></div>",
+        "<div>b1<!--az:1--></div>",
+        "<div>b1b2<!--az:2--></div>",
       ]
     `);
 });

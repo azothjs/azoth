@@ -48,7 +48,7 @@ describe('KeyedUList — authoring', () => {
         const list = document.createElement('pet-list') as PetList;
         document.body.append(list);                   // connect → builds the <ul>
         list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }]);
-        expect(list.outerHTML).toBe('<pet-list><ul><li>Felix<!--1--></li><li>Mittens<!--1--></li></ul></pet-list>');
+        expect(list.outerHTML).toBe('<pet-list><ul><li>Felix<!--az:1--></li><li>Mittens<!--az:1--></li></ul></pet-list>');
     });
 
     test('update(key, data) rebinds that row IN PLACE — same node, new value', ({ expect }) => {
@@ -61,7 +61,7 @@ describe('KeyedUList — authoring', () => {
         const after = list.get(1);
 
         expect(after).toBe(before);                   // per-row rerenderer: same node
-        expect(list.outerHTML).toBe('<pet-list><ul><li>Felicia<!--1--></li><li>Mittens<!--1--></li></ul></pet-list>');
+        expect(list.outerHTML).toBe('<pet-list><ul><li>Felicia<!--az:1--></li><li>Mittens<!--az:1--></li></ul></pet-list>');
     });
 
 });

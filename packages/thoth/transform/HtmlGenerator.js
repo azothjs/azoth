@@ -4,7 +4,10 @@ export class HtmlGenerator extends Generator {
 
     constructor(config) {
         super();
-        this.childReplace = config?.childReplace ?? `<!--0-->`;
+        // The az: prefix marks the comment as an azoth anchor — maya's
+        // clear() only trusts (and recurses into) az:-prefixed counts, so
+        // authored comments in composed content stay inert plain nodes.
+        this.childReplace = config?.childReplace ?? `<!--az:0-->`;
     }
 
     // <>...</>

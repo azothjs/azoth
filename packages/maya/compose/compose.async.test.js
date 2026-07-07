@@ -16,7 +16,7 @@ describe('async values', () => {
         expect(dom).toMatchInlineSnapshot(`
           <div>
             hi
-            <!--1-->
+            <!--az:1-->
           </div>
         `);
     });
@@ -35,7 +35,7 @@ describe('async values', () => {
             a
             b
             c
-            <!--3-->
+            <!--az:3-->
           </div>
         `);
     });
@@ -57,31 +57,31 @@ describe('async values', () => {
         fixture.append(runCompose(numbers(), elementWithAnchor));
         // initial render
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div><!--0--></div>"`
+            `"<div><!--az:0--></div>"`
         );
 
         resolve();
         await find('one');
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div>one<!--1--></div>"`
+            `"<div>one<!--az:1--></div>"`
         );
 
         resolve();
         await find('two');
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div>two<!--1--></div>"`
+            `"<div>two<!--az:1--></div>"`
         );
 
         resolve();
         await find('three');
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div>three<!--1--></div>"`
+            `"<div>three<!--az:1--></div>"`
         );
 
         resolve();
         await find('three');
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div>three<!--1--></div>"`
+            `"<div>three<!--az:1--></div>"`
         );
     });
 
@@ -98,7 +98,7 @@ describe('async values', () => {
         await find('yielded');
 
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div>yielded<!--1--></div>"`
+            `"<div>yielded<!--az:1--></div>"`
         );
     });
 
@@ -106,9 +106,9 @@ describe('async values', () => {
         const syncWrapper = new Channel({ source: Promise.resolve('hi') }, 'sync render');
         const dom = runCompose(syncWrapper, elementWithAnchor);
         fixture.append(dom);
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>sync render<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>sync render<!--az:1--></div>"`);
         await find('hi');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>hi<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>hi<!--az:1--></div>"`);
     });
 
     test('sync render async iter', async ({ expect, fixture, find }) => {
@@ -129,13 +129,13 @@ describe('async values', () => {
         fixture.append(runCompose(syncWrapper, elementWithAnchor));
         // initial render
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div>here come async numbers!<!--1--></div>"`
+            `"<div>here come async numbers!<!--az:1--></div>"`
         );
 
         resolve();
         await find('one');
         expect(fixture.innerHTML).toMatchInlineSnapshot(
-            `"<div>one<!--1--></div>"`
+            `"<div>one<!--az:1--></div>"`
         );
     });
 
@@ -151,13 +151,13 @@ describe('async values', () => {
         };
 
         fixture.append(runCompose(observable, elementWithAnchor));
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div><!--0--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div><!--az:0--></div>"`);
 
         emit('felix');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>felix<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>felix<!--az:1--></div>"`);
 
         emit('duchess');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>duchess<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>duchess<!--az:1--></div>"`);
     });
 
     test('ReadableStream replaces per chunk (one rule for every async sequence)', async ({ expect, fixture, find }) => {
@@ -173,15 +173,15 @@ describe('async values', () => {
         });
 
         fixture.append(runCompose(stream, elementWithAnchor));
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div><!--0--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div><!--az:0--></div>"`);
 
         push('a');
         await find('a');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>a<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>a<!--az:1--></div>"`);
 
         push('b');
         await find('b');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>b<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>b<!--az:1--></div>"`);
 
         close();
     });
@@ -204,21 +204,21 @@ describe('Channel append: first source value replaces initial, subsequent accumu
 
         const channel = new Channel({ source: gen(), append: true }, 'loading');
         fixture.append(runCompose(channel, elementWithAnchor));
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>loading<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>loading<!--az:1--></div>"`);
 
         resolve();
         await find('one');
         // First value REPLACES initial.
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>one<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>one<!--az:1--></div>"`);
 
         resolve();
         await find('onetwo');
         // Subsequent value APPENDS.
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>onetwo<!--2--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>onetwo<!--az:2--></div>"`);
 
         resolve();
         await find('onetwothree');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>onetwothree<!--3--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>onetwothree<!--az:3--></div>"`);
     });
 
     test('ReadableStream source', async ({ expect, fixture, find }) => {
@@ -232,17 +232,17 @@ describe('Channel append: first source value replaces initial, subsequent accumu
 
         const channel = new Channel({ source: stream, append: true }, 'loading');
         fixture.append(runCompose(channel, elementWithAnchor));
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>loading<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>loading<!--az:1--></div>"`);
 
         push('a');
         await find('a');
         // Initial replaced.
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>a<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>a<!--az:1--></div>"`);
 
         push('b');
         await find('ab');
         // Accumulates.
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>ab<!--2--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>ab<!--az:2--></div>"`);
 
         close();
     });
@@ -258,15 +258,15 @@ describe('Channel append: first source value replaces initial, subsequent accumu
 
         const channel = new Channel({ source: observable, append: true }, 'loading');
         fixture.append(runCompose(channel, elementWithAnchor));
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>loading<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>loading<!--az:1--></div>"`);
 
         emit('one');
         await find('one');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>one<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>one<!--az:1--></div>"`);
 
         emit('two');
         await find('onetwo');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>onetwo<!--2--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>onetwo<!--az:2--></div>"`);
     });
 
     test('Promise source (single value — append is functionally a no-op)', async ({ expect, fixture, find }) => {
@@ -275,11 +275,11 @@ describe('Channel append: first source value replaces initial, subsequent accumu
             'loading',
         );
         fixture.append(runCompose(channel, elementWithAnchor));
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>loading<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>loading<!--az:1--></div>"`);
 
         await find('resolved');
         // First (and only) value replaces initial. Same as without append.
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>resolved<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>resolved<!--az:1--></div>"`);
     });
 
 });
@@ -301,20 +301,20 @@ describe('Channel without append (default): each source value replaces', () => {
 
         const channel = new Channel({ source: gen() }, 'loading');
         fixture.append(runCompose(channel, elementWithAnchor));
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>loading<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>loading<!--az:1--></div>"`);
 
         resolve();
         await find('one');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>one<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>one<!--az:1--></div>"`);
 
         resolve();
         await find('two');
         // Replaces, doesn't accumulate.
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>two<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>two<!--az:1--></div>"`);
 
         resolve();
         await find('three');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>three<!--1--></div>"`);
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>three<!--az:1--></div>"`);
     });
 
 });
