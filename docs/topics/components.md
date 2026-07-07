@@ -206,9 +206,9 @@ needed.
 
 - [JSX as DOM](jsx-as-dom.md) — why a component's return value is the
   actual DOM
-- [Composition](composition.md) — how `{…}` slots accept values, including
+- [Composition](../../packages/valhalla/compose.test.tsx) — how `{…}` slots accept values, including
   component results
-- [Attributes and properties](attributes-and-properties.md) — how props
+- [Attributes and properties](../../packages/valhalla/attributes.test.tsx) — how props
   map to attributes when a component renders a host element
 - [Workflow](workflow.md) — the View + CardView pattern in full
 - [Authoring style](authoring-style.md) — file naming, component

@@ -89,7 +89,7 @@ checking, separately from the build.
 The same source file is type-checked by `tsc` and compiled by Vite. The
 two passes don't see the same intermediate output, but they see the same
 input — so a `.tsx` file that's type-correct in your editor compiles
-through Thoth correctly. See [typescript](typescript.md) for the type
+through Thoth correctly. See [typescript](../../packages/valhalla/README.md) for the type
 story.
 
 ## Output
@@ -160,13 +160,13 @@ Subtraction frame — things that simply aren't part of the integration:
   plugin owns the transform)
 - No SSR setup yet — the renderer abstraction is in place but the
   string-renderer is in progress; see
-  [maya-runtime](maya-runtime.md)
+  [maya-runtime](../design/core-rules.md)
 
 ## See also
 
 - [Thoth compiler](thoth-compiler.md) — what the plugin runs inside
   `transform`
-- [TypeScript](typescript.md) — the type-checking layer that runs
+- [TypeScript](../../packages/valhalla/README.md) — the type-checking layer that runs
   alongside the build
 - [For LLMs](for-llms.md) — terminology discipline; the build is where
   most of the "framework" lives

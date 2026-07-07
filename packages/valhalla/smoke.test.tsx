@@ -42,4 +42,15 @@ describe('azoth tsx', () => {
         expect(felix.className).toBe('cat cartoon');
     });
 
+    // Historical foot-gun check: {/* comments */} between siblings —
+    // including next to a component invocation — compile away cleanly
+    // (no anchor, no stray text, no crash). Known-limitations used to
+    // list this as an open runtime crash; this pins the fix.
+    test('JSX comments are ignored', ({ expect }) => {
+        const Right = () => <em>right</em>;
+        const Layout = () => <div><b>left</b>{/* the right side */}<Right /></div>;
+
+        expect(fixture(<Layout />)).toBe('<div><b>left</b><em>right</em><!--az:1--></div>');
+    });
+
 });

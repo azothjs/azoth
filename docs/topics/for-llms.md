@@ -73,17 +73,18 @@ When you encounter these patterns, pause before generating code:
    The pattern is composition (nesting), not manipulation. See
    [components.md](components.md).
 
-4. **About to write a `key` prop.** Azoth doesn't have a render cycle that
-   needs keys. List management uses a different mechanism — see
-   [maya-runtime.md](maya-runtime.md) on blocks.
+4. **About to write a `key` prop on ordinary JSX.** There's no render cycle
+   that needs keys. When list identity genuinely matters, that's a KeyedList —
+   author-defined keys with delta ops (add/update/move/remove) — see
+   [keyed-list.test.tsx](../../packages/valhalla/keyed-list.test.tsx).
 
-5. **About to add a `{/* comment */}` inside JSX you return from a
-   component.** This can crash the runtime — see
-   [known-limitations.md](known-limitations.md).
+5. **About to spread an array as children (`<ul>{...items}</ul>`).** Not
+   supported — arrays are already valid slot values: `<ul>{items}</ul>`.
+   See [known-limitations.md](known-limitations.md).
 
 6. **About to use `class={…}` for a dynamic class.** Dynamic bindings use DOM
    property names. Use `className={…}` for dynamic. `class="…"` is fine for
-   static. See [attributes-and-properties.md](attributes-and-properties.md).
+   static. See [attributes.test.tsx](../../packages/valhalla/attributes.test.tsx).
 
 ## Your secret weapon: the sandbox
 
@@ -146,16 +147,18 @@ yet. Surface that confusion. It's valuable.
 
 ## Reading order
 
+The core rules are tests — read them as worked examples ([why](../../packages/valhalla/README.md)):
+
 1. [JSX as DOM](jsx-as-dom.md) — the foundation
-2. [Composition](composition.md) — how `{…}` slots accept values
+2. [`compose.test.tsx`](../../packages/valhalla/compose.test.tsx) — the `{…}` slot rules
 3. [Components](components.md) — function and class forms; props and childNodes
-4. [Attributes and properties](attributes-and-properties.md) — static vs
-   dynamic; class/className foot-gun
-5. [Async and Channels](async-and-channels.md) — promises, generators,
-   channels
+4. [`attributes.test.tsx`](../../packages/valhalla/attributes.test.tsx) — static vs
+   dynamic; the class/className foot-gun
+5. [`channels.test.tsx`](../../packages/valhalla/channels.test.tsx) — async sources
+   and `<Channel>`
 6. [Known limitations](known-limitations.md) — current bugs and foot-guns
 7. [Hypermedia](hypermedia.md) — events-as-deltas model
-8. The rest as needed
+8. The rest via [the topic index](index.md) and [valhalla's map](../../packages/valhalla/index.md)
 
 For deeper context, see [`MENTAL-MODEL.md`](../history/MENTAL-MODEL.md) — the origin
 document this site grew out of, written by an LLM working through Azoth for

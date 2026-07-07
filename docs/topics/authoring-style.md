@@ -134,7 +134,7 @@ const [results$, push] = stream(/* … */);
 reader doesn't have to chase down the declaration to find out whether
 they can `.map()` it.
 
-See [async-and-channels](async-and-channels.md) for the underlying
+See [async-and-channels](../../packages/valhalla/channels.test.tsx) for the underlying
 mechanics.
 
 ## Data fetching ownership
@@ -242,6 +242,6 @@ Azoth itself is staying out of your way.
 - [JSX as DOM](jsx-as-dom.md) — why module-level JSX is a side effect
 - [Workflow](workflow.md) — UI-first development; Component Design
   Principles in full
-- [Async and Channels](async-and-channels.md) — `async` prop, `$`
+- [Async and Channels](../../packages/valhalla/channels.test.tsx) — channel usage; `$`
   variables, channels
 - [For LLMs](for-llms.md) — terminology discipline

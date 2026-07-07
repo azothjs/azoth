@@ -84,6 +84,6 @@ when reading or writing Azoth code:
 ## See also
 
 - [Components](components.md) — function and class forms, `component = constructor`
-- [Composition](composition.md) — how `{…}` slots accept values
+- [Composition](../../packages/valhalla/compose.test.tsx) — how `{…}` slots accept values
 - [Hypermedia model](hypermedia.md) — updates as deltas, not re-renders
 - [For LLMs](for-llms.md) — terminology discipline when describing Azoth

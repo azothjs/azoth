@@ -148,7 +148,7 @@ abstraction. An HTML-string renderer (for SSR) is in progress: Maya's
 runtime would consume the same generated `targets` and `bind` shapes
 but produce HTML strings instead of DOM nodes. The compiled artifact
 wouldn't change; only the renderer underneath would. See
-[maya-runtime](maya-runtime.md).
+[maya-runtime](../design/core-rules.md).
 
 ## TypeScript / TSX
 
@@ -185,9 +185,9 @@ took the work back.
 
 - [JSX as DOM](jsx-as-dom.md) — why the value of a JSX expression is a
   real DOM node
-- [Maya runtime](maya-runtime.md) — what the generated functions call
+- [Maya runtime](../design/core-rules.md) — what the generated functions call
   into at runtime
-- [Composition](composition.md) — how `{…}` slots accept values, which
+- [Composition](../../packages/valhalla/compose.test.tsx) — how `{…}` slots accept values, which
   is what `bind` is applying
 - [Known limitations](known-limitations.md) — including the
   JSX-comments foot-gun

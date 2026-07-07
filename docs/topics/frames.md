@@ -25,7 +25,7 @@ test is *what changes, and on whose clock*:
   a form's fields.
 - **A value that arrives once, or a stream into one slot** → async composition:
   a Promise or `<Channel>` in a `{…}` slot (see
-  [Async and Channels](async-and-channels.md)). Still no frame — the slot
+  [Async and Channels](../../packages/valhalla/channels.test.tsx)). Still no frame — the slot
   updates, but the structure around it doesn't manage itself.
 - **Structure that manages itself over time** — rows appearing, reordering,
   disappearing; a region that swaps what it shows as a key changes → a frame.
@@ -135,7 +135,7 @@ list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }]);
 ```
 
 (The `<!--az:1-->` is the interpolation anchor for `{p.name}` — see
-[composition](composition.md).)
+[composition](../../packages/valhalla/compose.test.tsx).)
 
 One platform note: a custom element is summoned by a string tag (`<pet-list>`),
 and a string is opaque to the bundler — it cannot see that `<pet-list>` depends
@@ -348,9 +348,9 @@ core stays small, and the frame primitives are an invitation, not a limit. See
 
 ## See also
 
-- [Async and Channels](async-and-channels.md) — values and streams into a slot;
+- [Async and Channels](../../packages/valhalla/channels.test.tsx) — values and streams into a slot;
   `<Channel>` in depth
-- [Composition](composition.md) — the `{…}` slot and interpolation anchors
+- [Composition](../../packages/valhalla/compose.test.tsx) — the `{…}` slot and interpolation anchors
 - [design/keyed-list.md](../design/keyed-list.md),
   [design/frame-primitives.md](../design/frame-primitives.md) — the design
   reasoning behind the seam

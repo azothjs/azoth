@@ -44,8 +44,10 @@ introduced.
   `e` is the real `Event`. No `e.persist()`, no `SyntheticEvent`.
 - **`React.Children` manipulation** — children are opaque DOM. Compose, don't
   introspect. See [components](components.md).
-- **`key` prop on lists** — list management uses [blocks](maya-runtime.md), not
-  a render-cycle keying scheme.
+- **`key` prop on lists** — list management uses
+  [keyed lists](../../packages/valhalla/keyed-list.test.tsx): author-defined
+  keys with delta ops (add/update/move/remove), not a render-cycle keying
+  scheme.
 
 Don't search for the Azoth equivalent of a React feature. Often there isn't
 one, and that's the point.
@@ -67,8 +69,8 @@ Put the promise directly in the JSX slot:
 <div>{fetchUser(id).then(user => <UserCard user={user}/>)}</div>
 ```
 
-Or wrap with `channel()` for loading states. See
-[async-and-channels](async-and-channels.md).
+Or use `<Channel>` for loading states. See
+[channels.test.tsx](../../packages/valhalla/channels.test.tsx).
 
 ### "I need `useRef` to hold a mutable value"
 
@@ -89,7 +91,7 @@ const Counter = () => {
 
 There's no re-render to trigger. To update the DOM, mutate it (the boring
 direct way), or wire a channel for declarative updates. For sections with
-predictable updates, the [renderer pattern](maya-runtime.md) gives you a
+predictable updates, the [renderer pattern](../design/core-rules.md) gives you a
 deliberate replay mechanism — which is what `useState` was trying to be.
 
 ### "I need a `ref` to access the DOM element"
@@ -124,7 +126,7 @@ See [authoring-style](authoring-style.md) for data ownership conventions.
 ### "I need `className={isActive ? 'on' : 'off'}`"
 
 That works directly. The foot-gun is the name: use `className` for dynamic,
-`class` for static. See [attributes-and-properties](attributes-and-properties.md).
+`class` for static. See [attributes-and-properties](../../packages/valhalla/attributes.test.tsx).
 
 ### "I need to memoize this expensive computation"
 
@@ -169,8 +171,8 @@ Once the React frame relaxes, the rest of the docs read normally. Start with:
 
 - [JSX as DOM](jsx-as-dom.md) — the foundation
 - [Components](components.md) — function and class forms
-- [Composition](composition.md) — the `{…}` slot mechanic
-- [Async and Channels](async-and-channels.md) — promises and updates
+- [Composition](../../packages/valhalla/compose.test.tsx) — the `{…}` slot mechanic
+- [Async and Channels](../../packages/valhalla/channels.test.tsx) — promises and updates
 - [Hypermedia](hypermedia.md) — the events-as-deltas model
 - [For LLMs](for-llms.md) — terminology discipline (also useful for humans
   retraining their reach)

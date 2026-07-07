@@ -36,7 +36,7 @@ origin.
 | [`azoth`](packages/azoth) | Umbrella package; re-exports maya (runtime) + the Vite plugin | published |
 | [`@azothjs/maya`](packages/maya) | Runtime — compose, the rerenderer, keyed lists, replay bindings | DOM complete; HTML target in progress |
 | [`@azothjs/thoth`](packages/thoth) | JSX compiler (extracts HTML, generates targets + bind + renderer) + the Vite plugin (`@azothjs/thoth/vite`) + dom-info (internal DOM-API authority) | DOM target complete; HTML/SSR target in progress |
-| [`valhalla`](packages/valhalla) | Conformance suite (author-JSX → thoth → maya); doubles as worked-example reference for LLMs | active, private |
+| [`valhalla`](packages/valhalla) | Conformance suite (author-JSX → thoth → maya); the core rules as tests — doubles as the worked-example reference for LLMs | active |
 
 Two halves under one umbrella: **maya** is what runs in the browser, **thoth**
 is what runs at build time (compiler + its Vite plugin + the internal dom-info
@@ -91,9 +91,11 @@ document.body.append(<App />);
 
 That's the whole shape: components return DOM, async values go directly into
 `{…}` slots, the DOM is what changes. See
-[components](docs/topics/components.md),
-[composition](docs/topics/composition.md), and
-[async and channels](docs/topics/async-and-channels.md) for the full model.
+[components](docs/topics/components.md) for the component model — and for the
+core rules as runnable examples,
+[the valhalla suite](packages/valhalla/index.md):
+[`compose.test.tsx`](packages/valhalla/compose.test.tsx) (the `{…}` slot),
+[`channels.test.tsx`](packages/valhalla/channels.test.tsx) (async sources).
 
 ## Status and roadmap
 

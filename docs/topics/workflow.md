@@ -68,7 +68,7 @@ After the static mockup is signed off, translate it into a real component.
    attributes), use the appropriate workaround. For Azoth, SVG presentation
    attributes need `style={...}` template strings — see
    [Azoth-Specific Patterns](#azoth-specific-patterns) below and
-   [attributes-and-properties](attributes-and-properties.md).
+   [attributes-and-properties](../../packages/valhalla/attributes.test.tsx).
 
 5. **Factor sub-components when patterns repeat** — Extract repeated
    structure into sub-components within the same file. Snapshot continues to
@@ -173,7 +173,7 @@ The View is now driven by service-shape props. Connect to the actual API.
    a channel. If you use a shared `CardView` shell, an internal `AsyncView`
    resolves the promise and spreads the data into the View as props. The
    raw mechanic is the same: a channel feeds an async value into the JSX
-   slot. See [async-and-channels](async-and-channels.md).
+   slot. See [async-and-channels](../../packages/valhalla/channels.test.tsx).
 3. Verify with real data; handle the empty/loading/error states the shell
    supports.
 
@@ -383,7 +383,7 @@ output works well:
 - Testing transform output captures the rendering spec exactly
 - Some Azoth bindings (SVG presentation attributes) require pre-formatted
   strings via `style={...}` anyway — see
-  [attributes-and-properties](attributes-and-properties.md)
+  [attributes-and-properties](../../packages/valhalla/attributes.test.tsx)
 
 Choose semantic output when the same transformed data feeds multiple views,
 or when the View has presentation logic that varies independently. For
@@ -580,7 +580,7 @@ interpolation) go into the HTML template directly:
 (used for screenshot capture) doesn't always export CSS-styled SVG strokes
 correctly. Set `stroke="#..."` directly on the element.
 
-See [attributes-and-properties](attributes-and-properties.md) for the
+See [attributes-and-properties](../../packages/valhalla/attributes.test.tsx) for the
 underlying mechanics.
 
 ### Avoid JSX comments inside returned JSX
@@ -629,7 +629,7 @@ assignment, and `class` isn't a writable property:
 ```
 
 The rendered HTML attribute is `class="..."` in both cases. See
-[attributes-and-properties](attributes-and-properties.md).
+[attributes-and-properties](../../packages/valhalla/attributes.test.tsx).
 
 ### Props handling
 
@@ -811,7 +811,7 @@ through is high.
 ## Async Data Patterns
 
 For the full async surface — promises, generators, channels — see
-[async-and-channels](async-and-channels.md). This section covers the
+[async-and-channels](../../packages/valhalla/channels.test.tsx). This section covers the
 specific patterns that come up in the workflow.
 
 ### The stream + channel pattern
@@ -964,10 +964,10 @@ External CSS files load correctly via relative paths:
 - [JSX as DOM](jsx-as-dom.md) — the foundation: JSX evaluates to real DOM
 - [Components](components.md) — function and class forms, `component =
   constructor`, the View + CardView idiom
-- [Composition](composition.md) — how `{…}` slots accept values
-- [Async and Channels](async-and-channels.md) — promises, generators,
+- [Composition](../../packages/valhalla/compose.test.tsx) — how `{…}` slots accept values
+- [Async and Channels](../../packages/valhalla/channels.test.tsx) — promises, generators,
   channels
-- [Attributes and properties](attributes-and-properties.md) — static vs
+- [Attributes and properties](../../packages/valhalla/attributes.test.tsx) — static vs
   dynamic; the `class` / `className` distinction; SVG attribute mechanics
 - [Known limitations](known-limitations.md) — including the JSX-comment
   crash

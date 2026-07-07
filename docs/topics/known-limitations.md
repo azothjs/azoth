@@ -16,44 +16,27 @@
 
 ---
 
-## JSX comments inside returned JSX can crash
+## JSX comments inside returned JSX — RESOLVED
 
-**Status:** Open
+**Status:** Resolved (was: a runtime crash / stray text node when
+`{/* … */}` sat between siblings next to a component invocation)
 
-**What it looks like:**
+The compiler now drops JSX comments entirely — no anchor placeholder, no
+child-index skew. Pinned at both layers:
+`packages/thoth/compiler.test.js` ("jsx comments are ignored") and
+`packages/valhalla/smoke.test.tsx` ("JSX comments are ignored").
 
 ```jsx
 function Layout() {
     return (
         <div>
             <Left />
-            {/* Right side */}
+            {/* Right side — fine */}
             <Right />
         </div>
     );
 }
 ```
-
-Runtime error: `TypeError: Cannot read properties of undefined (reading 'data')`. In some configurations the same pattern instead renders a stray `"1"` text node between the siblings.
-
-**Why:** The compiler's anchor positioning for dynamic children doesn't account for JSX comment nodes appearing between siblings. When a comment sits next to a dynamic component invocation, the runtime's index into the cloned template's child nodes is off by one (or pointing at nothing).
-
-**Workaround:** Remove `{/* … */}` comments from inside returned JSX. Use a plain JavaScript comment (`//` or `/* … */`) on the line above the JSX statement, or extract the section into a named sub-component when intent isn't obvious.
-
-```jsx
-// ✅ Comment outside the JSX expression
-function Layout() {
-    // Right side
-    return (
-        <div>
-            <Left />
-            <Right />
-        </div>
-    );
-}
-```
-
-**See also:** [for-llms](for-llms.md) lists this in the stop-and-ask triggers.
 
 ---
 
@@ -89,7 +72,7 @@ function Layout() {
 
 **Linked code:** `packages/valhalla/components.test.tsx` — see the `dynamic class attributes` describe block, which documents both the broken (`class={var}`) and correct (`className={var}`) forms in a snapshot.
 
-**See also:** [attributes-and-properties](attributes-and-properties.md) for the full discussion of the attribute/property split.
+**See also:** [attributes-and-properties](../design/attributes-and-properties.md) for the full discussion of the attribute/property split.
 
 ---
 
@@ -155,7 +138,7 @@ const items = list.map(x => <li>{x}</li>);
 <ul>{items}</ul>
 ```
 
-**See also:** [composition](composition.md) for the full list of value types accepted in `{…}` slots.
+**See also:** [composition](../../packages/valhalla/compose.test.tsx) for the full list of value types accepted in `{…}` slots.
 
 ---
 
@@ -314,6 +297,6 @@ The honest inventory is the working surface. Don't hesitate to add to it.
 
 - [For LLMs](for-llms.md) — terminology discipline and stop-and-ask triggers
 - [Components](components.md) — function and class forms, props and childNodes; includes the historical note on null props
-- [Attributes and properties](attributes-and-properties.md) — the static vs dynamic split, full class/className discussion
-- [Composition](composition.md) — what `{…}` slots accept
+- [Attributes and properties](../design/attributes-and-properties.md) — the static vs dynamic split, full class/className discussion
+- [Composition](../../packages/valhalla/compose.test.tsx) — what `{…}` slots accept
 - [JSX as DOM](jsx-as-dom.md) — the foundation that explains why DOM-property names matter

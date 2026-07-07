@@ -49,7 +49,7 @@ Every change to an Azoth UI arrives through one of three channels:
    appears. This is `ui₀`.
 2. **Async data sources.** Promises resolving, async generators yielding,
    streams emitting, observables firing. Each firing IS a delta — see
-   [async-and-channels](async-and-channels.md).
+   [async-and-channels](../../packages/valhalla/channels.test.tsx).
 3. **DOM events.** User input, browser events (`resize`, `visibilitychange`),
    programmatic dispatch. Standard `addEventListener` and inline
    `on*={…}` handlers. These come from outside the Azoth boundary because
@@ -132,8 +132,8 @@ The Promise lands in the slot. When it resolves, the resolved DOM takes
 the slot. No state declaration, no effect, no dependency array, no
 re-render. The async data source is the layout instruction.
 
-You can wrap that pattern in `channel()` to add a loading state, transform,
-or sequence — see [async-and-channels](async-and-channels.md) — but the
+You can wrap the source in `<Channel>` to add a loading state, transform,
+or sequence — see [channels.test.tsx](../../packages/valhalla/channels.test.tsx) — but the
 core shape is what's above. The Promise goes where the DOM goes.
 
 ## Connection to async data sources
@@ -152,8 +152,8 @@ is already the data flow. The slot is already the destination. The
 transform is already the shape. Putting a state variable between them
 would be adding a buffer where one isn't needed.
 
-See [async-and-channels](async-and-channels.md) for the four async source
-types and the `channel()` helper.
+See [channels.test.tsx](../../packages/valhalla/channels.test.tsx) for the async source
+types and `<Channel>`.
 
 ## Distinction from HTMX / HDA
 
@@ -181,33 +181,30 @@ underlying architecture is compatible.
 
 ## Forward-looking: platform alignment
 
-The WHATWG / TC39 [Observable proposal](https://github.com/WICG/observable)
+The WICG [Observable proposal](https://github.com/WICG/observable)
 adds native observables to the platform, including
-`EventTarget.prototype.on()` — a method that returns an Observable of DOM
-events from any event target.
+`EventTarget.prototype.when()` — a method that returns an Observable of DOM
+events from any event target (shipped in Chrome; Firefox implementing).
 
 That maps onto Azoth's model exactly. A DOM event stream is just another
-async data source. Today you'd write:
+async data source. Today, `<Channel>` bridges the EventTarget directly:
 
 ```jsx
-const clicks$ = someAsyncIteratorOverClicks(button);
-<div>{channel(clicks$, click => <p>clicked at {click.timeStamp}</p>)}</div>
+<div><Channel source={button} eventType="click" as={click => <p>clicked at {click.timeStamp}</p>} /></div>
 ```
 
-With native `EventTarget.prototype.on()` the source side becomes a
-platform primitive:
+With native `when()` the source side becomes a platform primitive —
+compose already accepts anything with `.subscribe`:
 
 ```jsx
-// Future, when the proposal ships
-const clicks$ = button.on('click');
-<div>{channel(clicks$, click => <p>clicked at {click.timeStamp}</p>)}</div>
+<div><Channel source={button.when('click')} as={click => <p>clicked at {click.timeStamp}</p>} /></div>
 ```
 
 DOM events flow directly into Azoth's compose chain. No framework
 intermediary, no synthetic event layer, no library to install. The compose
-engine already accepts observables (reserved slot in the dispatch table —
-see [async-and-channels](async-and-channels.md)); the platform is moving
-toward producing them natively.
+engine already accepts observables (the `.subscribe` branch of its
+dispatch — see [channels.test.tsx](../../packages/valhalla/channels.test.tsx));
+the platform is moving toward producing them natively.
 
 Azoth was designed to be ready for this, not depend on it.
 
@@ -235,7 +232,7 @@ problem genuinely calls for it.
 
 - **Reaching for `useState` because "the data has to live somewhere."**
   The Promise / async generator / stream is where it lives. The slot is
-  where it lands. See [async-and-channels](async-and-channels.md).
+  where it lands. See [async-and-channels](../../packages/valhalla/channels.test.tsx).
 - **Thinking of a fetch handler as setting state.** It isn't — it's
   returning the next DOM. The pattern is `data => DOM`, not
   `data => setState(data)`.
@@ -248,11 +245,11 @@ problem genuinely calls for it.
 ## See also
 
 - [JSX as DOM](jsx-as-dom.md) — why the DOM is the source of truth
-- [Async and Channels](async-and-channels.md) — async sources as delta
+- [Async and Channels](../../packages/valhalla/channels.test.tsx) — async sources as delta
   feeds; the `channel()` helper
-- [Composition](composition.md) — what `{…}` slots accept, and how
+- [Composition](../../packages/valhalla/compose.test.tsx) — what `{…}` slots accept, and how
   values land at them
-- [Maya runtime](maya-runtime.md) — how the compose engine applies each
+- [Maya runtime](../design/core-rules.md) — how the compose engine applies each
   delta
 - [For LLMs](for-llms.md) — terminology discipline (delta, channel,
   async source — not "state," "re-render," "hooks")
