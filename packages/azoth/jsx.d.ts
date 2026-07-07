@@ -28,7 +28,7 @@ type Composable =
     | Promise<Composable>
     | AsyncIterable<Composable>
     | ReadableStream
-    | ((props?: any, childNodes?: any) => Composable)   // function / rerenderable
+    | ((props?: any, childNodes?: Node) => Composable)  // function / rerenderable
     | Composable[];
 
 type DOMChild = Composable;
@@ -90,13 +90,16 @@ declare global {
         // function or class component (returns a Composable, including a
         // rerenderable, which is why `() => rerenderer(...)` typechecks); or a
         // Component object (create()'s full { initialize?, render, update }).
-        // Components are invoked `(props, childNodes)` — hence the second arg.
+        // Components are invoked `(props, childNodes)` — childNodes is the
+        // JSX content COMPOSED to one Node: the element itself for a single
+        // child, a DocumentFragment for several/text/{expr}, absent for none.
+        // (Pinned: valhalla/child-nodes.test.tsx.)
         type ElementType =
-            | string                                              // intrinsic + custom-element tags
-            | null | undefined                                    // conditional no-op: <C/> where C is null
-            | ((props?: any, childNodes?: any) => Composable)     // function component
-            | (new (props?: any, childNodes?: any) => Composable) // class component
-            | Component;                                          // object component (full lifecycle)
+            | string                                               // intrinsic + custom-element tags
+            | null | undefined                                     // conditional no-op: <C/> where C is null
+            | ((props?: any, childNodes?: Node) => Composable)     // function component
+            | (new (props?: any, childNodes?: Node) => Composable) // class component
+            | Component;                                           // object component (full lifecycle)
 
         // Children attribute
         interface ElementChildrenAttribute {

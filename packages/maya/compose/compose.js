@@ -124,13 +124,13 @@ export function compose(anchor, input, keep) {
  * compose()/Composable cares ONLY about this base (render + update); the
  * create()/`<C/>` intake hook lives on the fuller {@link Component}.
  * @property {() => *} render First paint — no args; intake already happened.
- * @property {(props: object, childNodes?: *) => (*|void)} update A prop changed:
- *   return new DOM to replace, or void to adapt in place. (Channel implements
- *   update-only — no render.)
+ * @property {(props: object, childNodes?: Node) => (*|void)} update A prop
+ *   changed: return new DOM to replace, or void to adapt in place. (Channel
+ *   implements update-only — no render.)
  */
 
 /**
- * @typedef {UIComponent & { initialize?: (props: object, childNodes?: *) => void }} Component
+ * @typedef {UIComponent & { initialize?: (props: object, childNodes?: Node) => void }} Component
  * A create()/`<C/>` component — a {@link UIComponent} plus the optional one-time
  * `initialize` intake (props/childNodes), run once before the first render.
  * create() drives the full lifecycle (initialize → render → update); compose()
