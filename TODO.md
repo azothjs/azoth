@@ -16,69 +16,9 @@ Open:
   object UIComponent / plain render fn) to realistic UI-layout management —
   worked examples, not mechanism explainers.
 
-## Attribute vs property table (2.0 release-gating)
 
-Azoth currently does nothing here — WYSIWYG. Static JSX values compile
-into the HTML template string (attributes); dynamic values are applied
-as property assignment. So `class="x"` works but `class={x}` silently
-sets a useless expando property. Everyone will hit this.
-
-Plan (synthesized from two research passes, 2026-06-11):
-
-1. Seed a curated table from the frameworks that already paid this tax:
-   - Solid dom-expressions `constants.js` — most explicit; booleans,
-     tag-scoped PropAliases, Properties, SVGElements, namespaces
-   - Vue `shouldSetAsProp` — force-attribute traps that break the
-     `in el` heuristic (`form`, `list`@input, media `width/height`,
-     `sandbox`@iframe, enumerated attrs like `contenteditable`)
-   - Svelte `utils.js` — architectural template (only framework with
-     Azoth's compile-to-HTML-template-string shape). Critically:
-     `NON_STATIC_PROPERTIES` (`autofocus`, `muted`, `defaultValue`,
-     `defaultChecked`) — attrs that cannot live in a cloned template
-     string even when static. Azoth needs this category first-class.
-2. Merge dom-info's curated corrections (~/dev/azothjs/dom-info):
-   `allowFullscreen` casing, lowercase `autocomplete`, attrOnly buckets.
-   Fix dom-info's line-148 bug first (`notYetImplemented` missing
-   `[attr]` — guard always true, global-attr assertions silently
-   skipped), then re-run the 4-browser audit as validation.
-3. Output: one compiler-consumed table — JSX name → static-HTML-attr |
-   property | setAttribute | boolean | SVG-namespace (setAttributeNS
-   for xlink/xml) | non-static.
-4. Design wins that fall out: `class` AND `className` both work (static
-   compiles to HTML = no FOUC; dynamic applies via JS); SVG correctness.
-   Also: custom elements / web components need validation cases —
-   they're intrinsic to azoth (tag in template HTML, props are binds);
-   the table's custom-element rule (property-if-setter-else-attribute
-   per the framework survey) needs explicit test coverage.
-5. Dropped: @webref extraction pipeline. Reflection rules live in spec
-   prose, not IDL; tables are ~40-80 names total. Curated + empirically
-   audited beats generated here. webref may return as part of the
-   property-information upstream contribution.
-
-Related: reply to wooorm's open question on property-information #21
-(he asked whether dom-info's browser-audit should be pulled into his
-project, Feb 2025, awaiting Marty's answer). Comment first; PR if
-receptive; Azoth doesn't wait on the outcome.
 
 ## Channel
-
-### Multi-listener broadcast helper (future utility)
-
-Async iterators are single-consumer. When code needs fan-out (one source
-→ multiple Channels), the right shape is to lift into an EventTarget
-(naturally multi-listener) rather than try to share an iterator. A small
-helper for "create EventTarget + push function" would smooth the DX:
-
-```js
-const [target, push] = broadcastTarget('change');
-push(value); // dispatches CustomEvent
-<Channel source={target} eventType="change" as={A} />
-<Channel source={target} eventType="change" as={B} />
-```
-
-Park until a real multi-listener use case shows up to shape the API.
-Naming, default eventType, CustomEvent boxing — all decisions that
-benefit from real usage informing them.
 
 ### Cancel semantics / AbortController
 
@@ -177,11 +117,12 @@ covers async-iter / promise / stream / observable).
   the abort machinery is shared/exposed there too? Or overreaching (keep
   pushable minimal; let compose/Channel own cancellation)? Revisit once the
   `withAbort` shape settles; may collapse compose's `aborted()` into channel's.
-- **composeStream's hardcoded `keep`** — a direct `{aStream}` value composes via
-  `composeStream(anchor, stream, true)` — always accumulate. Sensible default for
-  a chunk stream, but now that Input carries `append`, reconsider: should a
-  direct stream honor compose's `keep`, and should Input-`from`-a-stream route
-  through pipeTo (composeStream) instead of for-await (composeAsyncIterator)?
+
+Resolved 2026-07: **composeStream deleted** — a direct `{aStream}` now flows
+through the asyncIterator branch like every async sequence (replace default;
+accumulate opts in via Channel/Input `append`). The pre-Input accumulate
+special case (2023-era) and its ReadableStream-before-asyncIterator ordering
+constraint are gone.
 
 ### Performance research (parked)
 
@@ -199,6 +140,12 @@ What still matters for hot dispatch code on modern engines:
 Park until a real regression motivates the work. Benchmarks need
 realistic render trees; speculative micro-optimization risks worse
 shape stability than the current code.
+
+Harness direction (2026-07, not a release gate): wire into krausest's
+js-framework-benchmark rather than a custom harness — KeyedList maps
+directly onto its rows model, and the numbers are corpus-standard.
+A martypdx fork exists (gh + another user account on this laptop),
+~2 years stale; needs a rewrite against current azoth.
 
 ## Platform tracking (informational)
 
@@ -268,23 +215,6 @@ files that don't exist (pre-existing); a commented-out block lists `/about`,
 `/compose`, `/component`, `/async`. `docs/index.md` is the real home
 (`layout: home`). Rebuild the nav/sidebar around `docs/topics/`, or fold into
 the open "ditch vitepress" decision.
-
-### Downstream: wre-dashboards migration to 2.0
-
-wre-dashboards consumes published `azoth: ^1.4.5` from npm — NOT a file
-link. It is insulated from the branch merge AND from the 2.0 publish
-(caret ranges don't cross majors). Migration is a deliberate opt-in on
-its own schedule, against the published 2.0.
-
-What migrates when it does:
-- `azoth/chronos/channels` imports (AiAnalysis.jsx and adjacent) →
-  `azoth/maya/channels`
-- `AgentSearch.jsx` line 14: `generator as stream` from
-  `azoth/chronos/generators` → `pushable` from `azoth/maya/channels`
-  (transform moves to the call site or Channel.as)
-
-This migration doubles as the validation pass for the 2.0 migration
-story — first real consumer upgrade.
 
 ## dom-info (folded into thoth — `packages/thoth/dom-info/`)
 
