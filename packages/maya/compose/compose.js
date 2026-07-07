@@ -1,4 +1,5 @@
 import { activeRenderer } from '../renderer/rerenderer.js';
+import { ABORTED, aborted } from './abort.js';
 
 export const IGNORE = Symbol.for('azoth.compose.IGNORE');
 
@@ -345,17 +346,6 @@ function subscribe(anchor, cancel) {
 // may have superseded it (=== guard).
 function settled(anchor, cancel) {
     if(subscriptions.get(anchor) === cancel) subscriptions.delete(anchor);
-}
-
-// Resolves to ABORTED when the signal fires, raced against a pull so clear()
-// interrupts a parked await. (Duplicates channel's aborted() for now —
-// working code both places; collapse in refinement if the shape holds.)
-const ABORTED = Symbol('compose.aborted');
-function aborted(signal) {
-    return new Promise(resolve => {
-        if(signal.aborted) resolve(ABORTED);
-        else signal.addEventListener('abort', () => resolve(ABORTED), { once: true });
-    });
 }
 
 /* replace and clear */

@@ -1,5 +1,6 @@
 import { pushable } from './pushable.js';
 import { IGNORE } from '../compose/compose.js';
+import { ABORTED, aborted } from '../compose/abort.js';
 
 /**
  * Channel — recognized by compose via the Input shape (a `.from` getter),
@@ -124,17 +125,6 @@ export class Channel {
 // longer imports Channel, so the compose↔channel cycle that forced a local
 // copy is gone.
 
-// Resolves to ABORTED when the signal fires — raced against each pending
-// pull so a switch interrupts a parked `await` promptly instead of waiting
-// for the abandoned source to produce its next value.
-const ABORTED = Symbol('Channel.aborted');
-function aborted(signal) {
-    return new Promise(resolve => {
-        if(signal.aborted) resolve(ABORTED);
-        else signal.addEventListener('abort', () => resolve(ABORTED), { once: true });
-    });
-}
-
 function makeSource(source, transform, errorTransform, eventType, signal) {
     if(source === undefined || source === null) {
         return source;
@@ -211,30 +201,18 @@ async function* fromAsyncIterable(iter, transform, errorTransform, signal) {
 
 async function* fromEventTarget(target, eventType, transform, errorTransform, signal) {
     // pushable bridges the EventTarget's push model into pull-based async
-    // iteration. The listener pushes each event into the iterator; the
+    // iteration; the consumption path (race-abort, transform, error routing)
+    // is fromAsyncIterable's — one loop, delegated to. (EventTarget itself
+    // has no error channel; errorTransform catches transform exceptions,
+    // inside the delegate, for parity with other source types.) The
     // try/finally guarantees we removeEventListener whether the consumer
     // exits normally, throws, or is aborted (source switched / slot removed).
     const [iter, push] = pushable();
-    const it = iter[Symbol.asyncIterator]();
-    const stop = aborted(signal);
     target.addEventListener(eventType, push);
     try {
-        while(!signal.aborted) {
-            const next = await Promise.race([it.next(), stop]);
-            if(next === ABORTED || signal.aborted) break;
-            const { value, done } = next;
-            if(done) break;
-            yield transform ? transform(value) : value;
-        }
-    }
-    catch(err) {
-        // EventTarget itself has no error channel — this catches exceptions
-        // thrown by `transform` for parity with other source types.
-        if(errorTransform) yield errorTransform(err);
-        else throw err;
+        yield* fromAsyncIterable(iter, transform, errorTransform, signal);
     }
     finally {
-        it.return?.();
         target.removeEventListener(eventType, push);
     }
 }
