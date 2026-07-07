@@ -83,10 +83,28 @@ EventTarget source, `map` ⟺ array source, `error`/`as` return match, `append`.
 **Per-form prop typing** — `pushable`, render-object, class-/function-component
 surfaces. `@template`/conditional types vs per-component `.d.ts` — open.
 
-**`childNodes` type on component signatures** — jsx.d.ts types the second
-component arg as `any` (matches the JSDoc `*`). Tighten to `Node`, `Composable`,
-or a specific child-nodes shape? Pin the compiler's actual childNodes shape
-first.
+**`childNodes` type — RESOLVED 2026-07**: pinned empirically
+(valhalla/child-nodes.test.tsx) as ONE Node or absent — the element for a
+single child, a DocumentFragment for several/text/{expr}, undefined for
+none; never an array or string. jsx.d.ts tightened `any` → `Node`; maya
+JSDoc matches. Also: Composable's UIComponent member relaxed to structural
+`{ render(): Composable }` — compose's render branch needs only render();
+update() is the additional verb — so render-only classes/objects typecheck.
+
+**Findings from component-forms.test.tsx (2026-07)** — three TS/JSX gaps the
+per-form pass should tackle; each carries an `as any` + comment in the test:
+
+- **Nullable tag**: `const C = cond ? null : Cat; <C/>` → TS2604, even though
+  `JSX.ElementType` includes null — TS won't tag a union containing null.
+- **children synthesized into props**: with `ElementChildrenAttribute`
+  declared, a component with JSX children must have `children` in its PROPS
+  type to check — but azoth delivers children as arg-2, never in props.
+  Options: drop ElementChildrenAttribute (loses intrinsic children typing?),
+  a PropsWithChildNodes-style helper, or live with untyped props on
+  children-taking components.
+- **Object-as-tag**: `<Badge/>` where Badge is an { initialize, render,
+  update } object literal → TS2604; TS's tag checking wants a call/construct
+  signature and doesn't consult ElementType's object member for value tags.
 
 **`Component.initialize?` — optional vs required** — the Component typedef
 (create's full lifecycle) has `initialize?` optional, matching create's

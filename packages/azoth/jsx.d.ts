@@ -9,7 +9,7 @@
  */
 
 import type { Channel } from '@azothjs/maya/channels';
-import type { Input, UIComponent, Component } from '@azothjs/maya/compose';
+import type { Input, Component } from '@azothjs/maya/compose';
 
 // maya's Composable — everything compose() accepts: a {…} slot value, or a
 // component's return. (DOMChild was the child subset; this is the full set,
@@ -24,7 +24,10 @@ type Composable =
     | Node
     | Channel
     | Input                              // { initial?, from, append? }
-    | UIComponent                        // base: { render, update }
+    // Anything with render() — compose's render branch needs only that;
+    // update() is the ADDITIONAL change-channel verb (see UIComponent).
+    // Structural, so render-only classes/objects are Composable too.
+    | { render(): Composable }
     | Promise<Composable>
     | AsyncIterable<Composable>
     | ReadableStream
