@@ -160,7 +160,10 @@ describe('async values', () => {
         expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>duchess<!--1--></div>"`);
     });
 
-    test('ReadableStream accumulates chunks', async ({ expect, fixture, find }) => {
+    test('ReadableStream replaces per chunk (one rule for every async sequence)', async ({ expect, fixture, find }) => {
+        // A stream is just an async iterable to compose — same replace
+        // semantics as an async generator. Accumulation is opt-in upstream:
+        // Channel/Input `append` (see the Channel append describe below).
         let push, close;
         const stream = new ReadableStream({
             start(controller) {
@@ -177,8 +180,8 @@ describe('async values', () => {
         expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>a<!--1--></div>"`);
 
         push('b');
-        await find('ab');
-        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>ab<!--2--></div>"`);
+        await find('b');
+        expect(fixture.innerHTML).toMatchInlineSnapshot(`"<div>b<!--1--></div>"`);
 
         close();
     });

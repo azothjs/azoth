@@ -36,8 +36,8 @@ problem calls for them.
 `compose` is the runtime that fills a `{…}` slot. It takes any value and
 dispatches it into DOM through a defined order of tests — a string becomes
 a text node, a `Node` is appended, a `Promise` resolves and the resolved
-value re-enters the chain, an async generator's yields replace, a
-`ReadableStream`'s chunks accumulate.
+value re-enters the chain, an async iterable's values replace (that
+includes `ReadableStream` chunks).
 
 The full table and worked examples live in [composition](composition.md).
 What's worth holding in mind here:

@@ -64,8 +64,7 @@ wins:
 | instance | `Promise`                                  | `.then()`, compose the resolved value |
 | value    | `Array.isArray`                            | map, compose each element             |
 | type     | `object`                                   | check for async protocols:            |
-| has      | `[Symbol.asyncIterator]`                   | iterate, compose each yield           |
-| instance | `ReadableStream`                           | write — accumulates, does not replace |
+| has      | `[Symbol.asyncIterator]`                   | iterate, compose each yield (covers `ReadableStream`) |
 | has      | `.subscribe`                               | observe, compose each emission        |
 | (none)   |                                            | throw                                 |
 
@@ -76,17 +75,14 @@ again. The slot does one thing: turn this value into DOM at this position.
 
 ## Replace vs accumulate
 
-Default behavior is **replace**. When new content arrives at a slot —
-through a promise resolving, a generator yielding, an observable emitting —
-it replaces what was there.
+Default behavior is **replace**, for every source. When new content arrives
+at a slot — a promise resolving, a generator yielding, a stream chunk, an
+observable emitting — it replaces what was there.
 
-The single exception is `ReadableStream`, which **accumulates**: each chunk
-written to the stream is appended after the previous chunk, not in place of
-it. This is the only accumulating source in the current runtime.
-
-If you need accumulation semantics from another source (e.g. an
-`AsyncIterator` whose yields should pile up rather than swap), the pattern
-is to write into a `ReadableStream` and pass the stream.
+Accumulation is opt-in, declared upstream of the slot: the `append` prop on
+`<Channel>`, or `append: true` on an Input literal (`{ from, append: true }`).
+The first source value replaces the initial render; subsequent values
+accumulate.
 
 ## The anchor mechanism
 
@@ -155,10 +151,11 @@ async function* clock() {
 <div>{clock()}</div>;                // asyncIterator branch, replace each tick
 ```
 
-A `ReadableStream` accumulates — chunks pile up rather than swap:
+A `ReadableStream` is an async iterable — each chunk replaces, like any
+other source. To accumulate chunks (a log, streamed text), opt in upstream:
 
 ```jsx
-<pre>{logStream}</pre>;              // ReadableStream branch, append each chunk
+<pre><Channel source={logStream} append /></pre>;   // chunks pile up
 ```
 
 For more on async sources, see [async-and-channels](async-and-channels.md).

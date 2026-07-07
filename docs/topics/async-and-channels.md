@@ -25,15 +25,13 @@ position in the DOM.
 | Source                              | Detection                         | Behavior                                   |
 | ----------------------------------- | --------------------------------- | ------------------------------------------ |
 | `Promise`                           | `instanceof Promise`              | Resolved value composed into the slot      |
-| Async iterator / async generator    | `[Symbol.asyncIterator]` present  | Each yielded value **replaces** the previous |
-| `ReadableStream`                    | `instanceof ReadableStream`       | Each chunk **accumulates** at the slot     |
+| Async iterable (generators, `ReadableStream`, …) | `[Symbol.asyncIterator]` present | Each value **replaces** the previous |
 | Observable                          | `.subscribe` is a function        | Each emission replaces the previous        |
 | `EventTarget`                       | `instanceof EventTarget` (Channel only) | Each event of the configured type renders via `as` |
 
-A Promise delivers a single value. An async iterator delivers a sequence,
-with each value taking the slot from the previous. A `ReadableStream` in
-a raw slot is the exception — chunks append rather than replace, matching
-how streams are typically consumed. Observables follow the TC39 proposal
+A Promise delivers a single value. An async iterable delivers a sequence,
+with each value taking the slot from the previous — one rule for every
+source, `ReadableStream` included. Observables follow the TC39 proposal
 shape (also RxJS-compatible): each `next` value replaces, `complete` ends
 iteration, `error` re-throws unless wrapped in a
 [Channel](#channel--the-canonical-surface) with an `error` prop.
@@ -41,12 +39,9 @@ iteration, `error` re-throws unless wrapped in a
 the slot because there's no way to express which event type to listen
 for; the `eventType` prop on `<Channel>` fills that role.
 
-When you wrap an async source in a `<Channel>` (see below), the semantic
-is uniform: each value **replaces** by default; opt into accumulation
-with the `append` prop. Channel treats `ReadableStream` as an async
-iterable (modern streams have `[Symbol.asyncIterator]`), so the
-accumulate-vs-replace decision is yours via `append` rather than implied
-by the source type.
+Accumulation is opt-in, never implied by the source type: the `append`
+prop on `<Channel>` (or `append: true` on an Input literal). The first
+source value replaces the initial render; subsequent values accumulate.
 
 ## Plain async patterns first
 

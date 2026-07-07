@@ -177,11 +177,10 @@ describe('Channel with map prop (array iteration)', () => {
 
 describe('Channel with ReadableStream source', () => {
 
-    // Channel treats ReadableStream as an async iterable (modern streams
-    // have [Symbol.asyncIterator]). Default is REPLACE — each chunk
-    // replaces the previous. Add `append` to accumulate. (Raw streams in
-    // a slot — without Channel — still accumulate via compose's
-    // ReadableStream special case.)
+    // A ReadableStream is an async iterable (modern streams have
+    // [Symbol.asyncIterator]) — one rule everywhere: each chunk REPLACES
+    // the previous, wrapped in a Channel or raw in a slot. Add `append`
+    // to accumulate.
 
     test('default (replace): each chunk replaces — only the last is visible', async ({ expect }) => {
         const stream = new ReadableStream({

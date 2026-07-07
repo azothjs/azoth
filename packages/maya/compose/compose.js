@@ -71,15 +71,14 @@ export function compose(anchor, input, keep) {
         case Array.isArray(input):
             composeArray(anchor, input, keep);
             break;
-        // ReadableStream must come before the asyncIterator check — modern
-        // ReadableStream implements [Symbol.asyncIterator], so without this
-        // ordering the stream would be consumed via for-await (replace
-        // semantics) instead of pipeTo (accumulate semantics).
-        case input instanceof ReadableStream:
-            // no props and childNodes propagation on streams
-            composeStream(anchor, input, true);
-            break;
-        // w/o the !! this causes intermittent failures :p maybe vitest/node thing?
+        // Covers async generators, modern ReadableStream (implements
+        // [Symbol.asyncIterator]), and any other AsyncIterable. One rule for
+        // every async sequence: each value replaces; accumulation is opt-in
+        // upstream (Channel/Input `append`).
+        //
+        // The !! is required semantics, not a workaround: switch(true) is a
+        // strict-equality match, and `true === <the asyncIterator function>`
+        // is never true. Every case here must be an actual boolean.
         case !!input[Symbol.asyncIterator]:
             composeAsyncIterator(anchor, input, keep);
             break;
@@ -403,29 +402,6 @@ function composeArray(anchor, array, keep) {
     // vanillajs-1 in jsperf benchmarks has specific numbers
     for(let i = 0; i < array.length; i++) {
         compose(anchor, array[i], true);
-    }
-}
-
-async function composeStream(anchor, stream, keep) {
-    const controller = new AbortController();
-    const cancel = () => controller.abort();
-    subscribe(anchor, cancel);
-    try {
-        await stream.pipeTo(new WritableStream({
-            write(chunk) {
-                const prev = currentSource;
-                currentSource = cancel;
-                try { compose(anchor, chunk, keep); }
-                finally { currentSource = prev; }
-            }
-        }), { signal: controller.signal });
-    }
-    catch(err) {
-        // abort (via clear) is expected; only a real stream error propagates.
-        if(!controller.signal.aborted) throw err;
-    }
-    finally {
-        settled(anchor, cancel);
     }
 }
 
