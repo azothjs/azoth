@@ -395,6 +395,55 @@ describe('Channel with Observable source', () => {
         expect(collected).toEqual(['felix']);
     });
 
+    // Teardown-timing pins. These freeze resource-release semantics so a
+    // future internal reshape (e.g. building fromObservable over pushable —
+    // see TODO withAbort ↔ pushable) can't change them silently.
+
+    test('subscription is lazy: an unconsumed .from never subscribes upstream', async ({ expect }) => {
+        // The generator body (where subscribe lives) doesn't run until the
+        // first pull. A Channel that's constructed but never composed or
+        // iterated holds no upstream resources.
+        let subscribed = false;
+        const obs = {
+            subscribe() {
+                subscribed = true;
+                return { unsubscribe() { } };
+            }
+        };
+        const c = new Channel({ source: obs });
+        await Promise.resolve();               // give any eager path a chance
+        expect(subscribed).toBe(false);
+        void c.from;                           // touching the getter changes nothing
+        await Promise.resolve();
+        expect(subscribed).toBe(false);
+    });
+
+    test('source switch (abort) unsubscribes promptly even if the consumer never pulls again', async ({ expect }) => {
+        // The abort listener releases the subscription the moment update()
+        // switches sources — NOT lazily on the consumer's next pull. An
+        // abandoned-but-referenced iterator must not pin an upstream
+        // subscription (websocket, store) until GC.
+        let unsubscribed = false;
+        let emit;
+        const obs = {
+            subscribe(observer) {
+                emit = v => observer.next(v);
+                return { unsubscribe() { unsubscribed = true; } };
+            }
+        };
+        const c = new Channel({ source: obs });
+        const it = c.from[Symbol.asyncIterator]();
+
+        const first = it.next();               // first pull starts the body → subscribes
+        await Promise.resolve();               // let the body park on its pending await
+        emit('felix');
+        await expect(first).resolves.toEqual({ value: 'felix', done: false });
+
+        // Abandon iteration (no further pulls), then switch sources.
+        c.update({ source: Promise.resolve('next') });
+        expect(unsubscribed).toBe(true);       // released by the abort, not a pull
+    });
+
 });
 
 describe('Compose subtractions — primitive-as-component', () => {
