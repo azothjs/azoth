@@ -24,6 +24,10 @@
  * Single-consumer. Async iterators are not shareable; if you need fan-out,
  * lift the source into an EventTarget (naturally multi-listener) and use
  * Channel's EventTarget integration per consumer.
+ *
+ * @returns {[AsyncIterableIterator<any>, (value: any) => void]} the tuple —
+ *   without this annotation TS infers an array-of-union and destructured
+ *   `push` isn't callable.
  */
 export function pushable() {
     let resolve = null;
