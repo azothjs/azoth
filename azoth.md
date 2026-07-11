@@ -1,31 +1,32 @@
 Azoth - "JSX for the Web Platform"
 
-(note: need better intro)
-Welcome to the Design Age, where greater expressiveness and control of UI/X is an advantage. 
-
+(note: intro now cuts straight to the subtraction — the withouts ARE the hook.
+The "Design Age" framing moved to a note at the bottom: it's the same thought
+as the era-of-AI closer and will land harder there, with evidence behind it.)
 
 Through subtraction, not replacement, Azoth removes a decade of framework cruft and plugs JSX into the gap in the web platform:
 
-- without vDom or any intermediate representation
+- without vDOM or any intermediate representation
 - without a controlling framework or render tree
 - without js-created DOM
 - without state management
 
 Do I have your attention yet?
 
+(note: "Hold that thought." from the talk is the humbler alternative here —
+kept your line; swap if the swagger reads wrong on the page.)
+
 Instead JSX:
 
 - returns DOM
-- maintains 100% control flow fidelity
-- accepts any asynchronous javascript
+- preserves your control flow — ternaries, loops, closures, untouched
+- accepts any asynchronous JavaScript
 - is rerenderable
-- faithfully works with every Web Platform API
+- works directly with the web platform — no synthetic layer to cross
 
 Those are some big claims, let's look at how it works.
 
 # Compiling JSX
-
-(note: need to regenerate sample with latest azoth. consider adding a static and dyanmic prop, and put a span around name. A subcomponent not a bad idea too (shows up in the binding function). For the talk, this was kept minimal, to fit on a slide and not overwhelm with too much, but as a read artifact can it support more. (or should it stick to simple example?))
 
 Here's a snippet of JSX:
 
@@ -38,89 +39,117 @@ const Greeting = ({ name }) => {
 document.body.append(<Greeting name="Azoth" />);
 ```
 
-Notice the JSX being directly appended to `document.body`, Azoth JSX **returns DOM**. (note: here about no controlling renderer, but want to refine the claim). At compile time the jsx in the runtime code is replaced in-situ, and additional artificats are create.
+Notice the JSX being directly appended to `document.body` — Azoth JSX **returns DOM**. There's no mount point, no `createRoot(...).render(...)`, and no runtime that owns the tree afterward: nothing schedules a re-visit, nothing reconciles. What updates is what you wire to update.
+
+At compile time the JSX is replaced in-situ in the runtime code, and additional artifacts are created.
 
 ## The transpiled code
 
-First, let's look at how originally authored code changes:
+First, let's look at how the originally authored code changes:
 
 ```js
-import { createComponent } from 'azoth/runtime';
-import { t4a104a2a } from 'virtual:azoth-templates?id=4a104a2a';
+import { __createComponent } from 'azoth/runtime';
+import { t0c2ba934 } from 'virtual:azoth-templates?id=0c2ba934';
 
 const Greeting = ({ name }) => {
     const salutation = name === 'Azoth'
         ? "Whazzup" : "Hello";
-    return t4a104a2a(salutation, name.toUpperCase());
+    return t0c2ba934(salutation, name.toUpperCase());
 };
-document.body.append(createComponent(Greeting,
-    { name: "Azoth" }));
+document.body.append(__createComponent(Greeting, { name: "Azoth" }));
 ```
 
 Two things to notice:
 1. The imported modules:
     - The replacement template for the JSX (details below)
     - A runtime function to manage component creation
-2. The rest of the javascript structure is faithfully preserved, including the properties and interpolations. Only the JSX has been replaced, **runtime control flow fidelity is fully preserved**
+2. The rest of the JavaScript structure is faithfully preserved, including the properties and interpolations. Only the JSX has been replaced — **runtime control flow is fully preserved**.
 
-Direct replacement by call-site. **No vDOM, no factory functions, no JavaScript bloat.**
+Direct replacement by call site. **No vDOM, no factory functions, no JavaScript bloat.**
 
-Let's look where the rest of the information represented by the JSX landed. 
+Let's look where the rest of the information represented by the JSX landed.
 
 ## Html goes in `.html`
 
 The html itself is delivered in `<page>.html`, DOM creation is handled _by the browser's html parsing engine_:
 
 ```html
-<template id="4a104a2a">
-  <p><!--az:0-->, <!--az:0-->!</p>
+<template id="0c2ba934">
+    <p><!--az:0-->, <!--az:0-->!</p>
 </template>
 ```
 
 The win here isn't browser vs JavaScript instantiation time, it's **no JavaScript in the code bundle that needs to be parsed to get to DOM creation**.
 
+Those `<!--az:0-->` comments are anchors — stable positions where the dynamic values will land. Which brings us to the last artifacts.
+
 ## Decomposition
 
-Three JavaScript parts get created by the compiler. First is the refinement from element to comment nodes on interpolators:
+Three JavaScript parts get created by the compiler. First, a target selector — from the cloned template root to the exact nodes that will change:
 
 ```js
-const g356056d3 = r => [r.childNodes[0], r.childNodes[2]];
+export const g356056d3 = r => [r.childNodes[0], r.childNodes[2]];
 ```
 
-Second, the actual binding function. Includes properties, composition into the surrounding DOM, and child component management:
+Second, the binding function. It receives the targets once, and returns the per-render application of values:
 
 ```js
-// Binder
-// TODO: show compose import
-const bac4750db = ([a, b]) => (x, y) => {
-    compose(a, x); 
-    compose(b, y);
-    // props to be added, maybe component
+import { __compose } from 'azoth/runtime';
+
+export const bac4750db = (ts) => {
+    const t0 = ts[0], t1 = ts[1];
+    return (v0, v1) => {
+        __compose(t0, v0);
+        __compose(t1, v1);
+    };
 };
 ```
 
-These first two are deduped and shared among templates with same sub-structure.
+These first two are keyed by structure, not by template — they're **deduped and shared** among all templates with the same shape.
 
-The template factory, exported and consumed in the original call site.
+Third, the template factory, exported and consumed at the original call site:
 
 ```js
-export const t4a104a2a = renderer("4a104a2a", g356056d3, bac4750db);
+export const t0c2ba934 = __render("0c2ba934", g356056d3, bac4750db, false);
 ```
 
-(note: when we regenerate examples, consider if worth calling out per-site rerender)
+Each call site gets its own factory — that per-site identity is what makes rerendering possible later (more below).
+
+The example above only has child interpolations, so the binder is all `__compose`. Give it a dynamic property and a child component:
+
+```jsx
+const Badge = ({ status, label }) => <p className={status}><Icon type={status}/> {label}</p>;
+```
+
+and the binder grows to exactly what you'd write by hand:
+
+```js
+return (v0, v1, v2) => {
+    t0.className = v0;
+    __composeComponent(t1, v1);
+    __compose(t2, v2);
+};
+```
+
+Property assignment, component creation, composition — that's the entire vocabulary.
 
 # Layout Management
 
-Compiling shows the mechanics, removing state management is bigger leap, it requires changing how you think about building web applications. Two key questions need to be addressed.
+Compiling shows the mechanics; removing state management is a bigger leap — it requires changing how you think about building web applications. Two key questions need to be addressed.
 
 First, why even let go of state management _as an integrated part of frontend frameworks_? The answer is it:
-- Sets a high level of complexity across the board for any type of change 
+- Sets a high level of complexity across the board for any type of change
 - Restricts what you can do with the platform
-- Favors an internal focus that solves engineering problems at the expense of users
+- Favors an internal focus that solves engineering problems at the expense of users — a decade in, every dashboard greets you with the same skeleton-wipe re-render for a one-field change
 
-Second, if not using state management, then what is the alternative? It's layout management. Controlled changes that update the document as the source of truth. This is hypermedia, it's how the web platform was designed and built. Additions, removals, swaps – each a change to the ledger through a defined channel.
+(note: that third bullet now carries a concrete beat; alternative is to keep it
+bare here and spend the full argument in the closer, where the
+commoditization/differentiation thesis lives. Both work — this version makes
+the section self-sufficient.)
 
-If state management is `ui = fn(state)`, then hypermedia is <code>ui<sub>n</sub> = ui<sub>n-1</sub> + Δ<sub>i</sub></code>. What that means is that Azoth models the UI as a sequence of deltas applied to the prior UI:
+Second, if not using state management, then what is the alternative? It's layout management. Controlled changes that update the document as the source of truth. This is hypermedia — it's how the web platform was designed and built. Additions, removals, swaps — each a change to the ledger through a defined channel.
+
+If state management is `ui = fn(state)`, then hypermedia is <code>ui<sub>n</sub> = ui<sub>n-1</sub> + Δ<sub>n</sub></code>. What that means is that Azoth models the UI as a sequence of deltas applied to the prior UI:
 
 ```
 ui₀  = initial render
@@ -132,17 +161,17 @@ uiₙ  = uiₙ₋₁ + Δ
 
 Each Δ is delivered by an event. The DOM is the source of truth; events modify it in place. There is no separate state being projected — the UI already exists, and the next event tells it how to change.
 
-These two models are mutually exclusive. State and UI cannot *both* be the
-source of truth.
+These two models are mutually exclusive. State and UI cannot *both* be the source of truth.
+
+To be precise about the claim: your application still has state. It lives where JavaScript already puts it — closures, class instances, the DOM itself. What's subtracted is the *management layer* between that state and the document: the store, the reconciler, the projection. You'll see this concretely in "State without the management" below.
 
 # Opt-in to complexity
 
-In practice, what this means is that the complexity of the type of delta being applied can scale based on the change needed. 
+In practice, what this means is that the complexity of the type of delta being applied can scale based on the change needed.
 
-## Asynchronusly delayed rendering
+## Asynchronously delayed rendering
 
-The default rendering mode in Azoth is forward-only. Yet his also includes using asynchronicity (as the event) to deliver content later:
-
+The default rendering mode in Azoth is forward-only. Yet this also includes using asynchronicity (as the event) to deliver content later:
 
 ```jsx
 <p>Render me now - {Promise.resolve(`Render me later`)}</p>
@@ -154,61 +183,68 @@ The JSX slot itself accepts a `Promise`! Any valid JavaScript can feed into that
 function CatList() {
     async function getCats() {
         const cats = await fetchCats();
-        return cats.map(cat => <Cats {...cat}/>)
+        return cats.map(cat => <Cat {...cat}/>);
     }
 
     return <ul>{getCats()}</ul>;
 }
 ```
 
-It took React six years to deliver on suspense/use in order to _opt-out_ of it's default model. Azoth allows you to _opt-in_ uisng a `Promise`. And it fully works in the client with plain JavaScript.
+It took React six years to deliver suspense/`use` in order to _opt-out_ of its default model. Azoth lets you _opt-in_ using a `Promise`. And it fully works in the client with plain JavaScript.
 
-It's not just promises delivering a single value, it's any value(s) over time: 
-- `EventTarget` 
-- [`Observable`](https://github.com/WICG/observable) (WICG spec, use [RxJs](https://rxjs.dev/) until available) 
-- [`ReadableStream`](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream) 
-- [`AsyncIterator`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncIterator)
-- Anything bridged with a listener function (Supabase, Firebase/Firestore, Appwrite, PocketBase, SurrealDB)
+It's not just promises delivering a single value, it's any value(s) over time:
+- `EventTarget`
+- [`Observable`](https://github.com/WICG/observable) (WICG — shipping in Chrome, Firefox implementing; RxJS-compatible today)
+- [`ReadableStream`](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)
+- async iterables — [async generators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function*) and friends
+- anything bridged with a listener function (Supabase, Firebase/Firestore, Appwrite, PocketBase, SurrealDB)
 
 ## Channel
 
-A delta delivered by an event with a payload which is then mapped to DOM is called a `channel` in Azoth. A utility component `<Channel/>` facilitates this pattern:
+In Azoth, a *channel* is an async source whose values are mapped to DOM at a slot — the delta, its event, and its rendering in one wiring. The utility component `<Channel/>` facilitates the pattern:
 
 ```jsx
-function Ticker(symbol) {
+function Ticker({ symbol }) {
     return <div>
         {symbol}:
-        <Channel 
-            source={getTickerStream(symbol)} 
+        <Channel
+            source={getTickerStream(symbol)}
             as={({ price }) => usdFormatter.format(price)}
         />
     </div>;
 }
 ```
 
-It also offers additional options, like a default display and whether to append to existing content, instead of replacing it:
+It also offers additional options, like a default display and whether to append to existing content instead of replacing it:
 
 ```jsx
 function Feed({ url }) {
     return <ul>
-        <Channel source={new WebSocket(url)} 
+        <Channel source={new WebSocket(url)}
             eventType="message"
             append
-            as={({ data: { header, content } }) => <li>
-                <h2>{header}</h2>
-                <p>{content}</p>
-            </li>}>
+            as={({ data }) => {
+                const { header, content } = JSON.parse(data);
+                return <li>
+                    <h2>{header}</h2>
+                    <p>{content}</p>
+                </li>;
+            }}>
 
             <p>Connecting to feed...</p>
-        
+
         </Channel>
     </ul>;
 }
 ```
 
-## Local state
+A `WebSocket` is just an `EventTarget` — `eventType` says which event to listen for, the initial children show until the first message arrives, and `append` accumulates instead of replaces.
 
-Simple event loops can be creating using async iterators or DOM events directly:
+## State without the management
+
+(note: retitled from "Local state" — the title now IS the disarm.)
+
+Simple event loops can be created using DOM events directly:
 
 ```jsx
 const Counter = () => {
@@ -220,26 +256,30 @@ const Counter = () => {
 };
 ```
 
-Azoth has a small `pushable` utility function, which wraps an async iterator, that can be used to adapt an asychronous data source, or set up an event loop:
+`n` is state. It lives in a closure, because the component runs once and the closure holds — no hook required. The handler mutates the DOM directly.
+
+Azoth also has a small `pushable` utility — it creates a push-driven async iterator, the bridge from callback-style sources (or your own events) to pull-based iteration:
 
 ```jsx
 function Counter() {
     let count = 0;
-    const [count$, push] = pushable;
+    const [count$, push] = pushable();
     const increment = () => push(++count);
-    return <button onclick={increment}>{count$}</button>;
+    return <button onclick={increment}>{{ initial: count, from: count$ }}</button>;
 }
 ```
 
+The `{ initial, from }` object is Azoth's *Input* shape: seed the slot now, then drive it from the source. (`<Channel/>` is one implementer of the same shape.)
+
 ## Rerendering
 
-Delayed rendering and swapping content are useful technique. But oftentimes a a section of the document needs to be rerendered: new data over the same bound dom parts. This is achieved by passing a thunk to the `rerenderer` Azoth function.
+Delayed rendering and swapping content are useful techniques. But oftentimes a section of the document needs to be rerendered: new data over the same bound DOM parts. This is achieved by passing a thunk to the `rerenderer` Azoth function.
 
 ```jsx
 function App() {
-    const [detail$, push] = pushable;
-    const handleSelect = (id) => push(fetchDetail(id));
-    
+    const [detail$, push] = pushable();
+    const handleSelect = async (id) => push(await fetchDetail(id));
+
     return <main>
         <Channel source={fetchItems()} as={items => (
             <ListView items={items} onselect={handleSelect}/>
@@ -247,16 +287,16 @@ function App() {
             Loading list...
         </Channel>
 
-        <Channel source={detail$}> as={rerenderer(({ result }) => <DetailView {...result}/>)}>
+        <Channel source={detail$} as={rerenderer(detail => <DetailView {...detail}/>)}>
             Select an item from the list
         </Channel>
-    </main>
+    </main>;
 }
 
 function ListView({ items, onselect }) {
     return <ul>{items.map(({ id, title }) => (
         <li onclick={() => onselect(id)}>{title}</li>
-    ))}</ul>
+    ))}</ul>;
 }
 
 function DetailView({ title, type, description, tags }) {
@@ -264,30 +304,37 @@ function DetailView({ title, type, description, tags }) {
     return <article>
         <h1>{title}</h1>
         <p>{badge}-{description}</p>
-        <Tags tags={tags}/> 
-    </article>
+        <Tags tags={tags}/>
+    </article>;
 }
 
 function Tags({ tags }) {
     return <ul>{tags.map(tag => <li>{tag}</li>)}</ul>;
 }
-
-
 ```
 
-The `rerenderer(({ result }) => <DetailView {...result}/>))` causes the `DetailView` and all it's descendants to run each time, but only creates new DOM on the first pass, otherwise it replays the bindings over the previously created DOM.
+The `as={rerenderer(detail => <DetailView {...detail}/>)}` runs `DetailView` and all its descendants on every event — but only creates DOM on the first pass. After that, it replays the bindings over the previously created DOM: same `<article>`, same nodes, new values.
 
-It handled not only the list of tags, but also the conditional rendering logic! That's because rerendering is keyed on call site, not call order. That's control flow preserved, full web platform fidelity.
+Look at what that handled. The list of tags. And the conditional `badge` — select a premium item, then a basic one, then premium again: the `<span>VIP</span>` that comes back is the *same node* that rendered the first time. The branch not taken doesn't die; it sleeps, cached at its site.
 
+Here's why that works, and why it can't in a hooks world: React re-executes components against a cache keyed by **call order** — which is why control flow around hooks is forbidden. Azoth re-executes against a cache keyed by **call site** — so ternaries, loops, and early returns just work. That's the control-flow fidelity promised at the top, paid off.
 
-
+(note: every code example above is verified — packages/valhalla/article-examples.test.tsx
+runs them against real output, including the same-node-resurrection claim. Worth
+a one-line callout in the article itself? "Every example in this article runs in
+the repo's test suite" is a receipts flex few intros can make.)
 
 ---
 
 (note: below is draft verbiage or copied snippets from docs)
 
+(note: for the closer — the "Design Age" thought from the original intro
+belongs here, fused with the era-of-AI argument: reusing the dominant
+patterns is commoditized work; expressiveness and control are the
+differentiator; what you build is what you feed the model. The subtract→
+unlock table from the talk (M4.1) is the bridge.)
 
-This is the sense in which **Azoth makes the platform act like a framework**:
+This is the sense in which **the platform already ships the component model**:
 the self-managing component, the lifecycle, the encapsulated render cycle — the
-platform already ships all of it, as custom elements. Azoth doesn't reinvent the
+platform gives you all of it, as custom elements. Azoth doesn't reinvent the
 component; it hands off to the one the browser already gives you.
