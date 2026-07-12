@@ -1,116 +1,163 @@
 # Frames
 
-> *In Azoth, the page renders forward once. Top to bottom, each slot filled,
-> the DOM built — and then that pass is over. Most of what you build lives
-> there, in the forward flow.*
->
-> *But some structure changes on its own clock: rows arrive and reorder and
-> vanish, a detail pane swaps as you click around, a live feed pushes updates.
-> I went looking for the component that re-renders when the list changes — the
-> state that holds the rows, the effect that re-runs, the diff that works out
-> what moved. None of that is here.*
->
-> *Instead, the forward flow reaches a boundary — usually a custom element — and
-> hands off. Past it, a second render cycle takes over: its own, self-managing,
-> outside the page's one-way pass. The question stops being "how do I re-render
-> this list" and becomes "where does the page stop flowing forward and hand a
-> region its own time?" That hand-off is a* **frame**.
+In Azoth, the page renders forward once: top to bottom, each slot filled, the
+DOM built — then the pass is over. Most of what you build lives there, in the
+forward flow, with async values wired into slots.
 
-## When do you need a frame?
+But some structure changes on its own clock: rows arrive and reorder and
+vanish, a chat thread grows as a conversation runs, a live feed pushes
+updates. There is no component that "re-renders when the list changes" — no
+state holding the rows, no effect re-running, no diff working out what moved.
+Instead, the forward flow reaches a boundary and hands off. Past it, the
+region runs its own cycle. That hand-off is a **frame**.
 
-A frame is a specific tool for a specific shape of problem. The recognition
-test is *what changes, and on whose clock*:
+## The definition — two conditions
 
-- **Static structure** → the forward-only flow. No frame. A `<nav>`, a layout,
-  a form's fields.
-- **A value that arrives once, or a stream into one slot** → async composition:
-  a Promise or `<Channel>` in a `{…}` slot (see
-  [Async and Channels](../../packages/valhalla/channels.test.tsx)). Still no frame — the slot
-  updates, but the structure around it doesn't manage itself.
-- **Structure that manages itself over time** — rows appearing, reordering,
-  disappearing; a region that swaps what it shows as a key changes → a frame.
+A frame is a region that satisfies both:
 
-Azoth doesn't hand you a general "dynamic UI" engine. There is no reconciler
-deciding what changed, because there is no general "what changed" to solve. A
-frame is narrower and sharper: a boundary where the page hands a region its own
-render cycle, and you drive that region with **deltas** — *this row, in place;
-that row, gone* — not with a new snapshot to diff.
+1. **Its own intake** (the clock). The region's interior changes only through
+   intake the region itself defines — its methods and ops, listeners it
+   attaches, subscriptions it opens. The outer flow keeps exactly three
+   channels into any region it places: the **slot value** (place, replace,
+   remove it), **props** (re-subject it — see below), and **children**. If
+   those are the only ways in, and interior change flows through the region's
+   own surface, the region is on its own clock.
+2. **Structural self-management over time** (the work). Rows appearing,
+   reordering, disappearing; messages accumulating. A region that only writes
+   *values* onto existing nodes — set a `textContent`, toggle a class — is
+   tactical DOM work: a widget, a [UIComponent](#re-subjecting-a-region), not
+   a frame. (This boundary is deliberate — see
+   [design/frame-primitives.md](../design/frame-primitives.md).)
 
-## The frame is the seam
+The falsifiable test for condition 1:
 
-The forward-only flow is worth naming, because a frame is defined against it.
-When JSX renders, the compiler has already generated the binding functions —
-there is no runtime analysis, no diffing pass, no scheduler. The template
-clones, the bindings assign, the DOM exists. The flow goes one way and does not
-come back.
+> **Can anything outside change this region's interior without going through
+> the region's own surface?** If yes — it's wiring on the outer clock. If no —
+> the region owns its clock.
 
-A frame is the **seam** where that one-way flow hands a region its own render
-cycle — a context switch out of the forward pass, with a reset on the way in.
-The frame is *the seam itself*, not any one thing that carries it. Two carriers
-create one:
+## The same UI, both ways — where the intake lives
 
-- **A custom element** — the canonical carrier. Its lifecycle
-  (`connectedCallback`, `disconnectedCallback`) and encapsulation let it own a
-  cycle that outlives the forward pass. KeyedList rides this.
-- **A component wrapped in `renderer`** — a plain function/object whose render
-  is fenced off from the outer pass. No lifecycle; just scope isolation.
+Condition 1 isolated: a growing message log, built twice. The structural
+change is identical; only the location of the intake differs.
 
-This is the sense in which **Azoth makes the platform act like a framework**:
-the self-managing component, the lifecycle, the encapsulated render cycle — the
-platform already ships all of it, as custom elements. Azoth doesn't reinvent the
-component; it hands off to the one the browser already gives you. (The design
-notes call the seam *a context-frame change with a reset* — see
-[design/frame-primitives.md](../design/frame-primitives.md).)
+**Wiring** — the page assembles the intake; the region is passive:
 
-## Two kinds on the stack: rerenderer and renderer
+```jsx
+// The page owns the pushable and the slot wiring. The region is just
+// a slot the page feeds. Outer clock — not a frame.
+const [messages$, push] = pushable();
 
-A frame controls its own cycle through one small mechanism: a stack of *active
-renderers*, which `render()` (the per-site factory the compiler emits) and
-`compose()` consult. Two kinds ride that stack:
+const log = <ul>{{ from: messages$, append: true }}</ul>;
 
-- **`rerenderer`** — re-execution with a per-call-site cache. Wrap a render
-  function; call it again and it re-runs and **rebinds in place** — same node,
-  new values. Identity is the *call site*, not a key you manage and not a tree
-  it diffs.
-- **`renderer`** — the **reset**. Pushed to *shadow* an outer rerenderer, so a
-  nested scope builds **fresh** instead of being reused. It renders new DOM and,
-  by topping the stack, rerenders nothing. Two kinds, two words — there is no
-  third.
-
-```js
-import { rerenderer, renderer } from '@azothjs/maya/renderer';
-
-const panel = rerenderer((label) => <section><h2>{label}</h2></section>);
-const node = panel('Pets');     // builds the <section>
-panel('Animals');               // same <section>, <h2> rebound to "Animals"
+socket.addEventListener('message', e => push(<li>{e.data}</li>));
 ```
 
-That is the whole rerenderer idea: re-run at the same site, the delta lands. The
-`renderer` reset is the other half — a custom element or a component pushes one
-to fence its internals off from the page's outer rerenderer. (For the internals
-— the per-site cache, `activeRenderer`, `getBound` — see
-[design/rerenderer.md](../design/rerenderer.md).) A KeyedList uses **one
-rerenderer per row**, which is why a row updates in place.
+**Frame** — the region defines the intake; the page can only place it and
+call its surface:
+
+```jsx
+// The region owns the contract. Any page (or none) drives it the same
+// way. Its clock — a frame.
+class MessageLog {
+    #list = <ul/>;
+    render() { return this.#list; }
+    add(text) { this.#list.append(<li>{text}</li>); }
+}
+
+const log = new MessageLog();
+socket.addEventListener('message', e => log.add(e.data));
+```
+
+Both grow a list. In the first, replacing the page's wiring changes how the
+region updates — the intake belongs to the page. In the second, the update
+contract (`add`) survives any page. **A frame is defined by who owns the
+intake, not who owns the data** — and not by which mechanism it uses inside.
+
+Three flavors of owned intake, by how far the region reaches:
+
+- **Surface-driven** — exposed methods/ops; callers invoke them.
+  `MessageLog.add`, KeyedList's `add`/`update`/`move`/`remove`.
+- **Self-driving** — the region attaches its own listeners.
+  `AnalysisChat` below; KeyedList's `keyFor` click pattern.
+- **Source-driven** — the region (or a controller) owns a subscription and
+  translates its deltas to ops. See [controllers](#driving-a-frame-from-a-source-controllers).
+
+## Three axes, one of which is the frame
+
+Untangling what often gets blended — these are independent choices:
+
+| Axis | Choices | Decides |
+|---|---|---|
+| **Mechanism** | swap (compose replaces at an anchor) · rebind (rerenderer replays) · mutate (imperative ops) | what a change does to DOM |
+| **Clock** | outer wiring (slots, props, rerender calls) · the region's own intake | who initiates change — **frames live here** |
+| **Packaging** | inline JSX · function · class / UIComponent · custom element | how the region presents to the rest of the app |
+
+A frame may use any mechanism inside (KeyedList mutates rows into place *and*
+rebinds each row with a per-row rerenderer). And a frame may be packaged as
+anything with the reach it needs — packaging is preference and context, not
+what makes it a frame.
+
+Corollaries worth stating, because each is a common tangle:
+
+- **A rerendered region is not a frame.** `as={rerenderer(view)}` on a
+  Channel rebinds the same DOM per event — but the page wired that source to
+  that slot. Outer clock. Efficient wiring is still wiring.
+- **Owning the data doesn't make a frame.** A `DetailView` that fetches its
+  own record but is re-invoked by the page's wiring per selection is still on
+  the page's clock. It becomes a frame when the page stops re-invoking it and
+  the region exposes intake instead (`detail.show(id)`).
+- **A component wrapped in `renderer` is not a frame.** That's [the
+  shield](#the-shield--the-renderer-reset) — cache isolation, not a clock.
+
+## A class carries a frame — AnalysisChat
+
+From production (pre-KeyedList — the pattern predates the shipped frame): an
+AI chat panel. The page places it; from then on, the conversation is its own.
+
+```jsx
+class AnalysisChat {
+    constructor({ chatId, summary }) {
+        this.chatId = chatId;
+        this.thread = <div class="chat-thread"><p>{summary}</p></div>;
+        this.input = <input onkeydown={e => {
+            if(e.key === 'Enter') this.ask();
+        }}/>;
+        this.el = <div class="chat">{this.thread}{this.input}</div>;
+    }
+
+    render() { return this.el; }
+
+    async ask() {
+        const question = this.input.value;
+        this.input.value = '';
+        this.thread.append(<p class="user">{question}</p>);
+        const answer = await followUp(this.chatId, question);
+        this.thread.append(<p class="ai">{answer}</p>);
+    }
+}
+```
+
+Check it against the definition: the page's channels stop at construction
+(props in, root element out). Every interior change — messages accumulating —
+flows through intake the class defines (`ask`, driven by its own input's
+listener). Structural, over time, on its own clock: a frame, packaged as a
+plain class. *"Here's my element; I'll take things from here."*
+
+No base class, no lifecycle registration, no framework hook made this a
+frame. It's an authority arrangement, expressed in ordinary JavaScript.
 
 ## A custom element carries a frame — KeyedList
 
-KeyedList is the first frame Azoth ships: a keyed dynamic list as a pure-platform
-custom element. You don't use `KeyedList` directly — it is an abstract base
-(`extends HTMLElement`, no tag of its own). You extend a **semantic leaf** and
-give it two functions.
-
-### Semantic leaves
-
-Three leaves, one per list-shaped element:
+KeyedList is the first frame Azoth ships: a keyed dynamic list as a
+pure-platform custom element. You don't use `KeyedList` directly — it's an
+abstract base (`extends HTMLElement`, no tag of its own). You extend a
+**semantic leaf** and give it two functions.
 
 | Leaf | Owns | Rows | Tag |
 |---|---|---|---|
 | `KeyedUList` | `<ul>` | `<li>` | `keyed-ul` |
 | `KeyedOList` | `<ol>` | `<li>` | `keyed-ol` |
 | `KeyedTable` | `<table><tbody>` | `<tr>` (in the tbody) | `keyed-table` |
-
-Each leaf defines its own tag (idempotently), so `<keyed-ul>` works on its own.
-More often you extend a leaf to name your list and bind its row shape:
 
 ```jsx
 import { KeyedUList } from '@azothjs/maya/lists';
@@ -122,39 +169,21 @@ class PetList extends KeyedUList {
         this.view = (p) => <li>{p.name}</li>;    // the row's rerenderable thunk
     }
 }
-if (!customElements.get('pet-list')) customElements.define('pet-list', PetList);
+if(!customElements.get('pet-list')) customElements.define('pet-list', PetList);
 ```
 
-Now `<pet-list>` is yours. Create it, connect it, fill it:
+Now `<pet-list>` is yours. Create it, connect it, drive it through its ops:
 
 ```js
 const list = document.createElement('pet-list');
 document.body.append(list);                      // connect → builds the <ul>
 list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }]);
-// <pet-list><ul><li>Felix<!--az:1--></li><li>Mittens<!--az:1--></li></ul></pet-list>
 ```
 
-(The `<!--az:1-->` is the interpolation anchor for `{p.name}` — see
-[composition](../../packages/valhalla/compose.test.tsx).)
-
-One platform note: a custom element is summoned by a string tag (`<pet-list>`),
-and a string is opaque to the bundler — it cannot see that `<pet-list>` depends
-on the module that defines it. So you import that module for its `define` side
-effect: `import './pet-list.js'`. This is a property of the platform, not of
-Azoth; the pitfalls of custom elements are the pitfalls of the platform.
-
-### `key` and `view`
-
-Two function-valued props, set once in the constructor (the constructor runs
-once; the connect/disconnect cycle runs around it):
-
-- **`key(data)` → identity.** How a row is named. `update`, `move`, `remove`,
-  `has`, `get` all address rows by this key.
-- **`view(data)` → DOM.** The row's rerenderable thunk. KeyedList wraps it in a
-  per-row rerenderer, so `update(key, data)` re-executes that row's view in
-  place — same node, new values.
-
-That per-row rerenderer is the payoff: an update is a rebind, not a replace.
+**`key` and `view`**: `key(data)` names a row — `update`, `move`, `remove`,
+`has`, `get` all address rows by it. `view(data)` is the row's rerenderable
+thunk; KeyedList wraps it in a **per-row rerenderer**, so `update(key, data)`
+re-executes that row's view in place — same node, new values:
 
 ```js
 const before = list.get(1);
@@ -162,72 +191,57 @@ list.update(1, { id: 1, name: 'Felicia' });
 list.get(1) === before;                          // true — same <li>, rebound
 ```
 
-### The ops keep the delta
-
-Every op is a delta — the change you name, applied directly. Nothing
-reconciles by diff; you tell the list what happened, row by row. All positioning
-is **key-relative** (there are no indices):
+**The ops keep the delta.** You tell the list what happened; nothing
+reconciles by diff. All positioning is key-relative (no indices):
 
 | Op | Does |
 |---|---|
-| `add(...items)` | Append each argument as a row |
-| `addAll(items)` | Append each row in an iterable |
-| `insert(data, beforeKey)` | Place a row before `beforeKey`'s row; `null` → append |
-| `update(key, data)` | Re-run that row's view in place — same node, new value |
-| `move(key, beforeKey)` | Relocate a row before `beforeKey`'s row; `null` → to the end |
-| `remove(key)` | Drop the row, its node, and its key |
-| `clear()` | Empty the list and the key map |
-| `has(key)` | Is there a row for this key? |
-| `get(key)` | The row's node, or `null` |
-| `keyFor(node)` | Inverse of `get`: a node (or descendant) → its row key; outside any row → `undefined` |
-| `size` | How many rows |
-| `[Symbol.iterator]` | Yields `[key, node]` for each row |
+| `add(...items)` / `addAll(items)` | Append rows |
+| `insert(data, beforeKey)` | Place before `beforeKey`'s row; `null` → append |
+| `update(key, data)` | Re-run that row's view in place |
+| `move(key, beforeKey)` | Relocate; `null` → to the end |
+| `remove(key)` / `clear()` | Drop row(s), node(s), key(s) |
+| `has(key)` / `get(key)` / `size` / `[Symbol.iterator]` | Read access |
+| `keyFor(node)` | Inverse of `get`: a node (or descendant) → its row key |
 
-`keyFor` is the event-handling companion to `get`: from `event.target`, walk to
-the row's key.
+`keyFor` is the event-handling companion — the self-driving flavor:
 
 ```js
 list.addEventListener('click', e => {
     const key = list.keyFor(e.target);
-    if (key !== undefined) list.remove(key);
+    if(key !== undefined) list.remove(key);
 });
 ```
 
-### A frame survives an outer re-render
+One platform note: a custom element is summoned by a string tag, and a string
+is opaque to the bundler — import the defining module for its side effect
+(`import './pet-list.js'`). A property of the platform, not of Azoth.
 
-This is the seam doing its job. Put a list inside a re-rendering region; the
-element is reused by site and its rows are left untouched:
+**A frame survives an outer re-render.** Put a list inside a re-rendering
+region; the element is reused by site, and its rows are untouched:
 
 ```jsx
 const panel = rerenderer((label) =>
     <section><h2>{label}</h2><pet-list></pet-list></section>);
 
 const section = panel('Pets');                   // connect → pet-list builds its <ul>
-const list = section.querySelector('pet-list');
-list.addAll([{ id: 1, name: 'Felix' }, { id: 2, name: 'Mittens' }]);
+section.querySelector('pet-list').addAll([{ id: 1, name: 'Felix' }]);
 
 panel('Animals');                                // outer re-render
-// same <section>, same <pet-list> (reused by site),
-// <h2> rebound to "Animals", the two rows still there
+// same <section>, same <pet-list>, <h2> rebound, the row still there
 ```
 
-The outer rerenderer reuses the element by call site and never reaches into it.
-The list's imperatively-managed rows survive the outer pass — the frame keeps
-its own state. Note that KeyedList gets this *without* pushing a `renderer`
-reset: its rows are built in ops (`addAll`, `update`) that run **after** the
-forward pass closes, so the outer rerenderer is never active when a row is
-built. The reset earns its keep for the other carrier — a component that renders
-*during* the pass.
+The outer rerenderer reuses the element by call site and never reaches inside.
+(Pinned: [`keyed-list.test.tsx`](../../packages/valhalla/keyed-list.test.tsx).)
 
 ## Driving a frame from a source (controllers)
 
-A frame is driven by ops, so a live data source needs something that turns its
-deltas into ops. That something is a **controller** — and Azoth ships none. It is
-a recipe you implement (or import from a per-source library): subscribe to the
-source, map each delta straight to a list op, and tear down on dispose.
+A frame is driven through its intake, so a live data source needs something
+that turns source deltas into ops. That's a **controller** — and Azoth ships
+none. It's a recipe: subscribe, map each delta straight to an op, tear down on
+dispose.
 
 ```js
-// A source's events → list ops. The delta maps straight to an op; no diff.
 class FeedController {
     constructor(source, list) {
         this.#on(source, 'insert', e => list.add(e.detail));
@@ -243,117 +257,141 @@ class FeedController {
 }
 ```
 
-A Supabase realtime channel, a WebSocket feed, a plain `EventTarget` — same
-shape: source delta in, list op out. Because the ops are deltas and the source
-emits deltas, the controller is mostly a translation table. Nothing reconciles:
-an `insert` event is an `add`; an `update` event is an in-place row rebind. (The
-worked example, with teardown, is in
-[`keyed-list.test.tsx`](../../packages/valhalla/keyed-list.test.tsx).)
+A Supabase realtime channel, a WebSocket feed, a plain EventTarget — same
+shape: source delta in, list op out. Because the source emits deltas and the
+ops are deltas, the controller is a translation table. (Worked example with
+teardown: [`keyed-list.test.tsx`](../../packages/valhalla/keyed-list.test.tsx).)
 
-## A component carries a frame too — the `renderer` reset and the UIComponent protocol
+**Where the intake pipeline lives is a dial**, not a rule — all of these are
+the same frame with different reach:
 
-A controller drives a frame that already exists. Sometimes the frame itself has
-to change — most often, a region keyed to something that *itself* changes. A
-detail pane shows pet #1; the user clicks pet #2; now the whole subscription, not
-just a row, must be rebuilt against a new key. That is a different join: not "a
-delta arrived," but "the thing this frame is about has been replaced."
+- **Exposed** — the page constructs source + controller and wires them to the
+  list's ops. Most testable; most assembly.
+- **Injected** — the element accepts a source (or just a URL) and builds its
+  controller internally in `connectedCallback`, disposing on disconnect.
+- **Sealed** — the element owns everything: fetch, subscription, controller,
+  ops. Most self-contained; hardest to test without the real source.
 
-You don't need a custom element for this. A plain component can carry the frame
-— you just fence its render off from the page's outer pass with the `renderer`
-reset. **Protecting a component (or custom element) with `renderer` is the
-standard way to reset render mode:** inside it, every render builds fresh, and
-the outer rerenderer can't reach in to reuse.
+The trade is ordinary dependency-injection judgment. (Production versions of
+`createAnalysis` inject the service precisely so tests can mock it.)
 
-The component's *update shape* is the **UIComponent protocol** — not a class you
-extend (there is no `UIComponent` to import), but a shape any object, class, or
-function can implement, which `compose` drives:
+## Re-subjecting a region — the update protocol
+
+Orthogonal to frames: sometimes *the thing a region is about* gets replaced.
+A detail pane showed pet #1; now it should show pet #2. Not a delta arriving —
+a new subject.
+
+Props are the outer flow's channel for exactly this. Under a rerenderer, a
+component at the same site receives `update(props, childNodes)` instead of
+being reconstructed — the **UIComponent protocol**, a shape (not a base
+class) that any object, class, or function result can implement:
 
 ```
-initialize?(props, childNodes)            // optional: set up once
-render(): DOM                             // first paint
-update(props, childNodes): DOM | void     // a prop changed: return new DOM, or void to adapt in place
+initialize?(props, childNodes)         // optional one-time intake (create's full form)
+render(): DOM                          // first paint
+update(props, childNodes): DOM | void  // new subject: return replacement DOM, or void = adapted in place
 ```
 
-(In the types this is two shapes: `render` + `update` is the base **`UIComponent`**
-that `compose` drives in a slot; add the optional `initialize` and it's the
-fuller **`Component`** that `create` — `<C/>` — runs end to end.)
-
-These are two different axes, and they compose: **UIComponent is how a thing
-updates; a frame is where its render cycle is isolated.** A component driven by
-an async source, fenced by `renderer`, owning a cycle on the source's clock — is
-a frame. A small imperative tweak inside the forward flow is just a UIComponent,
-no frame needed.
-
-`Channel` is the shipped instance of this protocol — update-only (it has no
-`render`; it paints initial DOM, then updates from its source). It owns *a zone
-of layout responsibility for one source's events*, and its `update` is the
-canonical key-change lifecycle:
+`Channel` is the shipped instance — update-only, and its `update` is the
+canonical re-subject move:
 
 ```js
 update(props) {
-    if (props?.source === this.#sourceRef) return;   // same source → keep the live subscription
-    this.#controller.abort();                        // new source → cancel it (AbortController)
-    return new Channel({ ...props });                // → reconstruct on the new source
+    if(props?.source === this.#sourceRef) return;   // same source → keep the live subscription
+    this.#controller.abort();                        // new source → cancel internally
+    return new Channel({ ...props });                // reconstruct on the new subject
 }
 ```
 
-Read that as the detail-pane story: the key changes → the region re-renders with
-a new `source` → `Channel.update` sees a different source, aborts the old
-subscription, and reconstructs against the new key. Same source? A no-op — the
-live subscription keeps running. The abort-and-rebuild lives in one place,
-expressed as plain platform mechanics (an `AbortController`), not a framework
-lifecycle.
+Same source: no-op, the subscription keeps flowing. New source: abort and
+rebuild — resource lifecycle expressed as an `AbortController`, not a
+framework hook.
 
-So the two axes compose: a **controller** feeds row-level deltas *into* a stable
-frame; the **UIComponent protocol** rebuilds the frame's *source* when the key
-it is bound to changes. A live, keyed detail view uses both.
+The protocol serves wiring and frames alike: a wired region uses `update` to
+swap sources (Channel); a *frame* can accept a new subject through the same
+channel and rebuild its interior against it. Implementing `update` does not
+make something a frame — it makes it re-subjectable.
+
+## The shield — the `renderer` reset
+
+One mechanism note, last because it's narrow. Template factories consult the
+*active renderer* — during an outer rerenderer pass, factory calls are served
+from that pass's per-site cache. If a frame's interior mints template DOM
+**while an outer pass is live** (a build or `update` running synchronously
+inside someone else's tick), those mints would hit the outer cache. `renderer`
+is the reset: it shadows the outer pass so a nested scope builds fresh.
+
+```js
+import { renderer } from '@azothjs/maya/renderer';
+const buildFresh = renderer(() => <li>…</li>);   // fenced: never served from an outer cache
+```
+
+Most frames never need it. KeyedList doesn't: its ops run *after* the forward
+pass closes, so no outer pass is ever active when a row is built. The shield
+earns its keep only when own-clock work overlaps someone else's tick. It
+confers cache isolation — not a clock. Wrapping a component in `renderer`
+does not create a frame.
+
+## Packaging heuristics
+
+Any packaging can carry a frame. Reach for heavier packaging when its
+specific powers apply:
+
+- **Plain class / closure** — the default. AnalysisChat needs nothing more:
+  no external listeners to tear down, no markup presence required.
+- **Custom element** — when you want lifecycle (`connectedCallback` /
+  `disconnectedCallback` for subscription setup/teardown), a tag that appears
+  in markup and templates, or a hard reuse boundary. KeyedList wants all
+  three.
+- **UIComponent protocol** (add `update`) — when the region must accept a new
+  subject under an outer rerenderer without being rebuilt.
+
+Azoth's preference for the platform is a default, not a mandate.
 
 ## Nothing here is privileged
 
 The strongest evidence that frames are platform-native, not framework magic:
-**KeyedList and Channel reach for nothing internal.** KeyedList imports only the
-public `rerenderer` and the platform (`HTMLElement`, `document`, `Map`); Channel
-is an ordinary object implementing the update shape over an `AbortController`.
-Neither touches a compose internal, the renderer stack, or a `siteKey`.
+**KeyedList and Channel reach for nothing internal.** KeyedList imports only
+the public `rerenderer` and the platform (`HTMLElement`, `document`, `Map`);
+Channel is an ordinary object implementing the update shape over an
+`AbortController`. Neither touches a compose internal, the renderer stack, or
+a `siteKey`.
 
 The reverse holds too: `compose` has no privileged branch for `Channel` — it
-recognizes the **Input shape** (`{ from, … }`) structurally, exactly as it would
-a bare object literal. Channel is one implementer of a shape any author can
-write, not a class the core special-cases.
+recognizes the **Input shape** (`{ from, … }`) structurally, exactly as it
+would a bare object literal.
 
-So a frame is a **replicable author pattern**, not a maya capability. Any author
-can build a self-managing frame the same way KeyedList does — `extends
-HTMLElement` + `Map<key, rerenderer(view)>` + imperative ops + an idempotent
-`define` — or fence a component with `renderer`. KeyedList and Channel are worked
-*examples* of the pattern; Azoth ships the seam, not your Supabase. (That the
-public `rerenderer` + `renderer` are sufficient to build them is the point — the
-core stays small, and the frame primitives are an invitation, not a limit. See
+So a frame is a **replicable author pattern**, not a maya capability: `extends
+HTMLElement` + `Map<key, rerenderer(view)>` + imperative ops + idempotent
+`define` — or a plain class with methods, like AnalysisChat. KeyedList and
+Channel are worked examples, not special cases. Azoth ships the seam, not
+your Supabase. (Which patterns earn shipping vs stay recipes:
 [frame-primitives.md](../design/frame-primitives.md).)
 
 ## What a frame is not
 
-- **Not a reconciler.** No virtual tree, no diff, no "what changed" computed for
-  you. You apply deltas.
-- **Not a state layer.** Azoth never makes the UI a function of one — no
-  `ui = fn(state)` contract forcing every datum into a single replication store.
-  A frame holds whatever local state the problem needs (a closure variable, an
-  instance field) — that's just data with a short reach. The subtraction is of
-  the artificial replication layer, not of data.
-- **Not for static structure.** If it does not change on its own clock, it
-  belongs in the forward flow. A frame you never mutate is a custom element you
-  did not need.
+- **Not a reconciler.** No virtual tree, no diff, no "what changed" computed
+  for you. You apply deltas.
+- **Not a state layer.** A frame holds whatever local state the problem needs
+  (a closure variable, an instance field) — data with a short reach. The
+  subtraction is the replication layer, not data.
+- **Not a rerendered region.** `rerenderer` rebinding a wired slot is
+  efficient wiring — outer clock.
+- **Not anything wrapped in `renderer`.** The shield is cache isolation, not
+  a clock.
+- **Not for static structure.** If it doesn't change on its own clock, it
+  belongs in the forward flow. A frame you never mutate is a custom element
+  you didn't need.
 - **Not the only way to show async data.** A value into a slot is async
-  composition, not a frame. Reach for a frame when structure manages *itself*
-  over time.
+  composition. Reach for a frame when structure manages *itself* over time.
 
 ## See also
 
-- [Async and Channels](../../packages/valhalla/channels.test.tsx) — values and streams into a slot;
-  `<Channel>` in depth
-- [Composition](../../packages/valhalla/compose.test.tsx) — the `{…}` slot and interpolation anchors
+- [`keyed-list.test.tsx`](../../packages/valhalla/keyed-list.test.tsx) — the
+  ops, the controller recipe, frames under an outer rerenderer, all pinned
+- [`channels.test.tsx`](../../packages/valhalla/channels.test.tsx) — wiring:
+  values and streams into slots
+- [design/frame-primitives.md](../design/frame-primitives.md) — which frames
+  ship vs stay recipes; the routing stance
 - [design/keyed-list.md](../design/keyed-list.md),
-  [design/frame-primitives.md](../design/frame-primitives.md) — the design
-  reasoning behind the seam
-- [design/rerenderer.md](../design/rerenderer.md) — the rerenderer internals
-- Worked examples:
-  [`packages/valhalla/keyed-list.test.tsx`](../../packages/valhalla/keyed-list.test.tsx)
+  [design/rerenderer.md](../design/rerenderer.md) — design records
