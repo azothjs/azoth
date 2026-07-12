@@ -11,11 +11,6 @@ Through subtraction, not replacement, Azoth removes a decade of framework cruft 
 - without js-created DOM
 - without state management
 
-Do I have your attention yet?
-
-(note: "Hold that thought." from the talk is the humbler alternative here —
-kept your line; swap if the swagger reads wrong on the page.)
-
 Instead JSX:
 
 - returns DOM
@@ -242,8 +237,6 @@ A `WebSocket` is just an `EventTarget` — `eventType` says which event to liste
 
 ## State without the management
 
-(note: retitled from "Local state" — the title now IS the disarm.)
-
 Simple event loops can be created using DOM events directly:
 
 ```jsx
@@ -319,10 +312,22 @@ Look at what that handled. The list of tags. And the conditional `badge` — sel
 
 Here's why that works, and why it can't in a hooks world: React re-executes components against a cache keyed by **call order** — which is why control flow around hooks is forbidden. Azoth re-executes against a cache keyed by **call site** — so ternaries, loops, and early returns just work. That's the control-flow fidelity promised at the top, paid off.
 
-(note: every code example above is verified — packages/valhalla/article-examples.test.tsx
-runs them against real output, including the same-node-resurrection claim. Worth
-a one-line callout in the article itself? "Every example in this article runs in
-the repo's test suite" is a receipts flex few intros can make.)
+(note: yes, let's put a link to the test suite. Where is right place in article to put it? up front before first examples?
+verified — packages/valhalla/article-examples.test.tsx 
+"Every example in this article runs in the repo's test suite"
+
+# Layout control
+
+Azoth redners and modifies the document, without needing to own the rendered tree. Bindings are "fine-grained", only touching the element or comment node at render time, and again only if modified by a rerender update. This allows for the DOM structure and values to be modified imperatively. 
+
+Trees can be arbitrarily combined, libraries like d3 or GSAP can be used with out fuss.
+
+
+And components can implement
+## UIComponent
+
+
+Initial vs update direct - other side of the coin in comparison to trying ot maintain functional paradigm (vDOM reconcilation is the tell, it's applied deltas where the delta must be computed instead of known.)
 
 ---
 
