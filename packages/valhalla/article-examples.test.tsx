@@ -3,8 +3,9 @@
 /**
  * ARTICLE EXAMPLES — the intro article's code, verified.
  *
- * Every snippet in azoth.md runs here against real output before it ships
- * ("the test suite is the documentation" applies to the article too).
+ * Every snippet in docs/articles/jsx-for-the-web-platform.md runs here
+ * against real output before it ships ("the test suite is the
+ * documentation" applies to the article too).
  * Snippets are kept as authored — multi-line JSX and all — so assertions
  * target text/identity rather than whitespace-sensitive innerHTML.
  */

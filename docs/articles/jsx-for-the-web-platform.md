@@ -1,15 +1,11 @@
 Azoth - "JSX for the Web Platform"
 
-(note: intro now cuts straight to the subtraction — the withouts ARE the hook.
-The "Design Age" framing moved to a note at the bottom: it's the same thought
-as the era-of-AI closer and will land harder there, with evidence behind it.)
-
 Through subtraction, not replacement, Azoth removes a decade of framework cruft and plugs JSX into the gap in the web platform:
 
 - without vDOM or any intermediate representation
 - without a controlling framework or render tree
 - without js-created DOM
-- without state management
+- without state management (hold that thought)
 
 Instead JSX:
 
@@ -19,7 +15,7 @@ Instead JSX:
 - is rerenderable
 - works directly with the web platform — no synthetic layer to cross
 
-Those are some big claims, let's look at how it works.
+Those are some big claims, let's look at how it works. And don't take my word for any of it — every example in this article runs in the repo's test suite ([`article-examples.test.tsx`](../../packages/valhalla/article-examples.test.tsx)).
 
 # Compiling JSX
 
@@ -162,7 +158,7 @@ To be precise about the claim: your application still has state. It lives where 
 
 # Opt-in to complexity
 
-In practice, what this means is that the complexity of the type of delta being applied can scale based on the change needed.
+In practice, what this means is that the complexity of the type of delta being applied can scale based on the change needed. Each step is opt-in: you take on more of the update contract only where the UI calls for it — render now, render later, render again.
 
 ## Asynchronously delayed rendering
 
@@ -249,7 +245,7 @@ const Counter = () => {
 };
 ```
 
-`n` is state. It lives in a closure, because the component runs once and the closure holds — no hook required. The handler mutates the DOM directly.
+`n` is state. It lives in a closure, because the component runs once and the closure holds — no hook required. And notice the handler just mutates the DOM. That's not a cheat — it's the floor everything else in this section stands on: the DOM is yours, and the wiring above it is convenience, not permission.
 
 Azoth also has a small `pushable` utility — it creates a push-driven async iterator, the bridge from callback-style sources (or your own events) to pull-based iteration:
 
@@ -266,7 +262,15 @@ The `{ initial, from }` object is Azoth's *Input* shape: seed the slot now, then
 
 ## Rerendering
 
-Delayed rendering and swapping content are useful techniques. But oftentimes a section of the document needs to be rerendered: new data over the same bound DOM parts. This is achieved by passing a thunk to the `rerenderer` Azoth function.
+Delayed rendering and swapping content are useful techniques. But oftentimes a section of the document needs to be rerendered: new data over the same bound DOM parts. This is achieved by passing a thunk to the `rerenderer` Azoth function. The whole idea in three lines:
+
+```jsx
+const panel = rerenderer(label => <section><h2>{label}</h2></section>);
+const node = panel('Pets');     // builds the <section>
+panel('Animals');               // same <section>, <h2> rebound to "Animals"
+```
+
+Re-run at the same site, and the delta lands on the same DOM. Now wire it to events, in app shape — a master list driving a detail pane:
 
 ```jsx
 function App() {
@@ -312,22 +316,13 @@ Look at what that handled. The list of tags. And the conditional `badge` — sel
 
 Here's why that works, and why it can't in a hooks world: React re-executes components against a cache keyed by **call order** — which is why control flow around hooks is forbidden. Azoth re-executes against a cache keyed by **call site** — so ternaries, loops, and early returns just work. That's the control-flow fidelity promised at the top, paid off.
 
-(note: yes, let's put a link to the test suite. Where is right place in article to put it? up front before first examples?
-verified — packages/valhalla/article-examples.test.tsx 
-"Every example in this article runs in the repo's test suite"
+# The two moments
 
-# Layout control
+Step back and every option in this article reduces to the same pair: the **initial render** is a function call; an **update** is whatever channel you wired. The mechanisms differ only in what survives between the two — a swap keeps the position, a rerender keeps the DOM, an imperative op keeps everything but what you touched. There's no third moment where a framework reconciles on your behalf. vDOM reconciliation is the tell of the other model: deltas applied where the delta must be *computed*, because it was never known. In Azoth the delta arrives already known — it's the event.
 
-Azoth redners and modifies the document, without needing to own the rendered tree. Bindings are "fine-grained", only touching the element or comment node at render time, and again only if modified by a rerender update. This allows for the DOM structure and values to be modified imperatively. 
+And because bindings are fine-grained — an element property here, a comment anchor there — nothing owns the tree between those two moments. Restructure it, hand nodes to d3 or GSAP, combine trees from anywhere: there's no watcher to fight, because there was never a watcher.
 
-Trees can be arbitrarily combined, libraries like d3 or GSAP can be used with out fuss.
-
-
-And components can implement
-## UIComponent
-
-
-Initial vs update direct - other side of the coin in comparison to trying ot maintain functional paradigm (vDOM reconcilation is the tell, it's applied deltas where the delta must be computed instead of known.)
+That pair — build once, then change on a known channel — scales past slots and rerenders: regions that manage their own structure on their own clock (chat threads, live lists, keyed rows). That's the next article: components, update protocols, and frames.
 
 ---
 
