@@ -64,6 +64,12 @@ That's the whole shape: components return DOM, async values go directly into
 | `azoth/runtime` | Compiled-output surface — imported by generated code, not by you |
 | `azoth/jsx.d.ts` | JSX type definitions for TypeScript/TSX |
 
+## Using AI?
+
+The package ships a self-sufficient guide for AI assistants:
+[`llms.md`](./llms.md) (`node_modules/azoth/llms.md` in your project).
+Point your agent at it before writing azoth code.
+
 ## Learn more
 
 - [Repository + docs](https://github.com/azothjs/azoth) — topics, design

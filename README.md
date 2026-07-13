@@ -15,8 +15,10 @@ is being organized for open-source release.
 
 - [Mental model: JSX as DOM](docs/topics/jsx-as-dom.md) — the foundational
   reframe
-- [For LLMs](docs/topics/for-llms.md) — terminology discipline and
-  stop-and-ask triggers when working with Azoth via AI
+- [LLM guide](packages/azoth/llms.md) — the self-sufficient guide for AI
+  assistants writing azoth code; ships in the npm package
+  (`node_modules/azoth/llms.md`). Repo-work entry:
+  [for-llms](docs/topics/for-llms.md)
 - [Coming from React](docs/topics/coming-from-react.md) — translation bridge
   for React developers
 - [Full topic index](docs/topics/) — all curated reference docs

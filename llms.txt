@@ -1,0 +1,41 @@
+# Azoth
+
+> JSX that evaluates to real DOM — no virtual DOM, no reconciler, no render
+> cycle. Components run once; updates are wired channels (async values into
+> slots, rerenderers, direct DOM mutation). npm: `azoth`.
+
+The self-sufficient guide for writing azoth code (also shipped inside the
+npm package at `node_modules/azoth/llms.md`):
+
+- [LLM guide](https://raw.githubusercontent.com/azothjs/azoth/main/packages/azoth/llms.md):
+  the one fact, the core model, every rule with verified examples, catch-and-correct
+
+## The rules, as runnable tests
+
+The conformance suite is the canonical reference — authored code with
+frozen, verified output:
+
+- [Test index](https://raw.githubusercontent.com/azothjs/azoth/main/packages/valhalla/index.md):
+  topic → file map
+- [Reading the tests](https://raw.githubusercontent.com/azothjs/azoth/main/packages/valhalla/README.md):
+  anchor notation (`<!--az:N-->`), conventions
+- [The {…} slot](https://raw.githubusercontent.com/azothjs/azoth/main/packages/valhalla/compose.test.tsx)
+- [Component forms](https://raw.githubusercontent.com/azothjs/azoth/main/packages/valhalla/component-forms.test.tsx)
+- [Channel + async sources](https://raw.githubusercontent.com/azothjs/azoth/main/packages/valhalla/channels.test.tsx)
+- [Rerendering](https://raw.githubusercontent.com/azothjs/azoth/main/packages/valhalla/rerenderer.test.tsx)
+- [Keyed lists](https://raw.githubusercontent.com/azothjs/azoth/main/packages/valhalla/keyed-list.test.tsx)
+
+## Concepts
+
+- [JSX as DOM](https://raw.githubusercontent.com/azothjs/azoth/main/docs/topics/jsx-as-dom.md)
+- [Components](https://raw.githubusercontent.com/azothjs/azoth/main/docs/topics/components.md)
+- [Frames](https://raw.githubusercontent.com/azothjs/azoth/main/docs/topics/frames.md):
+  regions that manage their own structure on their own clock
+- [Core rules map](https://raw.githubusercontent.com/azothjs/azoth/main/docs/design/core-rules.md)
+
+## Optional
+
+- [Intro article](https://raw.githubusercontent.com/azothjs/azoth/main/docs/articles/jsx-for-the-web-platform.md):
+  the compile walkthrough and the layout-management model
+- [Known limitations](https://raw.githubusercontent.com/azothjs/azoth/main/docs/topics/known-limitations.md)
+- [Coming from React](https://raw.githubusercontent.com/azothjs/azoth/main/docs/topics/coming-from-react.md)

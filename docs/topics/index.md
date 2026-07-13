@@ -39,8 +39,10 @@ carry what tests can't: the reframe, the concepts, practice, transitions.
 
 ## For AI collaborators
 
-- [For LLMs](./for-llms.md) — terminology discipline; stop-and-ask
-  triggers; verify-don't-speculate
+- [LLM consumer guide](../../packages/azoth/llms.md) — self-sufficient;
+  ships in the npm package (`node_modules/azoth/llms.md`)
+- [For LLMs](./for-llms.md) — working in THIS repo:
+  verify-don't-speculate, the test surfaces, repo conventions
 
 ## Reading order
 

@@ -29,7 +29,8 @@
     "types": "./jsx.d.ts",
     "files": [
         "**/*.js",
-        "jsx.d.ts"
+        "jsx.d.ts",
+        "llms.md"
     ],
     "exports": {
         ".": "./index.js",
