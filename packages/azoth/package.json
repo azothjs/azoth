@@ -1,6 +1,6 @@
 {
     "name": "azoth",
-    "version": "1.4.5",
+    "version": "2.0.0",
     "description": "Azoth JSX hypermedia",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -22,15 +22,22 @@
         "url": "git+https://github.com/azothjs/azoth.git",
         "directory": "packages/azoth"
     },
+    "homepage": "https://github.com/azothjs/azoth#readme",
+    "bugs": "https://github.com/azothjs/azoth/issues",
     "type": "module",
+    "main": "./index.js",
+    "types": "./jsx.d.ts",
     "files": [
-        "**/*.js"
+        "**/*.js",
+        "jsx.d.ts"
     ],
     "exports": {
+        ".": "./index.js",
         "./runtime": "./runtime.js",
         "./maya": "./maya.js",
         "./maya/channels": "./maya/channels.js",
-        "./vite-plugin": "./vite-plugin.js"
+        "./vite-plugin": "./vite-plugin.js",
+        "./jsx.d.ts": "./jsx.d.ts"
     },
     "dependencies": {
         "@azothjs/maya": "workspace:*",

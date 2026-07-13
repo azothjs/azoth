@@ -1,5 +1,31 @@
 # azoth
 
+## 2.0.0
+
+### Major Changes
+
+First public release. From 2.0.0 forward, `azoth`, `@azothjs/maya`, and
+`@azothjs/thoth` version together (one release train); the umbrella pins the
+exact matching versions.
+
+- **New root entry**: `import { Channel, pushable, rerenderer } from 'azoth'`
+  — the author surface in one import. Subpaths (`azoth/vite-plugin`,
+  `azoth/runtime`, `azoth/maya`, `azoth/maya/channels`) unchanged.
+- **TypeScript/TSX**: `jsx.d.ts` now ships and is the package `types` entry —
+  JSX element typing, the `Composable` union, component signatures.
+- **Vite plugin consolidated**: `@azothjs/vite-plugin` and `@azothjs/chronos`
+  are retired; the plugin lives in `@azothjs/thoth` and is re-exported here
+  as `azoth/vite-plugin`.
+- See `@azothjs/maya@2.0.0` and `@azothjs/thoth@2.0.0` for the runtime and
+  compiler changes (breaking: `channel()` → `<Channel>`, blocks → KeyedList,
+  `az:`-prefixed anchors, uniform async replace semantics).
+
+### Patch Changes
+
+- Updated dependencies
+  - @azothjs/maya@2.0.0
+  - @azothjs/thoth@2.0.0
+
 ## 1.4.5
 
 ### Patch Changes

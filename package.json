@@ -1,7 +1,7 @@
 {
   "name": "azothjs",
   "version": "1.0.0",
-  "private": "true",
+  "private": true,
   "description": "azothjs monorepo",
   "author": "Marty Nelson",
   "license": "MIT",
@@ -12,6 +12,9 @@
   },
   "type": "module",
   "scripts": {
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm -r publish --access public",
     "test": "vitest",
     "test:CI": "CI=true vitest && pnpm lint",
     "test:validate": "VALIDATE=true vitest run",

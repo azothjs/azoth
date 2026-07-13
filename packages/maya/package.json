@@ -1,6 +1,6 @@
 {
     "name": "@azothjs/maya",
-    "version": "0.4.4",
+    "version": "2.0.0",
     "description": "Azoth runtime",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -21,6 +21,8 @@
         "url": "git+https://github.com/azothjs/azoth.git",
         "directory": "packages/maya"
     },
+    "homepage": "https://github.com/azothjs/azoth#readme",
+    "bugs": "https://github.com/azothjs/azoth/issues",
     "type": "module",
     "files": [
         "**/!(*test|*config).js"

@@ -1,6 +1,6 @@
 {
     "name": "@azothjs/thoth",
-    "version": "0.4.5",
+    "version": "2.0.0",
     "description": "Azoth compiler",
     "author": "Marty Nelson",
     "license": "MIT",
@@ -13,8 +13,10 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/azothjs/azoth.git",
-        "directory": "packages/compiler"
+        "directory": "packages/thoth"
     },
+    "homepage": "https://github.com/azothjs/azoth#readme",
+    "bugs": "https://github.com/azothjs/azoth/issues",
     "type": "module",
     "main": "./compiler.js",
     "files": [
@@ -36,7 +38,7 @@
         "test": "vitest"
     },
     "peerDependencies": {
-        "vite": "^5.0.12"
+        "vite": "^5.0.12 || ^6"
     },
     "dependencies": {
         "@rollup/pluginutils": "^5.1.0",

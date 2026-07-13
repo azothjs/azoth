@@ -8,8 +8,34 @@
  * to provide accurate intellisense for Azoth JSX.
  */
 
-import type { Channel } from '@azothjs/maya/channels';
-import type { Input, Component } from '@azothjs/maya/compose';
+// Self-contained structural mirrors of maya's JSDoc typedefs. maya ships no
+// .d.ts (generated declarations are the future fix — see TODO), and consumers
+// can't resolve types from JSDoc'd .js without allowJs, so these live here.
+// Structural: any conforming object matches, including maya's real Channel.
+
+// channels/channel.js — the Input implementer + JSX component.
+interface Channel {
+    readonly initial: unknown;
+    readonly from: unknown;
+    readonly append: boolean;
+    update(props?: any, childNodes?: Node): Channel | void;
+}
+
+// compose/compose.js @typedef Input — "seed the slot, then drive it from a
+// source"; recognized structurally by `from`.
+interface Input {
+    initial?: Composable;
+    from: Promise<Composable> | AsyncIterable<Composable> | null | undefined;
+    append?: boolean;
+}
+
+// compose/compose.js @typedef Component — create()'s full lifecycle shape
+// (optional one-time initialize intake + the UIComponent base).
+interface Component {
+    initialize?(props?: any, childNodes?: Node): void;
+    render(): Composable;
+    update(props?: any, childNodes?: Node): Composable | void;
+}
 
 // maya's Composable — everything compose() accepts: a {…} slot value, or a
 // component's return. (DOMChild was the child subset; this is the full set,
