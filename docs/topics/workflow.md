@@ -816,21 +816,24 @@ specific patterns that come up in the workflow.
 
 ### The stream + channel pattern
 
-For interactive data flows (like search), use a stream generator and a
-channel:
+For interactive data flows (like search), bridge events into an async
+pipeline with `pushable`, and render the results with `<Channel>`:
 
 ```js
-import { generator as stream } from 'azoth/chronos/generators';
-import { Channel } from '../shared/Channel.jsx';
+import { Channel, pushable } from 'azoth';
 
 export function AgentSearch(props) {
     const search = props?.search ?? searchAgents;
-    const [results$, push] = stream(q => q ? search(q) : []);
+
+    const [query$, push] = pushable();
+    const results$ = (async function*() {
+        for await(const q of query$) yield q ? await search(q) : [];
+    })();
 
     return (
         <div class="search-section">
             <SearchBox onsearch={push} />
-            <Channel async={results$} as={r => <SearchResults results={r} />} />
+            <Channel source={results$} as={r => <SearchResults results={r} />} />
         </div>
     );
 }
@@ -838,32 +841,38 @@ export function AgentSearch(props) {
 
 **How it works:**
 
-| Piece               | Role                                                                          |
-| ------------------- | ----------------------------------------------------------------------------- |
-| `stream(transform)` | Creates `[asyncIterator, push]` — push values in, transformed values come out |
-| `push`              | Function to send values into the stream                                       |
-| `results$`          | Async iterator that yields transformed results                                |
-| `<Channel>`         | Subscribes to async data and renders with `as` function                       |
-| `as={r => ...}`     | Maps data to component — you control the prop mapping                         |
+| Piece            | Role                                                                     |
+| ---------------- | ------------------------------------------------------------------------ |
+| `pushable()`     | Creates `[asyncIterator, push]` — the bridge from events to iteration    |
+| `push`           | Function to send values in                                               |
+| `results$`       | Plain async generator: queries in, search results out                    |
+| `<Channel>`      | Drives the source's values into the slot, rendered through `as`          |
+| `as={r => ...}`  | Maps data to component — you control the prop mapping                    |
 
 **The data flow:**
 1. User types → `SearchBox` calls `push(query)` (debounced)
-2. Stream transform runs: `q => q ? search(q) : []`
-3. Result yields on `results$`
+2. The generator transform runs: `q ? await search(q) : []`
+3. The result yields on `results$`
 4. Channel renders `<SearchResults results={r} />`
+
+(When async iterator helpers land, the generator collapses to
+`query$.map(q => q ? search(q) : [])` — the pipeline is already the
+platform's shape.)
 
 ### Stream transform logic
 
-The stream transform is where conditional data logic lives:
+The generator is where conditional data logic lives:
 
 ```js
-// If query exists, search; otherwise return empty
-const [results$, push] = stream(q => q ? search(q) : []);
+const results$ = (async function*() {
+    for await(const q of query$) yield q ? await search(q) : [];
+})();
 ```
 
 This handles:
-- Empty input → returns `[]` → results clear
-- Non-empty input → calls `search(q)` → results display
+- Empty input → yields `[]` → results clear
+- Non-empty input → `await search(q)` → results display
+- Sequential by construction — a slow search can't land after a newer one
 
 Keep data logic in the stream, not scattered across components.
 
@@ -889,8 +898,7 @@ Accept service functions as props with defaults:
 ```js
 export function AgentSearch(props) {
     const search = props?.search ?? searchAgents;  // Default to real API
-    const [results$, push] = stream(q => q ? search(q) : []);
-    // ...
+    // ... the pushable + generator pipeline from above uses `search`
 }
 ```
 
