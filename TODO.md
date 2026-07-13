@@ -1,23 +1,12 @@
 # Azoth TODO
 
-## Release (2.0.0 prepped — Marty presses the button)
+## Release
 
-Runbook (repo is publish-ready as of the "release: 2.0.0 prep" commit):
+2.0.0 is prepped; the publish flow lives in [RELEASING.md](RELEASING.md).
+Post-publish, Marty: deprecate `@azothjs/chronos` + `@azothjs/vite-plugin`
+on the registry (pointers to azoth 2.0 / `@azothjs/thoth/vite`).
 
-1. `npm login` (or verify: `npm whoami`) — needs publish rights on `azoth`
-   and the `@azothjs` org.
-2. `pnpm release` (= `pnpm -r publish --access public`) — publishes thoth,
-   maya, azoth in dependency order. Add `--dry-run` first if paranoid.
-3. Tag: `git tag azoth@2.0.0 @azothjs/maya@2.0.0 @azothjs/thoth@2.0.0 && git push --tags`.
-4. Optional cleanup of orphaned registry packages:
-   `npm deprecate @azothjs/chronos "folded into azoth 2.0 — use the azoth package"`
-   and the same for `@azothjs/vite-plugin` (→ `@azothjs/thoth/vite` /
-   `azoth/vite-plugin`).
-
-Going forward: changesets is wired (`pnpm changeset` → `pnpm version` →
-`pnpm release`); the three packages are a `fixed` group — one version train.
-
-Post-2.0 release backlog (deliberately not in this pass):
+Post-2.0 backlog:
 - Generated `.d.ts` for maya/thoth (tsc JSDoc emit) — jsx.d.ts is
   self-contained until then.
 - `sideEffects` fields (maya/lists registers custom-element tags on import —
@@ -29,288 +18,128 @@ Post-2.0 release backlog (deliberately not in this pass):
 - vite-test refresh (still on vite 5 / vitest 1; not in the workspace —
   parked separately).
 
-## Blocks / rerenderer follow-ons
+## Rerenderer / lists
 
-Landed: **KeyedList** shipped (abstract base + `KeyedUList`/`KeyedOList`/
-`KeyedTable` leaves; add/addAll/insert/update/move/remove/clear/has/get/keyFor;
-controller pattern; `Map<key, rerenderer(view)>` per-row model). Legacy
-`Controller`/`Updater` + injectable/`getBound` path removed. Design:
-`docs/design/keyed-list.md`, `frame-primitives.md`.
-
-Open:
-- **Rerenderer naming bikeshed** (Rerender vs Rerenderer) — deferred.
+- **Rerenderer naming bikeshed** (Rerender vs Rerenderer) — NOTE: publishing
+  2.0 semver-locks the exported name. Decide before `pnpm release` or accept
+  `rerenderer`.
 - **VirtualList** (recycled-pool / virtualization, FUTURE, separate block) —
   `docs/design/VirtualList.md` + `frame-primitives.md`.
-- **Teaching docs**: tie the init→update patterns (module-factory / class /
-  object UIComponent / plain render fn) to realistic UI-layout management —
-  worked examples, not mechanism explainers.
-
-
+- **Init→update worked examples** (module-factory / class / object
+  UIComponent / plain render fn against realistic UI-layout management) —
+  absorbed into the articles series (article two: enhanced composition; see
+  `docs/articles/README.md`).
 
 ## Channel
 
-### Cancel semantics / AbortController
-
-The slot-lifecycle half landed (2026-07): compose tears down a live source when
-its anchor is cleared (WeakMap<anchor, cancel> + reentrancy guard — see Compose
-→ Async source teardown). What remains is the AUTHOR-initiated half — a Channel
-`AbortController`/`cancel` prop so code can say "I'm done with this source" and
-release upstream resources (open WebSockets, ongoing fetches), not just react to
-a swap. Defer until a real-world need surfaces; design is open.
-
-### Channel role evolution
-
-Channel carries two roles (named explicitly 2026-06-11 after
-considering a split):
-
-1. **Orchestrator** (the "Anchor" role) — control over compose:
-   initial DOM render, append directive, (future) cancel. Source-
-   agnostic: the slot doesn't care where the DOM came from — another
-   module's exported Channel, or (future) HTML streamed and parsed
-   from a server.
-2. **Transformer** — `as`, `map`, `error`. A stand-in until the
-   platform pulls transform duty into sources themselves (async
-   iterator helpers, Stage 2, est. 2027-28).
-
-Considered and rejected: splitting into `<Anchor source={...}>` +
-`channel(source, transform)`. The split is conceptually clean — it IS
-the end-state architecture — but: (a) the unified Channel degrades
-gracefully INTO the split, since source-side transforms already work
-today (`source={x.then(f)}`) and `as`/`error`/`map` simply become
-unused props when helpers land — no breaking change; the reverse
-re-merge would break; (b) it resurrects the lowercase `channel()`
-shape this branch just subtracted; (c) it pays a two-concept DX tax
-for the entire 2-3 year interim. Decision: stay flat. Revisit only
-when source transforms are native.
-
-Docs-pass note: the "module exports a Channel, consumer slots it into
-any DOM" separation-of-concerns pattern deserves a documented example
-(search box + paging + results in one module, Channel out — no
-component-tree demands). Connects to the hypermedia thesis.
+- **Author-initiated cancel** — slot-lifecycle teardown landed (compose
+  cancels a live source on clear); what remains is an author-facing
+  `AbortController`/`cancel` prop to release upstream resources (open
+  WebSockets, fetches) without a swap. Defer until a real-world need
+  surfaces.
+- **Role evolution (decision record)** — Channel = orchestrator + transformer
+  in one; the `<Anchor>` + `channel()` split was considered and REJECTED
+  2026-06-11 (the flat form degrades gracefully into the split once async
+  iterator helpers land; the reverse breaks). Revisit only when source
+  transforms are native (~2027-28). Full reasoning in git history.
+- **SoC example** — "module exports a Channel, consumer slots it into any
+  DOM" (search + paging + results in one module, Channel out) deserves a
+  worked example — articles series or a valhalla test.
 
 ## Components / typing — precision pass (follow-on)
 
-valhalla typechecks fully (`.tsx`, 0 errors). Landed 2026-07: a full
-`Composable` union in jsx.d.ts — everything compose accepts — with `DOMChild =
-Composable`; `JSX.ElementType` = string tag | null/undefined (conditional
-no-op) | function | class | `Component` object, all returning `Composable`, with
-the `(props, childNodes)` arity; and the `UIComponent` (base: render/update) vs
-`Component` (create's full: + `initialize`) split. maya's types reach valhalla
-via `allowJs`. Remaining is *depth* (optional, on-demand):
+Foundation landed (Composable union, ElementType, UIComponent/Component
+split, childNodes pinned as `Node | undefined`, structural render member).
+Remaining depth, on-demand:
 
-**`Composable` — last gaps** — it now covers primitives, Node, Channel, Input,
-UIComponent, Promise, AsyncIterable, ReadableStream, function/rerenderable,
-arrays. Still missing: **Observable-shaped** (`.subscribe`) and the **`IGNORE`**
-sentinel — the `as unknown as JSX.Element` casts in `channels.test.tsx:285`
-(Observable) and `rerenderer.test.tsx` persist for these.
-
-**`<Channel>` props are `any`** — its constructor param is untyped, so neither
-`new Channel({…})` nor `<Channel …>` deep-checks props. Typing the constructor
-(JSDoc **on Channel** — types-closer-to-the-object) unlocks both: `eventType` ⟺
-EventTarget source, `map` ⟺ array source, `error`/`as` return match, `append`.
-
-**Per-form prop typing** — `pushable`, render-object, class-/function-component
-surfaces. `@template`/conditional types vs per-component `.d.ts` — open.
-
-**`childNodes` type — RESOLVED 2026-07**: pinned empirically
-(valhalla/child-nodes.test.tsx) as ONE Node or absent — the element for a
-single child, a DocumentFragment for several/text/{expr}, undefined for
-none; never an array or string. jsx.d.ts tightened `any` → `Node`; maya
-JSDoc matches. Also: Composable's UIComponent member relaxed to structural
-`{ render(): Composable }` — compose's render branch needs only render();
-update() is the additional verb — so render-only classes/objects typecheck.
-
-**Findings from component-forms.test.tsx (2026-07)** — three TS/JSX gaps the
-per-form pass should tackle; each carries an `as any` + comment in the test:
-
-- **Nullable tag**: `const C = cond ? null : Cat; <C/>` → TS2604, even though
-  `JSX.ElementType` includes null — TS won't tag a union containing null.
-- **children synthesized into props**: with `ElementChildrenAttribute`
-  declared, a component with JSX children must have `children` in its PROPS
-  type to check — but azoth delivers children as arg-2, never in props.
-  Options: drop ElementChildrenAttribute (loses intrinsic children typing?),
-  a PropsWithChildNodes-style helper, or live with untyped props on
-  children-taking components.
-- **Object-as-tag**: `<Badge/>` where Badge is an { initialize, render,
-  update } object literal → TS2604; TS's tag checking wants a call/construct
-  signature and doesn't consult ElementType's object member for value tags.
-
-**`Component.initialize?` — optional vs required** — the Component typedef
-(create's full lifecycle) has `initialize?` optional, matching create's
-`initialize?.()`. Should create REQUIRE initialize (drop the runtime `?.`, make
-the type `initialize`)? A stricter contract vs the current lenient runtime —
-decide together.
+- **`Composable` last gaps** — Observable-shaped (`.subscribe`) and the
+  `IGNORE` sentinel; `as unknown as JSX.Element` casts persist in
+  `channels.test.tsx` (observable-in-slot) and `rerenderer.test.tsx`
+  (module-factory return).
+- **`<Channel>` props are `any`** — type the constructor (JSDoc on Channel);
+  unlocks `new Channel({…})` and `<Channel …>` prop checking (`eventType` ⟺
+  EventTarget, `map` ⟺ array source, `error`/`as` return match).
+- **Per-form prop typing** — render-object, class-/function-component
+  surfaces; `@template`/conditional types vs per-component `.d.ts` — open.
+- **Findings from component-forms.test.tsx** (each carries an `as any` +
+  comment in the test):
+  - Nullable tag: `const C = cond ? null : Cat; <C/>` → TS2604 despite
+    ElementType including null.
+  - children synthesized into props: `ElementChildrenAttribute` makes TS
+    demand `children` in a component's PROPS type, but azoth delivers arg-2.
+    Options: drop ElementChildrenAttribute, a helper type, or untyped props
+    on children-taking components.
+  - Object-as-tag: `{ initialize, render, update }` literal as a tag →
+    TS2604; TS wants a call/construct signature.
+- **`Component.initialize?` optional vs required** — stricter contract vs
+  the current lenient runtime (`initialize?.()`) — decide together.
 
 ## Compose
 
-### Accept null/undefined return from components
-
-Components returning `null` or `undefined` should render nothing rather
-than risk errors downstream. Arrow components already get `?? null`
-coercion; class/function-with-prototype components return whatever the
-constructor returns (typically the new instance even when the body
-`return null`s, unless an object is explicitly returned). Worth verifying
-the full surface and aligning so authors can write `return null` to mean
-"render nothing" regardless of component form.
-
-### Async source teardown — follow-ons
-
-compose now cancels a live source on clear (a `WeakMap<anchor, cancel>` plus a
-`currentSource` reentrancy guard so a source's own value doesn't self-cancel;
-covers async-iter / promise / stream / observable).
-
-- **withAbort ↔ pushable**: should `pushable` (packages/maya/channels/
-  pushable.js) return `[results$, push, cancel]` — a cancel alongside push — so
-  the abort machinery is shared/exposed there too? Or overreaching (keep
-  pushable minimal; let compose/Channel own cancellation)? Revisit once the
-  `withAbort` shape settles; may collapse compose's `aborted()` into channel's.
-
-Resolved 2026-07: **composeStream deleted** — a direct `{aStream}` now flows
-through the asyncIterator branch like every async sequence (replace default;
-accumulate opts in via Channel/Input `append`). The pre-Input accumulate
-special case (2023-era) and its ReadableStream-before-asyncIterator ordering
-constraint are gone.
+- **Class components returning null** — arrow-null and null-as-component are
+  pinned (render nothing — `component-forms.test.tsx`); the open wart is a
+  class whose constructor body `return null`s: JS yields the instance anyway
+  (no render → throws). Align so `return null` means "render nothing" in
+  every form, or document the class-form exception.
+- **withAbort ↔ pushable** — should `pushable` return `[results$, push,
+  cancel]` so abort is exposed there too, or stay minimal (compose/Channel
+  own cancellation)? The shared `aborted()` collapse is done
+  (`compose/abort.js`); teardown timing is pinned (`channel.test.js` — lazy
+  subscribe, prompt abort). Revisit if a real consumer needs cancel-at-push.
 
 ### Performance research (parked)
 
 `compose` is the hot path. Older lore said "call functions with consistent
-arity for V8 perf" — that's no longer true. V8 8.9 (Feb 2021) removed the
-arguments adaptor frame; calling with fewer/more args than formal params
-no longer pays the adaptor cost. Source: v8.dev/blog/adaptor-frame.
+arity for V8 perf" — no longer true (V8 8.9 removed the adaptor frame).
+What still matters: hidden-class/shape stability, monomorphic ICs, function
+size vs inlining thresholds, avoiding mid-flight shape changes. Park until a
+real regression motivates the work.
 
-What still matters for hot dispatch code on modern engines:
-- Hidden class / shape stability on `anchor`, `props`, `input`
-- Monomorphic inline cache stability on property accesses
-- Function size relative to inlining thresholds
-- Avoiding deopts from mid-flight shape changes
-
-Park until a real regression motivates the work. Benchmarks need
-realistic render trees; speculative micro-optimization risks worse
-shape stability than the current code.
-
-Harness direction (2026-07, not a release gate): wire into krausest's
-js-framework-benchmark rather than a custom harness — KeyedList maps
-directly onto its rows model, and the numbers are corpus-standard.
-A martypdx fork exists (gh + another user account on this laptop),
-~2 years stale; needs a rewrite against current azoth.
+Harness direction (not a release gate): wire into krausest's
+js-framework-benchmark — KeyedList maps onto its rows model; numbers are
+corpus-standard. A martypdx fork exists (gh + another user account on this
+laptop), ~2 years stale; needs a rewrite against current azoth.
 
 ## Platform tracking (informational)
 
-### Async iterator helpers (Stage 2, est. 2027-2028)
+- **Async iterator helpers** (Stage 2, est. 2027-28) — Channel's pipeline
+  props (`as`/`map`/`error`) become optional sugar once
+  `source={events$.map(Notification).catch(ErrorBanner)}` is native. Both
+  forms stay valid. See Channel role evolution.
+- **DOM Parts** (WICG, early incubation) — azoth's compiled binders are
+  "DOM parts in a part group" (`docs/design/rerenderer.md`); working
+  evidence to offer the proposal conversation. Consider a position write-up
+  once 2.0 ships.
+- **WICG Observable + `EventTarget.prototype.when()`** — Chrome 135+
+  shipped; Firefox implementing. When `when()` is broadly available, our
+  `fromEventTarget` bridge becomes a polyfill (Observable-shaped sources
+  already flow through `.subscribe` detection). Track adoption.
 
-When `AsyncIterator.prototype.map/filter/catch/...` ships, Channel's
-data-pipeline props become optional sugar for what iterator helpers
-express directly:
+## dom-info (`packages/thoth/dom-info/`)
 
-```jsx
-// Today
-<Channel source={events$} as={Notification} error={ErrorBanner} />
-
-// When async iterator helpers ship
-<Channel source={events$.map(Notification).catch(ErrorBanner)} />
-```
-
-Both forms remain valid. The change is "data transforms can live upstream
-in the iterator chain instead of as Channel props." See Channel role
-evolution.
-
-### DOM Parts (WICG, early incubation)
-
-Azoth's compiled binders are literally "DOM parts in a part group"
-(see docs/design/rerenderer.md). The proposal space is early with
-multiple competing drafts — Azoth has working evidence (compiled
-part-groups + the Rerenderer's apply-values mechanism) to offer the
-direction conversation. Watch the repo; consider a position
-write-up once 2.0 ships.
-
-### WICG Observable + `EventTarget.prototype.when()`
-
-Chrome 135+ has shipped Observable; Firefox is implementing. When
-`target.when('foo')` becomes widely available, our `fromEventTarget`
-shim becomes a polyfill (and may delete entirely — Observable-shape
-sources already flow through the existing `.subscribe` detection
-branch). No action now; track adoption.
-
-## Docs
-
-Resolved 2026-07 (the tests-as-docs prune):
-
-- **VitePress deleted** — the repo's MDs are the docs surface; brand assets
-  moved to `docs/assets/`; the dangling-nav item went with it.
-- **Mechanics prose archived** to `docs/history/` (composition,
-  async-and-channels, attributes-and-properties, maya-runtime, typescript,
-  scratchpad) — superseded by valhalla (`compose.test.tsx` et al.) +
-  `docs/design/core-rules.md`. Survivor links repointed; `topics/index.md`
-  and `valhalla/{README,index}.md` rewritten as the entry points.
-- **Currency pass done** — the old `channel()` refs (hypermedia,
-  coming-from-react), "blocks" → keyed lists (for-llms, coming-from-react),
-  and the JSX-comment crash entry flipped to Resolved (pinned in
-  `smoke.test.tsx` + `compiler.test.js`).
-
-Resolved 2026-07 (follow-through): component-forms tests landed
-(`valhalla/component-forms.test.tsx`) and `components.md` folded to its
-concept kernel (the reframe, which-form-when, created-vs-composed) with
-pointers to the tests. The prune is complete — every mechanics rule now
-lives as a test. Earlier loose-docs resolution (maya.md etc.) noted in git
-history.
-
-## dom-info (folded into thoth — `packages/thoth/dom-info/`)
-
-### Browser-validation suites — on-demand, not in CI
-
-The `dom-props` / `events` / `svg` suites probe the pinned Chromium to confirm
-the lifted platform data still matches. Excluded from the default run; run on
-demand via `pnpm test:validate` (`VALIDATE=true`). They change only on a
-dependency or Chromium bump.
-
-Open follow-ons:
-- Wire `test:validate` into a CI job gated to PRs/merges that touch
-  `packages/thoth/dom-info/**` or bump the relevant deps (property-information,
-  html/svg-element-attributes, html/svg/mathml-tag-names, playwright) — rather
-  than every push.
-- A "deps current?" check (renovate, or scheduled `pnpm outdated` on those
-  packages) to signal when re-validation + data regeneration is due.
-- No README for the dom-info module yet; document the data sources + validation
-  workflow (now under thoth).
+Browser-validation suites are on-demand (`pnpm test:validate`), not in CI.
+Open:
+- Gate `test:validate` into CI only for changes touching
+  `packages/thoth/dom-info/**` or the data-package deps.
+- A "deps current?" signal (renovate or scheduled `pnpm outdated`) for when
+  re-validation + regeneration is due.
+- No dom-info README yet — document data sources + the validation workflow.
 
 ## External (not Azoth code)
 
-### Vitest snapshot bug — fix applied locally; upstream PR still open
+- **Vitest inline-snapshot updater, bug 1** (comment-adjacent coalescing) —
+  4-char fix applied locally via `pnpm patch`
+  (`patches/@vitest__snapshot@4.1.8.patch`); upstream PR still to be opened
+  from the martypdx fork. Drop the patch once it lands and we bump.
+- **Vitest inline-snapshot updater, bug 2** (same-test/many-snapshot
+  mis-assign; spike) — `-u` lands values on wrong calls. BROWSER MODE is
+  worse: many-at-once fills coalesce, and one-at-a-time via `-t` offsets by
+  executed-test ordinal (node-env fills are fine). Workaround in use: probe
+  assertion → harvest → freeze to `toBe`/`toEqual` (valhalla convention).
+  Fold both into one upstream issue/fix.
 
-A 4-character non-greedy regex fix to vitest's inline-snapshot updater
-(`@vitest/snapshot`, coalesces snapshots after a comment). Now applied to
-this repo via `pnpm patch` (`patches/@vitest__snapshot@4.1.8.patch`) since
-the martypdx fork is vitest 5.0-beta (a major ahead of our 4.1.8). The
-upstream PR (martypdx fork) is still to be opened; drop the patch once it
-lands and we bump. See `OVERNIGHT-NOTES.md` for the original discovery.
+## ESLint (lower priority)
 
-### Vitest -u second bug — adjacent same-test snapshots mis-assign (LOW PRIORITY, spike)
-
-Separate from the comment-greedy bug above. With two `toMatchInlineSnapshot()`
-calls in the SAME test, `-u` mis-assigns: one value lands on the wrong call,
-the other is lost. Repro'd minimally (2026-06-15) — NOT triggered by comments
-or identical expressions; the trigger is subtle position-tracking in
-saveInlineSnapshots. The comment patch does not cover it. Workaround in use:
-`toBe()` with known values, or fill snapshots one at a time. Spike to isolate
-the exact trigger and fold into the upstream fix. Low priority — single-
-snapshot-per-test (the common case) is unaffected.
-
-BROWSER MODE is worse (2026-07, building valhalla compose.test.tsx): filling
-many empty snapshots in one browser-mode run coalesces several values onto
-one call and leaves others empty; filling ONE AT A TIME via `-t` still lands
-values on the WRONG calls (offset by skipped tests — the write-back resolves
-call sites against executed-test ordinals, not file positions). Node-env
-files fill fine (compose.clear.test.js, 4-in-one-run, correct). Workaround
-that held: capture real output via a probe assertion (`expect('SNAP>>>' +
-JSON.stringify(v)).toBe('')`, harvest Received from the failure), freeze to
-`toBe`/`toEqual` directly. Fold this evidence into the spike.
-
-## ESLint usage review (lower priority)
-
-Revisit how azoth configures ESLint — e.g. `eqeqeq` flagged `== null` (the
-idiomatic null/undefined check); consider the `{ null: "ignore" }` option, and
-audit the ruleset generally. (Surfaced by a CI failure on KeyedList.js, 2026-06.)
-Landed 2026-07: a husky + lint-staged pre-commit hook runs `eslint --fix` on
-staged `packages/**/*.{js,jsx,ts,tsx}` (via npx — no pnpm). Still open: the
-ruleset audit itself, and an ESLint v9 modernization (flat config already in
-use; deps are on v8.57).
+Ruleset audit (e.g. `eqeqeq` vs idiomatic `== null` — consider
+`{ null: "ignore" }`) and ESLint v9 modernization (flat config already in
+use; deps on v8.57). The pre-commit hook (husky + lint-staged) is in place.
