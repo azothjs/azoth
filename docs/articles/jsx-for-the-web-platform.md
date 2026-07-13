@@ -1,6 +1,6 @@
 Azoth - "JSX for the Web Platform"
 
-Welcome to the web platform as a framework. Most new frameworks introduce themselves by telling you what new thing they're adding. Azoth is different. It removes most of what you know about frameworks and then uses JSX to amplifies what the platform already ships.
+Welcome to the web platform as a framework. Most new frameworks introduce themselves by telling you what they're adding. Azoth is different. It removes most of what you know about frameworks, then uses JSX to amplify what the platform already ships.
 
 In the new AI era, code is cheap and cookie-cutter apps are commodity. Elevated work focuses on experience and transformation. Azoth allows you to freely express your design, taste, and judgement by giving full access to, and control of, the web platform.
 
@@ -11,7 +11,7 @@ This is the first in a series of three introductory articles on Azoth:
 
 # Subtract to Unlock
 
-Azoth's first move is to subtract, without replacement, a decade of framework cruft and plugs JSX into the gap in the web platform:
+Azoth's first move is to subtract, without replacement, a decade of framework cruft — plugging JSX into the gap in the web platform:
 
 - without vDOM or any intermediate representation
 - without a controlling framework or render tree
@@ -260,6 +260,8 @@ function Counter() {
     let count = 0;
     const [count$, push] = pushable();
     const increment = () => push(++count);
+
+    // seed the slot now, then drive it from the source
     return <button onclick={increment}>{{ initial: count, from: count$ }}</button>;
 }
 ```
@@ -272,8 +274,12 @@ Delayed rendering and swapping content are useful techniques. But oftentimes a s
 
 ```jsx
 const panel = rerenderer(label => <section><h2>{label}</h2></section>);
-const node = panel('Pets');     // builds the <section>
-panel('Animals');               // same <section>, <h2> rebound to "Animals"
+
+// first call builds the <section>
+const node = panel('Pets');
+
+// same <section> comes back — <h2> rebound to "Animals"
+panel('Animals');
 ```
 
 Re-run at the same site, and the delta lands on the same DOM. Now wire it to events, in app shape — a master list driving a detail pane:
@@ -284,13 +290,16 @@ function App() {
     const handleSelect = async (id) => push(await fetchDetail(id));
 
     return <main>
+        {/* fetch once, render the list */}
         <Channel source={fetchItems()} as={items => (
             <ListView items={items} onselect={handleSelect}/>
         )}>
             Loading list...
         </Channel>
 
-        <Channel source={detail$} as={rerenderer(detail => <DetailView {...detail}/>)}>
+        {/* every selection event rebinds the SAME DetailView DOM */}
+        <Channel source={detail$}
+            as={rerenderer(detail => <DetailView {...detail}/>)}>
             Select an item from the list
         </Channel>
     </main>;
@@ -328,7 +337,7 @@ Step back and every option in this article reduces to the same pair: the **initi
 
 And because bindings are fine-grained — an element property here, a comment anchor there — nothing owns the tree between those two moments. Restructure it, hand nodes to d3 or GSAP, combine trees from anywhere: there's no watcher to fight, because there was never a watcher.
 
-That pair — build once, then change on a known channel — scales past slots and rerenders: regions that manage their own structure on their own clock (chat threads, live lists, keyed rows). That's the next article: components, update protocols, and frames.
+That pair — build once, then change on a known channel — scales past slots and rerenders: regions that manage their own structure on their own clock (chat threads, live lists, keyed rows). That's article two: enhanced composition — components, the update protocol, Input, and web components.
 
 
 
