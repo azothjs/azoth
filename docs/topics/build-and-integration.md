@@ -139,14 +139,17 @@ Thoth pipeline will see no JSX to extract.
 **The Azoth plugin owns JSX compilation.** If JSX is going through Vite,
 only Azoth should be touching it.
 
-The workspace's own `vite.config.js` explicitly tells esbuild to ignore
-JSX/TSX files for exactly this reason:
+The plugin enforces this itself: its `config` hook sets
 
 ```js
 esbuild: {
     exclude: ['**/*.jsx', '**/*.tsx'],
 }
 ```
+
+so Vite's built-in esbuild pipeline never touches JSX/TSX — no manual
+config needed. (The returned config is merged, so a project can still
+extend it; just never point another JSX transform at the same files.)
 
 ## What this is *not*
 

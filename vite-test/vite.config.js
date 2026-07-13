@@ -5,9 +5,6 @@ export default defineConfig({
     plugins: [
         azothPlugin(),
     ],
-    esbuild: {
-        exclude: '**/*.jsx',
-    },
     logLevel: 'debug',
     build: {
         target: 'esnext',

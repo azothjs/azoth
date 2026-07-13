@@ -57,7 +57,5 @@ export default defineConfig({
     build: {
         target: 'esnext',
     },
-    esbuild: {
-        exclude: ['**/*.jsx', '**/*.tsx'],
-    }
+    // esbuild.exclude for JSX/TSX is set by the azoth plugin's config hook.
 });

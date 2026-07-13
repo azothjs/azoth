@@ -32,6 +32,14 @@ export default function azothPlugin(options) {
         enforce: 'pre',
         templates: programTemplates,
 
+        config() {
+            // Vite's own esbuild pipeline must not touch JSX/TSX — azoth
+            // owns the JSX transform (.tsx type-stripping happens in this
+            // plugin's esbuild pre-pass with jsx: 'preserve'). Returned
+            // config is merged, so a project can still extend/override.
+            return { esbuild: { exclude: ['**/*.jsx', '**/*.tsx'] } };
+        },
+
         configResolved(resolvedConfig) {
             // store the resolved config
             config = resolvedConfig;
