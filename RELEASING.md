@@ -35,10 +35,12 @@ umbrella `azoth` pins the exact matching `@azothjs/*` versions on publish
    (valhalla, test-utils, vite-test) are skipped automatically. Add
    `--dry-run` first to sanity-check.
 
-4. **Tag and push**:
+4. **Tag and push** (`git tag` takes one tag per call):
 
    ```bash
-   git tag azoth@X.Y.Z "@azothjs/maya@X.Y.Z" "@azothjs/thoth@X.Y.Z"
+   git tag azoth@X.Y.Z
+   git tag @azothjs/maya@X.Y.Z
+   git tag @azothjs/thoth@X.Y.Z
    git push && git push --tags
    ```
 
