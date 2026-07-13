@@ -58,6 +58,7 @@ const Greeting = ({ name }) => {
         ? "Whazzup" : "Hello";
     return t0c2ba934(salutation, name.toUpperCase());
 };
+
 document.body.append(__createComponent(Greeting, { name: "Azoth" }));
 ```
 
@@ -339,7 +340,9 @@ And because bindings are fine-grained — an element property here, a comment an
 
 That pair — build once, then change on a known channel — scales past slots and rerenders: regions that manage their own structure on their own clock (chat threads, live lists, keyed rows). That's article two: enhanced composition — components, the update protocol, Input, and web components.
 
+# Next 
 
+This first part explained the mechanics of how Azoth subtracts most of modern frontend frameworks: internal representation, render tree ownership, and state management.  Hypermedia and layout management are the new pardigm for change over time. JSX is semantically aligned to fit into the web platform without obstructing its use.
 
----
+The next part will dive into the rich layers of composition this unlocks, from traditional functional components to fully integrated web components, and everything in between.
 
