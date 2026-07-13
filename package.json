@@ -13,7 +13,7 @@
   "type": "module",
   "scripts": {
     "changeset": "changeset",
-    "version": "changeset version",
+    "version-packages": "changeset version",
     "release": "pnpm -r publish --access public",
     "test": "vitest",
     "test:CI": "CI=true vitest && pnpm lint",

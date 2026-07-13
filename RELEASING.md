@@ -19,7 +19,7 @@ umbrella `azoth` pins the exact matching `@azothjs/*` versions on publish
 2. **Cut the version** (when ready to release):
 
    ```bash
-   pnpm version        # = changeset version: bumps package.jsons, writes CHANGELOGs
+   pnpm version-packages   # = changeset version: bumps package.jsons, writes CHANGELOGs
    pnpm install        # refresh the lockfile for the new versions
    git add -A && git commit -m "release: vX.Y.Z"
    ```

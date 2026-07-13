@@ -1,5 +1,11 @@
 # @azothjs/maya
 
+## 2.0.1
+
+### Patch Changes
+
+- Version alignment with the 2.0.1 release train (no runtime changes).
+
 ## 2.0.0
 
 ### Major Changes
@@ -14,7 +20,7 @@ First public release; versions now move with `azoth` and `@azothjs/thoth`.
   elements — keyed rows with delta ops (`add`/`addAll`/`insert`/`update`/
   `move`/`remove`/`clear`/`keyFor`), per-row rerenderers.
 - **Channel + the Input shape**: `<Channel source as error map append
-  eventType>` over Promise / async iterable / Observable / EventTarget
+eventType>` over Promise / async iterable / Observable / EventTarget
   sources; compose recognizes the structural Input shape
   `{ initial?, from, append? }` — Channel is one implementer.
 - **`pushable()`**: `[asyncIterator, push]` — the bridge from push/callback
@@ -30,7 +36,7 @@ First public release; versions now move with `azoth` and `@azothjs/thoth`.
 Breaking:
 
 - `channel()` function form removed → `<Channel>` / `new Channel(props,
-  childNodes)`.
+childNodes)`.
 - Blocks (`KeyedBlock`, `Controller`, `Updater`, `use()`) removed →
   KeyedList + the controller recipe.
 - Slot functions are called with no arguments (props/childNodes intake is
