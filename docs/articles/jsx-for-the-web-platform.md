@@ -1,6 +1,17 @@
 Azoth - "JSX for the Web Platform"
 
-Through subtraction, not replacement, Azoth removes a decade of framework cruft and plugs JSX into the gap in the web platform:
+Welcome to the web platform as a framework. Most new frameworks introduce themselves by telling you what new thing they're adding. Azoth is different. It removes most of what you know about frameworks and then uses JSX to amplifies what the platform already ships.
+
+In the new AI era, code is cheap and cookie-cutter apps are commodity. Elevated work focuses on experience and transformation. Azoth allows you to freely express your design, taste, and judgement by giving full access to, and control of, the web platform.
+
+This is the first in a series of three introductory articles on Azoth:
+1. The core mechanics of replacing modern frameworks with hypermedia
+2. Enhanced composition: functional components, UIComponent, Input, and web components
+3. Using AI with Azoth: leaning into the corpus
+
+# Subtract to Unlock
+
+Azoth's first move is to subtract, without replacement, a decade of framework cruft and plugs JSX into the gap in the web platform:
 
 - without vDOM or any intermediate representation
 - without a controlling framework or render tree
@@ -36,7 +47,7 @@ At compile time the JSX is replaced in-situ in the runtime code, and additional 
 
 ## The transpiled code
 
-First, let's look at how the originally authored code changes:
+Here's how the originally authored code changes:
 
 ```js
 import { __createComponent } from 'azoth/runtime';
@@ -72,7 +83,7 @@ The html itself is delivered in `<page>.html`, DOM creation is handled _by the b
 
 The win here isn't browser vs JavaScript instantiation time, it's **no JavaScript in the code bundle that needs to be parsed to get to DOM creation**.
 
-Those `<!--az:0-->` comments are anchors — stable positions where the dynamic values will land. Which brings us to the last artifacts.
+Those `<!--az:0-->` comments are anchors — stable positions where the dynamic values will land. Which brings us to the remaining artifacts.
 
 ## Decomposition
 
@@ -133,11 +144,6 @@ First, why even let go of state management _as an integrated part of frontend fr
 - Restricts what you can do with the platform
 - Favors an internal focus that solves engineering problems at the expense of users — a decade in, every dashboard greets you with the same skeleton-wipe re-render for a one-field change
 
-(note: that third bullet now carries a concrete beat; alternative is to keep it
-bare here and spend the full argument in the closer, where the
-commoditization/differentiation thesis lives. Both work — this version makes
-the section self-sufficient.)
-
 Second, if not using state management, then what is the alternative? It's layout management. Controlled changes that update the document as the source of truth. This is hypermedia — it's how the web platform was designed and built. Additions, removals, swaps — each a change to the ledger through a defined channel.
 
 If state management is `ui = fn(state)`, then hypermedia is <code>ui<sub>n</sub> = ui<sub>n-1</sub> + Δ<sub>n</sub></code>. What that means is that Azoth models the UI as a sequence of deltas applied to the prior UI:
@@ -154,15 +160,15 @@ Each Δ is delivered by an event. The DOM is the source of truth; events modify 
 
 These two models are mutually exclusive. State and UI cannot *both* be the source of truth.
 
-To be precise about the claim: your application still has state. It lives where JavaScript already puts it — closures, class instances, the DOM itself. What's subtracted is the *management layer* between that state and the document: the store, the reconciler, the projection. You'll see this concretely in "State without the management" below.
+To be precise: your application still has state. It lives as distributed data outside the browser and inside the browser where JavaScript already puts it — closures, class instances, the DOM itself. What's subtracted is the *required management layer* between that state and the document: the store, the reconciler, the projection. You'll see this concretely in "State without the management" below.
 
 # Opt-in to complexity
 
-In practice, what this means is that the complexity of the type of delta being applied can scale based on the change needed. Each step is opt-in: you take on more of the update contract only where the UI calls for it — render now, render later, render again.
+In practice, this means the complexity of the type of delta being applied can scale based on the change needed. Each step is opt-in: you take on more of the update contract only where the UI calls for it — render now, render later, render again.
 
 ## Asynchronously delayed rendering
 
-The default rendering mode in Azoth is forward-only. Yet this also includes using asynchronicity (as the event) to deliver content later:
+The default rendering mode in Azoth is forward-only. However, this also includes using asynchronicity (as the event) to deliver content later:
 
 ```jsx
 <p>Render me now - {Promise.resolve(`Render me later`)}</p>
@@ -324,17 +330,7 @@ And because bindings are fine-grained — an element property here, a comment an
 
 That pair — build once, then change on a known channel — scales past slots and rerenders: regions that manage their own structure on their own clock (chat threads, live lists, keyed rows). That's the next article: components, update protocols, and frames.
 
+
+
 ---
 
-(note: below is draft verbiage or copied snippets from docs)
-
-(note: for the closer — the "Design Age" thought from the original intro
-belongs here, fused with the era-of-AI argument: reusing the dominant
-patterns is commoditized work; expressiveness and control are the
-differentiator; what you build is what you feed the model. The subtract→
-unlock table from the talk (M4.1) is the bridge.)
-
-This is the sense in which **the platform already ships the component model**:
-the self-managing component, the lifecycle, the encapsulated render cycle — the
-platform gives you all of it, as custom elements. Azoth doesn't reinvent the
-component; it hands off to the one the browser already gives you.
