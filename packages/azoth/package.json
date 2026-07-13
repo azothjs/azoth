@@ -34,8 +34,6 @@
     "exports": {
         ".": "./index.js",
         "./runtime": "./runtime.js",
-        "./maya": "./maya.js",
-        "./maya/channels": "./maya/channels.js",
         "./vite-plugin": "./vite-plugin.js",
         "./jsx.d.ts": "./jsx.d.ts"
     },

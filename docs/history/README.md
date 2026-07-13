@@ -34,3 +34,8 @@ valhalla suite — the tests can't drift; these already had. The replacement is
   analysis). The analysis held; the delivery mechanism changed — the LLM
   track became the valhalla suite rather than more topic prose. Kept as the
   planning artifact.
+- **`package-reorg.md`** — the completed package-reorganization plan
+  (chronos/vite-plugin folded into maya/thoth; shipped 2026).
+- **`keyed-list-transcript.md`** — the design-dialogue transcript behind
+  [`design/keyed-list.md`](../design/keyed-list.md); the distilled decisions
+  live there.

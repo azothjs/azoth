@@ -9,8 +9,10 @@ First public release. From 2.0.0 forward, `azoth`, `@azothjs/maya`, and
 exact matching versions.
 
 - **New root entry**: `import { Channel, pushable, rerenderer } from 'azoth'`
-  — the author surface in one import. Subpaths (`azoth/vite-plugin`,
-  `azoth/runtime`, `azoth/maya`, `azoth/maya/channels`) unchanged.
+  — the author surface in one import. `azoth/vite-plugin` and
+  `azoth/runtime` unchanged; the duplicative `azoth/maya` and
+  `azoth/maya/channels` subpaths are removed (the root covers them; the
+  scoped `@azothjs/maya/*` subpaths remain for precise imports).
 - **TypeScript/TSX**: `jsx.d.ts` now ships and is the package `types` entry —
   JSX element typing, the `Composable` union, component signatures.
 - **Vite plugin consolidated**: `@azothjs/vite-plugin` and `@azothjs/chronos`

@@ -11,6 +11,30 @@ state holding the rows, no effect re-running, no diff working out what moved.
 Instead, the forward flow reaches a boundary and hands off. Past it, the
 region runs its own cycle. That hand-off is a **frame**.
 
+## Why the concept exists
+
+Every framework answers one architecture question for you: *when this
+changes, who updates it?* React's answer is uniform — everything is a
+re-render. Azoth subtracted that engine, so the question comes back to the
+author — and it has two answers, not one: **wiring** (the page connects a
+source to a slot) or **a frame** (the region updates itself). Frames exist
+to make that split nameable, decidable, and testable.
+
+Without the name, "the list changed" pulls toward two failure modes:
+
+- **Reconciler-seeking** — trying to re-render the whole region per delta,
+  hunting for the keys/diff/effect machinery that isn't there. (If you're an
+  LLM, this is the corpus pull. The frame concept is the redirect: don't ask
+  "how do I re-render this?" — ask "who owns this region's intake?")
+- **Boundary-less mutation** — imperative DOM edits scattered across the
+  page with no owner, no teardown pairing, no answer to "what survives an
+  outer re-render?"
+
+A frame is the discipline between those: structural change stays imperative
+and delta-shaped (no reconciler), but it lives behind a surface with an
+owner — which is what makes encapsulation, subscription teardown, and
+surviving the outer flow's passes all fall out for free.
+
 ## The definition — two conditions
 
 A frame is a region that satisfies both:
@@ -381,7 +405,9 @@ your Supabase. (Which patterns earn shipping vs stay recipes:
   a clock.
 - **Not for static structure.** If it doesn't change on its own clock, it
   belongs in the forward flow. A frame you never mutate is a custom element
-  you didn't need.
+  you didn't need — *as a frame*. (Slots, shadow DOM, and style
+  encapsulation are their own, perfectly good reasons to reach for a custom
+  element.)
 - **Not the only way to show async data.** A value into a slot is async
   composition. Reach for a frame when structure manages *itself* over time.
 

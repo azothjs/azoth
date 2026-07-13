@@ -8,25 +8,27 @@ against real output before it ships.
 
 ## The series
 
-1. **[JSX for the Web Platform](./jsx-for-the-web-platform.md)** — the intro.
-   The subtraction hook, the compile walkthrough, layout management
-   (`uiₙ = uiₙ₋₁ + Δ`), the opt-in ladder (render now → later → again), the
-   call-site/call-order coin. *Status: core complete; closer (era-of-AI /
-   differentiation argument) pending — see the notes at the file's end.*
+1. **[JSX for the Web Platform](./jsx-for-the-web-platform.md)** — the core
+   mechanics of replacing modern frameworks with hypermedia. The subtraction
+   hook, the compile walkthrough, layout management (`uiₙ = uiₙ₋₁ + Δ`), the
+   opt-in ladder (render now → later → again), the call-site/call-order
+   coin, "the two moments." *Status: draft — core complete through the
+   series hand-off.*
 
-2. **Who owns the update** *(planned)* — the component ladder: render
-   function → UIComponent protocol → custom element; re-subjecting via
-   `update()`; the frames concept (own intake + structural
-   self-management); KeyedList and controllers; the intake gradient
-   (exposed / injected / sealed). Source material:
-   [topics/frames.md](../topics/frames.md),
+2. **Enhanced composition** *(planned)* — functional components, the
+   UIComponent update protocol, the Input shape, and web components: who
+   owns the update. The component ladder, re-subjecting via `update()`,
+   frames (own intake + structural self-management), KeyedList and
+   controllers. Source material: [topics/frames.md](../topics/frames.md),
    [topics/components.md](../topics/components.md).
 
-3. **Patterns on top** *(planned)* — Azoth deliberately leaves multiple
-   valid shapes ("it's just JavaScript"); patterns belong to the app layer,
-   and that's the invitation. View/CardView, module-exports-a-Channel
-   separation of concerns, controller recipes per source. Source material:
-   [topics/workflow.md](../topics/workflow.md).
+3. **Using AI with Azoth: leaning into the corpus** *(planned)* — the
+   era-of-AI spine: code is cheap, cookie-cutter is commodity,
+   expressiveness and control are the differentiator; what you build is
+   what you feed the model. Terminology navigation (push from the
+   subtracted, pull to the unlocked), the verified-examples receipts story.
+   Source material: [topics/for-llms.md](../topics/for-llms.md), the
+   CascadiaJS talk (subtract→unlock).
 
-Parked until the harness exists: a performance piece against krausest's
-js-framework-benchmark (see TODO — not a release gate).
+Parked: a performance piece against krausest's js-framework-benchmark
+(waits on the harness — see TODO).

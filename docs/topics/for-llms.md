@@ -137,8 +137,8 @@ root.append(
 Most rendered HTML hides this (browsers collapse whitespace in flow
 content), but it matters for `<pre>` / `<code>`, for snapshot tests, and
 for any layout that's whitespace-sensitive. See
-[authoring-style.md](authoring-style.md#whitespace-in-jsx-is-preserved-as-text)
-for the design rationale.
+the valhalla [README](../../packages/valhalla/README.md) ("Reading the
+snapshots") for the conventions this drives.
 
 ## Surface confusion
 

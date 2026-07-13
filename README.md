@@ -17,8 +17,6 @@ is being organized for open-source release.
   reframe
 - [For LLMs](docs/topics/for-llms.md) — terminology discipline and
   stop-and-ask triggers when working with Azoth via AI
-- [Workflow](docs/topics/workflow.md) — UI-first methodology that emerged
-  from production
 - [Coming from React](docs/topics/coming-from-react.md) — translation bridge
   for React developers
 - [Full topic index](docs/topics/) — all curated reference docs
@@ -110,6 +108,11 @@ progress includes:
 - Channel API consolidation
 
 See [`TODO.md`](TODO.md) for the in-flight list.
+
+## Releasing
+
+Maintainers: see [RELEASING.md](RELEASING.md) — changesets, one fixed
+version train across the three packages.
 
 ## License
 

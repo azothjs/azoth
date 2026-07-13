@@ -55,9 +55,6 @@ composed* — fully resolved into DOM at its anchor. Pinned in
 
 - [JSX as DOM](jsx-as-dom.md) — why a component's return value is the
   actual DOM
-- [Workflow](workflow.md) — the View + CardView pattern; component design
-  in practice
-- [Authoring style](authoring-style.md) — file naming (PascalCase
-  components), organization
+- [Frames](frames.md) — when a component owns its own update clock
 - [For LLMs](for-llms.md) — the corpus foot-guns (`props.children`,
   `useState`, expecting re-runs)

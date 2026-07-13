@@ -22,10 +22,6 @@ carry what tests can't: the reframe, the concepts, practice, transitions.
 
 ## Practice
 
-- [Workflow](./workflow.md) — UI-first methodology; mode shifts;
-  step-size discipline
-- [Authoring style](./authoring-style.md) — naming conventions, file
-  structure, data ownership
 - [Build and integration](./build-and-integration.md) — Vite plugin
   setup; esbuild pre-pass; HMR
 
@@ -55,8 +51,7 @@ carry what tests can't: the reframe, the concepts, practice, transitions.
 4. [`valhalla/channels.test.tsx`](../../packages/valhalla/channels.test.tsx) —
    async sources and `<Channel>`
 5. [Frames](./frames.md) — when the forward-only flow needs a seam
-6. [Workflow](./workflow.md) — when ready to build
-7. The rest as questions arise
+6. The rest as questions arise
 
 Mechanics prose this directory used to carry (composition,
 async-and-channels, attributes-and-properties, maya-runtime, typescript)

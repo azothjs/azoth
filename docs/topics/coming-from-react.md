@@ -121,7 +121,6 @@ See [components](components.md) for the childNodes model.
 
 Pass props. Or use a module-level variable for genuinely global state. Or use
 any state library you like — Azoth doesn't own state, so any pattern works.
-See [authoring-style](authoring-style.md) for data ownership conventions.
 
 ### "I need `className={isActive ? 'on' : 'off'}`"
 
