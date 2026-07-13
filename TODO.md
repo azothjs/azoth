@@ -1,5 +1,34 @@
 # Azoth TODO
 
+## Release (2.0.0 prepped — Marty presses the button)
+
+Runbook (repo is publish-ready as of the "release: 2.0.0 prep" commit):
+
+1. `npm login` (or verify: `npm whoami`) — needs publish rights on `azoth`
+   and the `@azothjs` org.
+2. `pnpm release` (= `pnpm -r publish --access public`) — publishes thoth,
+   maya, azoth in dependency order. Add `--dry-run` first if paranoid.
+3. Tag: `git tag azoth@2.0.0 @azothjs/maya@2.0.0 @azothjs/thoth@2.0.0 && git push --tags`.
+4. Optional cleanup of orphaned registry packages:
+   `npm deprecate @azothjs/chronos "folded into azoth 2.0 — use the azoth package"`
+   and the same for `@azothjs/vite-plugin` (→ `@azothjs/thoth/vite` /
+   `azoth/vite-plugin`).
+
+Going forward: changesets is wired (`pnpm changeset` → `pnpm version` →
+`pnpm release`); the three packages are a `fixed` group — one version train.
+
+Post-2.0 release backlog (deliberately not in this pass):
+- Generated `.d.ts` for maya/thoth (tsc JSDoc emit) — jsx.d.ts is
+  self-contained until then.
+- `sideEffects` fields (maya/lists registers custom-element tags on import —
+  needs a careful array, not a blanket `false`).
+- `engines` (maya uses `Promise.withResolvers` → node >= 22 when run in
+  node; browsers fine — decide whether to signal).
+- Release GitHub workflow (changesets action) if/when publishing moves off
+  the laptop.
+- vite-test refresh (still on vite 5 / vitest 1; not in the workspace —
+  parked separately).
+
 ## Blocks / rerenderer follow-ons
 
 Landed: **KeyedList** shipped (abstract base + `KeyedUList`/`KeyedOList`/
