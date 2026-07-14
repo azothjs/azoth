@@ -44,7 +44,16 @@ Post-2.0 backlog:
   transforms are native (~2027-28). Full reasoning in git history.
 - **SoC example** — "module exports a Channel, consumer slots it into any
   DOM" (search + paging + results in one module, Channel out) deserves a
-  worked example — articles series or a valhalla test.
+  worked example — articles series or a valhalla test. Live sighting:
+  wre-frontend `AiAnalysis/createAnalysis()` returns a Channel the profile
+  slots in.
+- **llms.md: scope the "don't hold a Channel" caveat** — current line
+  ("Don't hold a Channel instance across rerenders — the JSX site owns it")
+  doesn't say WHY, so it over-warns: holding a Channel as a value before
+  composition (the SoC pattern above) is fine. The reason is
+  `update()`-on-source-change returning a replacement instance
+  (channel.js:116-120) — the held ref is spent only when a rerenderer
+  drives a source switch. Add the why + the safe case.
 
 ## Components / typing — precision pass (follow-on)
 
@@ -119,6 +128,17 @@ laptop), ~2 years stale; needs a rewrite against current azoth.
 
 Browser-validation suites are on-demand (`pnpm test:validate`), not in CI.
 Open:
+- **SVG 2 presentation attributes missing → false-positive rejections.**
+  `vector-effect="non-scaling-stroke"` on `<polyline>` (the standard
+  responsive-stroke idiom) is valid SVG but errors: per-element SVG
+  validation rides `svg-element-attributes`, whose data is SVG 1.1/Tiny 1.2
+  tables — the presentation attributes SVG 2 absorbed from CSS are absent
+  everywhere, including `*`: `vector-effect`, `paint-order`,
+  `transform-origin`, `mix-blend-mode`, `isolation`, `white-space`. Hit in
+  the wild during wre-frontend's 2.0 migration (LeadActivities chart;
+  worked around with runtime `setAttribute` — revert when fixed). Options:
+  union an SVG 2 presentation-attribute list into the per-element check,
+  PR the data upstream (wooorm/svg-element-attributes), or both.
 - Gate `test:validate` into CI only for changes touching
   `packages/thoth/dom-info/**` or the data-package deps.
 - A "deps current?" signal (renovate or scheduled `pnpm outdated`) for when
