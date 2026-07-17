@@ -1,4 +1,4 @@
-Azoth - "JSX for the Web Platform"
+# Azoth — JSX for the Web Platform
 
 Welcome to the web platform as a framework. Most new frameworks introduce themselves by telling you what they're adding. Azoth is different. It removes most of what you know about frameworks, then uses JSX to amplify what the platform already ships.
 
@@ -9,7 +9,7 @@ This is the first in a series of three introductory articles on Azoth:
 2. Enhanced composition: functional components, UIComponent, Input, and web components
 3. Using AI with Azoth: leaning into the corpus
 
-# Subtract to Unlock
+## Subtract to Unlock
 
 Azoth's first move is to subtract, without replacement, a decade of framework cruft — plugging JSX into the gap in the web platform:
 
@@ -28,7 +28,7 @@ Instead JSX:
 
 Those are some big claims, let's look at how it works. And don't take my word for any of it — every example in this article runs in the repo's test suite ([`article-examples.test.tsx`](../../packages/valhalla/article-examples.test.tsx)).
 
-# Compiling JSX
+## Compiling JSX
 
 Here's a snippet of JSX:
 
@@ -45,7 +45,7 @@ Notice the JSX being directly appended to `document.body` — Azoth JSX **return
 
 At compile time the JSX is replaced in-situ in the runtime code, and additional artifacts are created.
 
-## The transpiled code
+### The transpiled code
 
 Here's how the originally authored code changes:
 
@@ -72,7 +72,7 @@ Direct replacement by call site. **No vDOM, no factory functions, no JavaScript 
 
 Let's look where the rest of the information represented by the JSX landed.
 
-## Html goes in `.html`
+### Html goes in `.html`
 
 The html itself is delivered in `<page>.html`, DOM creation is handled _by the browser's html parsing engine_:
 
@@ -86,7 +86,7 @@ The win here isn't browser vs JavaScript instantiation time, it's **no JavaScrip
 
 Those `<!--az:0-->` comments are anchors — stable positions where the dynamic values will land. Which brings us to the remaining artifacts.
 
-## Decomposition
+### Decomposition
 
 Three JavaScript parts get created by the compiler. First, a target selector — from the cloned template root to the exact nodes that will change:
 
@@ -136,7 +136,7 @@ return (v0, v1, v2) => {
 
 Property assignment, component creation, composition — that's the entire vocabulary.
 
-# Layout Management
+## Layout Management
 
 Compiling shows the mechanics; removing state management is a bigger leap — it requires changing how you think about building web applications. Two key questions need to be addressed.
 
@@ -163,11 +163,11 @@ These two models are mutually exclusive. State and UI cannot *both* be the sourc
 
 To be precise: your application still has state. It lives as distributed data outside the browser and inside the browser where JavaScript already puts it — closures, class instances, the DOM itself. What's subtracted is the *required management layer* between that state and the document: the store, the reconciler, the projection. You'll see this concretely in "State without the management" below.
 
-# Opt-in to complexity
+## Opt-in to complexity
 
 In practice, this means the complexity of the type of delta being applied can scale based on the change needed. Each step is opt-in: you take on more of the update contract only where the UI calls for it — render now, render later, render again.
 
-## Asynchronously delayed rendering
+### Asynchronously delayed rendering
 
 The default rendering mode in Azoth is forward-only. However, this also includes using asynchronicity (as the event) to deliver content later:
 
@@ -197,7 +197,7 @@ It's not just promises delivering a single value, it's any value(s) over time:
 - async iterables — [async generators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function*) and friends
 - anything bridged with a listener function (Supabase, Firebase/Firestore, Appwrite, PocketBase, SurrealDB)
 
-## Channel
+### Channel
 
 In Azoth, a *channel* is an async source whose values are mapped to DOM at a slot — the delta, its event, and its rendering in one wiring. The utility component `<Channel/>` facilitates the pattern:
 
@@ -238,7 +238,7 @@ function Feed({ url }) {
 
 A `WebSocket` is just an `EventTarget` — `eventType` says which event to listen for, the initial children show until the first message arrives, and `append` accumulates instead of replaces.
 
-## State without the management
+### State without the management
 
 Simple event loops can be created using DOM events directly:
 
@@ -269,7 +269,7 @@ function Counter() {
 
 The `{ initial, from }` object is Azoth's *Input* shape: seed the slot now, then drive it from the source. (`<Channel/>` is one implementer of the same shape.)
 
-## Rerendering
+### Rerendering
 
 Delayed rendering and swapping content are useful techniques. But oftentimes a section of the document needs to be rerendered: new data over the same bound DOM parts. This is achieved by passing a thunk to the `rerenderer` Azoth function. The whole idea in three lines:
 
@@ -332,7 +332,7 @@ Look at what that handled. The list of tags. And the conditional `badge` — sel
 
 Here's why that works, and why it can't in a hooks world: React re-executes components against a cache keyed by **call order** — which is why control flow around hooks is forbidden. Azoth re-executes against a cache keyed by **call site** — so ternaries, loops, and early returns just work. That's the control-flow fidelity promised at the top, paid off.
 
-# The two moments
+## The two moments
 
 Step back and every option in this article reduces to the same pair: the **initial render** is a function call; an **update** is whatever channel you wired. The mechanisms differ only in what survives between the two — a swap keeps the position, a rerender keeps the DOM, an imperative op keeps everything but what you touched. There's no third moment where a framework reconciles on your behalf. vDOM reconciliation is the tell of the other model: deltas applied where the delta must be *computed*, because it was never known. In Azoth the delta arrives already known — it's the event.
 
@@ -340,7 +340,7 @@ And because bindings are fine-grained — an element property here, a comment an
 
 That pair — build once, then change on a known channel — scales past slots and rerenders: regions that manage their own structure on their own clock (chat threads, live lists, keyed rows). That's article two: enhanced composition — components, the update protocol, Input, and web components.
 
-# Next
+## Next
 
 This first part explained the mechanics of how Azoth subtracts most of modern frontend frameworks: internal representation, render tree ownership, and state management. Hypermedia and layout management are the new paradigm for change over time. JSX is semantically aligned to fit into the web platform without obstructing its use.
 
