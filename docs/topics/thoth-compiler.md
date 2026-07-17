@@ -160,13 +160,12 @@ If you're compiling Azoth code outside the vite-plugin, the type-strip
 step is on you. See [build-and-integration](build-and-integration.md)
 for the integration layer.
 
-## Authoring foot-gun: comments inside returned JSX
+## JSX comments
 
-`{/* comment */}` nodes inside JSX you return from a component can
-crash the compiler/runtime — the anchor positioning for dynamic
-children doesn't currently account for comment nodes between siblings.
-Use a code-level comment outside the JSX expression instead. See
-[known-limitations](known-limitations.md) for the full entry.
+`{/* comment */}` nodes are dropped entirely — no anchor placeholder,
+no child-index skew, nothing in the output. Pinned at both layers:
+`packages/thoth/compiler.test.js` and valhalla's `smoke.test.tsx`
+("JSX comments are ignored").
 
 ## What this is *not*
 
@@ -189,8 +188,6 @@ took the work back.
   into at runtime
 - [Composition](../../packages/valhalla/compose.test.tsx) — how `{…}` slots accept values, which
   is what `bind` is applying
-- [Known limitations](known-limitations.md) — including the
-  JSX-comments foot-gun
 - [Build and integration](build-and-integration.md) — vite-plugin, TSX
   pre-processing, virtual imports
 - [For LLMs](for-llms.md) — terminology discipline when describing the

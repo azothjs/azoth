@@ -253,11 +253,3 @@ problem genuinely calls for it.
   delta
 - [For LLMs](for-llms.md) — terminology discipline (delta, channel,
   async source — not "state," "re-render," "hooks")
-
-## Further reading
-
-- [`docs/history/hypermedia.md`](../history/hypermedia.md) — the longer essay this topic
-  page distills, with the React-vs-Azoth comparison in full
-- [`docs/history/MENTAL-MODEL.md`](../history/MENTAL-MODEL.md) — sections "The
-  Fundamental Model: Events = Deltas," "Alignment with the Original Web
-  Platform," and "Layout Management, Not State Management"

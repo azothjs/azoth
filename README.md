@@ -7,9 +7,9 @@ Azoth is a JSX framework where `<p>hello</p>` returns an actual
 JSX compiles to template-clone + property-assignment; what you build on top
 is plain DOM and plain JavaScript.
 
-Status: active development. Used in production at [Works Real
-Estate](https://github.com/worksrealestate) and adjacent projects. The repo
-is being organized for open-source release.
+Status: 2.0 is on npm and in production at [Works Real
+Estate](https://github.com/worksrealestate). New in public — the honest
+picture is under [Status and roadmap](#status-and-roadmap) below.
 
 ## Start here
 
@@ -22,12 +22,6 @@ is being organized for open-source release.
 - [Coming from React](docs/topics/coming-from-react.md) — translation bridge
   for React developers
 - [Full topic index](docs/topics/) — all curated reference docs
-
-For the longer reasoning trace (an LLM working through Azoth for the first
-time and corrected over many sessions), see
-[`docs/history/MENTAL-MODEL.md`](docs/history/MENTAL-MODEL.md). The topic files in
-`docs/topics/` are the curated surface; the mental-model document is the
-origin.
 
 ## Packages
 
@@ -48,7 +42,7 @@ data). The `azoth` package is the single install that re-exports both.
 |---|---|
 | [`test-utils`](test-utils) | Common test helpers |
 | [`vite-test`](vite-test) | End-to-end Vite pipeline smoke test |
-| [`docs`](docs) | Markdown docs: `topics/` (author-facing) · `design/` (maintainer decision records) · `history/` (archived artifacts) |
+| [`docs`](docs) | Markdown docs: `topics/` (author-facing) · `design/` (maintainer decision records) · `articles/` (outward writing) |
 
 ## Install
 
@@ -99,17 +93,29 @@ core rules as runnable examples,
 
 ## Status and roadmap
 
-Active development. Multiple production deployments. The OSS release work in
-progress includes:
+Azoth 2.0 is on npm and runs in production at [Works Real
+Estate](https://github.com/worksrealestate) — full disclosure: Azoth's
+author is the CTO there, so that's a bet on our own stack, not independent
+adoption. The API is stable as of 2.0, and the core is heavily specified:
+every rule in the model is pinned by the [valhalla conformance
+suite](packages/valhalla/index.md) — authored JSX through the compiler and
+runtime, output verified in a real browser.
 
-- Documentation reorganization (current — this `docs/topics/` directory is
-  the result)
-- API stabilization (some renames pending — see [`TODO.md`](TODO.md))
-- HTML/SSR target completion (Thoth + Maya have the abstraction; the HTML
-  renderer is being filled in)
-- Channel API consolidation
+It is also new in public, which means fresh usage will find edge cases ours
+hasn't. Two things keep that survivable. Azoth's surface area is
+deliberately thin — for most "does X work with it?" questions (View
+Transitions, d3, whatever ships next) the answer is "it's real DOM; use the
+platform." And limitations get documented openly when found, not buried —
+open an issue and it becomes part of the record.
 
-See [`TODO.md`](TODO.md) for the in-flight list.
+In progress:
+
+- HTML/SSR target (thoth + maya have the abstraction; the HTML renderer is
+  being filled in)
+- Generated `.d.ts` for maya/thoth (`jsx.d.ts` ships self-contained today)
+- Benchmark harness (krausest js-framework-benchmark)
+
+See [`TODO.md`](TODO.md) for the full in-flight list.
 
 ## Releasing
 

@@ -25,12 +25,10 @@ carry what tests can't: the reframe, the concepts, practice, transitions.
 - [Build and integration](./build-and-integration.md) — Vite plugin
   setup; esbuild pre-pass; HMR
 
-## Transitions and limitations
+## Transitions
 
 - [Coming from React](./coming-from-react.md) — translation bridge for
   React developers
-- [Known limitations](./known-limitations.md) — current bugs and
-  foot-guns reference
 
 ## Internals
 
@@ -57,6 +55,5 @@ carry what tests can't: the reframe, the concepts, practice, transitions.
 
 Mechanics prose this directory used to carry (composition,
 async-and-channels, attributes-and-properties, maya-runtime, typescript)
-is archived in [`docs/history/`](../history/) — superseded by the valhalla
-suite, which can't drift. For deeper origin context, see
-[`MENTAL-MODEL.md`](../history/MENTAL-MODEL.md).
+was superseded by the valhalla suite, which can't drift. The retired
+files live in git history.

@@ -91,7 +91,8 @@ const Counter = () => {
 
 There's no re-render to trigger. To update the DOM, mutate it (the boring
 direct way), or wire a channel for declarative updates. For sections with
-predictable updates, the [renderer pattern](../design/core-rules.md) gives you a
+predictable updates, a
+[rerenderer](../../packages/valhalla/rerenderer.test.tsx) gives you a
 deliberate replay mechanism — which is what `useState` was trying to be.
 
 ### "I need a `ref` to access the DOM element"
@@ -116,6 +117,12 @@ specific components instead of generic children:
 ```
 
 See [components](components.md) for the childNodes model.
+
+### "I can spread children: `{...items}`"
+
+Non-standard JSX — React never officially supported it either; some Babel
+configs compiled it by coincidence. Arrays are already valid children, so
+pass the array: `{items}`. The spread form is a compile error.
 
 ### "I need a context provider"
 
@@ -175,9 +182,3 @@ Once the React frame relaxes, the rest of the docs read normally. Start with:
 - [Hypermedia](hypermedia.md) — the events-as-deltas model
 - [For LLMs](for-llms.md) — terminology discipline (also useful for humans
   retraining their reach)
-
-## See also
-
-- [`MENTAL-MODEL.md`](../history/MENTAL-MODEL.md) — the longer, looser document this
-  site grew from. Contains additional React/Azoth contrast prose if you want
-  more of it.
