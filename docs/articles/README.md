@@ -31,4 +31,8 @@ against real output before it ships.
    CascadiaJS talk (subtract→unlock).
 
 Parked: a performance piece against krausest's js-framework-benchmark
-(waits on the harness — see TODO).
+(waits on the harness — see TODO). Candidate fourth piece: demo-led for
+design engineers (see [launch.md](./launch.md)).
+
+Launch operations — channels, cadence, prepared answers:
+[launch.md](./launch.md).
