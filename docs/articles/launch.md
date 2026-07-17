@@ -173,3 +173,6 @@ adapt to the actual comment.
   cancel is the open half)
 - [ ] Substack cross-post prepared, canonical link back to the repo
 - [ ] StackBlitz starter for the design-engineer play
+- [ ] Dependabot triage — 39 alerts on main (7 critical); likely mostly
+  the parked vite-test (vite 5 / vitest 1), but `npm audit` on a fresh
+  install of `azoth` must come back clean before the launch
